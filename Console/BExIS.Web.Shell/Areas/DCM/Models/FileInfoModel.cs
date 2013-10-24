@@ -1,23 +1,14 @@
-﻿
-namespace BExIS.DCM.Transform.Input
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using BExIS.DCM.Transform.Input;
+
+namespace BExIS.Web.Shell.Areas.DCM.Models
 {
-
-    public enum DecimalCharacter
+    public class FileInfoModel
     {
-        point,
-        comma
-    }
-
-    public enum Orientation
-    {
-        columnwise,
-        rowwise
-    }
-
-
-    public class FileReaderInfo
-    {
-
+        public string Extention { get; set; }
         /// <summary>
         /// representation of decimal 
         /// </summary>
@@ -42,6 +33,19 @@ namespace BExIS.DCM.Transform.Input
         /// Format of the Date
         /// </summary>
         public string Dateformat { get; set; }
+
+        public TextSeperator Seperator { get; set; }
+
+        public FileInfoModel()
+        {
+            Extention = "";
+            Decimal = DecimalCharacter.comma;
+            Orientation = Orientation.columnwise;
+            Offset = 0;
+            Variables = 1;
+            Data = 2;
+            Dateformat = "";
+        }
   
     }
 }
