@@ -1,0 +1,127 @@
+﻿<mapping id="1" name="abcd">
+	<header>
+		<destination xPath="DataSets" type="complex" sequence="false" order="1" ></destination>
+		<packages>
+		  <package abbreviation="xmlns" url="http://www.tdwg.org/schemas/abcd/2.06" ></package>
+		</packages>
+		<schema abbreviation="abcd" url="http://rs.tdwg.org/abcd/2.06/ABCD_2.06.xsd"></schema>
+	</header>
+	<routes>
+		<route>
+			<source xPath="Metadata" type="MetadataStructure"></source>
+			<destination xPath="DataSets/DataSet" type="complex" sequence="false" order="1"></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/TechnicalContact" type="MetadataPackageUsage"></source>
+			<destination xPath="DataSets/DataSet/TechnicalContacts/" type="complex" sequence="true" order="1" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/TechnicalContact/Person" type="MetadataPackage"></source>
+			<destination xPath="DataSets/DataSet/TechnicalContacts/TechnicalContact" type="complex" sequence="false" order="1" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/TechnicalContact/Person/Name/Name" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/TechnicalContacts/TechnicalContact/Name" type="element" sequence="false" order="1" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/TechnicalContact/Person/Phone/Phone" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/TechnicalContacts/TechnicalContact/Phone" type="element" sequence="false" order="3" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/TechnicalContact/Person/Email/Email" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/TechnicalContacts/TechnicalContact/Email" type="element" sequence="false" order="2" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/TechnicalContact/Person/Address/Address" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/TechnicalContacts/TechnicalContact/Address" type="element" sequence="false" order="4" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/ContentContact" type="MetadataPackageUsage"></source>
+			<destination xPath="DataSets/DataSet/ContentContacts/" type="complex" sequence="true" order="2" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/ContentContact/Person" type="MetadataPackage"></source>
+			<destination xPath="DataSets/DataSet/ContentContacts/ContentContact" type="complex" sequence="false" order="2" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/ContentContact/Person/Name/Name" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/ContentContacts/ContentContact/Name" type="element" sequence="false" order="1" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/ContentContact/Person/Phone/Phone" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/ContentContacts/ContentContact/Phone" type="element" sequence="false" order="3" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/ContentContact/Person/Email/Email" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/ContentContacts/ContentContact/Email" type="element" sequence="false" order="2" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/ContentContact/Person/Address/Address" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/ContentContacts/ContentContact/Address" type="element" sequence="false" order="4" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Description/Description" type="MetadataPackage"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Description" type="complex" sequence="false" order="1" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Description/Description/Title/Title" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Description/Representation/Title" type="element" sequence="false" order="1" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Description/Description/Details/Details" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Description/Representation/Details" type="element" sequence="false" order="2" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Description/Description/Coverage/Coverage" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Description/Representation/Coverage" type="element" sequence="false" order="3" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Description/Description/URI/URI" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Description/Representation/URI" type="element" sequence="false" order="4"></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Description/Description/DateModified/RevisionData" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Metadata/RevisionData/DateModified" type="element" sequence="false" order="1"></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Owner" type="MetadataPackageUsage"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Owners" type="complex" sequence="true" order="3"></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Owner/Owner" type="MetadataPackage"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Owners/Owner" type="complex" sequence="false" order="1"></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Owner/Owner/FullName/Name" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Owners/Owner/Person/FullName" type="element" sequence="false" order="1"></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Owner/Owner/SortingName/Name" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Owners/Owner/Person/SortingName" type="element" sequence="false" order="2" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Owner/Owner/OrganisationName/Name" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Metadata/Owners/Owner/Organisation/Name/Representation/Text" type="element" sequence="false" order="1" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Unit" type="MetadataPackageUsage"></source>
+			<destination xPath="DataSets/DataSet/Units" type="complex" sequence="true" order="3"></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Unit/Unit" type="MetadataPackage"></source>
+			<destination xPath="DataSets/DataSet/Units/Unit" type="complex" sequence="false" order="1"></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Unit/Unit/SourceInstitutionID/Id" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Units/Unit/SourceInstitutionID" type="element" sequence="false" order="1" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Unit/Unit/SourceID/Id" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Units/Unit/SourceID" type="element" sequence="false" order="2" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Unit/Unit/UnitID/Id" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/Units/Unit/UnitID" type="element" sequence="false" order="3" ></destination>
+		</route>
+	</routes>
+</mapping>

@@ -21,10 +21,6 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -108,10 +104,6 @@
       <HintPath>..\..\packages\Npgsql.2.2.5\lib\net45\Mono.Security.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="NHibernate, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\NHibernate.4.0.4.4000\lib\net40\NHibernate.dll</HintPath>
@@ -123,10 +115,6 @@
     <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\PostSharp\PostSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="saxon9he-api, Version=9.6.0.8, Culture=neutral, PublicKeyToken=e1fdd002d5083fe6, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Saxon-HE.9.6.0.8\lib\net40\saxon9he-api.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data.Linq" />
@@ -332,7 +320,6 @@
     <Compile Include="Areas\DCM\Models\CreateDatasetViewModel.cs" />
     <Compile Include="Areas\DCM\Models\CreateDataset\MetadataEditorModel.cs" />
     <Compile Include="Areas\DCM\Models\CreateDataset\SetupModel.cs" />
-    <Compile Include="Areas\DCM\Models\CreateDataset\StepModelHelper.cs" />
     <Compile Include="Areas\DCM\Models\Create\SelectDatasetSetupModel.cs" />
     <Compile Include="Areas\DCM\Models\Create\CreateSummaryModel.cs" />
     <Compile Include="Areas\DCM\Models\Create\StepModelHelper.cs" />
@@ -357,7 +344,6 @@
     <Compile Include="Areas\DCM\Models\UploadWizardParameters.cs" />
     <Compile Include="Areas\DCM\Models\ValidationModel.cs" />
     <Compile Include="Areas\DDM\Controllers\AdminController.cs" />
-    <Compile Include="Areas\DDM\Controllers\CreateDatasetController.cs" />
     <Compile Include="Areas\DDM\Controllers\DataController.cs" />
     <Compile Include="Areas\DDM\Controllers\HelpController.cs" />
     <Compile Include="Areas\DDM\Helpers\GridHelper.cs" />
@@ -369,27 +355,17 @@
     <Compile Include="Areas\DDM\Models\ShowPrimaryDataModel.cs" />
     <Compile Include="Areas\DIM\Controllers\AdminController.cs" />
     <Compile Include="Areas\DIM\Controllers\HelpController.cs" />
-    <Compile Include="Areas\DIM\Controllers\ImportController.cs" />
     <Compile Include="Areas\DIM\DIMAreaRegistration.cs" />
     <Compile Include="Areas\DIM\Models\AdminModel.cs" />
     <Compile Include="Areas\DIM\Models\DatasetVersionModel.cs" />
     <Compile Include="Areas\DIM\Models\MetadataStructureModel.cs" />
     <Compile Include="Areas\DIM\Models\ShowHelpModel.cs" />
-    <Compile Include="Areas\MSM\Controllers\TestController.cs" />
-    <Compile Include="Areas\MSM\Models\AddTextFieldModel.cs" />
-    <Compile Include="Areas\MSM\Models\TreePartialModel.cs" />
-    <Compile Include="Areas\MSM\Models\TestModel.cs" />
-    <Compile Include="Areas\MSM\MSMAreaRegistration.cs" />
-    <Compile Include="Areas\RPM\Controllers\DataStructureEditController.cs" />
     <Compile Include="Areas\RPM\Controllers\HelpController.cs" />
     <Compile Include="Areas\RPM\Controllers\DataAttributeController.cs" />
     <Compile Include="Areas\RPM\Controllers\HomeController.cs" />
-    <Compile Include="Areas\RPM\Controllers\DataStructureSearchController.cs" />
     <Compile Include="Areas\RPM\Controllers\UnitController.cs" />
     <Compile Include="Areas\RPM\Controllers\Helpers\HtmlPrefixScopeExtentions.cs" />
     <Compile Include="Areas\RPM\Controllers\Helpers\RPMSeedDataGenerator.cs" />
-    <Compile Include="Areas\RPM\Models\DataStructureEditModel.cs" />
-    <Compile Include="Areas\RPM\Models\DataStructureSearchModel.cs" />
     <Compile Include="Areas\RPM\Models\ConstraintModels.cs" />
     <Compile Include="Areas\RPM\Models\UnitManagerModel.cs" />
     <Compile Include="Areas\RPM\Models\DataAttributeModel.cs" />
@@ -408,6 +384,7 @@
     <Compile Include="Areas\SAM\Controllers\GroupsController.cs" />
     <Compile Include="Areas\SAM\Controllers\HelpController.cs" />
     <Compile Include="Areas\SAM\Controllers\DatasetController.cs" />
+    <Compile Include="Areas\SAM\Controllers\UserPisController.cs" />
     <Compile Include="Areas\SAM\Controllers\UsersController.cs" />
     <Compile Include="Areas\SAM\Helpers\SAMSeedDataGenerator.cs" />
     <Compile Include="Areas\SAM\Helpers\HtmlPrefixScopeExtensions.cs" />
@@ -424,6 +401,7 @@
     <Compile Include="Areas\SAM\Models\SecurityQuestionModels.cs" />
     <Compile Include="Areas\SAM\Models\ShowHelpModel.cs" />
     <Compile Include="Areas\SAM\Models\UserModels.cs" />
+    <Compile Include="Areas\SAM\Models\UserPisModel.cs" />
     <Compile Include="Areas\SAM\SAMAreaRegistration.cs" />
     <Compile Include="Areas\Site\Controllers\NavController.cs" />
     <Compile Include="Areas\Site\SiteAreaRegistration.cs" />
@@ -516,7 +494,9 @@
     <Content Include="Areas\DDM\Images\DDM_UserGuide_files\image003.jpg" />
     <Content Include="Areas\DDM\Images\DDM_UserGuide_files\image003.png" />
     <Content Include="Areas\DDM\Images\DDM_UserGuide_files\image004.gif" />
+    <Content Include="Areas\DDM\Images\DDM_UserGuide_files\image004.png" />
     <Content Include="Areas\DDM\Images\DDM_UserGuide_files\image005.jpg" />
+    <Content Include="Areas\DDM\Images\DDM_UserGuide_files\image005.png" />
     <Content Include="Areas\DDM\Images\DDM_UserGuide_files\image006.jpg" />
     <Content Include="Areas\DDM\Images\DDM_UserGuide_files\image007.jpg" />
     <Content Include="Areas\DDM\Images\DDM_UserGuide_files\image008.jpg" />
@@ -525,18 +505,6 @@
     <Content Include="Areas\DDM\Scripts\ddm.js" />
     <Content Include="Areas\DIM\Images\DIM_UserGuide_files\image001.jpg" />
     <Content Include="Areas\DIM\Views\Help\UserGuides\DIM_UserGuide.htm" />
-    <Content Include="Areas\MSM\Resources\Scripts\angular-dragdrop.min.js" />
-    <Content Include="Areas\MSM\Resources\Scripts\angular-route.min.js" />
-    <Content Include="Areas\MSM\Resources\Scripts\angular.js" />
-    <Content Include="Areas\MSM\Resources\Scripts\jquery-linedtextarea.js" />
-    <Content Include="Areas\MSM\Resources\Scripts\angular.min.js" />
-    <Content Include="Areas\MSM\Resources\Scripts\module.js" />
-    <Content Include="Areas\MSM\Resources\Scripts\snippet.js" />
-    <Content Include="Areas\MSM\Resources\Scripts\tree-repeat.js" />
-    <Content Include="Areas\MSM\Resources\Scripts\zippy-directive.js" />
-    <Content Include="Areas\MSM\Resources\Stylesheets\jquery-linedtextarea.css" />
-    <Content Include="Areas\MSM\Resources\Stylesheets\xsd2htmlTree.xslt" />
-    <Content Include="Areas\MSM\Resources\Stylesheets\xsd2jsonTree.xslt" />
     <Content Include="Areas\RPM\Images\RPM_UserGuide_files\image001.jpg" />
     <Content Include="Areas\RPM\Images\RPM_UserGuide_files\image001.png" />
     <Content Include="Areas\RPM\Images\RPM_UserGuide_files\image002.gif" />
@@ -565,7 +533,6 @@
     <Content Include="Areas\RPM\Images\RPM_UserGuide_files\image014.jpg" />
     <Content Include="Areas\RPM\Images\RPM_UserGuide_files\image015.jpg" />
     <Content Include="Areas\RPM\Scripts\jquery-1.10.1.min.js" />
-    <Content Include="Areas\RPM\Stylesheets\DataStructureSearch.css" />
     <Content Include="Areas\RPM\Stylesheets\RPM.css" />
     <Content Include="Areas\RPM\Views\Help\UserGuides\RPM_UserGuide.htm" />
     <Content Include="Areas\SAM\Images\SAM_UserGuide_files\image001.jpg" />
@@ -586,6 +553,7 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\Images\AquaDiva_Logo_300px.png" />
     <Content Include="Content\Images\Bildmarke_BEXIS_cmyk.svg" />
     <Content Include="Content\Images\Bildmarke_BEXIS_rgb_830x830.jpg" />
     <Content Include="Content\Images\Bildmarke_BEXIS_rgb_830x830.png" />
@@ -624,23 +592,10 @@
     <Content Include="Areas\SAM\Views\Users\_Membership.cshtml" />
     <Content Include="Areas\SAM\Views\Groups\_Membership.cshtml" />
     <Content Include="Areas\SAM\Views\Account\MyAccount.cshtml" />
-    <Content Include="Areas\DDM\Views\CreateDataset\_metadataAttributeView.cshtml" />
-    <Content Include="Areas\DDM\Views\CreateDataset\_metadataCompoundAttributeUsageView.cshtml" />
-    <Content Include="Areas\DDM\Views\CreateDataset\_metadataCompoundAttributeView.cshtml" />
-    <Content Include="Areas\DDM\Views\CreateDataset\_metadataPackageUsageView.cshtml" />
-    <Content Include="Areas\DDM\Views\CreateDataset\_metadataPackageView.cshtml" />
-    <Content Include="Areas\DDM\Views\CreateDataset\Index.cshtml" />
-    <Content Include="Areas\DDM\Views\CreateDataset\MetadataEditor.cshtml" />
-    <Content Include="Areas\RPM\Views\DataStructureSearch\Index.cshtml" />
-    <Content Include="Areas\RPM\Views\DataStructureSearch\_dataStructuredStructurePreview.cshtml" />
-    <Content Include="Areas\RPM\Views\DataStructureSearch\_datatructureSearchResult.cshtml" />
-    <Content Include="Areas\RPM\Views\DataStructureEdit\Index.cshtml" />
-    <Content Include="Areas\DIM\Views\Import\Index.cshtml" />
-    <Content Include="Areas\MSM\Views\Web.config" />
-    <Content Include="Areas\MSM\Views\_ViewStart.cshtml" />
-    <Content Include="Areas\MSM\Views\Test\Index.cshtml" />
-    <Content Include="Areas\MSM\Views\Test\_TreePartial.cshtml" />
-    <Content Include="Areas\MSM\Views\Test\_AddTextField.cshtml" />
+    <Content Include="Areas\DCM\Views\CreateDataset\_PiPartial.cshtml" />
+    <Content Include="Areas\SAM\Views\UserPis\UserPis.cshtml" />
+    <Content Include="Areas\SAM\Views\UserPis\_CreatePartial.cshtml" />
+    <Content Include="Areas\SAM\Views\UserPis\_EditPartial.cshtml" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
     <Content Include="Scripts\jquery-2.1.4.min.js" />
@@ -655,6 +610,14 @@
     <Content Include="Themes\Default\Styles\awesome\css\font-awesome.css" />
     <Content Include="Themes\Default\Styles\awesome\css\font-awesome.min.css" />
     <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.css" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff2" />
     <Content Include="Scripts\2012.3.1018\telerik.extensions.js" />
     <Content Include="Scripts\2013.2.611\jquery-1.7.1.min.js" />
     <Content Include="Scripts\2013.2.611\jquery.validate.min.js" />
@@ -752,6 +715,32 @@
     <Content Include="Themes\Default\Styles\search.css" />
     <Content Include="Themes\Default\Styles\telerik.default.min.css" />
     <Content Include="Themes\Default\Styles\wizard.css" />
+    <Content Include="Themes\Aquadiva\Layouts\_Layout.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Themes\Aquadiva\Styles\bexis-jquery-ui.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-metadata.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-telerik.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-elements.css" />
+    <Content Include="Themes\Aquadiva\Styles\Copy of telerik.default.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\Default\editor.png" />
+    <Content Include="Themes\Aquadiva\Styles\emptyPng.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\imagebrowser.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\infoicon.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\loading.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\preloader.GIF" />
+    <Content Include="Themes\Aquadiva\Styles\Default\slider-h.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\slider-v.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\sprite-vertical.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\sprite.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-line.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-nodes.png" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-font-awesome-extension.css" />
+    <Content Include="Themes\Aquadiva\Styles\images.css" />
+    <Content Include="Themes\Aquadiva\Styles\search.css" />
+    <Content Include="Themes\Aquadiva\Styles\telerik.default.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\wizard.css" />
     <Content Include="Themes\Forest\Styles\Forest\editor.png" />
     <Content Include="Themes\Forest\Styles\Forest\imagebrowser.png" />
     <Content Include="Themes\Forest\Styles\Forest\loading.gif" />
@@ -967,6 +956,8 @@
     <Content Include="Scripts\jquery-2.1.4.min.map" />
     <Content Include="Themes\Default\Partials\_Breadcrumb.cshtml" />
     <Content Include="Themes\Default\Partials\_Information.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Breadcrumb.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Information.cshtml" />
     <Content Include="Views\Test\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -975,7 +966,6 @@
     <Folder Include="Areas\DCM\Views\Home\" />
     <Folder Include="Areas\DDM\Views\Shared\" />
     <Folder Include="Areas\DIM\Views\Shared\" />
-    <Folder Include="Areas\MSM\Views\Shared\" />
     <Folder Include="Areas\RPM\Views\Shared\" />
     <Folder Include="Areas\SAM\Views\Shared\" />
     <Folder Include="Areas\Site\Models\" />
@@ -1026,6 +1016,9 @@
     <Content Include="Themes\Default\Layouts\_Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Themes\Aquadiva\Layouts\_Layout.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="Themes\Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -1041,6 +1034,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Themes\Default\Partials\_ThemeSelector.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Aquadiva\Partials\_ThemeSelector.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\DDM\Views\_ViewStart.cshtml" />
@@ -1076,6 +1072,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Themes\Default\Partials\_Header.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Aquadiva\Partials\_Footer.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Aquadiva\Partials\_LogOnStatus.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Aquadiva\Partials\_Header.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Test\XmlShow.cshtml" />
@@ -1155,33 +1160,37 @@
       <Project>{b906a66a-4a09-4207-b590-655ee111ccf1}</Project>
       <Name>BExIS.Ext.Services</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Components\IO\BExIS.Io.Transform.Output\BExIS.Io.Transform.Output.csproj">
+      <Project>{455ec826-9a92-40ff-bd3b-388c288955ce}</Project>
+      <Name>BExIS.Io.Transform.Output</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\IO\BExIS.Io.Transform.Validation\BExIS.Io.Transform.Validation.csproj">
+      <Project>{c8a05313-b960-406e-92ec-c1e5b3f47fcd}</Project>
+      <Name>BExIS.Io.Transform.Validation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Components\IO\BExIS.IO.Transform.Input\BExIS.IO.Transform.Input.csproj">
       <Project>{5c4c8570-a53b-4191-a414-de028aaaf36a}</Project>
-      <Name>BExIS.IO.Transform.Input</Name>
+      <Name>BExIS.Io.Transform.Input</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Components\IO\BExIS.IO.Transform.Output\BExIS.IO.Transform.Output.csproj">
-      <Project>{455ec826-9a92-40ff-bd3b-388c288955ce}</Project>
-      <Name>BExIS.IO.Transform.Output</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Components\IO\BExIS.IO.Transform.Validation\BExIS.IO.Transform.Validation.csproj">
+    <ProjectReference Include="..\..\Components\IO\BExIS.Io.Transform.Validation\BExIS.Io.Transform.Validation.csproj">
       <Project>{c8a05313-b960-406e-92ec-c1e5b3f47fcd}</Project>
-      <Name>BExIS.IO.Transform.Validation</Name>
+      <Name>BExIS.Io.Transform.Validation</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Components\IO\BExIS.IO.Transform.Validation\BExIS.IO.Transform.Validation.csproj">
-      <Project>{c8a05313-b960-406e-92ec-c1e5b3f47fcd}</Project>
-      <Name>BExIS.IO.Transform.Validation</Name>
+    <ProjectReference Include="..\..\Components\IO\BExIS.IoTransform.Input\BExIS.Io.Transform.Input.csproj">
+      <Project>{5c4c8570-a53b-4191-a414-de028aaaf36a}</Project>
+      <Name>BExIS.Io.Transform.Input</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Components\IO\BExIS.IO\BExIS.IO.csproj">
+    <ProjectReference Include="..\..\Components\IO\BExIS.Io\BExIS.Io.csproj">
       <Project>{e4795f06-20c2-4c4c-a720-9a79896384df}</Project>
-      <Name>BExIS.IO</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Components\XML\BExIS.Xml.Helpers\BExIS.Xml.Helpers.csproj">
-      <Project>{252f7872-a69c-43a6-84b4-4d2abdbdd9ab}</Project>
-      <Name>BExIS.Xml.Helpers</Name>
+      <Name>BExIS.Io</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Components\XML\BExIS.Xml.Models\BExIS.Xml.Models.csproj">
       <Project>{c0c9f0f2-9e65-448d-8000-d311db326460}</Project>
-      <Name>BExIS.Xml.Models</Name>
+      <Name>BExIS.Xml.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\XML\BExIS.Xml.Helpers\BExIS.Xml.Helpers.csproj">
+      <Project>{252f7872-a69c-43a6-84b4-4d2abdbdd9ab}</Project>
+      <Name>BExIS.Xml.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Modules\DCM\BExIS.Dcm.CreateDatasetWizard\BExIS.Dcm.CreateDatasetWizard.csproj">
       <Project>{93eeeda5-6d79-41a1-947b-0a3fc9e46abc}</Project>
@@ -1342,6 +1351,12 @@
     <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.ttf" />
     <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.eot" />
     <Content Include="Themes\Default\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff2" />
     <None Include="Properties\PublishProfiles\2230.pubxml" />
     <None Include="Properties\PublishProfiles\2301.pubxml" />
     <None Include="Properties\PublishProfiles\2302.pubxml" />
@@ -1363,6 +1378,12 @@
     <Content Include="Themes\Black\Styles\awesome\fonts\fontawesome-webfont.woff" />
     <Content Include="Themes\Black\Styles\awesome\fonts\fontawesome-webfont.woff2" />
     <Content Include="Themes\Black\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff2" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_GlobalResources\UploadLocalization.zh-CN.resx">
@@ -1448,9 +1469,6 @@
       <LastGenOutput>EditorLocalization.de-DE.designer.cs</LastGenOutput>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -1473,7 +1491,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>5412</DevelopmentServerPort>
+          <DevelopmentServerPort>18541</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>
           </IISUrl>

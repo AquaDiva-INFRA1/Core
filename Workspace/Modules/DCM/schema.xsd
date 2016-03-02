@@ -1,0 +1,467 @@
+<?xml version="1.0"?>
+<!--
+
+Biodiversity Exploratories Information System
+
+The Biodiversity Exploratories Information System
+from the Central Data Management in the Biodiversity Exploratories project
+is published under
+Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Germany (CC BY-NC-SA 3.0)
+
+http://creativecommons.org/licenses/by-nc-sa/3.0/de/deed.en
+
+Developed by the Central Data Management of Biodiversity Exploratories
+http://www.biodiversity-exploratories.de/
+
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.bgc-jena.mpg.de"
+	xmlns:bgc="http://www.bgc-jena.mpg.de"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.bgc-jena.mpg.de" elementFormDefault="qualified" xml:lang="en">
+  <!-- ========================================================================= -->
+ 
+  <!-- ========================================================================= -->
+  <xsd:element name="metaProfile" type="metaProfileType">
+    <xsd:annotation>
+      <xsd:documentation>
+        This is the schema for metadata of the DFG
+        exploratories / functional biodiversity. --YJ 20071107--
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+  <xsd:complexType name="metaProfileType">
+    <xsd:sequence>
+      <xsd:element name="general" type="generalType" />
+      <xsd:element name="methodology" type="methodologyType" />
+      <xsd:element name="description" type="descriptionType" />
+
+  </xsd:complexType>
+  
+  <!-- =========================== generalType declarations ==================== -->
+  <xsd:complexType name="generalType">
+    <xsd:sequence>
+      <xsd:element name="id" type="positiveIntegerSource">
+        <xsd:annotation>
+          <xsd:documentation>The id of the dataset.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="versionID" type="versionNumberType">
+        <xsd:annotation>
+          <xsd:documentation>The version of the dataset.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="lineage" type="lineageType">
+        <xsd:annotation>
+          <xsd:documentation>The dataset (id and version) where this dataset is based upon.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="title" type="stringSourceNotEmpty">
+        <xsd:annotation>
+          <xsd:documentation>The title of the dataset.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!--<xsd:element name="language" type="languageRestrictedSource">
+        <xsd:annotation>
+          <xsd:documentation>The language used for this metadata (english or german/deutsch).</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>-->
+      <xsd:element name="owners" type="ownerType">
+        <xsd:annotation>
+          <xsd:documentation>The owner(s) of the dataset. Use the + and - buttons to add and remove owners. Use the up and down buttons to change the sequence of owners.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:unique name="uniqueOwners">
+          <xsd:selector xpath="bgc:owner" />
+          <xsd:field xpath="." />
+        </xsd:unique>
+      </xsd:element>
+      <!--<xsd:element name="owner" type="stringNotEmpty"></xsd:element>-->
+      <xsd:element name="contact" type="contactType"></xsd:element>
+    </xsd:sequence>
+    <xsd:attribute ref="bgc:source" />
+  </xsd:complexType>
+
+  <xsd:complexType name="lineageType">
+    <xsd:sequence>
+      <xsd:element name="datasetid" type="positiveIntegerSource" default="0" />
+      <xsd:element name="version" type="versionNumberType" default="1.0.0" />
+    </xsd:sequence>
+    <xsd:attribute ref="bgc:source" />
+  </xsd:complexType>
+  <!-- ========== generalType/ownerType -->
+  <xsd:complexType name="ownerType">
+    <xsd:sequence minOccurs="1">
+      <xsd:element name="owner" type="stringTextOnlyMaxOccurs" maxOccurs="unbounded" minOccurs="1" />
+    </xsd:sequence>
+    <xsd:attribute ref="bgc:source" />
+  </xsd:complexType>
+
+  <!-- ========== generalType/contactType  -->
+  <xsd:complexType name="contactType">
+    <xsd:sequence>
+      <xsd:element name="userName" type="stringSourceNotEmpty">
+        <xsd:annotation>
+          <xsd:documentation>The author of the dataset.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!--<xsd:element name="group" type="mpiGroupType">
+        <xsd:annotation>
+          <xsd:documentation>The group to which the data belongs to.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="project" type="mpiProjectType">
+        <xsd:annotation>
+          <xsd:documentation>The group to which the data belongs to.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>-->
+      <!--<xsd:element name="projectLeader" type="stringSourceNotEmpty">
+        <xsd:annotation>
+          <xsd:documentation>The project leader.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>-->
+      <xsd:element name="institute" type="stringSourceNotEmpty">
+        <xsd:annotation>
+          <xsd:documentation>The institute.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!--<xsd:element name="address">
+        <xsd:annotation>
+          <xsd:documentation>The address of the institute.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="street" type="stringSourceNotEmpty" />
+            <xsd:element name="zipCode" type="zipCodeType"/>
+            <xsd:element name="city" type="stringTextOnlyNotEmpty" />
+          </xsd:sequence>
+          <xsd:attribute ref="bgc:source" />
+        </xsd:complexType>
+      </xsd:element>-->
+      <xsd:element name="email">
+        <xsd:annotation>
+          <xsd:documentation>The email address of the author.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+          <xsd:simpleContent>
+            <xsd:restriction base="stringSourceNotEmpty">
+              <xsd:pattern value=".+@.+" />
+            </xsd:restriction>
+          </xsd:simpleContent>
+        </xsd:complexType>
+      </xsd:element>
+      <!--<xsd:element name="url" type="stringSource" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>The web page of the project (optional).</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>-->
+      <xsd:element name="phone">
+        <xsd:annotation>
+          <xsd:documentation>The phone number of the author.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+          <xsd:simpleContent>
+            <xsd:restriction base="stringSourceNotEmpty">
+              <xsd:pattern value="[()0-9- +/,]+" />
+            </xsd:restriction>
+          </xsd:simpleContent>
+        </xsd:complexType>
+      </xsd:element>
+      <!-- <xsd:element name="mobile" type="phoneNumber" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>The mobile phone number of the author (optional).</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="fax" type="phoneNumber" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>The fax number of the author (optional).</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>-->
+      <xsd:element name="passwd" type="stringSource" minOccurs="0">
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute ref="bgc:source"  />
+  </xsd:complexType>
+  <xsd:complexType name="phoneNumber">
+    <xsd:simpleContent>
+      <xsd:restriction base="stringSource">
+        <xsd:pattern value="[()0-9- +/,]*" />
+      </xsd:restriction>
+    </xsd:simpleContent>
+  </xsd:complexType>
+  <xsd:complexType name="zipCodeType">
+    <xsd:simpleContent>
+      <xsd:restriction base="stringSourceNotEmpty">
+        <xsd:pattern value="([A-Z]{1,2}-)?\d{4,5}"/>
+      </xsd:restriction>
+    </xsd:simpleContent>
+  </xsd:complexType>
+  <!-- ========================================================================== -->
+  <!-- ==================== methodologyType declarations ======================== -->
+  <xsd:complexType name="methodologyType">
+    <xsd:annotation>
+      <xsd:documentation>
+        ? include reference to external DB, e.g.
+        BGC central database?
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="introduction" type="stringSourceNotEmptyLong">
+        <xsd:annotation>
+          <xsd:documentation>The introduction to and the objectives of the project.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="measurements" type="measurementType" />
+      <xsd:element name="equipment" type="equipmentType" />
+    </xsd:sequence>
+    <xsd:attribute ref="bgc:source" />
+  </xsd:complexType>
+  <!-- ==========  -->
+  <xsd:complexType name="measurementType">
+    <xsd:sequence>
+      <xsd:element name="theory" type="stringSourceNotEmptyLong">
+        <xsd:annotation>
+          <xsd:documentation>The theory behind the project.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="type" type="stringSourceNotEmptyLong">
+        <xsd:annotation>
+          <xsd:documentation>The type of measurements.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute ref="bgc:source" />
+  </xsd:complexType>
+  <!-- ==========  -->
+  <xsd:complexType name="equipmentType">
+    <xsd:sequence>
+      <xsd:element name="instruments" type="stringSourceNotEmptyLong">
+        <xsd:annotation>
+          <xsd:documentation>The instruments used to measure. </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="calibration" type="stringSourceNotEmptyLong">
+        <xsd:annotation>
+          <xsd:documentation>The calibration of the instruments.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="procedures" type="stringSourceNotEmptyLong">
+        <xsd:annotation>
+          <xsd:documentation>The procedures followed during measurements.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute ref="bgc:source" />
+  </xsd:complexType>
+
+  <!-- ==================== descriptionType declarations ============================= -->
+  <xsd:complexType name="descriptionType">
+    <xsd:sequence>
+      <xsd:element name="acronyms">
+        <xsd:annotation>
+          <xsd:documentation>List acronyms and their meanings. Use the + and - buttons to add and remove acronym pairs. Use the up and down buttons to change the sequence of acronyms.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="acronymPair" type="acronymPairType" minOccurs="0" maxOccurs="unbounded" />
+          </xsd:sequence>
+          <xsd:attribute ref="bgc:source" />
+        </xsd:complexType>
+        <xsd:unique name="uniqueAcronyms">
+          <xsd:selector xpath="bgc:acronymPair/bgc:acronym" />
+          <xsd:field xpath="." />
+        </xsd:unique>
+      </xsd:element>
+      <xsd:element name="keywords">
+        <xsd:annotation>
+          <xsd:documentation>The keywords associated with the dataset. Use the + and - buttons to add and remove keywords. Use the up and down buttons to change the sequence of keywords.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="keyword" type="stringMaxOccursEmpty"  minOccurs="0" maxOccurs="unbounded" />
+          </xsd:sequence>
+          <xsd:attribute ref="bgc:source" />
+        </xsd:complexType>
+        <xsd:unique name="uniqueKeywords">
+          <xsd:selector xpath="bgc:keyword" />
+          <xsd:field xpath="." />
+        </xsd:unique>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute ref="bgc:source" />
+  </xsd:complexType>
+  <!-- ================ -->
+  <xsd:complexType name="acronymPairType">
+    <xsd:sequence>
+      <xsd:element name="acronym" type="stringMaxOccursEmpty" />
+      <xsd:element name="meaning" type="stringMaxOccursEmpty" />
+    </xsd:sequence>
+    <xsd:attribute ref="bgc:source" />
+    <xsd:attribute name="number" type="xsd:positiveInteger" use="required" />
+  </xsd:complexType>
+
+  <!--=================BASETYPES==========================-->
+
+  <xsd:complexType name="stringSource">
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:string">
+        <xsd:attribute ref="bgc:source" />
+        <xsd:attribute name="input">
+          <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+              <xsd:enumeration value="textarea"/>
+              <xsd:enumeration value="input"/>
+            </xsd:restriction>
+          </xsd:simpleType>
+        </xsd:attribute>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="stringTextOnlyNotEmpty">
+    <xsd:simpleContent>
+      <xsd:restriction base="stringSourceNotEmpty">
+        <xsd:pattern value="[A-Za-zäöüÄÖÜ -.ß]+" />
+      </xsd:restriction>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <!-- ==========  -->
+  <xsd:complexType name="stringSourceNotEmpty">
+    <xsd:simpleContent>
+      <xsd:extension base="stringNotEmpty">
+        <xsd:attribute ref="bgc:source" />
+        <xsd:attribute name="input" default="input">
+          <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+              <xsd:enumeration value="textarea"/>
+              <xsd:enumeration value="input"/>
+            </xsd:restriction>
+          </xsd:simpleType>
+        </xsd:attribute>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="stringSourceNotEmptyLong">
+    <xsd:simpleContent>
+      <xsd:extension base="stringNotEmptyLong">
+        <xsd:attribute ref="bgc:source" />
+        <xsd:attribute name="input" default="input">
+          <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+              <xsd:enumeration value="textarea"/>
+              <xsd:enumeration value="input"/>
+            </xsd:restriction>
+          </xsd:simpleType>
+        </xsd:attribute>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+  <!-- ==========  -->
+
+  <xsd:simpleType name="stringNotEmpty">
+    <xsd:restriction base="xsd:string">
+      <xsd:minLength value="1" />
+      <xsd:maxLength value="150" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="stringNotEmptyLong">
+    <xsd:restriction base="xsd:string">
+      <xsd:minLength value="1" />
+      <xsd:maxLength value="3000" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:complexType name="booleanYesNo">
+    <xsd:simpleContent>
+      <xsd:restriction base="stringSourceNotEmpty">
+        <xsd:enumeration value="no" />
+        <xsd:enumeration value="yes" />
+      </xsd:restriction>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="languageRestrictedSource">
+    <xsd:simpleContent>
+      <xsd:restriction base="stringSourceNotEmpty">
+        <xsd:enumeration value="en" />
+        <xsd:enumeration value="de" />
+      </xsd:restriction>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="stringTextOnlyMaxOccurs">
+    <xsd:simpleContent>
+      <xsd:restriction base="stringMaxOccurs">
+        <xsd:pattern value="[A-Za-zäöüÄÖÜ -.ß]+" />
+      </xsd:restriction>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="stringMaxOccurs">
+    <xsd:simpleContent>
+      <xsd:extension base="stringSourceNotEmpty">
+        <xsd:attribute name="number" type="xsd:positiveInteger" use="required" />
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="stringMaxOccursEmpty">
+    <xsd:simpleContent>
+      <xsd:extension base="stringSource">
+        <xsd:attribute name="number" type="xsd:positiveInteger" use="required" />
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <!-- ==========  -->
+  <xsd:complexType name="integerMaxOccurs">
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:nonNegativeInteger">
+        <xsd:attribute ref="bgc:source" />
+        <xsd:attribute name="number" type="xsd:positiveInteger" use="required" />
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <!-- ==========  -->
+  <xsd:complexType name="positiveIntegerSource">
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:nonNegativeInteger">
+        <xsd:attribute ref="bgc:source" />
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <!-- ==========  generalType/versionNumberType -->
+  <xsd:complexType name="versionNumberType">
+    <xsd:simpleContent>
+      <xsd:restriction base="stringSourceNotEmpty">
+        <xsd:pattern value="\d+\.\d+\.\d+"/>
+      </xsd:restriction>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <!-- ==========  -->
+  <xsd:complexType name="dateSource">
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:string">
+        <xsd:attribute ref="bgc:source" />
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <!-- ==========   -->
+  <xsd:attribute name="source" default="extern">
+    <xsd:simpleType>
+      <xsd:restriction base="xsd:string">
+        <xsd:enumeration value="extern" />
+        <xsd:enumeration value="intern" />
+        <xsd:enumeration value="mixed" />
+      </xsd:restriction>
+    </xsd:simpleType>
+  </xsd:attribute>
+  
+</xsd:schema>

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<eml:eml packageId="eml.1.1" system="knb" 
+xmlns:eml="eml://ecoinformatics.org/eml-2.1.1" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 eml.xsd">
+   <dataset scope="document">
+		<title>Title of...</title>
+		<creator scope="document">
+		  <individualName>
+			<givenName>David</givenName>
+			<surName> Blaa</surName>
+		  </individualName>
+		  <organizationName>mpi</organizationName>
+		</creator>
+		<contact scope="document">
+		  <individualName>
+			<givenName>David</givenName>
+			<surName>Blaa</surName>
+		  </individualName>
+		  <organizationName>Mpi</organizationName>
+		</contact>
+  </dataset>
+</eml:eml>

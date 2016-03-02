@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Metadata id="1">
+  <packageRole name="Technical Contact" id="1">
+    <package name="Person" roleId="1" id="1" number="1">
+      <attributeRole name="Name">
+        <attribute name="Name" roleId="1" id="1" number="1" />
+      </attributeRole>
+      <attributeRole name="Email">
+        <attribute name="Email" roleId="2" id="2" number="1" />
+      </attributeRole>
+      <attributeRole name="Address">
+        <attribute name="Address" roleId="3" id="3" number="1" />
+      </attributeRole>
+    </package>
+  </packageRole>
+  <packageRole name="Content Contact" id="2">
+    <package name="Person" roleId="2" id="1" number="1">
+      <attributeRole name="Name">
+        <attribute name="Name" roleId="1" id="1" number="1" />
+      </attributeRole>
+      <attributeRole name="Email">
+        <attribute name="Email" roleId="2" id="2" number="1" />
+      </attributeRole>
+      <attributeRole name="Address">
+        <attribute name="Address" roleId="3" id="3" number="1" />
+      </attributeRole>
+    </package>
+  </packageRole>
+  <packageRole name="Description" id="3">
+    <package name="Description" roleId="3" id="2" number="1">
+      <attributeRole name="Title">
+        <attribute name="Title" roleId="4" id="4" number="1" />
+      </attributeRole>
+      <attributeRole name="RevisionData">
+        <attribute name="RevisionData" roleId="11" id="5" number="1" />
+      </attributeRole>
+      <attributeRole name="Details">
+        <attribute name="Details" roleId="13" id="10" number="1" />
+      </attributeRole>
+      <attributeRole name="Coverage">
+        <attribute name="Coverage" roleId="14" id="11" number="1" />
+      </attributeRole>
+      <attributeRole name="URI">
+        <attribute name="URI" roleId="15" id="12" number="1" />
+      </attributeRole>
+    </package>
+  </packageRole>
+  <packageRole name="Owner" id="7">
+    <package name="Owner" roleId="7" id="5" number="1">
+      <attributeRole name="Full Name">
+        <attribute name="Name" roleId="16" id="1" number="1" />
+      </attributeRole>
+      <attributeRole name="Sorting Name">
+        <attribute name="Name" roleId="17" id="1" number="1" />
+      </attributeRole>
+      <attributeRole name="Organisation Name">
+        <attribute name="Name" roleId="18" id="1" number="1" />
+      </attributeRole>
+      <attributeRole name="Address">
+        <attribute name="Address" roleId="19" id="3" number="1" />
+      </attributeRole>
+      <attributeRole name="Role">
+        <attribute name="Role" roleId="37" id="15" number="1" />
+      </attributeRole>
+      <attributeRole name="Email">
+        <attribute name="Email" roleId="38" id="2" number="1" />
+      </attributeRole>
+      <attributeRole name="Phone">
+        <attribute name="Phone" roleId="39" id="9" number="1" />
+      </attributeRole>
+      <attributeRole name="URI">
+        <attribute name="URI" roleId="40" id="12" number="1" />
+      </attributeRole>
+    </package>
+  </packageRole>
+  <packageRole name="Scope" id="8">
+    <package name="Scope" roleId="8" id="6" number="1">
+      <attributeRole name="TaxonomicTerm">
+        <attribute name="TaxonomicTerm" roleId="29" id="13" number="1" />
+      </attributeRole>
+      <attributeRole name="GeoEcologicalTerm">
+        <attribute name="GeoEcologicalTerm" roleId="30" id="14" number="1" />
+      </attributeRole>
+    </package>
+  </packageRole>
+</Metadata>

@@ -1,0 +1,30 @@
+<DataSets xmlns="http://www.tdwg.org/schemas/abcd/2.06">
+  <DataSet>
+    <ContentContacts>
+      <ContentContact preferred="false">
+        <Name>Lin Burg</Name>
+      </ContentContact>
+    </ContentContacts>
+    <Metadata>
+      <Description>
+        <Representation language="en">
+          <Title>Fish in Pond B</Title>
+        </Representation>
+      </Description>
+      <Owners>
+        <Owner>
+          <Person>
+            <FullName>Lin Burg</FullName>
+          </Person>
+        </Owner>
+      </Owners>
+    </Metadata>
+    <Units>
+      <Unit>
+        <SourceInstitutionID>khgf34h2</SourceInstitutionID>
+        <SourceID>wg354</SourceID>
+        <UnitID>667</UnitID>
+      </Unit>
+    </Units>
+  </DataSet>
+</DataSets>

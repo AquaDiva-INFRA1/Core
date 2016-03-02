@@ -12,11 +12,6 @@
     <AssemblyName>BExIS.Dlm.Orm.NH</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -44,7 +39,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -198,7 +192,6 @@
   <ItemGroup>
     <Folder Include="Mappings\DB2Dialect\" />
     <Folder Include="Mappings\Default\NativeObjects\" />
-    <Folder Include="Mappings\Default\Party\" />
     <Folder Include="Mappings\Default\PostObjects\" />
     <Folder Include="Mappings\MsSql2008Dialect\" />
   </ItemGroup>

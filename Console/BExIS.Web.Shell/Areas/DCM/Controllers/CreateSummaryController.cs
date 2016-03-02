@@ -27,6 +27,7 @@ using BExIS.Security.Services.Subjects;
 using BExIS.Xml.Services;
 using BExIS.Dlm.Entities.Common;
 using BExIS.Web.Shell.Areas.DCM.Models;
+using BExIS.Security.Entities.Subjects;
 
 namespace BExIS.Web.Shell.Areas.DCM.Controllers
 {
@@ -185,10 +186,31 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                         SubjectManager sm = new SubjectManager();
 
                         BExIS.Security.Entities.Subjects.User user = sm.GetUserByName(GetUserNameOrDefault());
+                        
+                        UserPiManager upm = new UserPiManager();
 
                         foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
                         {
                             pm.CreateDataPermission(user.Id, 1, ds.Id, rightType);
+
+                            // get all pi members
+                            List<UserPi> currentMembers = upm.GetAllPiMember(user.Id).ToList();
+
+                            foreach (UserPi currentMapping in currentMembers)
+                            {
+                                switch (rightType)
+                                {
+                                    case RightType.View:
+                                        pm.CreateDataPermission(currentMapping.UserId, 1, ds.Id, rightType);
+                                        break;
+                                    case RightType.Download:
+                                        pm.CreateDataPermission(currentMapping.UserId, 1, ds.Id, rightType);
+                                        break;
+                                    default:
+                                        pm.CreateDataPermission(currentMapping.UserId, 0, ds.Id, rightType);
+                                        break;
+                                }
+                            }
                         }
                     }
 

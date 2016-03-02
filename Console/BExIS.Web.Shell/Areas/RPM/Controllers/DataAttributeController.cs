@@ -81,25 +81,15 @@ namespace BExIS.Web.Shell.Areas.RPM.Controllers
                     if (nameNotExist)
                     {
                         UnitManager UM = new UnitManager();
-                        Unit unit = new Unit();
+                        Unit unit = UM.Repo.Get(tempUnitId);
                         DataTypeManager DTM = new DataTypeManager();
-                        DataType dataType = new DataType();
+                        DataType dataType = DTM.Repo.Get(tempDataTypeId);
                         DataContainerManager DAM = new DataContainerManager();
 
                         DataAttribute temp = new DataAttribute();
-
-                        if(UM.Repo.Get(tempUnitId)!= null)
-                            unit = UM.Repo.Get(tempUnitId);
-                        else
-                            unit = UM.Repo.Get().Where(u => u.Name.ToLower() == "none").FirstOrDefault();
-
-                        if (DTM.Repo.Get(tempDataTypeId) != null)
-                            dataType = DTM.Repo.Get(tempDataTypeId);
-                        else
-                            dataType = DTM.Repo.Get().ToList().FirstOrDefault();
-
                         temp = DAM.CreateDataAttribute(Model.ShortName, Model.Name, Model.Description, false, false, "", MeasurementScale.Categorial, DataContainerType.ReferenceType, "", dataType, unit, null, null, null, null, null, null);
-
+                    
+                    
                         #region store constraint
 
                         if (Model.RangeConstraints.Count > 0 && (Model.RangeConstraints.FirstOrDefault().Min !=null || Model.RangeConstraints.FirstOrDefault().Max !=null)
@@ -141,18 +131,9 @@ namespace BExIS.Web.Shell.Areas.RPM.Controllers
                             dataAttribute.ShortName = Model.ShortName;
                             dataAttribute.Description = Model.Description;
                             UnitManager UM = new UnitManager();
-
-                            if (UM.Repo.Get(tempUnitId) != null)
-                                dataAttribute.Unit = UM.Repo.Get(tempUnitId);
-                            else
-                                dataAttribute.Unit = UM.Repo.Get().Where(u => u.Name.ToLower() == "none").FirstOrDefault();
-
+                            dataAttribute.Unit = UM.Repo.Get(tempUnitId);
                             DataTypeManager DTM = new DataTypeManager();
-
-                            if (DTM.Repo.Get(tempDataTypeId) != null)
-                                dataAttribute.DataType = DTM.Repo.Get(tempDataTypeId);
-                            else
-                                dataAttribute.DataType = DTM.Repo.Get().ToList().FirstOrDefault();
+                            dataAttribute.DataType = DTM.Repo.Get(tempDataTypeId);
 
                             #region store constraint
 

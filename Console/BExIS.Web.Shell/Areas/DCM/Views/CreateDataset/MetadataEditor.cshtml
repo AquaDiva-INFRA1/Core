@@ -1,6 +1,6 @@
 ﻿@model MetadataEditorModel
 @using BExIS.Web.Shell.Areas.DCM.Models.CreateDataset
-@using BExIS.Web.Shell.Areas.DCM.Models.Metadata;
+@using BExIS.Dlm.Entities.MetadataStructure;
 @{
     string lockedClass = "";
     bool locked = false;
@@ -63,13 +63,11 @@
 
 @foreach (var element in Model.StepModelHelpers)
 {
-    if (element.Model is MetadataPackageModel)
+    if (element.Usage is MetadataPackageUsage)
     { 
-
-    @Html.Partial("_metadataPackageView", element)
+        @Html.Partial("_metadataPackageView", element)
+    }
 }
-}
-
 </div>
 @if (!locked)
 { 

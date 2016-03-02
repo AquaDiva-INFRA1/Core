@@ -29,6 +29,8 @@ namespace BExIS.Web.Shell.Areas.DCM.Models.Create
         public List<ListViewItem> ResearchPlanViewList { get; set; }
         public List<ListViewItem> MetadataStructureViewList { get; set; }
 
+        public List<long> Pis { get; set; }
+
         public bool IsLoaded { get; set; }
 
         public SelectDatasetSetupModel()
@@ -44,6 +46,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Models.Create
             MetadataStructureViewList = new List<ListViewItem>();
 
             IsLoaded = false;
+            Pis = new List<long>();
         }
 
     }

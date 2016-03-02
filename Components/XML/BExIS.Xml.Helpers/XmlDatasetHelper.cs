@@ -29,13 +29,7 @@ namespace BExIS.Xml.Services
                 XElement temp = XmlUtility.GetXElementByAttribute(nodeNames.nodeRef.ToString(), "name", name.ToString(), xDoc);
 
                 string xpath = temp.Attribute("value").Value.ToString();
-
-                XmlNode node = datasetVersion.Metadata.SelectSingleNode(xpath);
-
-                string title = "";
-                if(node != null)
-                    title = datasetVersion.Metadata.SelectSingleNode(xpath).InnerText;
-
+                string title = datasetVersion.Metadata.SelectSingleNode(xpath).InnerText;
                 return title;
             }
             return string.Empty;

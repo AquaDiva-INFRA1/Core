@@ -23,6 +23,7 @@ using BExIS.Web.Shell.Areas.DCM.Models;
 using BExIS.Web.Shell.Areas.DCM.Models.Create;
 using BExIS.Xml.Helpers;
 using Vaiona.Utils.Cfg;
+using BExIS.Web.Shell.Areas.SAM.Models;
 
 namespace BExIS.Web.Shell.Areas.DCM.Controllers
 {
@@ -33,6 +34,11 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         //
         // GET: /DCM/SelectDatasetSetup/
 
+        [HttpGet]
+        public ActionResult AddPi()
+        {
+            return PartialView("_PiPartial", new UserSelectListModel(HttpContext.User.Identity.Name));
+        }
 
         [HttpGet]
         public ActionResult SelectDatasetSetup(int stepId)
@@ -69,7 +75,8 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
             if (TaskManager.Bus.ContainsKey(CreateDatasetTaskmanager.DATASTRUCTURE_ID) && 
                 TaskManager.Bus.ContainsKey(CreateDatasetTaskmanager.METADATASTRUCTURE_ID) && 
-                TaskManager.Bus.ContainsKey(CreateDatasetTaskmanager.RESEARCHPLAN_ID)
+                TaskManager.Bus.ContainsKey(CreateDatasetTaskmanager.RESEARCHPLAN_ID) &&
+                TaskManager.Bus.ContainsKey(CreateDatasetTaskmanager.PIS)
                 )
             {
                 bool ready = false;
@@ -148,6 +155,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 TaskManager.AddToBus(CreateDatasetTaskmanager.RESEARCHPLAN_ID, model.SelectedResearchPlanId);
                 TaskManager.AddToBus(CreateDatasetTaskmanager.METADATASTRUCTURE_ID, model.SelectedMetadatStructureId);
                 TaskManager.AddToBus(CreateDatasetTaskmanager.DATASTRUCTURE_TYPE, GetDataStructureType(model.SelectedDatastructureId));
+                TaskManager.AddToBus(CreateDatasetTaskmanager.PIS, model.Pis);
                 // creat a new dataset
                 //CreateANewDataset(model.SelectedDatastructureId, model.SelectedResearchPlanId, model.SelectedMetadatStructureId);
 

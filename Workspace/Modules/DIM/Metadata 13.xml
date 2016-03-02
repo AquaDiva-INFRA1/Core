@@ -1,0 +1,48 @@
+<DataSets xmlns="http://www.tdwg.org/schemas/abcd/2.06">
+  <DataSet>
+    <TechnicalContacts>
+      <TechnicalContact preferred="false">
+        <Name>Jakob Maria Mierscheid</Name>
+        <Email>jmm@uni-jena.de</Email>
+        <Address>Feldweg 1, 07707 Jena</Address>
+      </TechnicalContact>
+    </TechnicalContacts>
+    <ContentContacts>
+      <ContentContact preferred="false">
+        <Name>Jakob Maria Mierscheid</Name>
+        <Email>jmm@uni-jena.de</Email>
+        <Address>Feldweg 1, 07707 Jena</Address>
+      </ContentContact>
+    </ContentContacts>
+    <Metadata>
+      <Description>
+        <Representation language="en">
+          <Title>Heuschrecken_Raw1</Title>
+          <Details>The effects of land use on arthropod diversity is studied in all three exploratories during the whole vegetation period 2008. 1) Effects of land use on the diversity of arthropods 2)Effects of land use on ecological functions related to arthropods.</Details>
+        </Representation>
+      </Description>
+      <Owners>
+        <Owner>
+          <Organisation>
+            <Name>
+              <Representation language="en">
+                <Text>University of Jena</Text>
+              </Representation>
+            </Name>
+          </Organisation>
+          <Person>
+            <FullName>Jakob Maria Mierscheid</FullName>
+            <SortingName>Jakob Maria Mierscheid</SortingName>
+          </Person>
+        </Owner>
+      </Owners>
+    </Metadata>
+    <Units>
+      <Unit>
+        <SourceInstitutionID>-</SourceInstitutionID>
+        <SourceID>-</SourceID>
+        <UnitID>-</UnitID>
+      </Unit>
+    </Units>
+  </DataSet>
+</DataSets>

@@ -162,7 +162,7 @@ namespace BExIS.Web.Shell.Areas.DIM.Controllers
         {
             // get MetadataStructure 
             XDocument xDoc = XmlUtility.ToXDocument((XmlDocument)datasetVersion.Dataset.MetadataStructure.Extra);
-            XElement temp = XmlUtility.GetXElementByAttribute("convertRef", "name", "mappingFileExport", xDoc);
+            XElement temp = XmlUtility.GetXElementByAttribute("convertRef", "name", "mappingFile", xDoc);
 
             return temp.Attribute("value").Value.ToString();
         }
@@ -195,7 +195,7 @@ namespace BExIS.Web.Shell.Areas.DIM.Controllers
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(metadataStructure.Extra.OuterXml);
 
-            if (XmlUtility.GetXElementByNodeName("convertRef", XmlUtility.ToXDocument(doc)).Count() > 0)
+            if (XmlUtility.GetXElementByNodeName("convertRef", XmlUtility.ToXDocument(doc)).Count() == 1)
             {
                 hasMappingFile = true;
             }

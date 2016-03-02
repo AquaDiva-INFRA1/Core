@@ -1,0 +1,38 @@
+<DataSets xmlns="http://www.tdwg.org/schemas/abcd/2.06">
+  <DataSet>
+    <TechnicalContacts>
+      <TechnicalContact preferred="false">
+        <Name>Rolf Bäcker</Name>
+      </TechnicalContact>
+    </TechnicalContacts>
+    <ContentContacts>
+      <ContentContact preferred="false">
+        <Name>Rolf Bäcker</Name>
+      </ContentContact>
+    </ContentContacts>
+    <Metadata>
+      <Description>
+        <Representation language="en">
+          <Title>Field Campaign Images 2012</Title>
+        </Representation>
+      </Description>
+      <RevisionData>
+        <DateModified>2012-09-02T22:00:00.000Z</DateModified>
+      </RevisionData>
+      <Owners>
+        <Owner>
+          <Person>
+            <FullName>Rolf Bäcker</FullName>
+          </Person>
+        </Owner>
+      </Owners>
+    </Metadata>
+    <Units>
+      <Unit>
+        <SourceInstitutionID>2342-234234-456h56-h5678</SourceInstitutionID>
+        <SourceID>DF34</SourceID>
+        <UnitID>230kj33</UnitID>
+      </Unit>
+    </Units>
+  </DataSet>
+</DataSets>

@@ -1,0 +1,43 @@
+﻿<mapping id="1" name="eml">
+	<header>
+		<destination xPath="eml" sequence="" prefix="eml" namespaceUri="eml://ecoinformatics.org/eml-2.1.1" ></destination>
+		<attributes>
+			<attribute name = "packageId" value="eml.1.1"></attribute>
+			<attribute name = "system" value="bexis"></attribute>
+		</attributes>
+		<packages>
+		  <package abbreviation="xmlns:xsi" url="http://www.w3.org/2001/XMLSchema-instance" ></package>
+		</packages>
+		<schema abbreviation="eml" url="Metadata/Eml/eml.xsd"></schema>
+	</header>
+	<routes>
+		<route>
+			<source xPath="Metadata/Description/DescriptionEML/Title/Title"  ></source>
+			<destination xPath="eml/dataset/title" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Creator/PersonEML/Givenname/Name" ></source>
+			<destination xPath="eml/dataset/creator/individualName/givenName" sequence="creator" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Creator/PersonEML/Surname/Name" ></source>
+			<destination xPath="eml/dataset/creator/individualName/surName" sequence="creator"   ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Creator/PersonEML/Organization/Name" ></source>
+			<destination xPath="eml/dataset/creator/organizationName" sequence="creator"   ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Contact/PersonEML/Givenname/Name" ></source>
+			<destination xPath="eml/dataset/contact/individualName/givenName" sequence="creator"   ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Contact/PersonEML/Surname/Name" ></source>
+			<destination xPath="eml/dataset/contact/individualName/surName" sequence="creator" ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/Contact/PersonEML/Organization/Name" ></source>
+			<destination xPath="eml/dataset/contact/organizationName" sequence="creator" ></destination>
+		</route>
+	</routes>
+</mapping>

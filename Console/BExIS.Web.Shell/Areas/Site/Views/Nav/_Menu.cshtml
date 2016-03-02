@@ -21,7 +21,7 @@
                 <span class="icon-bar"></span>
             </button>
             <a href="@Url.Action("Index", "Home", new {area = ""})" class="navbar-brand">
-                <img alt="BExIS" style="height:40px; margin-top:-10px;" src="~/Content/Images/Bildmarke_BEXIS_cmyk.svg">
+                <img alt="BExIS" style="height:40px; margin-top:-10px;" src="~/Content/Images/AquaDiva_Logo_300px.png">
             </a>
         </div>
 
@@ -74,6 +74,9 @@
                         <li>@Html.ActionLink("Data Collection", "Index", "Help", new { area = "DCM" }, null)</li>
                         <li>@Html.ActionLink("Data Dissemination", "Index", "Help", new { area = "DIM" }, null)</li>
                         <li>@Html.ActionLink("Administration", "Index", "Help", new { area = "SAM" }, null)</li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="https://aquadiva-trac1.inf-bb.uni-jena.de/wiki/doku.php?id=help:howto" target="_blank">Howto</a></li>
+                        <li><a href="https://aquadiva-trac1.inf-bb.uni-jena.de/mantis/bug_report_page.php" target="_blank">Report a bug</a></li>
                     </ul>
                 </li>
 
@@ -82,6 +85,7 @@
                     <ul class="dropdown-menu">
                         <li>@Html.ActionLink("Manage Users", "Users", "Users", new { area = "SAM" }, null)</li>
                         <li>@Html.ActionLink("Manage Groups", "Groups", "Groups", new { area = "SAM" }, null)</li>
+                        <li>@Html.ActionLink("Manage User PI Mapping", "UserPis", "UserPis", new { area = "SAM" }, null)</li>
                         <li>@Html.ActionLink("Manage Features", "Features", "FeaturePermissions", new { area = "SAM" }, null)</li>
                         <li>@Html.ActionLink("Manage Data Permissions", "Data", "DataPermissions", new { area = "SAM" }, null)</li>
                         <li role="separator" class="divider"></li>

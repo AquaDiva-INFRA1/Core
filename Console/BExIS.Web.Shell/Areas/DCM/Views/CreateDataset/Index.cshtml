@@ -40,6 +40,29 @@
                     @Html.ValidationMessageFor(m => m.SelectedMetadataStructureId)
                 </td>
             </tr>
+
+            <tr>
+                
+                 <td style="width:300px;">@Html.LabelFor(m=>m.Pis)<span class="bx bx-required" title="Required"></span>
+                 </td>
+                    
+                <td>
+                    @Html.ActionLink("Add PI...", "AddPi", null, new { id = "AddPi" })
+                    @Html.ValidationMessageFor(m => m.Pis)
+                    <div id="piRows" class="editor-field">
+                        @{if (Model.Pis != null && Model.Pis.Count() > 0)
+                          {
+                              foreach (long item in Model.Pis)
+                              {
+                                  Html.RenderPartial("_PiPartial", new BExIS.Web.Shell.Areas.SAM.Models.UserSelectListModel(HttpContext.Current.User.Identity.Name) { Id = item });
+                              }
+
+                          }
+                        }   
+                    </div> 
+                </td>
+            </tr>
+
         </table>
     
     <br />
@@ -49,6 +72,26 @@
 
 
 <script type="text/javascript">
+
+    
+
+    $(document).ready(function () {
+        $.validator.unobtrusive.parse("#createDatasetFormular");
+
+        $("#AddPi").click(function () {
+            $.ajax({
+                url: this.href,
+                cache: false,
+                success: function (html) { $("#piRows").append(html); }
+            });
+            return false;
+        });
+
+        $("a.removePi").live("click", function () {
+            $(this).parents("div.piRow:first").remove();
+            return false;
+        });
+    })
 
     $("#SelectedMetadataStructureId").change(function (e)
     {

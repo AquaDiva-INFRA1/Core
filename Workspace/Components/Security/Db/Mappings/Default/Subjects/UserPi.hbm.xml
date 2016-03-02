@@ -1,0 +1,15 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Security.Entities" namespace="BExIS.Security.Entities.Subjects">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="UserPi" table="UserPis" dynamic-update="true">
+
+    <id name="Id" type="Int64">
+      <column name="Id" />
+      <generator class="native" />
+    </id>
+
+    <property name="UserId" type="Int64" />
+    <property name="PiId" type="Int64" />
+
+
+  </class>
+
+</hibernate-mapping>
