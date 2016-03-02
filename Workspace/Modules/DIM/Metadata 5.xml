@@ -1,0 +1,59 @@
+<DataSets xmlns="http://www.tdwg.org/schemas/abcd/2.06">
+  <DataSet>
+    <TechnicalContacts>
+      <TechnicalContact preferred="false">
+        <Name>David Blaa</Name>
+        <Email>dblaa@bgc-jena.mpg.de</Email>
+        <Phone>6013</Phone>
+        <Address>Humboldstraße 10</Address>
+      </TechnicalContact>
+    </TechnicalContacts>
+    <ContentContacts>
+      <ContentContact preferred="false">
+        <Name>David Blaa</Name>
+        <Email>dblaa@bgc-jena.mpg.de</Email>
+        <Phone>6013</Phone>
+        <Address>Humboldstraße 10</Address>
+      </ContentContact>
+      <ContentContact preferred="false">
+        <Name>Martin Hohmuth</Name>
+        <Email>mhohmuthbgc-jena.mpg.de</Email>
+        <Phone>6011</Phone>
+        <Address>Humboldstraße 10</Address>
+      </ContentContact>
+    </ContentContacts>
+    <Metadata>
+      <Description>
+        <Representation language="en">
+          <Title>Bird Observation Germany 2014</Title>
+          <Details>Count birds on different plot in Germany</Details>
+        </Representation>
+      </Description>
+      <RevisionData>
+        <DateModified>2014-10-08T22:00:00.000Z</DateModified>
+      </RevisionData>
+      <Owners>
+        <Owner>
+          <Organisation>
+            <Name>
+              <Representation language="en">
+                <Text>Max Planch Institute for biogeochemistry</Text>
+              </Representation>
+            </Name>
+          </Organisation>
+          <Person>
+            <FullName>David Blaa</FullName>
+            <SortingName>Blaa</SortingName>
+          </Person>
+        </Owner>
+      </Owners>
+    </Metadata>
+    <Units>
+      <Unit>
+        <SourceInstitutionID>1</SourceInstitutionID>
+        <SourceID>1</SourceID>
+        <UnitID>1</UnitID>
+      </Unit>
+    </Units>
+  </DataSet>
+</DataSets>

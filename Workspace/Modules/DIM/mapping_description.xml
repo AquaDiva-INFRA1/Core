@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mapping id="1" name="abcd">
+	<header>
+		<destination xPath="DataSets" type="complex"></destination>
+		<packages>
+		  <package abbreviation="xmlns" url="http://www.tdwg.org/schemas/abcd/2.06" ></package>
+		</packages>
+		<schema abbreviation="abcd" url="http://rs.tdwg.org/abcd/2.06/ABCD_2.06.xsd"></schema>
+	</header>
+	<routes>
+		<route>
+			<source xPath="Metadata/TechnicalContact/Person/Name/Name" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/TechnicalContacts/TechnicalContact/Name" type="element"  ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/TechnicalContact/Person/Phone/Phone" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/TechnicalContacts/TechnicalContact/Phone" type="element"  ></destination>
+		</route>
+		<route>
+			<source xPath="Metadata/TechnicalContact/Person/Email/Email" type="MetadataAttribute"></source>
+			<destination xPath="DataSets/DataSet/TechnicalContacts/TechnicalContact/Email" type="element"  ></destination>
+		</route>
+	</routes>
+</mapping>
+
+
+<!-- 
+
+source
+............
+
+type = MetadataStructure | MetadataPackage | MetadataPackageUsage | MetadataAttribute | MetadataAttributeUsage
+
+destination
+............
+
+type = complex | element   = complextype/ element as a enitiytypes in a schema
+
+dataType only by elements = string | int
+
+..
+schema defined datatypes like - String255
+reading from xsd
+
+<xs:simpleType name="String255">
+		<xs:annotation>
+			<xs:documentation xml:lang="en-us">normalized string restricted to 1..255 character length (i. e. required, may not be empty string)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:normalizedString">
+			<xs:minLength fixed="true" value="1"/>
+			<xs:maxLength fixed="true" value="255"/>
+			<xs:whiteSpace fixed="false" value="collapse"/>
+		</xs:restriction>
+	</xs:simpleType>
+..
+
+
+Validation???? wird beim eingang geprüft nicht bei der erstellung der output dokumente
+
+-->

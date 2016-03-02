@@ -12,10 +12,6 @@
     <AssemblyName>BExIS.Security.Services</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
@@ -87,6 +83,7 @@
     <Compile Include="Subjects\IUserManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Subjects\SubjectManager.cs" />
+    <Compile Include="Subjects\UserPiManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BExIS.Security.Entities\BExIS.Security.Entities.csproj">

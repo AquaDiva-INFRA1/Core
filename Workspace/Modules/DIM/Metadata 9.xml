@@ -1,0 +1,49 @@
+<DataSets xmlns="http://www.tdwg.org/schemas/abcd/2.06">
+  <DataSet>
+    <TechnicalContacts>
+      <TechnicalContact preferred="false">
+        <Name>Sophia Kaiser</Name>
+        <Email>sk@bgc-jena.mpg.de</Email>
+        <Phone>-</Phone>
+        <Address>Beutenberg 10, 07745 jena</Address>
+      </TechnicalContact>
+    </TechnicalContacts>
+    <ContentContacts>
+      <ContentContact preferred="false">
+        <Name>Sophia Kaiser</Name>
+        <Email>sk@bgc-jena.mpg.de</Email>
+        <Phone>-</Phone>
+        <Address>Beutenberg 10, 07745 Jena</Address>
+      </ContentContact>
+    </ContentContacts>
+    <Metadata>
+      <Description>
+        <Representation language="en">
+          <Title>LiDAR_SCH_100_0.75</Title>
+        </Representation>
+      </Description>
+      <Owners>
+        <Owner>
+          <Organisation>
+            <Name>
+              <Representation language="en">
+                <Text>Max-Planck-Institute for Biogeochemistry, Jena</Text>
+              </Representation>
+            </Name>
+          </Organisation>
+          <Person>
+            <FullName>Sophia Kaiser</FullName>
+            <SortingName>Sophia Kaiser</SortingName>
+          </Person>
+        </Owner>
+      </Owners>
+    </Metadata>
+    <Units>
+      <Unit>
+        <SourceInstitutionID>-</SourceInstitutionID>
+        <SourceID>-</SourceID>
+        <UnitID>-</UnitID>
+      </Unit>
+    </Units>
+  </DataSet>
+</DataSets>

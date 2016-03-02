@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<luceneConfig>
+  <field display_name="Title" lucene_name="title" metadata_name="Metadata/Description/Description/Title/Title,Metadata/Description/DescriptionEML/Title/Title" type="facet_field" primitive_type="string" store="yes" multivalued="no" analysed="yes" norm="yes" boost="5" header_item="yes" default_visible_item="yes" />
+</luceneConfig>

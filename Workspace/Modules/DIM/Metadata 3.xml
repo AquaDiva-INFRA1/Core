@@ -1,0 +1,19 @@
+<eml:eml packageId="eml.1.1" system="bexis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:eml="eml://ecoinformatics.org/eml-2.1.1">
+  <dataset scope="document">
+    <title>Plot Size</title>
+    <creator scope="document">
+      <individualName>
+        <givenName>Hans</givenName>
+        <surName>Meier</surName>
+      </individualName>
+      <organizationName>FSU Jena</organizationName>
+    </creator>
+    <contact scope="document">
+      <individualName>
+        <givenName>Horst</givenName>
+        <surName>Rudolf</surName>
+      </individualName>
+      <organizationName>FSU Jena</organizationName>
+    </contact>
+  </dataset>
+</eml:eml>

@@ -1,0 +1,11 @@
+﻿@using BExIS.Web.Shell.Areas.DDM.Helpers;
+
+@model BExIS.Web.Shell.Areas.SAM.Models.UserSelectListModel
+
+<div class="piRow editor-field">
+    @using(Html.BeginCollectionItem("Pis")) {
+        @Html.DropDownListFor(m => m, new SelectList(Model.UserList, "Id", "Name", Model.Id))
+        @Html.ValidationMessageFor(m => m)
+        <a href="#" class="removePi">delete</a>
+    }
+</div>

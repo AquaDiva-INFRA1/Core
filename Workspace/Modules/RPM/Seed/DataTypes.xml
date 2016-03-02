@@ -1,0 +1,27 @@
+<datatypes>
+  <datatype
+    name="String"
+    description="A Unicode String"
+    typeCode="String"
+    />
+  <datatype
+    name="Number"
+    description="An Integer Number"
+    typeCode="Int32"
+    />
+  <datatype
+    name="Decimal"
+    description="An Real Number"
+    typeCode="Double"
+    />
+  <datatype
+    name="Date"
+    description="A date with time"
+    typeCode="DateTime"
+    />
+  <datatype
+   name="Text"
+   description="For long text"
+   typeCode="String"
+    />
+</datatypes>

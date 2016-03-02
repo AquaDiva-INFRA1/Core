@@ -39,6 +39,8 @@ namespace BExIS.Dcm.CreateDatasetWizard
     
         public static string ERROR_DIC = "Error_Dic";
 
+        public static string PIS = "Pis";
+
         private int MaxStepId;
 
         public StepInfo Root { get; set; }

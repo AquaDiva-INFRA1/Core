@@ -11,7 +11,6 @@ using BExIS.Ddm.Model;
 using BExIS.Ddm.Providers.LuceneProvider;
 using BExIS.Web.Shell.Areas.DDM.Models;
 using Telerik.Web.Mvc;
-using Telerik.Web.Mvc.UI;
 using Vaiona.IoC;
 using Vaiona.Web.Mvc.Models;
 
@@ -24,7 +23,6 @@ namespace BExIS.Web.Shell.Areas.DDM.Controllers
 
         public ActionResult Index()
         {
-
             return View();
         }
 

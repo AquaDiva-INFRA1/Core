@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<eml:eml packageId="eml.1.1" system="knb" 
+xmlns:eml="eml://ecoinformatics.org/eml-2.1.1" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 eml.xsd">
+  <software scope="document">
+	<title>Title of...</title>
+	<creator scope="document">
+	  <individualName>
+		<givenName>David</givenName>
+		<surName> Blaa</surName>
+	  </individualName>
+	  <organizationName>mpi</organizationName>
+	</creator>
+		<implementation>
+			<distribution>
+			  <online>
+				<url>http://www.something.org</url>
+			  </online>
+			</distribution>
+			<size>
+			  123 MB
+			</size>
+			<operatingSystem>Linux</operatingSystem>
+			<virtualMachine>JVM</virtualMachine>
+			<diskUsage>123 MB</diskUsage>
+			<programmingLanguage>Java</programmingLanguage>
+	  </implementation>
+	  <license>
+		GPL
+	  </license>
+	  <version>
+		1.0
+	  </version>
+  </software>
+</eml:eml>
