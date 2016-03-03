@@ -773,7 +773,16 @@ namespace BExIS.Dcm.UploadWizard
                     };
                 }
 
-                return new List<string>();
+            if (type.Equals(DataStructureType.NewStructured))
+            {
+                return new List<string>()
+                    {
+                        ".xls",
+                        ".xlsx"
+                    };
+            }
+
+            return new List<string>();
             }
 
         #endregion

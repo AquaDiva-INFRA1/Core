@@ -71,6 +71,9 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                     if (type == DataStructureType.Structured)
                         path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "SubmitTaskInfo.xml");
 
+                    if (type == DataStructureType.NewStructured)
+                        path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "SubmitNewStructuredDataTaskInfo.xml");
+
                     XmlDocument xmlTaskInfo = new XmlDocument();
                     xmlTaskInfo.Load(path);
 
