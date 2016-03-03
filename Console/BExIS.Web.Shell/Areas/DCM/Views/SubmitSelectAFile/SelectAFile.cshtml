@@ -65,7 +65,7 @@
                                 )
                             </td>
                             <td>
-                               Select a data file from your local computer.
+                               Select a data file from your local computer. |@fileExtListAsString|
                             </td>
                             
                         </tr>
@@ -131,6 +131,7 @@
         var type = '@Model.DataStructureType';
         var structuredType = '@BExIS.Dcm.UploadWizard.DataStructureType.Structured';
         var unStructuredType = '@BExIS.Dcm.UploadWizard.DataStructureType.Unstructured';
+        var NewStructuredType = '@BExIS.Dcm.UploadWizard.DataStructureType.NewStructured';
 
         if( type == structuredType)
         {
@@ -140,6 +141,10 @@
         if (type == unStructuredType)
         {
             unStructuredDataSet(e)
+        }
+
+        if (type == NewStructuredType) {
+            NewStructuredDataSet(e)
         }
     }
 
@@ -177,6 +182,31 @@
         if (!IsExtentionValid(file.extension)) {
 
             alert("Only " +'@fileExtListAsString'+ " files can be uploaded")
+            e.preventDefault();
+            return false;
+        }
+        else {
+
+            if (file.size > (maxsize * 1024)) {
+
+                alert("Max file : " + maxsize / 1024 + " MB is supported. Please contact your administrator to upload bigger files.");
+                e.preventDefault();
+                return false;
+            }
+
+            Parameters.push("Extention:" + file.extension);
+        }
+    }
+
+    function NewStructuredDataSet(e) {
+
+        var file = e.files[0];
+        var maxsize = '@int_MaxRequestLength';
+
+        //alert("is Ext " + IsExtentionValid(file.extension));
+        if (!IsExtentionValid(file.extension)) {
+
+            alert("Only " + '@fileExtListAsString' + " files can be uploaded")
             e.preventDefault();
             return false;
         }

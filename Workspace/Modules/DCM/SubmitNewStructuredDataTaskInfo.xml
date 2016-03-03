@@ -1,0 +1,9 @@
+<stepInfos>
+	<stepInfo title="Select File" action="SelectAFile" area="DCM" controller="SubmitSelectAFile"/>
+	<stepInfo title="Get File Information" action="GetFileInformation" area="DCM" controller="SubmitGetFileInformation"/>
+	<stepInfo title="Specify Dataset" action="SpecifyDataset" area="DCM" controller="SubmitSpecifyDataset"/>
+	<stepInfo title="Define Primary Key" action="DefinePrimaryKey" area="DCM" controller="SubmitDefinePrimaryKey"/>
+	<stepInfo title="Validation" action="Validation" area="DCM" controller="SubmitValidation"/>
+	<stepInfo title="Summary" action="Summary" area="DCM" controller="SubmitSummary"/>
+</stepInfos>
+

@@ -149,7 +149,22 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                                 
                                 #endregion
                             }
-                            
+
+                            if (GetDataStructureType().Equals(DataStructureType.NewStructured))
+                            {
+                                #region newstructured datastructure
+                                //try save FileStream
+                                string filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
+
+                                if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xls") || TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xslx"))
+                                {
+                                    TaskManager.Current().SetValid(true);
+                                }
+
+
+                                #endregion
+                            }
+
                         }
                         catch
                         {
