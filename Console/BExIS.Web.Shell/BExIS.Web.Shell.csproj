@@ -309,6 +309,7 @@
     <Compile Include="Areas\DCM\Controllers\SubmitGetFileInformationController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSelectAFileController.cs" />
+    <Compile Include="Areas\DCM\Controllers\SubmitSheetDataStructureController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSpecifyDatasetController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSummaryController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitValidationController.cs" />
@@ -424,6 +425,9 @@
     <DesignData Include="Db\Settings\PostgreSQL82Dialect.hibernate.cfg.xml">
       <SubType>Designer</SubType>
     </DesignData>
+    <Content Include="Areas\DCM\Images\DCM_SelectAreas\left-right.png" />
+    <Content Include="Areas\DCM\Images\DCM_SelectAreas\matrix.png" />
+    <Content Include="Areas\DCM\Images\DCM_SelectAreas\top-down.png" />
     <Content Include="Areas\DCM\Images\DCM_UserGuide_files\image001.png" />
     <Content Include="Areas\DCM\Images\DCM_UserGuide_files\image002.gif" />
     <Content Include="Areas\DCM\Images\DCM_UserGuide_files\image002.png" />
@@ -596,6 +600,7 @@
     <Content Include="Areas\SAM\Views\UserPis\UserPis.cshtml" />
     <Content Include="Areas\SAM\Views\UserPis\_CreatePartial.cshtml" />
     <Content Include="Areas\SAM\Views\UserPis\_EditPartial.cshtml" />
+    <Content Include="Areas\DCM\Views\SubmitSheetDataStructure\SheetDataStructure.cshtml" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
     <Content Include="Scripts\jquery-2.1.4.min.js" />

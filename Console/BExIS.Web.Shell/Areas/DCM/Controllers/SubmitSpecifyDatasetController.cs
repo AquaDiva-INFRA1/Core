@@ -51,11 +51,13 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             // jump back to this step
             // check if dataset selected
             if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_ID))
+            {
                 if (Convert.ToInt32(TaskManager.Bus[TaskManager.DATASET_ID]) > 0)
                 {
                     model.DatasetTitle = TaskManager.Bus[TaskManager.DATASET_TITLE].ToString();
                     model.SelectedDatasetId = Convert.ToInt32(TaskManager.Bus[TaskManager.DATASET_ID]);
                 }
+            }
 
             model.StepInfo = TaskManager.Current();
             if ((List<ListViewItem>)Session["DatasetVersionViewList"] != null) model.DatasetsViewList = (List<ListViewItem>)Session["DatasetVersionViewList"];

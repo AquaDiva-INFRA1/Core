@@ -1,9 +1,9 @@
 <stepInfos>
 	<stepInfo title="Select File" action="SelectAFile" area="DCM" controller="SubmitSelectAFile"/>
-	<stepInfo title="Get File Information" action="GetFileInformation" area="DCM" controller="SubmitGetFileInformation"/>
 	<stepInfo title="Specify Dataset" action="SpecifyDataset" area="DCM" controller="SubmitSpecifyDataset"/>
-	<stepInfo title="Define Primary Key" action="DefinePrimaryKey" area="DCM" controller="SubmitDefinePrimaryKey"/>
-	<stepInfo title="Validation" action="Validation" area="DCM" controller="SubmitValidation"/>
+	<stepInfo title="Sheet Structure" action="SheetDataStructure" area="DCM" controller="SubmitSheetDataStructure"/>
+	<stepInfo title="Select Areas" action="SelectAreas" area="DCM" controller="SubmitSelectAreas"/>
+	<stepInfo title="Verification" action="Verification" area="DCM" controller="SubmitVerification"/>
 	<stepInfo title="Summary" action="Summary" area="DCM" controller="SubmitSummary"/>
 </stepInfos>
 

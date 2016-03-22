@@ -239,7 +239,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                     }
 
                 }
-                else
+                else if (dataStructureType.Equals(DataStructureType.Unstructured))
                 {
                     List<UnStructuredDataStructure> list = dataStructureManager.UnStructuredDataStructureRepo.Get().ToList();
                                        
@@ -254,6 +254,27 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                             }
                         }
                     }
+                }
+                else if(dataStructureType.Equals(DataStructureType.NewStructured))
+                {
+                    List<StructuredDataStructure> list = dataStructureManager.StructuredDataStructureRepo.Get().ToList();
+
+                    foreach (StructuredDataStructure sds in list)
+                    {
+                        sds.Materialize();
+
+                        foreach (Dataset d in sds.Datasets)
+                        {
+                            if (datasetIDs.Contains(d.Id))
+                            {
+                                temp.Add(new ListViewItem(d.Id, XmlDatasetHelper.GetInformation(dm.GetDatasetLatestVersion(d), AttributeNames.title)));
+                            }
+                        }
+                    }
+                }
+                else
+                {
+
                 }
 
                return temp.OrderBy(p => p.Title).ToList();
