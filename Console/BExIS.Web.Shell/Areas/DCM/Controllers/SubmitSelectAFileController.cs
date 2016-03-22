@@ -156,7 +156,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                                 //try save FileStream
                                 string filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
 
-                                if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xls") || TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xslx"))
+                                if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xls") || TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsx"))
                                 {
                                     TaskManager.Current().SetValid(true);
                                 }

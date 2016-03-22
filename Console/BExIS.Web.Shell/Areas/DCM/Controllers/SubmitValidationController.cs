@@ -158,7 +158,10 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 }
                 finally
                 {
-                    Stream.Close();
+                    if (Stream != null)
+                    {
+                        Stream.Close();
+                    }
                 }
             }
             else
