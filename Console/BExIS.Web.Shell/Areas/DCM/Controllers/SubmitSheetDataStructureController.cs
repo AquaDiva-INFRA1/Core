@@ -46,21 +46,19 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 TaskManager.RemoveExecutedStep(TaskManager.Current());
             }
 
-            ChooseDatasetViewModel model = new ChooseDatasetViewModel();
+            SelectSheetFormatModel model = new SelectSheetFormatModel();
 
             // jump back to this step
             // check if dataset selected
-            if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_ID))
+            if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_FORMAT))
             {
-                if (Convert.ToInt32(TaskManager.Bus[TaskManager.DATASET_ID]) > 0)
+                if (String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.DATASET_ID])))
                 {
-                    model.DatasetTitle = TaskManager.Bus[TaskManager.DATASET_TITLE].ToString();
-                    model.SelectedDatasetId = Convert.ToInt32(TaskManager.Bus[TaskManager.DATASET_ID]);
+                    model.SelectedSheetFormat = TaskManager.Bus[TaskManager.SHEET_FORMAT].ToString();
                 }
             }
 
             model.StepInfo = TaskManager.Current();
-            if ((List<ListViewItem>)Session["DatasetVersionViewList"] != null) model.DatasetsViewList = (List<ListViewItem>)Session["DatasetVersionViewList"];
 
             return PartialView(model);
 
@@ -70,32 +68,17 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         public ActionResult SheetDataStructure(object[] data)
         {
             TaskManager = (TaskManager)Session["TaskManager"];
-            ChooseDatasetViewModel model = new ChooseDatasetViewModel();
+            SelectSheetFormatModel model = new SelectSheetFormatModel();
             model.StepInfo = TaskManager.Current();
 
             if (TaskManager != null)
             {
                 TaskManager.Current().SetValid(false);
 
-                if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_ID))
+                //TODO
+                if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_FORMAT))
                 {
-                    DatasetManager dm = new DatasetManager();
-                    Dataset ds = new Dataset();
-                    try
-                    {
-                        dm = new DatasetManager();
-                        ds = dm.GetDataset((long)Convert.ToInt32(TaskManager.Bus[TaskManager.DATASET_ID]));
-
-                        TaskManager.AddToBus(TaskManager.DATASTRUCTURE_ID, ((DataStructure)(ds.DataStructure.Self)).Id);
-                        TaskManager.AddToBus(TaskManager.DATASTRUCTURE_TITLE, ((DataStructure)(ds.DataStructure.Self)).Name);
-
-                        TaskManager.Current().SetValid(true);
-
-                    }
-                    catch
-                    {
-                        model.ErrorList.Add(new Error(ErrorType.Other, "Dataset not exist."));
-                    }
+                    TaskManager.Current().SetValid(true);
                 }
                 else
                 {
@@ -116,14 +99,44 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
                     //reload model
                     model.StepInfo = TaskManager.Current();
-                    if ((List<ListViewItem>)Session["DatasetVersionViewList"] != null) model.DatasetsViewList = (List<ListViewItem>)Session["DatasetVersionViewList"];
               }
             }
 
             return PartialView(model);
         }
 
- 
+        [HttpPost]
+        public ActionResult AddSelectedDatasetToBus(string format)
+        {
+
+            SelectSheetFormatModel model = new SelectSheetFormatModel();
+
+            TaskManager TaskManager = (TaskManager)Session["TaskManager"];
+
+
+            if (!String.IsNullOrEmpty(format) && validateSheetFormat(format))
+            {
+                TaskManager.AddToBus(TaskManager.SHEET_FORMAT, format);
+            }
+            else
+            {
+                model.ErrorList.Add(new Error(ErrorType.Other, "Please select a sheet format."));
+            }
+
+            Session["TaskManager"] = TaskManager;
+
+
+            //create Model
+            model.StepInfo = TaskManager.Current();
+
+
+            model.SelectedSheetFormat = format;
+
+            return PartialView("SheetDataStructure", model);
+            
+        }
+
+
         #region private methods
 
 
@@ -141,6 +154,22 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             catch { }
 
             return !string.IsNullOrWhiteSpace(userName) ? userName : "DEFAULT";
+        }
+
+        
+        private bool validateSheetFormat(string sheetFormat)
+        {
+            switch (sheetFormat)
+            {
+                case "top-down":
+                    return true;
+                case "left-right":
+                    return true;
+                case "matrix":
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         #endregion

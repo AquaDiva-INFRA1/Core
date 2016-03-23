@@ -45,6 +45,8 @@ namespace BExIS.Dcm.UploadWizard
         public static string PROJECTNAME = "ProjectName";
         public static string INSTITUTE = "Institute";
 
+        // sheet structure
+        public static string SHEET_FORMAT = "SheetFormat";
 
         public static string NUMBERSOFROWS = "NUMBERSOFROWS";
         public static string CURRENTPACKAGE = "CURRENTPACKAGE";
