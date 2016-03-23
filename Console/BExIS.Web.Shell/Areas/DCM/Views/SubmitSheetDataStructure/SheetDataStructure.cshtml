@@ -1,9 +1,10 @@
-﻿@model BExIS.Web.Shell.Areas.DCM.Models.ChooseDatasetViewModel
+﻿@model BExIS.Web.Shell.Areas.DCM.Models.SelectSheetFormatModel
 @using Telerik.Web.Mvc.UI;
 @using Telerik.Web.Mvc.Resources;
 @using BExIS.Web.Shell.Areas.DCM.Models;
 
 @{
+    /*
     if (this.ViewContext.FormContext == null)
     {
         this.ViewContext.FormContext = new FormContext();
@@ -15,28 +16,42 @@
         selectedListeViewitem.Id = Model.SelectedDatasetId;
         selectedListeViewitem.Title = Model.DatasetTitle;
     }
+    */
+    string preselect = ":first";
+    if (!String.IsNullOrEmpty(Model.SelectedSheetFormat))
+    {
+        preselect = "[value=" + Model.SelectedSheetFormat + "]";
+    }
+
+
 }
 
 <script>
+    
     $(document).ready(function () {
-        $("input:radio[name=sheetFormat]:first").attr('checked', true);
+        $("input:radio[name=sheetFormat]@(preselect)").attr('checked', true);
     });
+    
 </script>
 <style>
     div.sheetSelect label > img {
         width: 100px;
     }
-    div.sheetSelect label > input{
+    div.sheetSelect label > input {
         display: none;
     }
-    div.sheetSelect label > input + img{ 
+    div.sheetSelect label > input + img { 
         cursor: pointer;
         border: 2px solid transparent;
+        margin-left: 20px;
+        margin-right: 20px;
     }
-    div.sheetSelect label > input:checked + img{
+    div.sheetSelect label > input:checked + img {
         border: 6px solid rgba(255, 165, 0, 0.7);
         border-radius: 4px;
         width: 140px;
+        margin-left: 0px;
+        margin-right: 0px;
     }
 </style>
 
@@ -102,21 +117,14 @@
 <script type="text/javascript">
 
     $('input[type=radio][name=sheetFormat]').change(function () {
-
-        if ($(this).val() > 0) {
-            // TODO
-           
-            SelectedDatasetId = $(this).val();
-            SelectedDatasetTitle = "test";
-            //Parameters.push("DatasetId:" + SelectedDatasetId);
-            //Parameters.push("DatasetTitle:" + SelectedDatasetTitle);
+        if ($(this).val() != null && $(this).val() != '') {
+            SelectedSheetFormat = $(this).val();
 
             // send to bus
-            $.post('@Url.Action("AddSelectedDatasetToBus", "SubmitSpecifyDataset", new RouteValueDictionary { { "area", "DCM" } })', { id: SelectedDatasetId }, function (response) {
+            $.post('@Url.Action("AddSelectedDatasetToBus", "SubmitSheetDataStructure", new RouteValueDictionary { { "area", "DCM" } })', { format: SelectedSheetFormat }, function (response) {
                 $("#Step3").html(response);
             })
         }
-
     })
 
 </script>
