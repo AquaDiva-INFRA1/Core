@@ -60,6 +60,10 @@
     <Reference Include="DocumentFormat.OpenXml">
       <HintPath>..\..\Libraries\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
+    <Reference Include="EPPlus, Version=4.0.5.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EPPlus.4.0.5\lib\net20\EPPlus.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FluentBootstrap, Version=3.3.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FluentBootstrap.3.3.5.1\lib\net40\FluentBootstrap.dll</HintPath>
       <Private>True</Private>
@@ -309,6 +313,7 @@
     <Compile Include="Areas\DCM\Controllers\SubmitGetFileInformationController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSelectAFileController.cs" />
+    <Compile Include="Areas\DCM\Controllers\SubmitSelectAreasController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSheetDataStructureController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSpecifyDatasetController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSummaryController.cs" />
@@ -317,6 +322,7 @@
     <Compile Include="Areas\DCM\Helpers\DCMSeedDataGenerator.cs" />
     <Compile Include="Areas\DCM\Helpers\UploadUtility.cs" />
     <Compile Include="Areas\DCM\Models\AbstractStepModel.cs" />
+    <Compile Include="Areas\DCM\Models\SelectAreasModel.cs" />
     <Compile Include="Areas\DCM\Models\SelectSheetFormatModel.cs" />
     <Compile Include="Areas\DCM\Models\ChooseDatasetViewModel.cs" />
     <Compile Include="Areas\DCM\Models\CreateDatasetViewModel.cs" />
@@ -585,6 +591,21 @@
     <Content Include="Scripts\bexis-metadata.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\handsontable\pikaday\LICENSE" />
+    <Content Include="Scripts\handsontable\pikaday\pikaday.css" />
+    <Content Include="Scripts\handsontable\pikaday\pikaday.js" />
+    <Content Include="Scripts\handsontable\zeroclipboard\LICENSE" />
+    <Content Include="Scripts\handsontable\zeroclipboard\ZeroClipboard.js" />
+    <Content Include="Scripts\handsontable\zeroclipboard\ZeroClipboard.swf" />
+    <Content Include="Scripts\handsontable\handsontable.css" />
+    <Content Include="Scripts\handsontable\handsontable.full.css" />
+    <Content Include="Scripts\handsontable\handsontable.full.js" />
+    <Content Include="Scripts\handsontable\handsontable.full.min.css" />
+    <Content Include="Scripts\handsontable\handsontable.full.min.js" />
+    <Content Include="Scripts\handsontable\handsontable.js" />
+    <Content Include="Scripts\handsontable\handsontable.min.css" />
+    <Content Include="Scripts\handsontable\handsontable.min.js" />
+    <Content Include="Scripts\handsontable\README.md" />
     <Content Include="Content\Images\Bildmarke_BEXIS_cmyk.ai" />
     <Content Include="Content\Images\Logo_BEXIS_cmyk.ai" />
     <Content Include="Areas\DCM\Views\CreateDataset\Index.cshtml" />
@@ -602,6 +623,7 @@
     <Content Include="Areas\SAM\Views\UserPis\_CreatePartial.cshtml" />
     <Content Include="Areas\SAM\Views\UserPis\_EditPartial.cshtml" />
     <Content Include="Areas\DCM\Views\SubmitSheetDataStructure\SheetDataStructure.cshtml" />
+    <Content Include="Areas\DCM\Views\SubmitSelectAreas\SelectAreas.cshtml" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
     <Content Include="Scripts\jquery-2.1.4.min.js" />
