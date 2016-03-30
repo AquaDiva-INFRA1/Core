@@ -5,20 +5,45 @@ using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
 using BExIS.Web.Shell.Areas.DCM.Models;
+using System.IO;
+using OfficeOpenXml;
+using System.Web.Script.Serialization;
+using System.Web.UI.WebControls;
 
 namespace BExIS.Web.Shell.Areas.DCM.Controllers
 {
-    public class SubmitSheetDataStructureController : Controller
+    public class SubmitSelectAreasController : Controller
     {
         private TaskManager TaskManager;
 
         //
-        // GET: /DCM/SubmitSheetDataStructure/
+        // GET: /DCM/SubmitSelectAreas/
 
         [HttpGet]
-        public ActionResult SheetDataStructure(int index)
+        public ActionResult SelectAreas(int index)
         {
             TaskManager = (TaskManager)Session["TaskManager"];
+
+            string filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
+            FileStream fis = null;
+            string jsonTable = "{}";
+
+            try {
+                fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                jsonTable = GenerateJsonTable(fis);
+
+            } catch(Exception ex)
+            {
+
+            } finally
+            {
+                if(fis != null)
+                {
+                    fis.Close();
+                }
+            }
+
+
             //set current stepinfo based on index
             if (TaskManager != null)
             {
@@ -28,7 +53,9 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 TaskManager.RemoveExecutedStep(TaskManager.Current());
             }
 
-            SelectSheetFormatModel model = new SelectSheetFormatModel();
+            SelectAreasModel model = new SelectAreasModel();
+
+            model.jsonTableData = jsonTable;
 
             // jump back to this step
             // check if dataset selected
@@ -36,7 +63,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             {
                 if (String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.DATASET_ID])))
                 {
-                    model.SelectedSheetFormat = TaskManager.Bus[TaskManager.SHEET_FORMAT].ToString();
+                    //model.SelectedSheetFormat = TaskManager.Bus[TaskManager.SHEET_FORMAT].ToString();
                 }
             }
 
@@ -46,8 +73,59 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
         }
 
+        private string GenerateJsonTable(FileStream fis)
+        {
+            ExcelPackage ep = new ExcelPackage(fis);
+
+            ExcelWorkbook excelWorkbook = ep.Workbook;
+            ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
+
+            ExcelCellAddress StartCell = firstWorksheet.Dimension.Start;
+            ExcelCellAddress EndCell = firstWorksheet.Dimension.End;
+
+            string[][] arr = new string[EndCell.Row][];
+
+            for (int Row = StartCell.Row; Row <= EndCell.Row; Row++)
+            {
+                TableRow tRow = new TableRow();
+
+                string[] currentRow = new string[EndCell.Column];
+
+                for (int Column = StartCell.Column; Column <= EndCell.Column; Column++)
+                {
+
+
+                    ExcelRange cell = firstWorksheet.Cells[Row, Column];
+
+                    //richTextBox1.Text += "Cell: " + cell.Address + ",";
+
+
+
+
+                    TableCell tCell = new TableCell();
+                    //tCell.Text = cell.Address + ": Value [" + cell.Value + "]<br>" + "BGColorRGB [" + colorRgb + "]<br>Formula [" + cell.Formula + "] ";
+                    if (cell.Value != null)
+                    {
+                        tCell.Text = cell.Value.ToString();
+                        currentRow[Column - 1] = cell.Value.ToString();
+                    }
+                    else
+                    {
+                        tCell.Text = "";
+                        currentRow[Column - 1] = "";
+                    }
+                    tRow.Cells.Add(tCell);
+
+                }
+
+                arr[Row - 1] = currentRow;
+            }
+            var serializer = new JavaScriptSerializer();
+            return serializer.Serialize(arr);
+        }
+
         [HttpPost]
-        public ActionResult SheetDataStructure(object[] data)
+        public ActionResult SelectAreas(object[] data)
         {
             TaskManager = (TaskManager)Session["TaskManager"];
             SelectSheetFormatModel model = new SelectSheetFormatModel();
@@ -64,7 +142,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 }
                 else
                 {
-                    model.ErrorList.Add(new Error(ErrorType.Other, "Please select a sheet format."));
+                    model.ErrorList.Add(new Error(ErrorType.Other, "Dataset not exist."));
                 }
 
                 if (TaskManager.Current().valid == true)

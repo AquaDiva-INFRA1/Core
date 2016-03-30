@@ -1,0 +1,164 @@
+﻿@model BExIS.Web.Shell.Areas.DCM.Models.SelectAreasModel
+@using Telerik.Web.Mvc.UI;
+@using Telerik.Web.Mvc.Resources;
+@using BExIS.Web.Shell.Areas.DCM.Models;
+
+<script src="@Url.Content("~/Scripts/handsontable/handsontable.full.js")"></script>
+<link rel="stylesheet" media="screen" href="@Url.Content("~/Scripts/handsontable/handsontable.full.css")">
+
+<script>
+                    var hot = null;
+                    var currentButton = null;
+
+
+                    $(document).ready(function () {
+
+                        function resetRenderer(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+
+                            cellProperties.editor = false;
+
+                            var selectedArea = instance.getSelected();
+
+                            if(!jQuery.isEmptyObject(selectedArea)) {
+                                var isCellInRow = cellProperties.row <= selectedArea[2] && cellProperties.row >= selectedArea[0];
+                                var isCellInCol = cellProperties.col <= selectedArea[3] && cellProperties.col >= selectedArea[1];
+
+                                if(!(isCellInRow && isCellInCol)) {
+                                    if(!jQuery.isEmptyObject(currentButton)) {
+                                        if( currentButton == "header") {
+                                            $(td).removeClass("headerMarking");
+                                        } else if(currentButton == "data") {
+                                            $(td).removeClass("dataMarking");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
+                        var container = document.getElementById('handsonExcelTable');
+                        var hot = new Handsontable(container, {
+                            data: @Html.Raw(Model.jsonTableData),
+                            rowHeaders: true,
+                            colHeaders: true,
+                            contextMenu: false,
+                            outsideClickDeselects: false,
+                            cells: function(row, col, prop) {
+                                var cellProperties = {};
+                                cellProperties.renderer = resetRenderer;
+                                return cellProperties;
+                            }
+                        });
+                        hot.render();
+
+                        var selectedHeaderArea = $('#HeaderSelection').val();
+                        if(selectedHeaderArea.length > 0) {
+                            hot.selectCell(JSON.parse(selectedHeaderArea));
+                        }
+
+
+                        $('#setSelectDataArea').click(function() {
+                            currentButton = "data";
+                            var selected = hot.getSelected();
+                            if(!jQuery.isEmptyObject(selected)) {
+                                console.log(selected);
+
+                                for(i = selected[0]; i <= selected[2]; i++) {
+                                    for(j = selected[1]; j <= selected[3]; j++) {
+                                        var cell = hot.getCellMeta(i,j, true);
+                                        cell.className = 'dataMarking';
+
+                                    }
+                                }
+
+                                hot.render();
+
+                                $('#DataSelection').val(JSON.stringify(selected));
+                                currentButton = null;
+                            }
+                        });
+
+                        $('#setSelectedHeaderArea').click(function() {
+                            currentButton = "header";
+                            var selected = hot.getSelected();
+                            if(!jQuery.isEmptyObject(selected)) {
+                                console.log(selected);
+
+                                for(i = selected[0]; i <= selected[2]; i++) {
+                                    for(j = selected[1]; j <= selected[3]; j++) {
+                                        var cell = hot.getCellMeta(i,j, true);
+                                        cell.className = 'headerMarking';
+
+                                    }
+                                }
+
+                                hot.render();
+
+                                $('#HeaderSelection').val(JSON.stringify(selected));
+                                currentButton = null;
+                            }
+                        });
+                    });
+
+</script>
+
+<div id="Step3" class="uploadWizardStep">
+
+    <div class="uploadWizardStep_Main">
+        <div class="uploadWizardStep_Header stepper">
+            <h3>@Model.StepInfo.title</h3>
+        </div>
+
+        <div class="uploadWizardStep_Description stepper">
+            <p>Your uploaded file got a specific structure, please select which one.
+            </p>
+        </div>
+
+        <div class="uploadWizardStep_Content stepper">
+            <div id="handsonExcelTable"></div>
+        </div>
+    </div>
+
+    <div class="uploadWizardStep_Error stepper">
+        @if (Model != null)
+        {
+            if (Model.ErrorList != null)
+            {
+                if (Model.ErrorList.Count == 0)
+                {
+
+
+                }
+                else
+                { 
+                   <ul>
+                        @foreach (BExIS.IO.Transform.Validation.Exceptions.Error s in @Model.ErrorList)
+                        { 
+                            <li>@s.ToString()</li>
+                        }
+                   </ul>
+
+                }
+            }
+
+        }
+    </div>   
+</div>
+
+
+<script type="text/javascript">
+
+    
+    $('input[type=radio][name=sheetFormat]').change(function () {
+        if ($(this).val() != null && $(this).val() != '') {
+            SelectedSheetFormat = $(this).val();
+
+            $.post('@Url.Action("AddSelectedDatasetToBus", "SubmitSheetDataStructure", new RouteValueDictionary { { "area", "DCM" } })', { format: SelectedSheetFormat }, function (response) {
+                $("#Step3").html(response);
+            })
+        }
+    })
+    
+
+</script>

@@ -4,34 +4,22 @@
 @using BExIS.Web.Shell.Areas.DCM.Models;
 
 @{
-    /*
-    if (this.ViewContext.FormContext == null)
-    {
-        this.ViewContext.FormContext = new FormContext();
-    }
-
-    ListViewItem selectedListeViewitem = new ListViewItem();
-    if (@Model.SelectedDatasetId > 0)
-    {
-        selectedListeViewitem.Id = Model.SelectedDatasetId;
-        selectedListeViewitem.Title = Model.DatasetTitle;
-    }
-    */
-    string preselect = ":first";
+    string preselect = "";
     if (!String.IsNullOrEmpty(Model.SelectedSheetFormat))
     {
         preselect = "[value=" + Model.SelectedSheetFormat + "]";
     }
-
-
 }
 
 <script>
-    
     $(document).ready(function () {
-        $("input:radio[name=sheetFormat]@(preselect)").attr('checked', true);
+        var selectedValue = "@(preselect)";
+
+        if (selectedValue.length > 0) {
+            $("input:radio[name=sheetFormat]" + selectedValue).attr('checked', true);
+        }
     });
-    
+
 </script>
 <style>
     div.sheetSelect label > img {
@@ -116,15 +104,18 @@
 
 <script type="text/javascript">
 
-    $('input[type=radio][name=sheetFormat]').change(function () {
-        if ($(this).val() != null && $(this).val() != '') {
-            SelectedSheetFormat = $(this).val();
+    $(document).ready(function () {
+    
+        $('input[type=radio][name=sheetFormat]').change(function () {
+            if ($(this).val() != null && $(this).val() != '') {
+                SelectedSheetFormat = $(this).val();
 
-            // send to bus
-            $.post('@Url.Action("AddSelectedDatasetToBus", "SubmitSheetDataStructure", new RouteValueDictionary { { "area", "DCM" } })', { format: SelectedSheetFormat }, function (response) {
-                $("#Step3").html(response);
-            })
-        }
-    })
+                // send to bus
+                $.post('@Url.Action("AddSelectedDatasetToBus", "SubmitSheetDataStructure", new RouteValueDictionary { { "area", "DCM" } })', { format: SelectedSheetFormat }, function (response) {
+                    $("#Step3").html(response);
+                })
+            }
+        })
+    });
 
 </script>
