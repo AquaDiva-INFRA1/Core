@@ -7,99 +7,124 @@
 <link rel="stylesheet" media="screen" href="@Url.Content("~/Scripts/handsontable/handsontable.full.css")">
 
 <script>
-                    var hot = null;
-                    var currentButton = null;
+var hot = null;
+var currentButton = null;
 
 
-                    $(document).ready(function () {
+$(document).ready(function () {
 
-                        function resetRenderer(instance, td, row, col, prop, value, cellProperties) {
-                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+    function resetRenderer(instance, td, row, col, prop, value, cellProperties) {
+        Handsontable.renderers.TextRenderer.apply(this, arguments);
 
-                            cellProperties.editor = false;
+        cellProperties.editor = false;
 
-                            var selectedArea = instance.getSelected();
+        var selectedArea = instance.getSelected();
 
-                            if(!jQuery.isEmptyObject(selectedArea)) {
-                                var isCellInRow = cellProperties.row <= selectedArea[2] && cellProperties.row >= selectedArea[0];
-                                var isCellInCol = cellProperties.col <= selectedArea[3] && cellProperties.col >= selectedArea[1];
+        if(!jQuery.isEmptyObject(currentButton) && currentButton == "reset") {
+            if($(td).hasClass("dataMarking")) {
+                $(td).removeClass("dataMarking");
+            }
+            if($(td).hasClass("headerMarking")) {
+                $(td).removeClass("headerMarking");
+            }
+        }
 
-                                if(!(isCellInRow && isCellInCol)) {
-                                    if(!jQuery.isEmptyObject(currentButton)) {
-                                        if( currentButton == "header") {
-                                            $(td).removeClass("headerMarking");
-                                        } else if(currentButton == "data") {
-                                            $(td).removeClass("dataMarking");
-                                        }
-                                    }
-                                }
-                            }
-                        }
+        if(!jQuery.isEmptyObject(selectedArea)) {
+            var isCellInRow = cellProperties.row <= selectedArea[2] && cellProperties.row >= selectedArea[0];
+            var isCellInCol = cellProperties.col <= selectedArea[3] && cellProperties.col >= selectedArea[1];
 
-
-                        var container = document.getElementById('handsonExcelTable');
-                        var hot = new Handsontable(container, {
-                            data: @Html.Raw(Model.jsonTableData),
-                            rowHeaders: true,
-                            colHeaders: true,
-                            contextMenu: false,
-                            outsideClickDeselects: false,
-                            cells: function(row, col, prop) {
-                                var cellProperties = {};
-                                cellProperties.renderer = resetRenderer;
-                                return cellProperties;
-                            }
-                        });
-                        hot.render();
-
-                        var selectedHeaderArea = $('#HeaderSelection').val();
-                        if(selectedHeaderArea.length > 0) {
-                            hot.selectCell(JSON.parse(selectedHeaderArea));
-                        }
+            if(!(isCellInRow && isCellInCol)) {
+                if(!jQuery.isEmptyObject(currentButton)) {
+                    if( currentButton == "header") {
+                        $(td).removeClass("headerMarking");
+                    } else if(currentButton == "data") {
+                        $(td).removeClass("dataMarking");
+                    }
+                }
+            }
+        }
+    }
 
 
-                        $('#setSelectDataArea').click(function() {
-                            currentButton = "data";
-                            var selected = hot.getSelected();
-                            if(!jQuery.isEmptyObject(selected)) {
-                                console.log(selected);
+    var container = document.getElementById('handsonExcelTable');
+    var hot = new Handsontable(container, {
+        data: @Html.Raw(Model.JsonTableData),
+        rowHeaders: true,
+        colHeaders: true,
+        contextMenu: false,
+        width: 800,
+        height: 400,
+        outsideClickDeselects: false,
+        cells: function(row, col, prop) {
+            var cellProperties = {};
+            cellProperties.renderer = resetRenderer;
+            return cellProperties;
+        }
+    });
+    hot.render();
 
-                                for(i = selected[0]; i <= selected[2]; i++) {
-                                    for(j = selected[1]; j <= selected[3]; j++) {
-                                        var cell = hot.getCellMeta(i,j, true);
-                                        cell.className = 'dataMarking';
+    var selectedHeaderArea = $('#HeaderSelection').val();
+    if(selectedHeaderArea.length > 0) {
+        hot.selectCell(JSON.parse(selectedHeaderArea));
+    }
 
-                                    }
-                                }
 
-                                hot.render();
+    $('#setSelectDataArea').click(function() {
+        currentButton = "data";
+        var selected = hot.getSelected();
+        if(!jQuery.isEmptyObject(selected)) {
 
-                                $('#DataSelection').val(JSON.stringify(selected));
-                                currentButton = null;
-                            }
-                        });
+            for(i = selected[0]; i <= selected[2]; i++) {
+                for(j = selected[1]; j <= selected[3]; j++) {
+                    var cell = hot.getCellMeta(i,j, true);
+                    cell.className = 'dataMarking';
 
-                        $('#setSelectedHeaderArea').click(function() {
-                            currentButton = "header";
-                            var selected = hot.getSelected();
-                            if(!jQuery.isEmptyObject(selected)) {
-                                console.log(selected);
+                }
+            }
 
-                                for(i = selected[0]; i <= selected[2]; i++) {
-                                    for(j = selected[1]; j <= selected[3]; j++) {
-                                        var cell = hot.getCellMeta(i,j, true);
-                                        cell.className = 'headerMarking';
+            hot.render();
 
-                                    }
-                                }
+            $('#DataSelection').val(JSON.stringify(selected));
+            currentButton = null;
 
-                                hot.render();
+            $.post('@Url.Action("SelectedAreaToBus", "SubmitSelectAreas", new RouteValueDictionary { { "area", "DCM" } })', { dataArea: JSON.stringify(selected) }, function (response) { });
+        }
+    });
 
-                                $('#HeaderSelection').val(JSON.stringify(selected));
-                                currentButton = null;
-                            }
-                        });
-                    });
+    $('#setSelectedHeaderArea').click(function() {
+        currentButton = "header";
+        var selected = hot.getSelected();
+        if(!jQuery.isEmptyObject(selected)) {
+
+            for(i = selected[0]; i <= selected[2]; i++) {
+                for(j = selected[1]; j <= selected[3]; j++) {
+                    var cell = hot.getCellMeta(i,j, true);
+                    cell.className = 'headerMarking';
+
+                }
+            }
+
+            hot.render();
+
+            $('#HeaderSelection').val(JSON.stringify(selected));
+            currentButton = null;
+
+            $.post('@Url.Action("SelectedAreaToBus", "SubmitSelectAreas", new RouteValueDictionary { { "area", "DCM" } })', { headerArea: JSON.stringify(selected) }, function (response) { });
+        }
+    });
+
+    $('#setSelectReset').click(function() {
+        currentButton = "reset";
+        $('#HeaderSelection').val("");
+        $('#DataSelection').val("");
+
+        $.post('@Url.Action("SelectedAreaToBus", "SubmitSelectAreas", new RouteValueDictionary { { "area", "DCM" } })', { dataArea: "", headerArea: "" }, function (response) {});
+
+        hot.render();
+
+        currentButton = "null";
+    });
+});
 
 </script>
 
@@ -111,11 +136,17 @@
         </div>
 
         <div class="uploadWizardStep_Description stepper">
-            <p>Your uploaded file got a specific structure, please select which one.
-            </p>
+            <p>Please mark your header and data area</p>
         </div>
 
         <div class="uploadWizardStep_Content stepper">
+            <input type="button" class="t-button action areaSelect" id="setSelectedHeaderArea" value="Header" />
+            <input type="hidden" name="HeaderSelection" id="HeaderSelection" value="" />
+
+            <input type="button" class="t-button action areaSelect" id="setSelectDataArea" value="Data" />
+            <input type="hidden" name="DataSelection" id="DataSelection" value="" />
+
+            <input type="button" class="t-button action areaSelect" id="setSelectReset" value="Reset" />
             <div id="handsonExcelTable"></div>
         </div>
     </div>
@@ -146,17 +177,36 @@
     </div>   
 </div>
 
+<style>
+    .areaSelect {
+        padding: 5px 10px;
+    }
+
+    #setSelectedHeaderArea {
+        background: #660705 none repeat scroll 0 0 !important;
+    }
+
+    #setSelectDataArea {
+        background: #380566 none repeat scroll 0 0 !important;
+    }
+
+    .headerMarking {
+        background-color: rgba(40,3,2,0.5) !important;
+    }
+
+    .dataMarking {
+        background-color: rgba(22,2,40,0.5) !important;
+    }
+</style>
 
 <script type="text/javascript">
 
     
-    $('input[type=radio][name=sheetFormat]').change(function () {
+    $("#setSelectedHeaderArea").click(function () {
         if ($(this).val() != null && $(this).val() != '') {
             SelectedSheetFormat = $(this).val();
 
-            $.post('@Url.Action("AddSelectedDatasetToBus", "SubmitSheetDataStructure", new RouteValueDictionary { { "area", "DCM" } })', { format: SelectedSheetFormat }, function (response) {
-                $("#Step3").html(response);
-            })
+            
         }
     })
     

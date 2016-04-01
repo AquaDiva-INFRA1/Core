@@ -32,6 +32,11 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
                 jsonTable = GenerateJsonTable(fis);
 
+                if (!String.IsNullOrEmpty(jsonTable))
+                {
+                    TaskManager.AddToBus(TaskManager.SHEET_JSON_DATA, jsonTable);
+                }
+
             } catch(Exception ex)
             {
 
@@ -55,15 +60,15 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
             SelectAreasModel model = new SelectAreasModel();
 
-            model.jsonTableData = jsonTable;
+            model.JsonTableData = jsonTable;
 
             // jump back to this step
             // check if dataset selected
-            if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_FORMAT))
+            if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_JSON_DATA))
             {
-                if (String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.DATASET_ID])))
+                if (!String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_JSON_DATA])))
                 {
-                    //model.SelectedSheetFormat = TaskManager.Bus[TaskManager.SHEET_FORMAT].ToString();
+                    model.JsonTableData = TaskManager.Bus[TaskManager.SHEET_JSON_DATA].ToString();
                 }
             }
 
@@ -128,7 +133,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         public ActionResult SelectAreas(object[] data)
         {
             TaskManager = (TaskManager)Session["TaskManager"];
-            SelectSheetFormatModel model = new SelectSheetFormatModel();
+            SelectAreasModel model = new SelectAreasModel();
             model.StepInfo = TaskManager.Current();
 
             if (TaskManager != null)
@@ -136,13 +141,20 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 TaskManager.Current().SetValid(false);
 
                 //TODO
-                if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_FORMAT))
+                if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_JSON_DATA) &&
+                    TaskManager.Bus.ContainsKey(TaskManager.SHEET_DATA_AREA) &&
+                    TaskManager.Bus.ContainsKey(TaskManager.SHEET_HEADER_AREA))
                 {
-                    TaskManager.Current().SetValid(true);
+                    if (!String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_JSON_DATA])) &&
+                        !String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_DATA_AREA])) &&
+                        !String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_HEADER_AREA])))
+                    {
+                        TaskManager.Current().SetValid(true);
+                    }
                 }
                 else
                 {
-                    model.ErrorList.Add(new Error(ErrorType.Other, "Dataset not exist."));
+                    model.ErrorList.Add(new Error(ErrorType.Other, "Some Areas are not selected."));
                 }
 
                 if (TaskManager.Current().valid == true)
@@ -166,21 +178,37 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddSelectedDatasetToBus(string format)
+        public ActionResult SelectedAreaToBus()
         {
+            string headerArea = "";
+            string dataArea = "";
 
-            SelectSheetFormatModel model = new SelectSheetFormatModel();
+            foreach (string key in Request.Form.AllKeys)
+            {
+                if ("dataArea" == key)
+                {
+                    dataArea = Request.Form[key];
+                }
+                if("headerArea" == key)
+                {
+                    headerArea = Request.Form[key];
+                }
+            }
+
+            SelectAreasModel model = new SelectAreasModel();
 
             TaskManager TaskManager = (TaskManager)Session["TaskManager"];
 
-
-            if (!String.IsNullOrEmpty(format) && validateSheetFormat(format))
+            if(!String.IsNullOrEmpty(dataArea))
             {
-                TaskManager.AddToBus(TaskManager.SHEET_FORMAT, format);
+                TaskManager.AddToBus(TaskManager.SHEET_DATA_AREA, dataArea);
+                model.DataArea = dataArea;
             }
-            else
+
+            if(!String.IsNullOrEmpty(headerArea))
             {
-                model.ErrorList.Add(new Error(ErrorType.Other, "Please select a sheet format."));
+                TaskManager.AddToBus(TaskManager.SHEET_HEADER_AREA, headerArea);
+                model.HeaderArea = headerArea;
             }
 
             Session["TaskManager"] = TaskManager;
@@ -189,11 +217,8 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             //create Model
             model.StepInfo = TaskManager.Current();
 
+            return PartialView("SelectAreas", model);
 
-            model.SelectedSheetFormat = format;
-
-            return PartialView("SheetDataStructure", model);
-            
         }
 
 

@@ -48,6 +48,11 @@ namespace BExIS.Dcm.UploadWizard
         // sheet structure
         public static string SHEET_FORMAT = "SheetFormat";
 
+        // sheet area selection
+        public static string SHEET_HEADER_AREA = "SheetHeaderArea";
+        public static string SHEET_DATA_AREA = "SheetDataArea";
+        public static string SHEET_JSON_DATA = "SheetJsonData";
+
         public static string NUMBERSOFROWS = "NUMBERSOFROWS";
         public static string CURRENTPACKAGE = "CURRENTPACKAGE";
         public static string CURRENTPACKAGESIZE = "CURRENTPACKAGE";

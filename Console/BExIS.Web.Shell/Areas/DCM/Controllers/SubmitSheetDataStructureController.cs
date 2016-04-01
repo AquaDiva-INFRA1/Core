@@ -34,7 +34,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             // check if dataset selected
             if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_FORMAT))
             {
-                if (String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.DATASET_ID])))
+                if (!String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_FORMAT])))
                 {
                     model.SelectedSheetFormat = TaskManager.Bus[TaskManager.SHEET_FORMAT].ToString();
                 }
