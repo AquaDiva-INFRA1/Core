@@ -108,7 +108,7 @@
     
         $('input[type=radio][name=sheetFormat]').change(function () {
             if ($(this).val() != null && $(this).val() != '') {
-                SelectedSheetFormat = $(this).val();
+                var SelectedSheetFormat = $(this).val();
 
                 // send to bus
                 $.post('@Url.Action("AddSelectedDatasetToBus", "SubmitSheetDataStructure", new RouteValueDictionary { { "area", "DCM" } })', { format: SelectedSheetFormat }, function (response) {
