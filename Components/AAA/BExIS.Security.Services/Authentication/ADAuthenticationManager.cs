@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.Protocols;
 using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Text;
+using Vaiona.Logging;
 
 namespace BExIS.Security.Services.Authentication
 {
@@ -132,10 +131,9 @@ namespace BExIS.Security.Services.Authentication
                     throw new Exception("Login failed.");
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                //Todo: Pass error to logging framework instead of console!
-                Console.WriteLine(e.Message);
+                LoggerFactory.LogCustom("Errormessage: " + ex.Message + "; Stacktrace:" + ex.StackTrace);
                 return false;
             }
             return true;
