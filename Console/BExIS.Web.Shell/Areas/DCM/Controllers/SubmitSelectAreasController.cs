@@ -9,6 +9,9 @@ using System.IO;
 using OfficeOpenXml;
 using System.Web.Script.Serialization;
 using System.Web.UI.WebControls;
+using BExIS.Dlm.Services.DataStructure;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BExIS.Web.Shell.Areas.DCM.Controllers
 {
@@ -36,9 +39,13 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 {
                     TaskManager.AddToBus(TaskManager.SHEET_JSON_DATA, jsonTable);
                 }
+                UnitManager unitManager = new UnitManager();
+                List<BExIS.Dlm.Entities.DataStructure.Unit> tempUnitList = unitManager.Repo.Get().ToList();
+                int foo = tempUnitList.Count;
 
             } catch(Exception ex)
             {
+                
 
             } finally
             {
@@ -70,6 +77,20 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 {
                     model.JsonTableData = TaskManager.Bus[TaskManager.SHEET_JSON_DATA].ToString();
                 }
+            }
+
+            if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_DATA_AREA))
+            {
+               
+                    model.DataArea = TaskManager.Bus[TaskManager.SHEET_DATA_AREA].ToString();
+                
+            }
+
+            if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_HEADER_AREA))
+            {
+                
+                    model.HeaderArea = TaskManager.Bus[TaskManager.SHEET_HEADER_AREA].ToString();
+                
             }
 
             model.StepInfo = TaskManager.Current();
@@ -145,9 +166,11 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                     TaskManager.Bus.ContainsKey(TaskManager.SHEET_DATA_AREA) &&
                     TaskManager.Bus.ContainsKey(TaskManager.SHEET_HEADER_AREA))
                 {
-                    if (!String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_JSON_DATA])) &&
-                        !String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_DATA_AREA])) &&
-                        !String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_HEADER_AREA])))
+                    bool isJsonDataEmpty = String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_JSON_DATA]));
+                    bool isDataAreaEmpty = String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_DATA_AREA]));
+                    bool isHeadAreaEmpty = String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_HEADER_AREA]));
+
+                    if (!isJsonDataEmpty && !isDataAreaEmpty && !isHeadAreaEmpty)
                     {
                         TaskManager.Current().SetValid(true);
                     }
@@ -180,8 +203,8 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         [HttpPost]
         public ActionResult SelectedAreaToBus()
         {
-            string headerArea = "";
-            string dataArea = "";
+            string headerArea = null;
+            string dataArea = null;
 
             foreach (string key in Request.Form.AllKeys)
             {
@@ -199,13 +222,13 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
             TaskManager TaskManager = (TaskManager)Session["TaskManager"];
 
-            if(!String.IsNullOrEmpty(dataArea))
+            if (dataArea != null)
             {
                 TaskManager.AddToBus(TaskManager.SHEET_DATA_AREA, dataArea);
                 model.DataArea = dataArea;
             }
 
-            if(!String.IsNullOrEmpty(headerArea))
+            if (headerArea != null)
             {
                 TaskManager.AddToBus(TaskManager.SHEET_HEADER_AREA, headerArea);
                 model.HeaderArea = headerArea;

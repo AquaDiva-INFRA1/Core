@@ -74,7 +74,9 @@
     <Compile Include="DataStructure\GlobalizationInfo.cs" />
     <Compile Include="DataStructure\Mathodology.cs" />
     <Compile Include="DataStructure\ObtainingMethod.cs" />
+    <Compile Include="DataStructure\SheetArea.cs" />
     <Compile Include="DataStructure\StructuredDataStructure.cs" />
+    <Compile Include="DataStructure\SheetFormat.cs" />
     <Compile Include="DataStructure\Unit.cs" />
     <Compile Include="DataStructure\UnStructuredDataStructure.cs" />
     <Compile Include="DataStructure\Usage.cs" />
@@ -100,7 +102,9 @@
     <Compile Include="Metadata\Metadata.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Administration\Administration.cd" />
     <None Include="DataStructure\DataStructure.cd" />
