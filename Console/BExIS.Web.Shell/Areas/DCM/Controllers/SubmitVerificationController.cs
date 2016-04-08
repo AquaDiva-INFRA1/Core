@@ -13,6 +13,8 @@ using Vaiona.Logging;
 using System.Collections.Generic;
 using BExIS.Dlm.Entities.DataStructure;
 using System.Web.Script.Serialization;
+using BExIS.Dlm.Services.DataStructure;
+using System.Linq;
 
 namespace BExIS.Web.Shell.Areas.DCM.Controllers
 {
@@ -27,41 +29,27 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         public ActionResult Verification(int index)
         {
             TaskManager = (TaskManager)Session["TaskManager"];
+            SelectVerificationModel model = new SelectVerificationModel();
+
+            UnitManager unitManager = new UnitManager();
+            model.AvailableUnits = unitManager.Repo.Get().ToList();
 
             string filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
+            string selectedHeaderAreaJson = TaskManager.Bus[TaskManager.SHEET_HEADER_AREA].ToString();
+
             FileStream fis = null;
-            string jsonTable = "{}";
+            fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            ExcelPackage ep = new ExcelPackage(fis);
 
-            try {
-                fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                ExcelPackage ep = new ExcelPackage(fis);
+            ExcelWorkbook excelWorkbook = ep.Workbook;
+            ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
 
-                ExcelWorkbook excelWorkbook = ep.Workbook;
-                ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
+            string sheetFormatString = Convert.ToString(TaskManager.Bus[TaskManager.SHEET_FORMAT]);
 
-                ExcelCellAddress StartCell = firstWorksheet.Dimension.Start;
-                ExcelCellAddress EndCell = firstWorksheet.Dimension.End;
+            SheetFormat sheetFormat = 0;
+            Enum.TryParse<SheetFormat>(sheetFormatString, true, out sheetFormat);
 
-                //jsonTable = GenerateJsonTable(fis);
-
-                if (!String.IsNullOrEmpty(jsonTable))
-                {
-                    TaskManager.AddToBus(TaskManager.SHEET_JSON_DATA, jsonTable);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                LoggerFactory.LogCustom("Errormessage: " + ex.Message + "; Stacktrace:" + ex.StackTrace);
-            }
-            finally
-            {
-                if(fis != null)
-                {
-                    fis.Close();
-                }
-            }
-
+            model.HeaderFields = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson).ToArray();
 
             //set current stepinfo based on index
             if (TaskManager != null)
@@ -72,9 +60,9 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 TaskManager.RemoveExecutedStep(TaskManager.Current());
             }
 
-            SelectAreasModel model = new SelectAreasModel();
+            
 
-            model.JsonTableData = jsonTable;
+            //model.JsonTableData = jsonTable;
 
             // jump back to this step
             // check if dataset selected
@@ -82,7 +70,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             {
                 if (!String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_JSON_DATA])))
                 {
-                    model.JsonTableData = TaskManager.Bus[TaskManager.SHEET_JSON_DATA].ToString();
+                    //model.JsonTableData = TaskManager.Bus[TaskManager.SHEET_JSON_DATA].ToString();
                 }
             }
 
@@ -139,7 +127,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         /// <param name="excelWorksheet">ExcelWorksheet with the data</param>
         /// <param name="selectedArea">Defined header area with start and end for rows and columns</param>
         /// <returns>Simple list with values of the header fields as string</returns>
-        private List<String> GetExcelHeaderFieldsTopDown(ExcelWorksheet excelWorksheet, SheetArea selectedArea)
+        private List<String> GetExcelHeaderFieldsLeftRight(ExcelWorksheet excelWorksheet, SheetArea selectedArea)
         {
             List<String> headerValues = new List<string>();
 
@@ -147,7 +135,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             ExcelCellAddress SheetEndCell = excelWorksheet.Dimension.End;
 
             // constant, because just one row is for header allowed
-            int Row = selectedArea.StartRow;
+            int Row = selectedArea.StartRow + 1;
 
             #region Validation
             bool isStartColumnValid = selectedArea.StartColumn >= SheetStartCell.Column;
@@ -162,7 +150,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             }
             #endregion
             
-            for (int Column = selectedArea.StartColumn; Column <= selectedArea.StartColumn; Column++)
+            for (int Column = selectedArea.StartColumn + 1; Column <= selectedArea.EndColumn + 1; Column++)
             {
                 ExcelRange cell = excelWorksheet.Cells[Row, Column];
 
@@ -186,7 +174,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         /// <param name="excelWorksheet">ExcelWorksheet with the data</param>
         /// <param name="selectedArea">Defined header area with start and end for rows and columns</param>
         /// <returns>Simple list with values of the header fields as string</returns>
-        private List<String> GetExcelHeaderFieldsLeftRight(ExcelWorksheet excelWorksheet, SheetArea selectedArea)
+        private List<String> GetExcelHeaderFieldsTopDown(ExcelWorksheet excelWorksheet, SheetArea selectedArea)
         {
             List<String> headerValues = new List<string>();
 
@@ -208,7 +196,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
             int Column = selectedArea.StartColumn;
 
-            for (int Row = selectedArea.StartRow; Row <= selectedArea.EndRow; Row++)
+            for (int Row = selectedArea.StartRow; Row >= selectedArea.EndRow; Row++)
             {
                 ExcelRange cell = excelWorksheet.Cells[Row, Column];
 

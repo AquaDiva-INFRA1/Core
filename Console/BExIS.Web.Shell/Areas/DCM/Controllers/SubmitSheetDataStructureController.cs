@@ -143,11 +143,11 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         {
             switch (sheetFormat)
             {
-                case "top-down":
+                case "TopDown":
                     return true;
-                case "left-right":
+                case "LeftRight":
                     return true;
-                case "matrix":
+                case "Matrix":
                     return true;
                 default:
                     return false;

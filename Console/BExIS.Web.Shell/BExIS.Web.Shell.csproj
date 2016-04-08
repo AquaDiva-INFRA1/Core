@@ -323,6 +323,7 @@
     <Compile Include="Areas\DCM\Helpers\DCMSeedDataGenerator.cs" />
     <Compile Include="Areas\DCM\Helpers\UploadUtility.cs" />
     <Compile Include="Areas\DCM\Models\AbstractStepModel.cs" />
+    <Compile Include="Areas\DCM\Models\SelectVerificationModel.cs" />
     <Compile Include="Areas\DCM\Models\SelectAreasModel.cs" />
     <Compile Include="Areas\DCM\Models\SelectSheetFormatModel.cs" />
     <Compile Include="Areas\DCM\Models\ChooseDatasetViewModel.cs" />
