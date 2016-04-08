@@ -1,47 +1,9 @@
-﻿@model BExIS.Web.Shell.Areas.DCM.Models.SelectSheetFormatModel
+﻿@model BExIS.Web.Shell.Areas.DCM.Models.SelectVerificationModel
 @using Telerik.Web.Mvc.UI;
 @using Telerik.Web.Mvc.Resources;
 @using BExIS.Web.Shell.Areas.DCM.Models;
+@using BExIS.Dlm.Entities.DataStructure;
 
-@{
-    string preselect = "";
-    if (!String.IsNullOrEmpty(Model.SelectedSheetFormat))
-    {
-        preselect = "[value=" + Model.SelectedSheetFormat + "]";
-    }
-}
-
-<script>
-    $(document).ready(function () {
-        var selectedValue = "@(preselect)";
-
-        if (selectedValue.length > 0) {
-            $("input:radio[name=sheetFormat]" + selectedValue).attr('checked', true);
-        }
-    });
-
-</script>
-<style>
-    div.sheetSelect label > img {
-        width: 100px;
-    }
-    div.sheetSelect label > input {
-        display: none;
-    }
-    div.sheetSelect label > input + img { 
-        cursor: pointer;
-        border: 2px solid transparent;
-        margin-left: 20px;
-        margin-right: 20px;
-    }
-    div.sheetSelect label > input:checked + img {
-        border: 6px solid rgba(255, 165, 0, 0.7);
-        border-radius: 4px;
-        width: 140px;
-        margin-left: 0px;
-        margin-right: 0px;
-    }
-</style>
 
 <div id="Step3" class="uploadWizardStep">
 
@@ -56,22 +18,32 @@
         </div>
 
         <div class="uploadWizardStep_Content stepper">
-            <div class="sheetSelect">
-                <label>
-                    <input type="radio" name="sheetFormat" value="top-down" />
-                    <img src="~/Areas/DCM/Images/DCM_SelectAreas/top-down.png">
-                </label>
-
-                <label>
-                    <input type="radio" name="sheetFormat" value="left-right" />
-                    <img src="~/Areas/DCM/Images/DCM_SelectAreas/left-right.png">
-                </label>
-
-                <label>
-                    <input type="radio" name="sheetFormat" value="matrix" />
-                    <img src="~/Areas/DCM/Images/DCM_SelectAreas/matrix.png">
-                </label>
-            </div>
+           <table>
+               <thead>
+                <tr>
+                   <td>Header Field</td>
+                   <td>Unit</td>
+                </tr>
+               </thead>
+               <tbody>
+                       @for(int i = 0; i < Model.HeaderFields.Length; i++)
+                       {
+                           <tr>
+                               <td>
+                                   @Html.Name(Model.HeaderFields[i])
+                               </td>
+                               <td>
+                                  <select name="@(i)">
+                                      @foreach(Unit unit in Model.AvailableUnits)
+                                      {
+                                          <option value="@Html.Name(Convert.ToString(unit.Id))" title="@Html.Name(unit.Description)">@Html.Name(unit.Name) (@Html.Name(unit.Abbreviation))</option>
+                                      }
+                                  </select>
+                               </td>
+                            </tr>
+                       }
+               </tbody>
+           </table>
         </div>
     </div>
 

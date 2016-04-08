@@ -12,6 +12,7 @@ using System.Web.UI.WebControls;
 using BExIS.Dlm.Services.DataStructure;
 using System.Collections.Generic;
 using System.Linq;
+using Vaiona.Logging;
 
 namespace BExIS.Web.Shell.Areas.DCM.Controllers
 {
@@ -39,15 +40,13 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 {
                     TaskManager.AddToBus(TaskManager.SHEET_JSON_DATA, jsonTable);
                 }
-                UnitManager unitManager = new UnitManager();
-                List<BExIS.Dlm.Entities.DataStructure.Unit> tempUnitList = unitManager.Repo.Get().ToList();
-                int foo = tempUnitList.Count;
 
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                
-
-            } finally
+                LoggerFactory.LogCustom(ex.Message);
+            }
+            finally
             {
                 if(fis != null)
                 {
