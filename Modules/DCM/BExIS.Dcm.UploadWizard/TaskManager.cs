@@ -53,6 +53,11 @@ namespace BExIS.Dcm.UploadWizard
         public static string SHEET_DATA_AREA = "SheetDataArea";
         public static string SHEET_JSON_DATA = "SheetJsonData";
 
+        // data validation
+        public static string VERIFICATION_AVAILABLEUNITS = "VerificationAvailableUnits";
+        public static string VERIFICATION_HEADERFIELDS = "VerificationHeaderFields";
+        public static string VERIFICATION_MAPPEDHEADERUNITS = "VerificationMappedHeaderUnits";
+
         public static string NUMBERSOFROWS = "NUMBERSOFROWS";
         public static string CURRENTPACKAGE = "CURRENTPACKAGE";
         public static string CURRENTPACKAGESIZE = "CURRENTPACKAGE";

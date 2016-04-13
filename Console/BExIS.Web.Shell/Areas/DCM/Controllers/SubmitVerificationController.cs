@@ -34,6 +34,11 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             UnitManager unitManager = new UnitManager();
             model.AvailableUnits = unitManager.Repo.Get().ToList();
 
+            if(!TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_AVAILABLEUNITS))
+            {
+                TaskManager.AddToBus(TaskManager.VERIFICATION_AVAILABLEUNITS, model.AvailableUnits);
+            }
+
             string filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
             string selectedHeaderAreaJson = TaskManager.Bus[TaskManager.SHEET_HEADER_AREA].ToString();
 
@@ -50,6 +55,11 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             Enum.TryParse<SheetFormat>(sheetFormatString, true, out sheetFormat);
 
             model.HeaderFields = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson).ToArray();
+
+            if (!TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_HEADERFIELDS))
+            {
+                TaskManager.AddToBus(TaskManager.VERIFICATION_HEADERFIELDS, model.HeaderFields);
+            }
 
             //set current stepinfo based on index
             if (TaskManager != null)
@@ -218,14 +228,13 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         public ActionResult Verification(object[] data)
         {
             TaskManager = (TaskManager)Session["TaskManager"];
-            SelectAreasModel model = new SelectAreasModel();
+            SelectVerificationModel model = new SelectVerificationModel();
             model.StepInfo = TaskManager.Current();
 
             if (TaskManager != null)
             {
                 TaskManager.Current().SetValid(false);
 
-                //TODO
                 if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_JSON_DATA) &&
                     TaskManager.Bus.ContainsKey(TaskManager.SHEET_DATA_AREA) &&
                     TaskManager.Bus.ContainsKey(TaskManager.SHEET_HEADER_AREA))
@@ -265,38 +274,59 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         }
 
         [HttpPost]
-        public ActionResult SelectedAreaToBus()
+        public ActionResult SaveUnitSelection()
         {
-            string headerArea = "";
-            string dataArea = "";
+
+            int? selectFieldId = null;
+            int? selectOptionId = null;
 
             foreach (string key in Request.Form.AllKeys)
             {
-                if ("dataArea" == key)
+                if ("selectFieldId" == key)
                 {
-                    dataArea = Request.Form[key];
+                    selectFieldId = Convert.ToInt32(Request.Form[key]);
                 }
-                if("headerArea" == key)
+                if("selectOptionId" == key)
                 {
-                    headerArea = Request.Form[key];
+                    selectOptionId = Convert.ToInt32(Request.Form[key]);
                 }
             }
 
-            SelectAreasModel model = new SelectAreasModel();
+            SelectVerificationModel model = new SelectVerificationModel();
 
             TaskManager TaskManager = (TaskManager)Session["TaskManager"];
 
-            if(!String.IsNullOrEmpty(dataArea))
+            if(TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_MAPPEDHEADERUNITS))
             {
-                TaskManager.AddToBus(TaskManager.SHEET_DATA_AREA, dataArea);
-                model.DataArea = dataArea;
+                model.AssignedHeaderUnits = (List < Tuple < int, string, Dlm.Entities.DataStructure.Unit>>) TaskManager.Bus[TaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             }
 
+
+            if ( selectFieldId != null && selectOptionId != null )
+            {
+                List<Dlm.Entities.DataStructure.Unit> availableUnits = (List<Dlm.Entities.DataStructure.Unit>) TaskManager.Bus[TaskManager.VERIFICATION_AVAILABLEUNITS];
+                string[] headerFields = (string[]) TaskManager.Bus[TaskManager.VERIFICATION_HEADERFIELDS];
+
+                string currentHeader = headerFields.ElementAt((int) selectFieldId);
+                Dlm.Entities.DataStructure.Unit currentUnit = availableUnits.Where(u => u.Id == selectOptionId).First();
+
+                Tuple<int, string, Dlm.Entities.DataStructure.Unit> existingTuple = model.AssignedHeaderUnits.Where(t => t.Item1 == (int)selectFieldId).FirstOrDefault() ;
+                if(existingTuple != null)
+                {
+                    model.AssignedHeaderUnits.Remove(existingTuple);
+                }
+                model.AssignedHeaderUnits.Add(new Tuple<int, string, Dlm.Entities.DataStructure.Unit>((int) selectFieldId, currentHeader, currentUnit));
+            }
+
+            TaskManager.AddToBus(TaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.AssignedHeaderUnits);
+
+            /*
             if(!String.IsNullOrEmpty(headerArea))
             {
                 TaskManager.AddToBus(TaskManager.SHEET_HEADER_AREA, headerArea);
                 model.HeaderArea = headerArea;
             }
+            */
 
             Session["TaskManager"] = TaskManager;
 

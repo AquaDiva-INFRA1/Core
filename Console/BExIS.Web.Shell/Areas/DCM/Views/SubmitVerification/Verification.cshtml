@@ -13,18 +13,10 @@
         </div>
 
         <div class="uploadWizardStep_Description stepper">
-            <p>Your uploaded file got a specific structure, please select which one.
-            </p>
         </div>
 
         <div class="uploadWizardStep_Content stepper">
            <table>
-               <thead>
-                <tr>
-                   <td>Header Field</td>
-                   <td>Unit</td>
-                </tr>
-               </thead>
                <tbody>
                        @for(int i = 0; i < Model.HeaderFields.Length; i++)
                        {
@@ -78,14 +70,15 @@
 
     $(document).ready(function () {
     
-        $('input[type=radio][name=sheetFormat]').change(function () {
+        $('select').change(function () {
             if ($(this).val() != null && $(this).val() != '') {
-                var SelectedSheetFormat = $(this).val();
+                var selectOptionId = $(this).val();
+                var selectId = $(this).attr('name');
 
                 // send to bus
-                $.post('@Url.Action("AddSelectedDatasetToBus", "SubmitSheetDataStructure", new RouteValueDictionary { { "area", "DCM" } })', { format: SelectedSheetFormat }, function (response) {
+                $.post('@Url.Action("SaveUnitSelection", "SubmitVerification", new RouteValueDictionary { { "area", "DCM" } })', { selectFieldId: selectId, selectOptionId: selectOptionId }, function (response) {
                     $("#Step3").html(response);
-                })
+                });
             }
         })
     });
