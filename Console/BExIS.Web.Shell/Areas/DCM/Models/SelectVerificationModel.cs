@@ -11,7 +11,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Models
         public StepInfo StepInfo { get; set; }
         public String[] HeaderFields { get; set; }
         public List<Unit> AvailableUnits { get; set; }
-        public Dictionary<String, Unit> AssignedHeaderUnits { get; set; }
+        public List<Tuple<int, string, Unit>> AssignedHeaderUnits { get; set; }
       
         public List<Error> ErrorList { get; set; }
 
@@ -19,6 +19,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Models
         {
             ErrorList = new List<Error>();
             AvailableUnits = new List<Unit>();
+            AssignedHeaderUnits = new List<Tuple<int, string, Unit>>();
         }
     }
 }
