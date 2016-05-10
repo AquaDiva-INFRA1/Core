@@ -6,13 +6,9 @@ using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
 using BExIS.Web.Shell.Areas.DCM.Models;
 using System.IO;
-using OfficeOpenXml;
-using System.Web.Script.Serialization;
-using System.Web.UI.WebControls;
-using BExIS.Dlm.Services.DataStructure;
-using System.Collections.Generic;
-using System.Linq;
 using Vaiona.Logging;
+using BExIS.IO.Transform.Input;
+using BExIS.Dlm.Entities.DataStructure;
 
 namespace BExIS.Web.Shell.Areas.DCM.Controllers
 {
@@ -34,7 +30,15 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
             try {
                 fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                jsonTable = GenerateJsonTable(fis);
+
+                string sheetFormatString = Convert.ToString(TaskManager.Bus[TaskManager.SHEET_FORMAT]);
+
+                SheetFormat CurrentSheetFormat = 0;
+                Enum.TryParse<SheetFormat>(sheetFormatString, true, out CurrentSheetFormat);
+
+                NewStructuredExcelReader NSEReader = new NewStructuredExcelReader(CurrentSheetFormat);
+
+                jsonTable = NSEReader.GenerateJsonTable(fis);
 
                 if (!String.IsNullOrEmpty(jsonTable))
                 {
@@ -98,56 +102,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
         }
 
-        private string GenerateJsonTable(FileStream fis)
-        {
-            ExcelPackage ep = new ExcelPackage(fis);
-
-            ExcelWorkbook excelWorkbook = ep.Workbook;
-            ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
-
-            ExcelCellAddress StartCell = firstWorksheet.Dimension.Start;
-            ExcelCellAddress EndCell = firstWorksheet.Dimension.End;
-
-            string[][] arr = new string[EndCell.Row][];
-
-            for (int Row = StartCell.Row; Row <= EndCell.Row; Row++)
-            {
-                TableRow tRow = new TableRow();
-
-                string[] currentRow = new string[EndCell.Column];
-
-                for (int Column = StartCell.Column; Column <= EndCell.Column; Column++)
-                {
-
-
-                    ExcelRange cell = firstWorksheet.Cells[Row, Column];
-
-                    //richTextBox1.Text += "Cell: " + cell.Address + ",";
-
-
-
-
-                    TableCell tCell = new TableCell();
-                    //tCell.Text = cell.Address + ": Value [" + cell.Value + "]<br>" + "BGColorRGB [" + colorRgb + "]<br>Formula [" + cell.Formula + "] ";
-                    if (cell.Value != null)
-                    {
-                        tCell.Text = cell.Value.ToString();
-                        currentRow[Column - 1] = cell.Value.ToString();
-                    }
-                    else
-                    {
-                        tCell.Text = "";
-                        currentRow[Column - 1] = "";
-                    }
-                    tRow.Cells.Add(tCell);
-
-                }
-
-                arr[Row - 1] = currentRow;
-            }
-            var serializer = new JavaScriptSerializer();
-            return serializer.Serialize(arr);
-        }
+        
 
         [HttpPost]
         public ActionResult SelectAreas(object[] data)

@@ -28,7 +28,18 @@
                                   <select name="@(i)">
                                       @foreach(Unit unit in Model.AvailableUnits)
                                       {
-                                          <option value="@Html.Name(Convert.ToString(unit.Id))" title="@Html.Name(unit.Description)">@Html.Name(unit.Name) (@Html.Name(unit.Abbreviation))</option>
+                                          string selected = "";
+
+                                          if(Model.AssignedHeaderUnits.Count > 0)
+                                          {
+                                              Tuple<int, String, Unit> tuple = Model.AssignedHeaderUnits.Where(t => t.Item3.Id == unit.Id && t.Item2 == Model.HeaderFields[i]).FirstOrDefault();
+
+                                              if (tuple != null)
+                                              {
+                                                  selected = "selected";
+                                              }
+                                          }
+                                          <option @Html.Raw(selected) value="@Html.Name(Convert.ToString(unit.Id))" title="@Html.Name(unit.Description)">@Html.Name(unit.Name) (@Html.Name(unit.Abbreviation))</option>
                                       }
                                   </select>
                                </td>

@@ -20,7 +20,8 @@ namespace BExIS.IO
     public enum Orientation
     {
         columnwise,
-        rowwise
+        rowwise,
+        matrix
     }
 
     /// <summary>
