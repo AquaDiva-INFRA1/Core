@@ -61,8 +61,13 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 TaskManager.AddToBus(TaskManager.VERIFICATION_HEADERFIELDS, model.HeaderFields);
             }
 
+            if (TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_MAPPEDHEADERUNITS))
+            {
+                model.AssignedHeaderUnits = (List<Tuple<int, String, Dlm.Entities.DataStructure.Unit>>) TaskManager.Bus[TaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+            }
+
             //set current stepinfo based on index
-            if (TaskManager != null)
+                if (TaskManager != null)
             {
                 TaskManager.SetCurrent(index);
 
