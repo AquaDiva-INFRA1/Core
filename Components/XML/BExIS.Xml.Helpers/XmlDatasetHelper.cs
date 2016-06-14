@@ -41,6 +41,28 @@ namespace BExIS.Xml.Services
         /// <param name="datasetVersion"></param>
         /// <param name="name"></param>
         /// <returns></returns>
+        public static XmlDocument SetInformation(DatasetVersion datasetVersion, XmlDocument xmlDoc, AttributeNames name, string value)
+        {
+            // get MetadataStructure 
+            if (datasetVersion != null && datasetVersion.Dataset != null && datasetVersion.Dataset.MetadataStructure != null && datasetVersion.Metadata != null)
+            {
+                MetadataStructure metadataStructure = datasetVersion.Dataset.MetadataStructure;
+                XDocument xDoc = XmlUtility.ToXDocument((XmlDocument)datasetVersion.Dataset.MetadataStructure.Extra);
+                XElement temp = XmlUtility.GetXElementByAttribute(nodeNames.nodeRef.ToString(), "name", name.ToString(), xDoc);
+
+                string xpath = temp.Attribute("value").Value.ToString();
+                xmlDoc.SelectSingleNode(xpath).InnerText = value;
+                return xmlDoc;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// returns a value of a metadata node
+        /// </summary>
+        /// <param name="datasetVersion"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static string GetInformation(Dataset dataset, AttributeNames name)
         {
             DatasetManager dm = new DatasetManager();

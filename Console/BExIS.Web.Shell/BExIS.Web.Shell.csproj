@@ -627,6 +627,7 @@
     <Content Include="Areas\DCM\Views\SubmitSheetDataStructure\SheetDataStructure.cshtml" />
     <Content Include="Areas\DCM\Views\SubmitSelectAreas\SelectAreas.cshtml" />
     <Content Include="Areas\DCM\Views\SubmitVerification\Verification.cshtml" />
+    <Content Include="Areas\DCM\Views\SubmitSheetSelectMetaData\SheetSelectMetaData.cshtml" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
     <Content Include="Scripts\jquery-2.1.4.min.js" />

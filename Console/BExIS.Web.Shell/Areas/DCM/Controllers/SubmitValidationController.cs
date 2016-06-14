@@ -113,7 +113,9 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                     dsm.StructuredDataStructureRepo.LoadIfNot(sds.Variables);
 
 
-                    if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsm"))
+                    if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsm") ||
+                        TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xls") ||
+                        TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsx"))
                     {
                         // open FileStream
                         ExcelReader reader = new ExcelReader();

@@ -10,16 +10,60 @@ namespace BExIS.Web.Shell.Areas.DCM.Models
     {
         public StepInfo StepInfo { get; set; }
         public String[] HeaderFields { get; set; }
-        public List<Unit> AvailableUnits { get; set; }
-        public List<Tuple<int, string, Unit>> AssignedHeaderUnits { get; set; }
-      
+        public List<UnitInfo> AvailableUnits { get; set; }
+        public List<Tuple<int, string, UnitInfo>> AssignedHeaderUnits { get; set; }
+
         public List<Error> ErrorList { get; set; }
 
         public SelectVerificationModel()
         {
             ErrorList = new List<Error>();
-            AvailableUnits = new List<Unit>();
-            AssignedHeaderUnits = new List<Tuple<int, string, Unit>>();
+            AvailableUnits = new List<UnitInfo>();
+            AssignedHeaderUnits = new List<Tuple<int, string, UnitInfo>>();
         }
     }
+
+    public class UnitInfo
+    {
+        public long UnitId { get; set; }
+        public String Description { get; set; }
+        public String Name { get; set; }
+        public String Abbreviation { get; set; }
+        public int SelectedDataTypeId { get; set; }
+        public List<DataTypeInfo> DataTypeInfos { get; set; }
+
+        public UnitInfo()
+        {
+            this.SelectedDataTypeId = -1;
+            this.DataTypeInfos = new List<DataTypeInfo>();
+        }
+
+        public UnitInfo(long UnitId, String Description, String Name, String Abbreviation)
+        {
+            this.UnitId = UnitId;
+            this.Description = Description;
+            this.Name = Name;
+            this.Abbreviation = Abbreviation;
+            this.DataTypeInfos = new List<DataTypeInfo>();
+        }
+    }
+
+    public class DataTypeInfo
+    {
+        public long UnitId { get; set; }
+        public long DataTypeId { get; set; }
+        public String Description { get; set; }
+        public String Name { get; set; }
+
+        public DataTypeInfo() {}
+
+        public DataTypeInfo(long UnitId, long DataTypeId, String Description, String Name)
+        {
+            this.UnitId = UnitId;
+            this.DataTypeId = DataTypeId;
+            this.Description = Description;
+            this.Name = Name;
+        }
+    }
+
 }

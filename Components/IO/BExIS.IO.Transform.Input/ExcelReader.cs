@@ -250,7 +250,7 @@ namespace BExIS.IO.Transform.Input
         /// <param name="sds">StructuredDataStructure of a dataset</param>
         /// <param name="datasetId">Datasetid of a dataset</param>
         /// <returns>List of DataTuples</returns>
-        public List<DataTuple> ReadFile(Stream file, string fileName, FileReaderInfo fri, StructuredDataStructure sds, long datasetId)
+        public DataTuple[] ReadFile(Stream file, string fileName, FileReaderInfo fri, StructuredDataStructure sds, long datasetId)
         {
             this.FileStream = file;
             this.FileName = fileName;
@@ -285,25 +285,30 @@ namespace BExIS.IO.Transform.Input
                 // get workbookpart
                 WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart;
 
-                SheetDimension dimension = workbookPart.WorksheetParts.First().Worksheet.GetFirstChild<SheetDimension>();
-
-               string s =  dimension.Reference.Value;
-
-               string[] references = s.Split(':'); 
-                 
+                //SheetDimension dimension = workbookPart.WorksheetParts.First().Worksheet.GetFirstChild<SheetDimension>();
 
                 // get all the defined area 
                 //List<DefinedNameVal> namesTable = BuildDefinedNamesTable(workbookPart);
 
+                this._areaOfVariables.StartColumn = alphabet[fri.VariablesStartColumn].ToString(); 
+                this._areaOfVariables.EndColumn = alphabet[fri.VariablesEndColumn].ToString();
+                this._areaOfVariables.StartRow = fri.Variables;
+                this._areaOfVariables.EndRow  = fri.VariablesEndRow;
+
+                this._areaOfData.StartColumn = alphabet[fri.DataStartColumn].ToString();
+                this._areaOfData.EndColumn = alphabet[fri.DataEndColumn].ToString();
+                this._areaOfData.StartRow = fri.Data;
+                this._areaOfData.EndRow = fri.DataEndRow;
+
 
                 // Get intergers for reading data
-                startColumn = GetColumnNumber(GetColumnName(references[0]));
-                endColumn = GetColumnNumber(GetColumnName(references[1]));
+                startColumn = fri.VariablesStartColumn;
+                endColumn = fri.VariablesEndColumn;
                 
                 numOfColumns = (endColumn - startColumn) + 1;
                 offset = this.Info.Offset;
 
-                int endRowData = GetRowNumber(references[1]);
+                int endRowData = fri.DataEndRow;
                 
                 // select worksheetpart by selected defined name area like data in sheet
                 // sheet where data area is inside
@@ -320,12 +325,12 @@ namespace BExIS.IO.Transform.Input
                     ReadRows(worksheetPart, this.Info.Data, endRowData);
                 }
 
-                return this.DataTuples;
+                return this.DataTuples.ToArray();
 
 
             }
 
-            return this.DataTuples;
+            return this.DataTuples.ToArray();
         }
 
 

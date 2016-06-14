@@ -5,7 +5,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
 -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <_PublishTargetUrl>D:\281_newstruct</_PublishTargetUrl>
+    <_PublishTargetUrl>D:\281_fordev</_PublishTargetUrl>
   </PropertyGroup>
   <ItemGroup>
     <File Include="App_GlobalResources/EditorLocalization.de-DE.resx">
@@ -49,6 +49,15 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     </File>
     <File Include="App_GlobalResources/UploadLocalization.zh-CN.resx">
       <publishTime>10/23/2015 10:15:09</publishTime>
+    </File>
+    <File Include="Areas/DCM/Images/DCM_SelectAreas/left-right.png">
+      <publishTime>03/22/2016 11:03:10</publishTime>
+    </File>
+    <File Include="Areas/DCM/Images/DCM_SelectAreas/matrix.png">
+      <publishTime>03/22/2016 11:03:10</publishTime>
+    </File>
+    <File Include="Areas/DCM/Images/DCM_SelectAreas/top-down.png">
+      <publishTime>03/22/2016 11:03:10</publishTime>
     </File>
     <File Include="Areas/DCM/Images/DCM_UserGuide_files/image001.png">
       <publishTime>01/05/2016 08:56:03</publishTime>
@@ -389,6 +398,12 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="Areas/DCM/Views/SubmitSelectAFile/SelectAFile.cshtml">
       <publishTime>03/03/2016 12:49:43</publishTime>
     </File>
+    <File Include="Areas/DCM/Views/SubmitSelectAreas/SelectAreas.cshtml">
+      <publishTime>04/04/2016 12:23:35</publishTime>
+    </File>
+    <File Include="Areas/DCM/Views/SubmitSheetDataStructure/SheetDataStructure.cshtml">
+      <publishTime>04/08/2016 13:17:42</publishTime>
+    </File>
     <File Include="Areas/DCM/Views/SubmitSpecifyDataset/SpecifyDataset.cshtml">
       <publishTime>01/05/2016 08:56:05</publishTime>
     </File>
@@ -400,6 +415,9 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     </File>
     <File Include="Areas/DCM/Views/SubmitValidation/Validation.cshtml">
       <publishTime>01/05/2016 08:56:05</publishTime>
+    </File>
+    <File Include="Areas/DCM/Views/SubmitVerification/Verification.cshtml">
+      <publishTime>05/27/2016 10:47:12</publishTime>
     </File>
     <File Include="Areas/DCM/Views/Web.config">
       <publishTime>01/05/2016 08:56:04</publishTime>
@@ -468,7 +486,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/05/2016 08:56:05</publishTime>
     </File>
     <File Include="Areas/DDM/Views/Data/ShowData.cshtml">
-      <publishTime>01/05/2016 08:56:05</publishTime>
+      <publishTime>05/02/2016 14:19:48</publishTime>
     </File>
     <File Include="Areas/DDM/Views/Data/ShowMetaData.cshtml">
       <publishTime>01/05/2016 08:56:05</publishTime>
@@ -870,70 +888,70 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/05/2016 08:56:07</publishTime>
     </File>
     <File Include="bin/BExIS.Dcm.CreateDatasetWizard.dll">
-      <publishTime>03/03/2016 13:08:38</publishTime>
+      <publishTime>06/07/2016 15:48:33</publishTime>
     </File>
     <File Include="bin/BExIS.Dcm.ImportMetadataStructureWizard.dll">
-      <publishTime>03/03/2016 13:08:38</publishTime>
+      <publishTime>06/07/2016 15:48:32</publishTime>
     </File>
     <File Include="bin/BExIS.DCM.UploadWizard.dll">
-      <publishTime>03/03/2016 13:08:40</publishTime>
+      <publishTime>06/07/2016 15:48:34</publishTime>
     </File>
     <File Include="bin/BExIS.Dcm.Wizard.dll">
-      <publishTime>03/03/2016 13:08:37</publishTime>
+      <publishTime>06/07/2016 15:48:31</publishTime>
     </File>
     <File Include="bin/BExIS.Ddm.Api.dll">
-      <publishTime>03/03/2016 13:08:38</publishTime>
+      <publishTime>06/07/2016 15:48:32</publishTime>
     </File>
     <File Include="bin/BExIS.Ddm.Model.dll">
-      <publishTime>03/03/2016 13:08:37</publishTime>
+      <publishTime>06/07/2016 15:48:31</publishTime>
     </File>
     <File Include="bin/BExIS.Ddm.Providers.DummyProvider.dll">
-      <publishTime>03/03/2016 13:08:38</publishTime>
+      <publishTime>06/07/2016 15:48:33</publishTime>
     </File>
     <File Include="bin/BExIS.Ddm.Providers.LuceneProvider.dll">
-      <publishTime>03/03/2016 13:08:39</publishTime>
+      <publishTime>06/07/2016 15:48:33</publishTime>
     </File>
     <File Include="bin/BExIS.Dlm.Entities.dll">
-      <publishTime>03/03/2016 13:08:37</publishTime>
+      <publishTime>06/07/2016 15:48:31</publishTime>
     </File>
     <File Include="bin/BExIS.Dlm.Services.dll">
-      <publishTime>03/03/2016 13:08:38</publishTime>
+      <publishTime>06/07/2016 15:48:32</publishTime>
     </File>
     <File Include="bin/BExIS.Ext.Services.dll">
-      <publishTime>03/03/2016 13:08:38</publishTime>
+      <publishTime>06/07/2016 15:48:33</publishTime>
     </File>
     <File Include="bin/BExIS.IO.dll">
-      <publishTime>03/03/2016 13:08:39</publishTime>
+      <publishTime>06/07/2016 15:48:33</publishTime>
     </File>
     <File Include="bin/BExIS.IO.Transform.Input.dll">
-      <publishTime>03/03/2016 13:08:39</publishTime>
+      <publishTime>06/07/2016 15:48:34</publishTime>
     </File>
     <File Include="bin/BExIS.IO.Transform.Output.dll">
-      <publishTime>03/03/2016 13:08:39</publishTime>
+      <publishTime>06/07/2016 15:48:34</publishTime>
     </File>
     <File Include="bin/BExIS.IO.Transform.Validation.dll">
-      <publishTime>03/03/2016 13:08:39</publishTime>
+      <publishTime>06/07/2016 15:48:34</publishTime>
     </File>
     <File Include="bin/BExIS.RPM.Model.dll">
-      <publishTime>03/03/2016 13:08:39</publishTime>
+      <publishTime>06/07/2016 15:48:33</publishTime>
     </File>
     <File Include="bin/BExIS.RPM.Output.dll">
-      <publishTime>03/03/2016 13:08:39</publishTime>
+      <publishTime>06/07/2016 15:48:33</publishTime>
     </File>
     <File Include="bin/BExIS.Security.Entities.dll">
-      <publishTime>03/03/2016 13:08:38</publishTime>
+      <publishTime>06/07/2016 15:48:32</publishTime>
     </File>
     <File Include="bin/BExIS.Security.Services.dll">
-      <publishTime>03/03/2016 13:08:38</publishTime>
+      <publishTime>06/07/2016 15:48:33</publishTime>
     </File>
     <File Include="bin/BExIS.Web.Shell.dll">
-      <publishTime>03/03/2016 13:08:41</publishTime>
+      <publishTime>06/07/2016 16:27:39</publishTime>
     </File>
     <File Include="bin/BExIS.Xml.Helpers.dll">
-      <publishTime>03/03/2016 13:08:38</publishTime>
+      <publishTime>06/07/2016 15:48:33</publishTime>
     </File>
     <File Include="bin/BExIS.Xml.Models.dll">
-      <publishTime>03/03/2016 13:08:37</publishTime>
+      <publishTime>06/07/2016 15:48:31</publishTime>
     </File>
     <File Include="bin/DataAnnotationsExtensions.ClientValidation.dll">
       <publishTime>10/23/2015 10:15:14</publishTime>
@@ -964,6 +982,9 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     </File>
     <File Include="bin/DocumentFormat.OpenXml.dll">
       <publishTime>10/23/2015 10:15:12</publishTime>
+    </File>
+    <File Include="bin/EPPlus.dll">
+      <publishTime>03/30/2016 15:04:42</publishTime>
     </File>
     <File Include="bin/es/Npgsql.resources.dll">
       <publishTime>10/23/2015 10:15:15</publishTime>
@@ -1197,7 +1218,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/05/2016 08:56:03</publishTime>
     </File>
     <File Include="packages.config">
-      <publishTime>01/05/2016 08:56:03</publishTime>
+      <publishTime>03/30/2016 15:04:44</publishTime>
     </File>
     <File Include="Scripts/2012.3.1018/telerik.extensions.js">
       <publishTime>01/05/2016 08:56:13</publishTime>
@@ -1309,6 +1330,51 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     </File>
     <File Include="Scripts/bootstrap.min.js">
       <publishTime>01/05/2016 08:56:12</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/handsontable.css">
+      <publishTime>03/30/2016 14:24:08</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/handsontable.full.css">
+      <publishTime>03/30/2016 14:24:08</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/handsontable.full.js">
+      <publishTime>03/30/2016 14:24:09</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/handsontable.full.min.css">
+      <publishTime>03/30/2016 14:24:09</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/handsontable.full.min.js">
+      <publishTime>03/30/2016 14:24:09</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/handsontable.js">
+      <publishTime>03/30/2016 14:24:09</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/handsontable.min.css">
+      <publishTime>03/30/2016 14:24:09</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/handsontable.min.js">
+      <publishTime>03/30/2016 14:24:09</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/pikaday/LICENSE">
+      <publishTime>03/30/2016 14:24:11</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/pikaday/pikaday.css">
+      <publishTime>03/30/2016 14:24:11</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/pikaday/pikaday.js">
+      <publishTime>03/30/2016 14:24:11</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/README.md">
+      <publishTime>03/30/2016 14:24:08</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/zeroclipboard/LICENSE">
+      <publishTime>03/30/2016 14:24:11</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/zeroclipboard/ZeroClipboard.js">
+      <publishTime>03/30/2016 14:24:11</publishTime>
+    </File>
+    <File Include="Scripts/handsontable/zeroclipboard/ZeroClipboard.swf">
+      <publishTime>03/30/2016 14:24:11</publishTime>
     </File>
     <File Include="Scripts/jquery-1.4.4-vsdoc.js">
       <publishTime>01/05/2016 08:56:12</publishTime>
@@ -1728,7 +1794,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/05/2016 08:56:15</publishTime>
     </File>
     <File Include="Themes/Default/Styles/Default/preloader.GIF">
-      <publishTime>01/05/2016 08:56:15</publishTime>
+      <publishTime>03/30/2016 15:13:41</publishTime>
     </File>
     <File Include="Themes/Default/Styles/Default/slider-h.gif">
       <publishTime>01/05/2016 08:56:15</publishTime>
@@ -2355,7 +2421,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/05/2016 08:56:17</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>03/03/2016 13:08:42</publishTime>
+      <publishTime>06/07/2016 15:48:36</publishTime>
     </File>
     <File Include="_AppStart.cshtml">
       <publishTime>01/05/2016 08:56:03</publishTime>
