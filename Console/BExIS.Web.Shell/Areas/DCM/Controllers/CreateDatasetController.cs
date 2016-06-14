@@ -1220,6 +1220,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                     ds = dm.CreateEmptyDataset(dataStructure, rp, metadataStructure);
                     datasetId = ds.Id;
 
+                    #region security
                     // add security
                     if (GetUserNameOrDefault() != "DEFAULT")
                     {
@@ -1260,6 +1261,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                             }
                         }
                     }
+                    #endregion security
 
                 }
                 else

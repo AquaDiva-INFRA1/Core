@@ -19,6 +19,20 @@ using BExIS.Web.Shell.Areas.DCM.Models;
 using System.Threading.Tasks;
 using System.Threading;
 using Vaiona.Logging.Aspects;
+using BExIS.Dlm.Services.MetadataStructure;
+using BExIS.Dlm.Entities.MetadataStructure;
+using BExIS.Dlm.Services.Administration;
+using BExIS.Dlm.Entities.Administration;
+using System.Xml;
+using BExIS.Xml.Helpers;
+using System.Xml.Linq;
+using BExIS.Xml.Services;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Subjects;
+using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Entities.Objects;
+using System.Web.Script.Serialization;
+using BExIS.Web.Shell.Areas.SAM.Models;
 
 namespace BExIS.Web.Shell.Areas.DCM.Controllers
 {
@@ -666,6 +680,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 #endregion
 
             }
+            
             else
             {
                 temp.Add(new Error(ErrorType.Dataset, "Dataset is not selected."));
@@ -955,99 +970,251 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
                 #endregion
 
-                #region new structured data
+               
 
-                if (TaskManager.Bus.ContainsKey(TaskManager.DATASTRUCTURE_TYPE) && TaskManager.Bus[TaskManager.DATASTRUCTURE_TYPE].Equals(DataStructureType.NewStructured))
+            }
+            else if (TaskManager.Bus.ContainsKey(TaskManager.DATASTRUCTURE_TYPE) && TaskManager.Bus[TaskManager.DATASTRUCTURE_TYPE].Equals(DataStructureType.NewStructured))
+            {
+                // initialize all necessary manager
+                DataStructureManager dsm = new DataStructureManager();
+                DatasetManager dm = new DatasetManager();
+                MetadataStructureManager msm = new MetadataStructureManager();
+                ResearchPlanManager rpm = new ResearchPlanManager();
+                UnitManager um = new UnitManager();
+                DataTypeManager dtm = new DataTypeManager();
+                DataContainerManager dam = new DataContainerManager();
+
+                DataTuple[] rows;
+
+                string timestamp = DateTime.Now.ToString("r");
+                string title = Convert.ToString(TaskManager.Bus[TaskManager.FILENAME]);
+
+                StructuredDataStructure sds = dsm.CreateStructuredDataStructure(title, title + " " + timestamp, "", "", DataStructureCategory.Generic);
+
+                if (!TaskManager.Bus.ContainsKey(TaskManager.DATASET_TITLE))
                 {
-                    try
-                    {
-                        List<long> datatupleFromDatabaseIds = dm.GetDatasetVersionEffectiveTupleIds(dm.GetDatasetLatestVersion(ds.Id));
+                    TaskManager.AddToBus(TaskManager.DATASET_TITLE, title);
+                }
 
-                        StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(iddsd);
-                        dsm.StructuredDataStructureRepo.LoadIfNot(sds.Variables);
+                // FIXIT
+                MetadataStructure metadataStructure = msm.Repo.Get(m => m.Name.ToLower().Contains("eml")).FirstOrDefault();
+                ResearchPlan rp = rpm.Repo.Get().FirstOrDefault();
 
-                        #region excel reader
+                DatasetVersion workingCopy = new DatasetVersion();
 
-                        if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xls") ||
-                            TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsx"))
-                        {
-                            int packageSize = 10000;
-                            //HACK ?
-                            TaskManager.Bus[TaskManager.CURRENTPACKAGESIZE] = packageSize;
+                #region Progress Informations
 
-                            int counter = 0;
+                if (TaskManager.Bus.ContainsKey(TaskManager.CURRENTPACKAGESIZE))
+                {
+                    TaskManager.Bus[TaskManager.CURRENTPACKAGESIZE] = 0;
+                }
+                else
+                {
+                    TaskManager.Bus.Add(TaskManager.CURRENTPACKAGESIZE, 0);
+                }
 
-                            ExcelReader reader = new ExcelReader();
-
-                            //schleife
-                            dm.CheckOutDatasetIfNot(ds.Id, GetUserNameOrDefault()); // there are cases, the dataset does not get checked out!!
-                            if (!dm.IsDatasetCheckedOutFor(ds.Id, GetUserNameOrDefault()))
-                            {
-                                throw new Exception(string.Format("Not able to checkout dataset '{0}' for  user '{1}'!", ds.Id, GetUserNameOrDefault()));
-                            }
-
-                            workingCopy = dm.GetDatasetWorkingCopy(ds.Id);
-
-                            //TODO hier gehts weiter
-                            do
-                            {
-                                counter++;
-                                TaskManager.Bus[TaskManager.CURRENTPACKAGE] = counter;
-
-                                // open file
-                                Stream = reader.Open(TaskManager.Bus[TaskManager.FILEPATH].ToString());
-                                rows = reader.ReadFile(Stream, TaskManager.Bus[TaskManager.FILENAME].ToString(), sds, (int)id, packageSize).ToArray();
-
-                                if (reader.ErrorMessages.Count == 0)
-                                {
-                                    //XXX Add packagesize to excel read function
-                                    if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_STATUS))
-                                    {
-                                        if (TaskManager.Bus[TaskManager.DATASET_STATUS].ToString().Equals("new"))
-                                        {
-                                            dm.EditDatasetVersion(workingCopy, rows, null, null);
-                                        }
-                                        if (TaskManager.Bus[TaskManager.DATASET_STATUS].ToString().Equals("edit"))
-                                        {
-                                            if (rows.Count() > 0)
-                                            {
-                                                Dictionary<string, List<DataTuple>> splittedDatatuples = new Dictionary<string, List<DataTuple>>();
-                                                splittedDatatuples = UploadWizardHelper.GetSplitDatatuples(rows, (List<long>)TaskManager.Bus[TaskManager.PRIMARY_KEYS], workingCopy, ref datatupleFromDatabaseIds);
-
-                                                dm.EditDatasetVersion(workingCopy, splittedDatatuples["new"], splittedDatatuples["edit"], null);
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-
-                                    }
-                                }
-
-                                Stream.Close();
-
-                            } while (rows.Count() > 0);
-                        }
-
-                        #endregion
-
-                        dm.CheckInDataset(ds.Id, "upload data from upload wizard", GetUserNameOrDefault());
-
-                    }
-                    catch (Exception e)
-                    {
-
-                        temp.Add(new Error(ErrorType.Other, "Can not upload. : " + e.Message));
-                        dm.CheckInDataset(ds.Id, "checked in but no update on data tuples", GetUserNameOrDefault());
-                    }
-                    finally
-                    {
-
-                    }
+                if (TaskManager.Bus.ContainsKey(TaskManager.CURRENTPACKAGE))
+                {
+                    TaskManager.Bus[TaskManager.CURRENTPACKAGE] = 0;
+                }
+                else
+                {
+                    TaskManager.Bus.Add(TaskManager.CURRENTPACKAGE, 0);
                 }
 
                 #endregion
 
+                Dataset ds = null;
+                XmlDocument xmldoc = new XmlDocument();
+                XmlElement extraElement = xmldoc.CreateElement("extra");
+                XmlElement orderElement = xmldoc.CreateElement("order");
+
+                List<DataAttribute> allDataAttributes = dam.DataAttributeRepo.Get().ToList();
+
+                List<Tuple<int, string, UnitInfo>> MappedHeaders = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[TaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                foreach (Tuple<int, string, UnitInfo> Entry in MappedHeaders)
+                {
+                    DataType dataType = dtm.Repo.Get(Entry.Item3.SelectedDataTypeId);
+                    Unit CurrentSelectedUnit = um.Repo.Get(Entry.Item3.UnitId);
+
+                    DataAttribute CurrentDataAttribute = new DataAttribute();
+
+                    DataAttribute existingDataAttribute = allDataAttributes.Where(da => da.Name.ToLower().Equals(TrimAndLimitString(Entry.Item2).ToLower()) &&
+                                                                                        da.DataType.Id == dataType.Id &&
+                                                                                        da.Unit.Id == CurrentSelectedUnit.Id).FirstOrDefault();
+                    if (existingDataAttribute != null)
+                    {
+                        CurrentDataAttribute = existingDataAttribute;
+                    }
+                    else
+                    {
+                        CurrentDataAttribute = dam.CreateDataAttribute(TrimAndLimitString(Entry.Item2), Entry.Item2, "", false, false, "", MeasurementScale.Categorial, DataContainerType.ReferenceType, "", dataType, CurrentSelectedUnit, null, null, null, null, null, null);
+                    }
+
+                    Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, Entry.Item2, "", "", "");
+
+                    XmlElement newVariableXml = xmldoc.CreateElement("variable");
+                    newVariableXml.InnerText = Convert.ToString(newVariable.Id);
+
+                    orderElement.AppendChild(newVariableXml);
+
+
+                }
+                extraElement.AppendChild(orderElement);
+                xmldoc.AppendChild(extraElement);
+
+                sds.Extra = xmldoc;
+                sds.Name = "generated import structure " + timestamp;
+                sds.Description = "automatically generated structured data structure by user " + GetUserNameOrDefault() + " for file " + title + " on " + timestamp;
+
+                ds = dm.CreateEmptyDataset(sds, rp, metadataStructure);
+
+                long datasetId = ds.Id;
+                long sdsId = sds.Id;
+
+
+                if (dm.IsDatasetCheckedOutFor(datasetId, GetUserNameOrDefault()) || dm.CheckOutDataset(datasetId, GetUserNameOrDefault()))
+                {
+                    DatasetVersion dsv = dm.GetDatasetWorkingCopy(datasetId);
+                    long METADATASTRUCTURE_ID = metadataStructure.Id;
+                    XmlMetadataWriter xmlMetadatWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
+                    XDocument metadataX = xmlMetadatWriter.CreateMetadataXml(METADATASTRUCTURE_ID);
+                    XmlDocument metadataXml = XmlMetadataWriter.ToXmlDocument(metadataX);
+                    dsv.Metadata = metadataXml;
+
+                    dsv.Metadata = XmlDatasetHelper.SetInformation(dsv, metadataXml, AttributeNames.title, title);
+                    dm.EditDatasetVersion(dsv, null, null, null);
+                }
+
+
+                #region security
+                // add security
+                if (GetUserNameOrDefault() != "DEFAULT")
+                {
+                    PermissionManager pm = new PermissionManager();
+                    SubjectManager sm = new SubjectManager();
+
+                    BExIS.Security.Entities.Subjects.User user = sm.GetUserByName(GetUserNameOrDefault());
+
+                    UserPiManager upm = new UserPiManager();
+                    List<long> piList = (new UserSelectListModel(GetUserNameOrDefault())).UserList.Select(x => x.Id).ToList();
+
+                    foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
+                    {
+                        pm.CreateDataPermission(user.Id, 1, ds.Id, rightType);
+
+                        // adding the rights for the pis
+                        foreach (long piId in piList)
+                        {
+                            pm.CreateDataPermission(piId, 1, ds.Id, rightType);
+
+                            // get all pi members
+                            List<UserPi> currentMembers = upm.GetAllPiMember(piId).ToList();
+
+                            foreach (UserPi currentMapping in currentMembers)
+                            {
+                                switch (rightType)
+                                {
+                                    case RightType.View:
+                                        pm.CreateDataPermission(currentMapping.UserId, 1, ds.Id, rightType);
+                                        break;
+                                    case RightType.Download:
+                                        pm.CreateDataPermission(currentMapping.UserId, 1, ds.Id, rightType);
+                                        break;
+                                    default:
+                                        pm.CreateDataPermission(currentMapping.UserId, 0, ds.Id, rightType);
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+                #endregion security
+
+
+                #region excel reader
+
+                if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xls") ||
+                    TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsx"))
+                {
+                    int packageSize = 10000;
+                    //HACK ?
+                    TaskManager.Bus[TaskManager.CURRENTPACKAGESIZE] = packageSize;
+
+                    int counter = 0;
+
+                    ExcelReader reader = new ExcelReader();
+
+                    //schleife
+                    dm.CheckOutDatasetIfNot(ds.Id, GetUserNameOrDefault()); // there are cases, the dataset does not get checked out!!
+                    if (!dm.IsDatasetCheckedOutFor(ds.Id, GetUserNameOrDefault()))
+                    {
+                        throw new Exception(string.Format("Not able to checkout dataset '{0}' for  user '{1}'!", ds.Id, GetUserNameOrDefault()));
+                    }
+
+                    workingCopy = dm.GetDatasetWorkingCopy(ds.Id);
+
+                    //TODO hier gehts weiter
+                    //do
+                    //{
+                    counter++;
+                    TaskManager.Bus[TaskManager.CURRENTPACKAGE] = counter;
+
+                    // open file
+                    Stream = reader.Open(TaskManager.Bus[TaskManager.FILEPATH].ToString());
+                    //rows = reader.ReadFile(Stream, TaskManager.Bus[TaskManager.FILENAME].ToString(), oldSds, (int)id, packageSize).ToArray();
+
+                    string selectedDataAreaJsonArray = TaskManager.Bus[TaskManager.SHEET_DATA_AREA].ToString();
+                    string selectedHeaderAreaJsonArray = TaskManager.Bus[TaskManager.SHEET_HEADER_AREA].ToString();
+                    JavaScriptSerializer serializer = new JavaScriptSerializer();
+                    int[] areaDataValues = serializer.Deserialize<int[]>(selectedDataAreaJsonArray);
+                    int[] areaHeaderValues = serializer.Deserialize<int[]>(selectedHeaderAreaJsonArray);
+
+                    Orientation orientation = 0;
+
+                    switch (TaskManager.Bus[TaskManager.SHEET_FORMAT].ToString())
+                    {
+                        case "LeftRight":
+                            orientation = Orientation.rowwise;
+                            break;
+                        case "Matrix":
+                            orientation = Orientation.matrix;
+                            break;
+                        default:
+                            orientation = Orientation.columnwise;
+                            break;
+                    }
+
+
+                    FileReaderInfo fri = new FileReaderInfo();
+                    fri.Data = areaDataValues[0] + 1;
+                    fri.DataStartColumn = areaDataValues[1];
+                    fri.DataEndRow = areaDataValues[2] + 1;
+                    fri.DataEndColumn = areaDataValues[3];
+
+                    fri.Variables = areaHeaderValues[0] + 1;
+                    fri.VariablesStartColumn = areaHeaderValues[1];
+                    fri.VariablesEndRow = areaHeaderValues[2] + 1;
+                    fri.VariablesEndColumn = areaHeaderValues[3];
+
+                    fri.Offset = areaDataValues[1];
+                    fri.Orientation = orientation;
+
+
+                    rows = reader.ReadFile(Stream, TaskManager.Bus[TaskManager.FILENAME].ToString(), fri, sds, (int)datasetId);
+
+                    dm.EditDatasetVersion(workingCopy, rows, null, null);
+
+                    Stream.Close();
+
+                    //} while (rows.Count() > 0);
+                }
+
+                #endregion
+
+                dm.CheckInDataset(ds.Id, "upload data from upload wizard", GetUserNameOrDefault());
+
+                TaskManager.AddToBus(TaskManager.DATASET_ID, ds.Id);
             }
             else
             {
@@ -1215,6 +1382,17 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(datasetId);
   
             return datasetManager.GetDatasetVersionEffectiveTupleIds(datasetVersion);
+        }
+
+        private string TrimAndLimitString(string str, int limit = 255)
+        {
+            if (str != "" && str != null)
+            {
+                str = str.Trim();
+                if (str.Length > limit)
+                    str = str.Substring(0, limit);
+            }
+            return (str);
         }
 
 

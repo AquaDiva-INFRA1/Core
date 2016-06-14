@@ -31,14 +31,58 @@ namespace BExIS.IO.Transform.Input
         /// <remarks></remarks>
         /// <seealso cref=""/>        
         public int Variables { get; set; }
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>        
+        public int VariablesEndRow { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>        
+        public int VariablesStartColumn { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>        
+        public int VariablesEndColumn { get; set; }
+
+
         /// <summary>
         /// Row/Column in which the Data are.
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>        
         public int Data { get; set; }
-        
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>        
+        public int DataEndRow { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>        
+        public int DataEndColumn { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>        
+        public int DataStartColumn { get; set; }
+
+
         /// <summary>
         /// Format of the Date
         /// </summary>

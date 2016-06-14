@@ -1,105 +1,80 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Metadata id="2">
-  <TechnicalContact type="MetadataPackageUsage" name="Technical Contact" id="6">
-    <Person type="MetadataPackage" name="Person" roleId="6" id="6" number="1">
-      <Name type="MetadataAttributeUsage" name="Name" id="17">
-        <Name type="MetadataAttribute" name="Name" roleId="17" id="1" number="1">florian test 20160105</Name>
-      </Name>
-      <Email type="MetadataAttributeUsage" name="Email" id="18">
-        <Email type="MetadataAttribute" name="Email" roleId="18" id="7" number="1" />
-      </Email>
-      <Address type="MetadataAttributeUsage" name="Address" id="19">
-        <Address type="MetadataAttribute" name="Address" roleId="19" id="8" number="1" />
-      </Address>
-      <Phone type="MetadataAttributeUsage" name="Phone" id="20">
-        <Phone type="MetadataAttribute" name="Phone" roleId="20" id="9" number="1" />
-      </Phone>
-    </Person>
-  </TechnicalContact>
-  <ContentContact type="MetadataPackageUsage" name="Content Contact" id="7">
-    <Person type="MetadataPackage" name="Person" roleId="7" id="6" number="1">
-      <Name type="MetadataAttributeUsage" name="Name" id="17">
-        <Name type="MetadataAttribute" name="Name" roleId="17" id="1" number="1">florian test 20160105</Name>
-      </Name>
-      <Email type="MetadataAttributeUsage" name="Email" id="18">
-        <Email type="MetadataAttribute" name="Email" roleId="18" id="7" number="1" />
-      </Email>
-      <Address type="MetadataAttributeUsage" name="Address" id="19">
-        <Address type="MetadataAttribute" name="Address" roleId="19" id="8" number="1" />
-      </Address>
-      <Phone type="MetadataAttributeUsage" name="Phone" id="20">
-        <Phone type="MetadataAttribute" name="Phone" roleId="20" id="9" number="1" />
-      </Phone>
-    </Person>
-  </ContentContact>
-  <Description type="MetadataPackageUsage" name="Description" id="8">
-    <Description type="MetadataPackage" name="Description" roleId="8" id="7" number="1">
-      <Title type="MetadataAttributeUsage" name="Title" id="21">
-        <Title type="MetadataAttribute" name="Title" roleId="21" id="2" number="1">florian test 20160105</Title>
+<Metadata id="1">
+  <Description type="MetadataPackageUsage" name="Description" id="1">
+    <DescriptionEML type="MetadataPackage" name="DescriptionEML" roleId="1" id="1" number="1">
+      <ShortName type="MetadataAttributeUsage" name="Short Name" id="1">
+        <Name type="MetadataAttribute" name="Name" roleId="1" id="1" number="1" />
+      </ShortName>
+      <Title type="MetadataAttributeUsage" name="Title" id="2">
+        <Title type="MetadataAttribute" name="Title" roleId="2" id="2" number="1">Test</Title>
       </Title>
-      <DateModified type="MetadataAttributeUsage" name="DateModified" id="22">
-        <RevisionData type="MetadataAttribute" name="RevisionData" roleId="22" id="10" number="1" />
-      </DateModified>
-      <Details type="MetadataAttributeUsage" name="Details" id="23">
-        <Details type="MetadataAttribute" name="Details" roleId="23" id="11" number="1" />
-      </Details>
-      <Coverage type="MetadataAttributeUsage" name="Coverage" id="24">
-        <Coverage type="MetadataAttribute" name="Coverage" roleId="24" id="12" number="1" />
-      </Coverage>
-      <URI type="MetadataAttributeUsage" name="URI" id="25">
-        <URI type="MetadataAttribute" name="URI" roleId="25" id="13" number="1" />
-      </URI>
-    </Description>
+      <PublishDate type="MetadataAttributeUsage" name="Publish Date" id="3">
+        <Date type="MetadataAttribute" name="Date" roleId="3" id="3" number="1" />
+      </PublishDate>
+      <AdditionalInformation type="MetadataAttributeUsage" name="Additional Information" id="4">
+        <Information type="MetadataAttribute" name="Information" roleId="4" id="4" number="1" />
+      </AdditionalInformation>
+    </DescriptionEML>
   </Description>
-  <Owner type="MetadataPackageUsage" name="Owner" id="9">
-    <Owner type="MetadataPackage" name="Owner" roleId="9" id="8" number="1">
-      <FullName type="MetadataAttributeUsage" name="Full Name" id="26">
-        <Name type="MetadataAttribute" name="Name" roleId="26" id="1" number="1">florian test 20160105</Name>
-      </FullName>
-      <SortingName type="MetadataAttributeUsage" name="Sorting Name" id="27">
-        <Name type="MetadataAttribute" name="Name" roleId="27" id="1" number="1" />
-      </SortingName>
-      <OrganisationName type="MetadataAttributeUsage" name="Organisation Name" id="28">
-        <Name type="MetadataAttribute" name="Name" roleId="28" id="1" number="1" />
-      </OrganisationName>
-      <Address type="MetadataAttributeUsage" name="Address" id="29">
-        <Address type="MetadataAttribute" name="Address" roleId="29" id="8" number="1" />
-      </Address>
-      <Email type="MetadataAttributeUsage" name="Email" id="30">
-        <Email type="MetadataAttribute" name="Email" roleId="30" id="7" number="1" />
-      </Email>
-      <Role type="MetadataAttributeUsage" name="Role" id="31">
-        <Role type="MetadataAttribute" name="Role" roleId="31" id="14" number="1" />
+  <Creator type="MetadataPackageUsage" name="Creator" id="2">
+    <PersonEML type="MetadataPackage" name="PersonEML" roleId="2" id="2" number="1">
+      <Givenname type="MetadataAttributeUsage" name="Given name" id="5">
+        <Name type="MetadataAttribute" name="Name" roleId="5" id="1" number="1" />
+      </Givenname>
+      <Surname type="MetadataAttributeUsage" name="Sur name" id="6">
+        <Name type="MetadataAttribute" name="Name" roleId="6" id="1" number="1" />
+      </Surname>
+      <Organization type="MetadataAttributeUsage" name="Organization" id="7">
+        <Name type="MetadataAttribute" name="Name" roleId="7" id="1" number="1" />
+      </Organization>
+    </PersonEML>
+  </Creator>
+  <AssociatedParties type="MetadataPackageUsage" name="Associated Parties " id="3">
+    <Party type="MetadataPackage" name="Party" roleId="3" id="3" number="1">
+      <Givenname type="MetadataAttributeUsage" name="Given name" id="8">
+        <Name type="MetadataAttribute" name="Name" roleId="8" id="1" number="1" />
+      </Givenname>
+      <Surname type="MetadataAttributeUsage" name="Sur name" id="9">
+        <Name type="MetadataAttribute" name="Name" roleId="9" id="1" number="1" />
+      </Surname>
+      <Organization type="MetadataAttributeUsage" name="Organization" id="10">
+        <Name type="MetadataAttribute" name="Name" roleId="10" id="1" number="1" />
+      </Organization>
+      <Role type="MetadataAttributeUsage" name="Role" id="11">
+        <RoleType type="MetadataAttribute" name="RoleType" roleId="11" id="5" number="1" />
       </Role>
-      <Phone type="MetadataAttributeUsage" name="Phone" id="32">
-        <Phone type="MetadataAttribute" name="Phone" roleId="32" id="9" number="1" />
-      </Phone>
-      <URI type="MetadataAttributeUsage" name="URI" id="33">
-        <URI type="MetadataAttribute" name="URI" roleId="33" id="13" number="1" />
-      </URI>
-    </Owner>
-  </Owner>
-  <Scope type="MetadataPackageUsage" name="Scope" id="10">
-    <Scope type="MetadataPackage" name="Scope" roleId="10" id="9" number="1">
-      <TaxonomicTerm type="MetadataAttributeUsage" name="TaxonomicTerm" id="34">
-        <TaxonomicTerm type="MetadataAttribute" name="TaxonomicTerm" roleId="34" id="15" number="1" />
-      </TaxonomicTerm>
-      <GeoEcologicalTerm type="MetadataAttributeUsage" name="GeoEcologicalTerm" id="35">
-        <GeoEcologicalTerm type="MetadataAttribute" name="GeoEcologicalTerm" roleId="35" id="16" number="1" />
-      </GeoEcologicalTerm>
-    </Scope>
-  </Scope>
-  <Unit type="MetadataPackageUsage" name="Unit" id="11">
-    <Unit type="MetadataPackage" name="Unit" roleId="11" id="10" number="1">
-      <SourceInstitutionID type="MetadataAttributeUsage" name="SourceInstitutionID" id="36">
-        <Id type="MetadataAttribute" name="Id" roleId="36" id="17" number="1">florian test 20160105</Id>
-      </SourceInstitutionID>
-      <SourceID type="MetadataAttributeUsage" name="SourceID" id="37">
-        <Id type="MetadataAttribute" name="Id" roleId="37" id="17" number="1">florian test 20160105</Id>
-      </SourceID>
-      <UnitID type="MetadataAttributeUsage" name="UnitID" id="38">
-        <Id type="MetadataAttribute" name="Id" roleId="38" id="17" number="1">florian test 20160105</Id>
-      </UnitID>
-    </Unit>
-  </Unit>
+    </Party>
+  </AssociatedParties>
+  <Contact type="MetadataPackageUsage" name="Contact" id="4">
+    <PersonEML type="MetadataPackage" name="PersonEML" roleId="4" id="2" number="1">
+      <Givenname type="MetadataAttributeUsage" name="Given name" id="5">
+        <Name type="MetadataAttribute" name="Name" roleId="5" id="1" number="1" />
+      </Givenname>
+      <Surname type="MetadataAttributeUsage" name="Sur name" id="6">
+        <Name type="MetadataAttribute" name="Name" roleId="6" id="1" number="1" />
+      </Surname>
+      <Organization type="MetadataAttributeUsage" name="Organization" id="7">
+        <Name type="MetadataAttribute" name="Name" roleId="7" id="1" number="1" />
+      </Organization>
+    </PersonEML>
+  </Contact>
+  <Project type="MetadataPackageUsage" name="Project" id="5">
+    <ProjectEML type="MetadataPackage" name="ProjectEML" roleId="5" id="4" number="1">
+      <Title type="MetadataAttributeUsage" name="Title" id="12">
+        <Title type="MetadataAttribute" name="Title" roleId="12" id="2" number="1" />
+      </Title>
+      <Personnelgivenname type="MetadataAttributeUsage" name="Personnel given name" id="13">
+        <Name type="MetadataAttribute" name="Name" roleId="13" id="1" number="1" />
+      </Personnelgivenname>
+      <Personnelsurname type="MetadataAttributeUsage" name="Personnel surname" id="14">
+        <Name type="MetadataAttribute" name="Name" roleId="14" id="1" number="1" />
+      </Personnelsurname>
+      <Role type="MetadataAttributeUsage" name="Role" id="15">
+        <RoleType type="MetadataAttribute" name="RoleType" roleId="15" id="5" number="1" />
+      </Role>
+      <Projectdescription type="MetadataAttributeUsage" name="Project description" id="16">
+        <Description type="MetadataAttribute" name="Description" roleId="16" id="6" number="1" />
+      </Projectdescription>
+    </ProjectEML>
+  </Project>
 </Metadata>

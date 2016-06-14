@@ -61,7 +61,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                     if (model.Extention.Equals(".txt") || model.Extention.Equals(".csv"))
                         TaskManager.Bus[TaskManager.FILE_READER_INFO] = new AsciiFileReaderInfo();
 
-                    if (model.Extention.Equals(".xls"))
+                    if (model.Extention.Equals(".xls") || model.Extention.Equals(".xlsx"))
                         TaskManager.Bus[TaskManager.FILE_READER_INFO] = new ExcelFileReaderInfo();
                 }
 

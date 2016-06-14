@@ -32,9 +32,36 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             SelectVerificationModel model = new SelectVerificationModel();
 
             UnitManager unitManager = new UnitManager();
-            model.AvailableUnits = unitManager.Repo.Get().ToList();
+            DataTypeManager dataTypeManager = new DataTypeManager();
+            List<Dlm.Entities.DataStructure.Unit> tempUnitList = unitManager.Repo.Get().ToList();
 
-            if(!TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_AVAILABLEUNITS))
+
+
+            // get all DataTypes for the Units
+            foreach(Dlm.Entities.DataStructure.Unit unit in tempUnitList)
+            {
+                UnitInfo unitInfo = new UnitInfo();
+
+                unitInfo.UnitId = unit.Id;
+                unitInfo.Description = unit.Description;
+                unitInfo.Name = unit.Name;
+                unitInfo.Abbreviation = unit.Abbreviation;
+
+                foreach(DataType dummyDataType in unit.AssociatedDataTypes)
+                {
+                    DataTypeInfo dataTypeInfo = new DataTypeInfo();
+
+                    DataType fullDataType = dataTypeManager.Repo.Get(dummyDataType.Id);
+                    dataTypeInfo.DataTypeId = fullDataType.Id;
+                    dataTypeInfo.Description = fullDataType.Description;
+                    dataTypeInfo.Name = fullDataType.Name;
+
+                    unitInfo.DataTypeInfos.Add(dataTypeInfo);
+                }
+                model.AvailableUnits.Add(unitInfo);
+            }
+
+            if (!TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_AVAILABLEUNITS))
             {
                 TaskManager.AddToBus(TaskManager.VERIFICATION_AVAILABLEUNITS, model.AvailableUnits);
             }
@@ -45,6 +72,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             FileStream fis = null;
             fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             ExcelPackage ep = new ExcelPackage(fis);
+            fis.Close();
 
             ExcelWorkbook excelWorkbook = ep.Workbook;
             ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
@@ -63,7 +91,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
             if (TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_MAPPEDHEADERUNITS))
             {
-                model.AssignedHeaderUnits = (List<Tuple<int, String, Dlm.Entities.DataStructure.Unit>>) TaskManager.Bus[TaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                model.AssignedHeaderUnits = (List<Tuple<int, String, UnitInfo>>) TaskManager.Bus[TaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             }
 
             //set current stepinfo based on index
@@ -289,6 +317,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             {
                 if ("selectFieldId" == key)
                 {
+
                     selectFieldId = Convert.ToInt32(Request.Form[key]);
                 }
                 if("selectOptionId" == key)
@@ -303,35 +332,38 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
             if(TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_MAPPEDHEADERUNITS))
             {
-                model.AssignedHeaderUnits = (List < Tuple < int, string, Dlm.Entities.DataStructure.Unit>>) TaskManager.Bus[TaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                model.AssignedHeaderUnits = (List < Tuple < int, string, UnitInfo>>) TaskManager.Bus[TaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             }
 
 
             if ( selectFieldId != null && selectOptionId != null )
             {
-                List<Dlm.Entities.DataStructure.Unit> availableUnits = (List<Dlm.Entities.DataStructure.Unit>) TaskManager.Bus[TaskManager.VERIFICATION_AVAILABLEUNITS];
+                List<UnitInfo> availableUnits = (List<UnitInfo>) TaskManager.Bus[TaskManager.VERIFICATION_AVAILABLEUNITS];
                 string[] headerFields = (string[]) TaskManager.Bus[TaskManager.VERIFICATION_HEADERFIELDS];
 
                 string currentHeader = headerFields.ElementAt((int) selectFieldId);
-                Dlm.Entities.DataStructure.Unit currentUnit = availableUnits.Where(u => u.Id == selectOptionId).First();
+                UnitInfo currentUnit = availableUnits.Where(u => u.UnitId == selectOptionId).First();
 
-                Tuple<int, string, Dlm.Entities.DataStructure.Unit> existingTuple = model.AssignedHeaderUnits.Where(t => t.Item1 == (int)selectFieldId).FirstOrDefault() ;
+                Tuple<int, string, UnitInfo> existingTuple = model.AssignedHeaderUnits.Where(t => t.Item1 == (int)selectFieldId).FirstOrDefault() ;
                 if(existingTuple != null)
                 {
                     model.AssignedHeaderUnits.Remove(existingTuple);
                 }
-                model.AssignedHeaderUnits.Add(new Tuple<int, string, Dlm.Entities.DataStructure.Unit>((int) selectFieldId, currentHeader, currentUnit));
+                model.AssignedHeaderUnits.Add(new Tuple<int, string, UnitInfo>((int) selectFieldId, currentHeader, currentUnit));
             }
 
             TaskManager.AddToBus(TaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.AssignedHeaderUnits);
 
-            /*
-            if(!String.IsNullOrEmpty(headerArea))
+            if (TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_HEADERFIELDS))
             {
-                TaskManager.AddToBus(TaskManager.SHEET_HEADER_AREA, headerArea);
-                model.HeaderArea = headerArea;
+                model.HeaderFields = (string[]) TaskManager.Bus[TaskManager.VERIFICATION_HEADERFIELDS];
             }
-            */
+
+            if(TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_AVAILABLEUNITS))
+            {
+                model.AvailableUnits = (List<UnitInfo>) TaskManager.Bus[TaskManager.VERIFICATION_AVAILABLEUNITS];
+            }
+
 
             Session["TaskManager"] = TaskManager;
 
@@ -339,7 +371,73 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             //create Model
             model.StepInfo = TaskManager.Current();
 
-            return PartialView("SelectAreas", model);
+            return PartialView("Verification", model);
+
+        }
+
+
+        [HttpPost]
+        public ActionResult SaveDataTypeSelection()
+        {
+
+            int? selectFieldId = null;
+            int? selectedDataTypeId = null;
+
+            foreach (string key in Request.Form.AllKeys)
+            {
+                if ("headerfieldId" == key)
+                {
+
+                    selectFieldId = Convert.ToInt32(Request.Form[key]);
+                }
+                if ("selectedDataTypeId" == key)
+                {
+                    selectedDataTypeId = Convert.ToInt32(Request.Form[key]);
+                }
+            }
+
+            SelectVerificationModel model = new SelectVerificationModel();
+
+            TaskManager TaskManager = (TaskManager)Session["TaskManager"];
+
+            if (TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_MAPPEDHEADERUNITS))
+            {
+                model.AssignedHeaderUnits = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[TaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+            }
+
+
+            if (selectFieldId != null && selectedDataTypeId != null)
+            {
+                List<UnitInfo> availableUnits = (List<UnitInfo>)TaskManager.Bus[TaskManager.VERIFICATION_AVAILABLEUNITS];
+
+                Tuple<int, string, UnitInfo> existingTuple = model.AssignedHeaderUnits.Where(t => t.Item1 == (int)selectFieldId).FirstOrDefault();
+                if (existingTuple != null)
+                {
+                    existingTuple.Item3.SelectedDataTypeId = Convert.ToInt32(selectedDataTypeId);
+                }
+            }
+
+
+            TaskManager.AddToBus(TaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.AssignedHeaderUnits);
+
+            if (TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_HEADERFIELDS))
+            {
+                model.HeaderFields = (string[])TaskManager.Bus[TaskManager.VERIFICATION_HEADERFIELDS];
+            }
+
+            if (TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_AVAILABLEUNITS))
+            {
+                model.AvailableUnits = (List<UnitInfo>)TaskManager.Bus[TaskManager.VERIFICATION_AVAILABLEUNITS];
+            }
+
+
+            Session["TaskManager"] = TaskManager;
+
+
+            //create Model
+            model.StepInfo = TaskManager.Current();
+
+            return PartialView("Verification", model);
 
         }
 
