@@ -44,6 +44,7 @@ namespace BExIS.Dcm.UploadWizard
         public static string OWNER = "Owner";
         public static string PROJECTNAME = "ProjectName";
         public static string INSTITUTE = "Institute";
+        public static string SCHEMA = "Schema";
 
         // sheet structure
         public static string SHEET_FORMAT = "SheetFormat";

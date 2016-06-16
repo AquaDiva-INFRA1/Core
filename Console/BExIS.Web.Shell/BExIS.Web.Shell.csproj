@@ -313,6 +313,7 @@
     <Compile Include="Areas\DCM\Controllers\SubmitGetFileInformationController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSelectAFileController.cs" />
+    <Compile Include="Areas\DCM\Controllers\SubmitSheetSelectMetaDataController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitVerificationController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSelectAreasController.cs" />
     <Compile Include="Areas\DCM\Controllers\SubmitSheetDataStructureController.cs" />
@@ -323,6 +324,7 @@
     <Compile Include="Areas\DCM\Helpers\DCMSeedDataGenerator.cs" />
     <Compile Include="Areas\DCM\Helpers\UploadUtility.cs" />
     <Compile Include="Areas\DCM\Models\AbstractStepModel.cs" />
+    <Compile Include="Areas\DCM\Models\SelectMetaDataModel.cs" />
     <Compile Include="Areas\DCM\Models\SelectVerificationModel.cs" />
     <Compile Include="Areas\DCM\Models\SelectAreasModel.cs" />
     <Compile Include="Areas\DCM\Models\SelectSheetFormatModel.cs" />

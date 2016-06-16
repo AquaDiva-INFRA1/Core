@@ -36,9 +36,9 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 SheetFormat CurrentSheetFormat = 0;
                 Enum.TryParse<SheetFormat>(sheetFormatString, true, out CurrentSheetFormat);
 
-                NewStructuredExcelReader NSEReader = new NewStructuredExcelReader(CurrentSheetFormat);
-
-                jsonTable = NSEReader.GenerateJsonTable(fis);
+                NewStructuredExcelReader NSEReader = new NewStructuredExcelReader();
+                NSEReader.Open(fis);
+                jsonTable = NSEReader.GenerateJsonTable(CurrentSheetFormat);
 
                 if (!String.IsNullOrEmpty(jsonTable))
                 {

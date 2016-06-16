@@ -268,18 +268,23 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             {
                 TaskManager.Current().SetValid(false);
 
-                if (TaskManager.Bus.ContainsKey(TaskManager.SHEET_JSON_DATA) &&
-                    TaskManager.Bus.ContainsKey(TaskManager.SHEET_DATA_AREA) &&
-                    TaskManager.Bus.ContainsKey(TaskManager.SHEET_HEADER_AREA))
-                {
-                    bool isJsonDataEmpty = String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_JSON_DATA]));
-                    bool isDataAreaEmpty = String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_DATA_AREA]));
-                    bool isHeadAreaEmpty = String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[TaskManager.SHEET_HEADER_AREA]));
+                
 
-                    if (!isJsonDataEmpty && !isDataAreaEmpty && !isHeadAreaEmpty)
+                if (TaskManager.Bus.ContainsKey(TaskManager.VERIFICATION_MAPPEDHEADERUNITS))
+                {
+                    List<Tuple<int, String, UnitInfo>> mappedHeaderUnits = (List<Tuple<int, String, UnitInfo>>)TaskManager.Bus[TaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                    foreach(Tuple<int, String, UnitInfo> tuple in mappedHeaderUnits)
                     {
-                        TaskManager.Current().SetValid(true);
+                        if(tuple.Item3.SelectedDataTypeId < 0)
+                        {
+                            tuple.Item3.SelectedDataTypeId = tuple.Item3.DataTypeInfos.FirstOrDefault().DataTypeId;
+                        }
                     }
+                    model.AssignedHeaderUnits = mappedHeaderUnits;
+
+
+                        TaskManager.Current().SetValid(true);
+                    
                 }
                 else
                 {

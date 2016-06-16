@@ -29,7 +29,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Models
         public String Description { get; set; }
         public String Name { get; set; }
         public String Abbreviation { get; set; }
-        public int SelectedDataTypeId { get; set; }
+        public long SelectedDataTypeId { get; set; }
         public List<DataTypeInfo> DataTypeInfos { get; set; }
 
         public UnitInfo()
