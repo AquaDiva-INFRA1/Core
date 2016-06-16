@@ -997,7 +997,16 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 }
 
                 // FIXIT
-                MetadataStructure metadataStructure = msm.Repo.Get(m => m.Name.ToLower().Contains("eml")).FirstOrDefault();
+                MetadataStructure metadataStructure = null;
+                if (TaskManager.Bus.ContainsKey(TaskManager.SCHEMA))
+                {
+                    long metadataStructureId = Convert.ToInt64(TaskManager.Bus[TaskManager.SCHEMA]);
+                    metadataStructure = msm.Repo.Get(m => m.Id == metadataStructureId).FirstOrDefault();
+                }
+                else
+                {
+                    metadataStructure = msm.Repo.Get(m => m.Name.ToLower().Contains("eml")).FirstOrDefault();
+                }
                 ResearchPlan rp = rpm.Repo.Get().FirstOrDefault();
 
                 DatasetVersion workingCopy = new DatasetVersion();

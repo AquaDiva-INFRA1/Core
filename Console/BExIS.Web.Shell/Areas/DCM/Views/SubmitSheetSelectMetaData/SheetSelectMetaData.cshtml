@@ -1,4 +1,4 @@
-﻿@model BExIS.Web.Shell.Areas.DCM.Models.SelectVerificationModel
+﻿@model BExIS.Web.Shell.Areas.DCM.Models.SelectMetaDataModel
 @using Telerik.Web.Mvc.UI;
 @using Telerik.Web.Mvc.Resources;
 @using BExIS.Web.Shell.Areas.DCM.Models;
@@ -9,87 +9,36 @@
 
     <div class="uploadWizardStep_Main">
         <div class="uploadWizardStep_Header stepper">
-            <h3>@Model.StepInfo.title</h3>
+            <h3>Select metadata schema</h3>
         </div>
 
         <div class="uploadWizardStep_Description stepper">
         </div>
 
         <div class="uploadWizardStep_Content stepper">
-           <table>
-               <thead>
-                   <tr>
-                    <th>Variable name</th>
-                    <th>Unit</th>
-                    <th>Datatype</th>
-                   </tr>
-               </thead>
-               <tbody>
-                   
-                       @for(int i = 0; i < Model.HeaderFields.Length; i++)
-                       {
-                           <tr>
-                               <td>
-                                   @Html.Name(Model.HeaderFields[i])
-                               </td>
+            <select name="MetaDataSchema">
+                @if (Model.SelectedMetaDataId <= 0)
+                {
+                    <option selected value="-1" title="Please select...">Please select...</option>
+                }
 
-                               <td>
-                                  <select name="Unit" headerfieldId="@(i)">
-                                      @foreach(UnitInfo unit in Model.AvailableUnits)
-                                      {
-                                          string selected = "";
+                @{
+                    Tuple<long, string> tuple = Model.AvailableMetadata.Where(t => t.Item1 == Model.SelectedMetaDataId).FirstOrDefault();
+                };
 
-                                          if(Model.AssignedHeaderUnits.Count > 0)
-                                          {
-                                              
-                                              Tuple<int, String, UnitInfo> tuple = Model.AssignedHeaderUnits.Where(t => t.Item3.UnitId == unit.UnitId && t.Item2 == Model.HeaderFields[i]).FirstOrDefault();
+                    @foreach (Tuple<long, string> metadata in Model.AvailableMetadata)
+                    {
 
-                                              if (tuple != null)
-                                              {
-                                                  selected = "selected";
-                                              }
-                                              
-                                          }
-                                          <option @Html.Raw(selected) value="@Html.Name(Convert.ToString(unit.UnitId))" title="@Html.Name(unit.Description)">@Html.Name(unit.Name) (@Html.Name(unit.Abbreviation))</option>
-                                      }
-                                  </select>
-                               </td>
-                               <td>
-                                    <select name="Datatype" headerfieldId="@(i)">
-                                            @{
-                                                Tuple<int, String, UnitInfo> tupleBla = Model.AssignedHeaderUnits.Where(t => t.Item1 == i).FirstOrDefault();
+                        string selected = "";
 
-                                                if (tupleBla != null && tupleBla.Item3.UnitId > 1)
-                                                {
-                                                    foreach (DataTypeInfo dataTypeInfo in ((UnitInfo)tupleBla.Item3).DataTypeInfos )
-                                                    {
-                                                        string selected = "";
-
-                                                        Tuple<int, String, UnitInfo> tuple = Model.AssignedHeaderUnits.Where(t => t.Item1 == i && t.Item3.SelectedDataTypeId == dataTypeInfo.DataTypeId).FirstOrDefault();
-
-                                                        if (tuple != null)
-                                                        {
-                                                            selected = "selected";
-                                                        }
-
-                                                        <option @Html.Raw(selected) value="@Html.Name(Convert.ToString(dataTypeInfo.DataTypeId))" title="@Html.Name(dataTypeInfo.Description)">@Html.Name(dataTypeInfo.Name)</option>
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    <option value="none" tilte="">Please select an unit</option>
-                                                }
-
-                                            }
-
-                                        }
-                                   </select>
-                               </td>
-                            </tr>
-                       }
-               </tbody>
-           </table>
-        </div>
+                        if (tuple != null && tuple.Item1 == metadata.Item1)
+                        {
+                            selected = "selected";
+                        }
+                        <option @Html.Raw(selected) value="@Html.Raw(metadata.Item1)" title="@Html.Name(metadata.Item2)">@Html.Name(metadata.Item2)</option>
+                    }
+</select>
+</div>
     </div>
 
     <div class="uploadWizardStep_Error stepper">
@@ -123,37 +72,11 @@
 
     $(document).ready(function () {
 
-        $('select[name="DataType"]').each(function (index) {
-            var selectId = $(this).attr('headerfieldId');
-            var val = $('select[name="Unit"][headerfieldId="' + selectId + '"]').val();
-            if(val > 0)
-            {
-                $(this).prop("disabled", false);
-
-            }
-        });
-
-        $('select[name="Unit"]').change(function () {
-            if ($(this).val() != null && $(this).val() != '') {
-                var selectOptionId = $(this).val();
-                var selectId = $(this).attr('headerfieldId');
-
-                // send to bus
-                $.post('@Url.Action("SaveUnitSelection", "SubmitVerification", new RouteValueDictionary { { "area", "DCM" } })', { selectFieldId: selectId, selectOptionId: selectOptionId }, function (response) {
-                    $("#Step3").html(response);
-                });
-            }
-        });
-
-        $('select[name="Datatype"]').change(function () {
-            var selectedDataTypeId = $(this).val();
-            var headerfieldId = $(this).attr('headerfieldId');
-
-            console.log("selectedDataTypeId: " + selectedDataTypeId);
-            console.log("headerfieldId: " + headerfieldId);
+        $('select[name="MetaDataSchema"]').change(function () {
+            var selectedMetaDataTypeId = $(this).val();
 
             // send to bus
-            $.post('@Url.Action("SaveDataTypeSelection", "SubmitVerification", new RouteValueDictionary { { "area", "DCM" } })', { headerfieldId: headerfieldId, selectedDataTypeId: selectedDataTypeId }, function (response) {
+            $.post('@Url.Action("SaveMetaDataSelection", "SubmitSheetSelectMetaData", new RouteValueDictionary { { "area", "DCM" } })', { metadataId: selectedMetaDataTypeId }, function (response) {
                 $("#Step3").html(response);
             });
         });
