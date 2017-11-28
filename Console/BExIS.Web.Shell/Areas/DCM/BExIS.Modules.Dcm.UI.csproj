@@ -516,6 +516,7 @@
     <Content Include="Views\EasyUpload\_taskListView.cshtml" />
     <Content Include="Views\EasyUpload\_uploadWizardNav.cshtml" />
     <Content Include="Views\EasyUploadSelectAreas\SelectAreas.cshtml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
