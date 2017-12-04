@@ -38,6 +38,7 @@
     <DontImportPostSharp>True</DontImportPostSharp>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -513,6 +514,33 @@
     <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Shell.Manifest.xml" />
+    <Content Include="Themes\Aquadiva\Layouts\_Layout.xml" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.css" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-elements.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-font-awesome-extension.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-jquery-ui.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-metadata.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-telerik.css" />
+    <Content Include="Themes\Aquadiva\Styles\Copy of telerik.default.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\Default\editor.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\imagebrowser.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\infoicon.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\loading.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\preloader.GIF" />
+    <Content Include="Themes\Aquadiva\Styles\Default\slider-h.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\slider-v.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\sprite-vertical.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\sprite.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-line.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-nodes.png" />
+    <Content Include="Themes\Aquadiva\Styles\emptyPng.png" />
+    <Content Include="Themes\Aquadiva\Styles\images.css" />
+    <Content Include="Themes\Aquadiva\Styles\search.css" />
+    <Content Include="Themes\Aquadiva\Styles\telerik.default.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\wizard.css" />
     <Content Include="Themes\Black\Styles\awesome\css\font-awesome.css" />
     <Content Include="Themes\Black\Styles\awesome\css\font-awesome.min.css" />
     <Content Include="Themes\Black\Styles\awesome\fonts\fontawesome-webfont.svg" />
@@ -858,6 +886,18 @@
     <Content Include="Views\Shared\Info.cshtml" />
     <Content Include="Views\Shared\NotAuthorized.cshtml" />
     <Content Include="Views\Error\AccessDenied.cshtml" />
+    <Content Include="Themes\Aquadiva\Layouts\_Layout.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Breadcrumb.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Footer.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Header.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Information.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_LogOnStatus.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_ThemeSelector.cshtml" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\FontAwesome.otf" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1133,7 +1173,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>5412</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

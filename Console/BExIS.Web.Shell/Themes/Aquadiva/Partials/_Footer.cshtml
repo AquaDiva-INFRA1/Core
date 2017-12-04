@@ -1,0 +1,43 @@
+@using Vaiona.Web.Mvc;
+
+<style>
+    img.desaturate 
+    {
+        filter: gray; /* IE6-9 */
+        filter: grayscale(1); /* Microsoft Edge and Firefox 35+ */
+        -webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */
+    }
+
+    img.desaturate:hover 
+    {
+        filter: none;
+        -webkit-filter: grayscale(0);
+    }
+</style>
+
+<div id="footer">
+    <footer>
+        Powered by
+        <br/><br/>
+        <a href="http://bexis2.uni-jena.de" target="_blank">
+            <img src="~/Content/Images/Logo_BEXIS_rgb_113x28.jpg" class="desaturate"/>
+        </a>
+
+        <br/><br/>
+        @if (!string.IsNullOrEmpty(Html.GetTenant().PolicyFileNamePath))
+        {
+            @Html.ActionLink("Privacy Policy", "Policy", "Footer", new { area = "Site" }, null)
+        }
+
+        @if (!string.IsNullOrEmpty(Html.GetTenant().ContactUsFileNamePath))
+        {
+            @Html.ActionLink("Contact Us", "ContactUs", "Footer", new { area = "Site" }, null)
+        }
+
+        @if (!string.IsNullOrEmpty(Html.GetTenant().ImprintFileNamePath))
+        {
+            @Html.ActionLink("Imprint", "Imprint", "Footer", new { area = "Site" }, null)
+        }
+        <br />
+    </footer>
+</div>
