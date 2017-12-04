@@ -430,6 +430,8 @@
     <Content Include="Content\handsontable\handsontable.full.css" />
     <Content Include="Content\handsontable\handsontable.full.min.css" />
     <Content Include="Content\handsontable\handsontable.min.css" />
+    <Content Include="Content\Images\aquadiva-favicon.ico" />
+    <Content Include="Content\Images\aquadiva-logo.png" />
     <Content Include="Content\Images\dfg_logo.gif" />
     <Content Include="Content\bootstrap-combobox.css" />
     <Content Include="Content\bootstrap-theme.css" />
@@ -898,6 +900,7 @@
     <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff" />
     <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff2" />
     <Content Include="Themes\Aquadiva\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="Themes\Aquadiva\Partials\_Menu.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
