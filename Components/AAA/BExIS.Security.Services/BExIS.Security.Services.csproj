@@ -105,6 +105,7 @@
     <Compile Include="Subjects\GroupManager.cs" />
     <Compile Include="Subjects\SubjectManager.cs" />
     <Compile Include="Subjects\UserManager.cs" />
+    <Compile Include="Subjects\UserPiManager.cs" />
     <Compile Include="Utilities\Auth.cs" />
     <Compile Include="Utilities\EmailService.cs" />
     <Compile Include="Utilities\MessageHelper.cs" />

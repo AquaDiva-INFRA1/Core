@@ -202,6 +202,7 @@
     <Compile Include="Models\Metadata\MetadataCompoundAttributeModel.cs" />
     <Compile Include="Models\Metadata\MetadataInstanceModel.cs" />
     <Compile Include="Models\Metadata\MetadataPackageModel.cs" />
+    <Compile Include="Models\PiUserModels.cs" />
     <Compile Include="Models\PrimaryKeyViewModel.cs" />
     <Compile Include="Models\Push\SendBigFilesToServerModel.cs" />
     <Compile Include="Models\SelectAreasModel.cs" />
@@ -517,6 +518,7 @@
     <Content Include="Views\EasyUpload\_uploadWizardNav.cshtml" />
     <Content Include="Views\EasyUploadSelectAreas\SelectAreas.cshtml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+    <Content Include="Views\CreateDataset\_PiPartial.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
