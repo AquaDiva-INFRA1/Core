@@ -41,6 +41,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         private CreateTaskmanager TaskManager;
         XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
+        #region Aquadiva PI-Management
+        /*public ActionResult AddPi()
+        {
+            return PartialView("_PiPartial", new UserSelectListModel(HttpContext.User.Identity.Name));
+        }*/
+        #endregion
+
         #region Create a Dataset Setup Page
 
         //

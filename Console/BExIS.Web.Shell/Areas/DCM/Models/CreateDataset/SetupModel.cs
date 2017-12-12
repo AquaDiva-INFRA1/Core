@@ -26,6 +26,9 @@ namespace BExIS.Modules.Dcm.UI.Models.CreateDataset
         public bool BlockDatastructureId { get; set; }
         public bool BlockMetadataStructureId { get; set; }
 
+        //Aquadiva-Specific: PIs
+        //public List<long> Pis { get; set; }
+
         public SetupModel()
         {
             SelectedMetadataStructureId = -1;

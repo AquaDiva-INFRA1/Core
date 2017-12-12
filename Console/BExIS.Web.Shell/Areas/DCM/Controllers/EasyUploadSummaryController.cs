@@ -418,10 +418,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                         //Rights-Management
                         /*
-                         * TODO: Use the BExIS Party API for that
-                         * 
-                         * */
-                        /*
                         UserPiManager upm = new UserPiManager();
                         List<long> piList = (new UserSelectListModel(GetUsernameOrDefault())).UserList.Select(x => x.Id).ToList();
                         */

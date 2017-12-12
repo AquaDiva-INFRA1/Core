@@ -155,6 +155,7 @@
     <Compile Include="Controllers\NotificationsController.cs" />
     <Compile Include="Controllers\TenantsController.cs" />
     <Compile Include="Controllers\UserPermissionsController.cs" />
+    <Compile Include="Controllers\UserPisController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Helpers\Attributes.cs" />
     <Compile Include="Helpers\SAMSeedDataGenerator.cs" />
@@ -172,6 +173,7 @@
     <Compile Include="Models\SubjectModels.cs" />
     <Compile Include="Models\TenantModels.cs" />
     <Compile Include="Models\UserModels.cs" />
+    <Compile Include="Models\UserPisModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SamModule.cs" />
   </ItemGroup>
@@ -251,6 +253,9 @@
     <Content Include="Views\EntityPermissions\_Instances.cshtml" />
     <Content Include="Views\EntityPermissions\_Subjects.cshtml" />
     <Content Include="Views\UserPermissions\_Subjects.cshtml" />
+    <Content Include="Views\UserPis\UserPis.cshtml" />
+    <Content Include="Views\UserPis\_CreatePartial.cshtml" />
+    <Content Include="Views\UserPis\_EditPartial.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

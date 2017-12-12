@@ -55,6 +55,10 @@ namespace BExIS.Modules.Sam.UI.Helpers
                 var userPermissionFeature = featureManager.FindByName("User Permissions") ?? featureManager.Create("User Permissions", "", administrationFeature);
                 var userPermissionOperation = operationManager.Find("SAM", "UserPermissions", "*") ?? operationManager.Create("SAM", "UserPermissions", "*", userPermissionFeature);
 
+                //User Pis
+                var userPiFeature = featureManager.FindByName("User Pis") ?? featureManager.Create("User Pis", "", administrationFeature);
+                var userPiOperation = operationManager.Find("SAM", "UserPis", "*") ?? operationManager.Create("SAM", "UserPis", "*", userPiFeature);
+
 
                 // Dataset Management
                 var datasetManagementFeature = featureManager.FindByName("Dataset Management") ?? featureManager.Create("Dataset Management", "", administrationFeature);
