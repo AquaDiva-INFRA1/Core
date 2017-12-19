@@ -499,7 +499,31 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         if (GetUsernameOrDefault() != "DEFAULT")
                         {
                             EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+                            //Full permissions for the user
                             entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                            #region Aquadiva: permissions for PIs
+                            UserPiManager upm = new UserPiManager();
+
+                            //Get PIs of the current user
+                            List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
+                            foreach (User pi in piList)
+                            {
+                                //Full permissions for the pis
+                                entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                                //Get all users with the same pi
+                                List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                                //Give view and download rights to the members
+                                foreach (User piMember in piMembers)
+                                {
+                                    entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
+                                        RightType.Read,
+                                        RightType.Download
+                                    });
+                                }
+                            }
+                            #endregion
                         }
                     }
                     else
