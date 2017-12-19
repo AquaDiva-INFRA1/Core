@@ -15,6 +15,7 @@ using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Subjects;
 using BExIS.Xml.Helpers;
 using Newtonsoft.Json;
 using System;
@@ -231,7 +232,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             DataStructureManager dsm = new DataStructureManager();
             DatasetManager dm = new DatasetManager();
             DataContainerManager dam = new DataContainerManager();
-            //SubjectManager sm = new SubjectManager();
             EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
 
             List<Error> temp = new List<Error>();
@@ -408,59 +408,35 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     }
 
 
-                    #region security
-                    // add security
+                    #region security/permissions
                     if (GetUsernameOrDefault() != "DEFAULT")
                     {
-                        //PermissionManager pm = new PermissionManager();
-
-                        //User user = sm.GetUserByName(GetUsernameOrDefault());
-
-                        //Rights-Management
-                        /*
                         UserPiManager upm = new UserPiManager();
-                        List<long> piList = (new UserSelectListModel(GetUsernameOrDefault())).UserList.Select(x => x.Id).ToList();
-                        */
 
+                        //Full permissions for the user
+                        entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
 
-                        foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
+                        List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
+                        using (var uow = this.GetUnitOfWork())
                         {
-                            //The user gets full permissions
-                            // add security
-                            if (GetUsernameOrDefault() != "DEFAULT")
+                            var userRepo = uow.GetReadOnlyRepository<User>();
+                            foreach (User pi in piList)
                             {
-                                entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
-                            }
-
-                            // adding the rights for the pis
-                            /*foreach (long piId in piList)
-                            {
-                                //Each pi gets full permissions
-                                pm.CreateDataPermission(piId, 1, ds.Id, rightType);
-
-                                // get all pi members
-                                List<UserPi> currentMembers = upm.GetAllPiMember(piId).ToList();
-
-                                foreach (UserPi currentMapping in currentMembers)
+                                //Full permissions for the pis
+                                entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                                
+                                //Get all users with the same pi
+                                List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                                //Give view and download rights to the members
+                                foreach(User piMember in piMembers)
                                 {
-                                    switch (rightType)
-                                    {
-                                        //Each member of each of the pis gets view-rights
-                                        case RightType.View:
-                                            pm.CreateDataPermission(currentMapping.UserId, 1, ds.Id, rightType);
-                                            break;
-                                        //Each member of each of the pis gets download-rights
-                                        case RightType.Download:
-                                            pm.CreateDataPermission(currentMapping.UserId, 1, ds.Id, rightType);
-                                            break;
-                                        default:
-                                            //No other permissions - is this call necessary?
-                                            pm.CreateDataPermission(currentMapping.UserId, 0, ds.Id, rightType);
-                                            break;
-                                    }
+                                    entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
+                                        RightType.Read,
+                                        RightType.Download
+                                    });
                                 }
-                            }*/
-                        }
+                            }
+                        }                        
                     }
                     #endregion security
 
