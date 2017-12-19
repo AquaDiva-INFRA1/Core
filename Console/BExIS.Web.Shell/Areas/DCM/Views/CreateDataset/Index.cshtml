@@ -171,27 +171,6 @@
                     @Html.ValidationMessageFor(m => m.SelectedMetadataStructureId)
                 </td>
             </tr>
-
-            <!--Aquadiva Specific: PIs
-            <tr>
-                 <td style="width:300px;">@Html.LabelFor(m=>m.Pis)<span class="bx bx-required" title="Required"></span>
-                 </td>
-                    
-                <td>
-                    @Html.ActionLink("Add PI...", "AddPi", null, new { id = "AddPi" })
-                    @Html.ValidationMessageFor(m => m.Pis)
-                    <div id="piRows" class="editor-field">
-                        @{if (Model.Pis != null && Model.Pis.Count() > 0)
-                          {
-                              foreach (long item in Model.Pis)
-                              {
-                                  Html.RenderPartial("_PiPartial", new UserSelectListModel(HttpContext.Current.User.Identity.Name) { Id = item });
-                              }
-                          }
-                        }   
-                    </div> 
-                </td>
-            </tr>-->
         </table>
 
         <div class="bx-footer right">
