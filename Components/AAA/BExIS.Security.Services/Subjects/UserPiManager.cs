@@ -199,13 +199,14 @@ namespace BExIS.Security.Services.Subjects
             }
         }
 
-        public ICollection<UserPi> GetAllPiMember(long piId)
+        public ICollection<User> GetAllPiMembers(long piId)
         {
-            ICollection<UserPi> userPis = UserPisRepo.Query(u => u.PiId == piId).ToArray();
+            ICollection<long> userIds = UserPisRepo.Query(u => u.PiId == piId).Select(u => u.UserId).ToArray();
+            ICollection<User> users = UsersRepo.Query(u => userIds.Contains(u.Id)).ToArray();
 
-            if (userPis.Count() > 0)
+            if (users.Count() > 0)
             {
-                return userPis;
+                return users;
             }
             else
             {
