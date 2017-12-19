@@ -47,7 +47,7 @@
       .Sortable(sorting => sorting.OrderBy(sortOrder => sortOrder.Add(o => o.Id))))
 
 @{
-    //This is needed so the javascript-code to open a telerik window works
+    //Needed to load the telerik window library
     Html.Telerik().Window()
         .Name("PiMappingWindow");
 }
