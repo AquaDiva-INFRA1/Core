@@ -18,19 +18,16 @@ namespace BExIS.Modules.Sam.UI.Controllers
 
         public ActionResult Index()
         {
-            Session["createWindow"] = false;
             return View();
         }
 
         public ActionResult UserPis()
         {
-            Session["createWindow"] = false;
             return View();
         }
 
         public ActionResult openCreatePiMappingWindow()
         {
-            Session["createWindow"] = true;
             return View("UserPis");
         }
 
