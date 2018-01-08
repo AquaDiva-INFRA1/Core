@@ -209,6 +209,7 @@ namespace BExIS.Web.Shell.Controllers
         // GET: /Account/Login
         public ActionResult Login(string returnUrl)
         {
+            return RedirectToAction("Login", "Ldap", new { returnUrl = returnUrl });
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -279,6 +280,7 @@ namespace BExIS.Web.Shell.Controllers
 
         public ActionResult Register()
         {
+            return RedirectToAction("Index", "Home");
             return View();
         }
 
