@@ -281,7 +281,7 @@ namespace BExIS.Web.Shell.Controllers
         public ActionResult Register()
         {
             return RedirectToAction("Index", "Home");
-            return View();
+            //return View();
         }
 
         //
@@ -290,6 +290,7 @@ namespace BExIS.Web.Shell.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model)
         {
+            return null;
             var identityUserService = new IdentityUserService();
 
             try
