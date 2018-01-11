@@ -20,6 +20,17 @@ namespace BExIS.Web.Shell.Controllers
         {
             return View();
         }
+        
+        [DoesNotNeedDataAccess]
+        public ActionResult RedirectToWiki()
+        {
+            return Redirect("https://aquadiva-trac1.inf-bb.uni-jena.de/wiki/doku.php");
+        }
 
+        [DoesNotNeedDataAccess]
+        public ActionResult RedirectToBugtracker()
+        {
+            return Redirect("https://aquadiva-trac1.inf-bb.uni-jena.de/mantis/bug_report_page.php");
+        }
     }
 }
