@@ -68,7 +68,8 @@ namespace BExIS.Web.Shell.Controllers
                     switch (result)
                     {
                         case SignInStatus.Success:
-                            var ldapUser = new User() {Name = model.UserName};
+
+                            var ldapUser = new User() {Name = model.UserName, SecurityStamp = Guid.NewGuid().ToString()};
                             await userManager.CreateAsync(ldapUser);
                             await userManager.AddLoginAsync(ldapUser, new UserLoginInfo("Ldap", ""));
                             var identity = await identityUserService.CreateIdentityAsync(ldapUser, DefaultAuthenticationTypes.ApplicationCookie);
