@@ -97,9 +97,23 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             dataTypeInfo.DataTypeId = fullDataType.Id;
                             dataTypeInfo.Description = fullDataType.Description;
                             dataTypeInfo.Name = fullDataType.Name;
+                            //unitInfo.DataTypeInfos.Add(dataTypeInfo);
 
-                            unitInfo.DataTypeInfos.Add(dataTypeInfo);
+                            // Hamdi Hamed: 
+                            // I changed the commented line above to this piece of code to set "String" Data Type at first so it can  
+                            // be selected by default in the "view" of the "verification step" for the "Easy Upload" process
+                            // instead of doing lot of test in the "View" side.
+                            // ===> tested and implemeted correctly on my machine.
+                            if (fullDataType.Name.ToString().ToLower() == "string")
+                            {
+                                unitInfo.DataTypeInfos.Insert(0, dataTypeInfo);
+                            }
+                            else
+                            {
+                                unitInfo.DataTypeInfos.Add(dataTypeInfo);
+                            }
                         }
+
                         model.AvailableUnits.Add(unitInfo);
                     }
                     else
