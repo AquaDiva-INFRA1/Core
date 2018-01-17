@@ -43,6 +43,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="dotNetRDF, Version=0.0.0.0, Culture=neutral, PublicKeyToken=6055ffe4c97cc780, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\dotNetRDF.2.0.0\lib\net40\dotNetRDF.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.6.0.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\HtmlAgilityPack.1.6.0\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\..\..\..\Libraries\Ionic.Zip.dll</HintPath>
     </Reference>
@@ -64,6 +70,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -145,6 +152,9 @@
     <Reference Include="Vaiona.Web.Mvc.Modularity">
       <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Web.Mvc.Modularity.dll</HintPath>
     </Reference>
+    <Reference Include="VDS.Common, Version=1.9.0.0, Culture=neutral, PublicKeyToken=ab5f4eb908061bf0, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\VDS.Common.1.9.0\lib\net40-client\VDS.Common.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\AdminController.cs" />
@@ -153,17 +163,23 @@
     <Compile Include="Controllers\HelpController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SearchIndexController.cs" />
+    <Compile Include="Controllers\SemanticSearchController.cs" />
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="DdmModule.cs" />
     <Compile Include="Helpers\DdmSeedDataGenerator.cs" />
     <Compile Include="Helpers\GridHelper.cs" />
     <Compile Include="Helpers\HtmlPrefixScopeExtentions.cs" />
+    <Compile Include="Helpers\OntologyMapping.cs" />
     <Compile Include="Helpers\SearchUIHelper.cs" />
+    <Compile Include="Helpers\SemanticSearchResultIds.cs" />
     <Compile Include="Models\DatasetPermissionModels.cs" />
     <Compile Include="Models\SearchAttributeViewModel.cs" />
+    <Compile Include="Models\SemedicoResultDetailsModel.cs" />
+    <Compile Include="Models\SemedicoResultModel.cs" />
     <Compile Include="Models\ShowDataModel.cs" />
     <Compile Include="Models\ShowMetadataModel.cs" />
     <Compile Include="Models\ShowPrimaryDataModel.cs" />
+    <Compile Include="Models\ShowSemanticResultModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -427,6 +443,8 @@
     <None Include="Properties\PublishProfiles\DDm21105.pubxml" />
     <None Include="Properties\PublishProfiles\DDM21108.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+    <Content Include="Views\SemanticSearch\Index.cshtml" />
+    <Content Include="Views\SemanticSearch\_metaDataResultGridViewSemantic.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
