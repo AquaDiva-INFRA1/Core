@@ -24,6 +24,7 @@ using System.Net.Sockets;
 using VDS.RDF;
 using VDS.RDF.Query;
 using BExIS.Modules.Ddm.UI.Helpers;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -37,8 +38,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static HeaderItem idHeader;
 
         static Dictionary<String, List<OntologyMapping>> mappingDic;
-        static String mappingDictionaryFilePath = "~/Areas/DDM/Ontologies/mappings.txt";
-        static String autocompletionFilePath = "~/Areas/DDM/Ontologies/autocompletion.txt";
+        static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "mappings.txt");
+        static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "autocompletion.txt");
 
         private void setSessions()
         {
@@ -308,12 +309,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             * */
         public ActionResult getAutocompletionFromFile()
         {
-            String filePath = Server.MapPath(autocompletionFilePath);
             List<String> autocompletionList = new List<string>();
 
-            if (global::System.IO.File.Exists(filePath))
+            if (global::System.IO.File.Exists(autocompletionFilePath))
             {
-                string[] autocompletionTerms = global::System.IO.File.ReadAllLines(filePath);
+                string[] autocompletionTerms = global::System.IO.File.ReadAllLines(autocompletionFilePath);
                 autocompletionList = autocompletionTerms.ToList<String>();
             }
 
@@ -326,7 +326,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             mappingDic = new Dictionary<string, List<OntologyMapping>>();
             List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
 
-            String path = Server.MapPath("~/Areas/DDM/Ontologies/ad-ontology-merged.owl");
+            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
             ontologies.Add(new OntologyNamePair(path, "ADOntology"));
 
             //Just for testing purposes
@@ -485,20 +485,17 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 #endregion
 
                 #region Store dictionary in file
-                String mappingFilePath = Server.MapPath(mappingDictionaryFilePath);
                 String serializedDic = JsonConvert.SerializeObject(mappingDic, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.All,
                     TypeNameAssemblyFormat = global::System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple
                 });
-                global::System.IO.File.WriteAllText(mappingFilePath, serializedDic);
+                global::System.IO.File.WriteAllText(mappingDictionaryFilePath, serializedDic);
                 #endregion
 
                 #region Store autocompletion terms in file
-
-                String filePath = Server.MapPath(autocompletionFilePath);
-
-                using (StreamWriter writer = new StreamWriter(filePath, false))
+                
+                using (StreamWriter writer = new StreamWriter(autocompletionFilePath, false))
                 {
                     foreach (KeyValuePair<String, List<OntologyMapping>> kvp in mappingDic)
                     {
@@ -613,8 +610,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         private DataTable semanticSearch(String searchTerm)
         {
             #region Load mapping dictionary from file
-            String mappingFilePath = Server.MapPath(mappingDictionaryFilePath);
-            string[] lines = global::System.IO.File.ReadAllLines(mappingFilePath);
+            string[] lines = global::System.IO.File.ReadAllLines(mappingDictionaryFilePath);
             string json = String.Join("", lines);
 
             mappingDic = JsonConvert.DeserializeObject<Dictionary<String, List<OntologyMapping>>>(json, new JsonSerializerSettings

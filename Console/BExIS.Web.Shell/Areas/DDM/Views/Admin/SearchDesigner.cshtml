@@ -66,8 +66,8 @@
 
         <div id="#searchDesigerOptions"  style="position:absolute; right:0px;">  
         
+            @Html.ActionLink("Refresh Semantic Search Autocompletion", "buildDictionary", "SemanticSearch", new { }, new { @class = "bx-button action" })
             @Html.CheckBox("includePrimaryDataCheckBox", isPrimaryDataNodeExist) <b>include primary data</b>  
-
             @Html.ActionLink("Refresh Search", "RefreshSearch", "Admin", new { @class = "bx-button action", @title = "Refresh index from search", onclick= "$('#SearchDesignerGrid').preloader(20,'Reloading index ...')" })
         
             @*@Html.ActionLink("Reset to last working setup", "ResetConfig", "Admin", new { @class = "bx-button function", @title = "Reset to Default" })*@
