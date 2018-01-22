@@ -21,6 +21,11 @@
             title="Search" description="Search datasets" icon=""
             controller="home" action="index"
             extends="./menubarRoot" />
+    
+    <Export tag="menubar" id="semanticSearch" order="2"
+            title="Semantic Search" description="Search datasets" icon=""
+            controller="SemanticSearch" action="index"
+            extends="./menubarRoot/menuSearch" />
 
     <Export tag="menubar" id="dashboard" order="1"
         title="Dashboard" description="Quick Access to User Area" icon=""
