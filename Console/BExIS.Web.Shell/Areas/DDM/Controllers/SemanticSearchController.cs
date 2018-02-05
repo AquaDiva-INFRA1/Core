@@ -38,8 +38,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static HeaderItem idHeader;
 
         static Dictionary<String, List<OntologyMapping>> mappingDic;
-        static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "mappings.txt");
-        static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "autocompletion.txt");
+        static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "mappings.txt");
+        static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
 
         private void setSessions()
         {
@@ -326,7 +326,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             mappingDic = new Dictionary<string, List<OntologyMapping>>();
             List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
 
-            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
+            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
             ontologies.Add(new OntologyNamePair(path, "ADOntology"));
 
             //Just for testing purposes
