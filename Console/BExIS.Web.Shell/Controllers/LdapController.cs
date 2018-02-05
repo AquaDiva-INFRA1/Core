@@ -52,13 +52,13 @@ namespace BExIS.Web.Shell.Controllers
                                 return RedirectToLocal(returnUrl);
 
                             default:
-                                ModelState.AddModelError("", "Invalid login attempt.");
+                                ModelState.AddModelError("", "Invalid login attempt. Invalid credentials.");
                                 return View(model);
                         }
                     }
                     else
                     {
-                        ModelState.AddModelError("", "Invalid login attempt.");
+                        ModelState.AddModelError("", "Invalid login attempt. Entry in Logins table not found! Please contact your system administrator to register an account.");
                         return View(model);
                     }
                 }
