@@ -25,6 +25,10 @@ using VDS.RDF;
 using VDS.RDF.Query;
 using BExIS.Modules.Ddm.UI.Helpers;
 using Vaiona.Utils.Cfg;
+using BExIS.Modules.Ddm.UI.Models.Term_Frequency;
+using System.Text.RegularExpressions;
+using EnglishStemmer;
+using Vaiona.Persistence.Api;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -32,6 +36,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
     {
         static ShowSemanticResultModel model;
         static List<HeaderItem> headerItems;
+        //http://localhost:2607/bexis/search/query=soil+Entity+ +http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-merged.owl--
         static String semanticSearchURL = "http://localhost:2607/bexis/search/";
         static String semedicoSearchURL = "http://semedico.org/Webservice";
         //static String semedicoSearchURL = "http://localhost:3000";
@@ -40,6 +45,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static Dictionary<String, List<OntologyMapping>> mappingDic;
         static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "mappings.txt");
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "autocompletion.txt");
+
 
         private void setSessions()
         {
@@ -60,7 +66,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             //Initially show all possible Datasets
             model = new ShowSemanticResultModel(CreateDataTable(makeHeader()));
             model.semanticComponent = searchAndMerge(CreateDataTable(headerItems), "", false);
-
+            model.semedicoServerError = "";
             return View(model);
         }
 
@@ -77,6 +83,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             Session["Window"] = false;
             model = null;
 
+            /*This is for the javascript char result - String Char_result = null; */
+
             searchTerm = searchTerm.Trim();
             //Semedico Search
             if ((searchSemedico != null) && (searchTerm != null) && (!searchTerm.Equals("")))
@@ -90,7 +98,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 model.resultListComponent = semResult;
                 model.detailsComponent = null;
                 ViewData.Model = model;
+                
             }
+            //end of parsinbg the TF*IDF for the SEMEDICO results
 
             if (model == null || model.semanticComponent == null)
             {
@@ -124,13 +134,16 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             int newSubsetSize = currentSubsetSize;
 
             string result = consumeSemedicoREST(searchTermString, newSubsetStart, newSubsetSize);
+            
             if (result == null)
             {
                 model.semedicoServerError = "An error occured when trying to connect to Semedico. Please try again later.";
             }
-            model.resultListComponent = JsonConvert.DeserializeObject<SemedicoResultModel>(result);
-            model.resultListComponent.searchTermString = searchTermString;
-
+            else
+            {
+                model.resultListComponent = JsonConvert.DeserializeObject<SemedicoResultModel>(result);
+                model.resultListComponent.searchTermString = searchTermString;
+            }
             return PartialView("_semedicoSearchContent", model);
         }
 
@@ -640,11 +653,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     if (mappingList.Count >= 1)
                     {
+                        
                         foreach (OntologyMapping mapping in mappingList)
                         {
                             paramBuilder.Append(mapping.getDisplayName() + "+" + mapping.getMappedConceptGroup() + "+"
                         + mapping.getMappedConceptUri() + "+" + mapping.getBaseUri());
                             paramBuilder.Append("--");
+                           
                         }
                     }
 
@@ -718,25 +733,34 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     row["ID"] = Int64.Parse(r.dataset_id);
                     //row["VersionID"] = Int64.Parse(r.versionno);
 
-                    DatasetManager dm = new DatasetManager();
-
                     //Grab the Metadata of the current ID
                     long datasetID = long.Parse(r.dataset_id);
                     string description = "";
                     string title = "";
                     string owner = "";
 
-                    //Grab the Metadata
-                    XmlDatasetHelper helper = new XmlDatasetHelper();
-                    description = helper.GetInformation(datasetID, NameAttributeValues.description);
-                    title = helper.GetInformation(datasetID, NameAttributeValues.title);
-                    owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
+                    Dataset dataset = null;
+                    using (IUnitOfWork uow = this.GetUnitOfWork())
+                    {
+                        var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
+                        dataset = datasetRepo.Get(datasetID);
+                    }
+                    
+                    if (dataset != null)
+                    {
+                        //Grab the Metadata
+                        XmlDatasetHelper helper = new XmlDatasetHelper();
+                        description = helper.GetInformation(datasetID, NameAttributeValues.description);
+                        title = helper.GetInformation(datasetID, NameAttributeValues.title);
+                        owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
 
-                    row["Title"] = title;
-                    row["Datasetdescription"] = description;
-                    row["Ownername"] = owner;
+                        row["Title"] = title;
+                        row["Datasetdescription"] = description;
+                        row["Ownername"] = owner;
 
-                    m.Rows.Add(row);
+                        m.Rows.Add(row);
+                    }
+                    
                 }
             }
             #endregion
@@ -797,6 +821,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return headerItems;
         }
+        
+
 
         /*
             * Calls the semedico API with the specified search term and subset
@@ -810,8 +836,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             client.Timeout = TimeSpan.FromSeconds(30);
             //Set the searchTerm as query-String
             String param = ("?inputstring=" + searchTerm.Replace(", ", "+") + "&subsetstart=" + subsetStart + "&subsetsize=" + subsetSize);
-            String output = "";
+            String output = null;
 
+            if (client.GetAsync(param).Result.StatusCode.ToString() == "200")
+                Debug.WriteLine("HAHAHAHAHAHAHAHAaaaaa");
             try
             {
                 HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
@@ -819,6 +847,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     // Get the response body. Blocking!
                     output = response.Content.ReadAsStringAsync().Result;
+
+                    // This is the processing of the TF*IDF terms for the SEMEDICO corpus results
+                    List<String> keywords_query = new List<String>();
+
                 }
             }
             catch (SocketException e)
