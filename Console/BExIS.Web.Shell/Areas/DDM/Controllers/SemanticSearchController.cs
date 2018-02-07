@@ -25,9 +25,6 @@ using VDS.RDF;
 using VDS.RDF.Query;
 using BExIS.Modules.Ddm.UI.Helpers;
 using Vaiona.Utils.Cfg;
-using BExIS.Modules.Ddm.UI.Models.Term_Frequency;
-using System.Text.RegularExpressions;
-using EnglishStemmer;
 using Vaiona.Persistence.Api;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
@@ -36,15 +33,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
     {
         static ShowSemanticResultModel model;
         static List<HeaderItem> headerItems;
-        //http://localhost:2607/bexis/search/query=soil+Entity+ +http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-merged.owl--
         static String semanticSearchURL = "http://localhost:2607/bexis/search/";
         static String semedicoSearchURL = "http://semedico.org/Webservice";
         //static String semedicoSearchURL = "http://localhost:3000";
         static HeaderItem idHeader;
 
         static Dictionary<String, List<OntologyMapping>> mappingDic;
-        static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "mappings.txt");
-        static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "autocompletion.txt");
+        static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "mappings.txt");
+        static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
 
 
         private void setSessions()
@@ -83,8 +79,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             Session["Window"] = false;
             model = null;
 
-            /*This is for the javascript char result - String Char_result = null; */
-
             searchTerm = searchTerm.Trim();
             //Semedico Search
             if ((searchSemedico != null) && (searchTerm != null) && (!searchTerm.Equals("")))
@@ -100,7 +94,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 ViewData.Model = model;
                 
             }
-            //end of parsinbg the TF*IDF for the SEMEDICO results
 
             if (model == null || model.semanticComponent == null)
             {
@@ -339,7 +332,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             mappingDic = new Dictionary<string, List<OntologyMapping>>();
             List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
 
-            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
+            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
             ontologies.Add(new OntologyNamePair(path, "ADOntology"));
 
             //Just for testing purposes
@@ -838,8 +831,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             String param = ("?inputstring=" + searchTerm.Replace(", ", "+") + "&subsetstart=" + subsetStart + "&subsetsize=" + subsetSize);
             String output = null;
 
-            if (client.GetAsync(param).Result.StatusCode.ToString() == "200")
-                Debug.WriteLine("HAHAHAHAHAHAHAHAaaaaa");
             try
             {
                 HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
@@ -847,10 +838,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     // Get the response body. Blocking!
                     output = response.Content.ReadAsStringAsync().Result;
-
-                    // This is the processing of the TF*IDF terms for the SEMEDICO corpus results
-                    List<String> keywords_query = new List<String>();
-
                 }
             }
             catch (SocketException e)
