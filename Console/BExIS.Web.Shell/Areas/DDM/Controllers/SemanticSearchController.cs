@@ -104,8 +104,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             if ((searchSemantically != null) && (searchTerm != null))
             {
                 //Merge the results from the semantic search with the results from the normal bexis-search
-                //Alternative: Skip the merging: model.semanticComponent = semanticSearch(searchTerm);
-                model.semanticComponent = searchAndMerge(semanticSearch(searchTerm), searchTerm);
+                //Alternative: Skip the merging: 
+                model.semanticComponent = semanticSearch(searchTerm);
+                //model.semanticComponent = searchAndMerge(semanticSearch(searchTerm), searchTerm);
             }
 
             headerItems = makeHeader();
