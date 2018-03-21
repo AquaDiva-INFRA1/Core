@@ -256,6 +256,7 @@
     <Content Include="Views\UserPis\UserPis.cshtml" />
     <Content Include="Views\UserPis\_CreatePartial.cshtml" />
     <Content Include="Views\UserPis\_EditPartial.cshtml" />
+	<Content Include="Views\Datasets\Sync.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
