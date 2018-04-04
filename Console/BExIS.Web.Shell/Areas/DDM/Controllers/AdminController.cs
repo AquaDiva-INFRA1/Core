@@ -5,6 +5,7 @@ using BExIS.Utils.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Telerik.Web.Mvc;
@@ -31,6 +32,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         //[ActionName("configure")]
         public ActionResult SearchDesigner()
         {
+            if(GetUsernameOrDefault() == "DEFAULT")
+            {
+                return RedirectToAction( "Login", "Ldap", new RouteValueDictionary { { "area", "" } });
+            }
+
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Search", this.Session.GetTenant());
 
             try
@@ -366,6 +372,18 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         #endregion
 
+        // chekc if user exist
+        // if true return usernamem otherwise "DEFAULT"
+        public string GetUsernameOrDefault()
+        {
+            string username = string.Empty;
+            try
+            {
+                username = HttpContext.User.Identity.Name;
+            }
+            catch { }
 
+            return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
+        }
     }
 }
