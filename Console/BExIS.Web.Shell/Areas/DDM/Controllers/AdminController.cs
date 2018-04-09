@@ -32,11 +32,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         //[ActionName("configure")]
         public ActionResult SearchDesigner()
         {
-            if(GetUsernameOrDefault() == "DEFAULT")
-            {
-                return RedirectToAction( "Login", "Ldap", new RouteValueDictionary { { "area", "" } });
-            }
-
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Search", this.Session.GetTenant());
 
             try
