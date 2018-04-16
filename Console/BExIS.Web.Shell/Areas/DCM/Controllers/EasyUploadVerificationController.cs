@@ -54,23 +54,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 SelectVerificationModel model = new SelectVerificationModel();
 
                 //Grab all necessary managers and lists
-                //UnitManager unitManager = new UnitManager();
-                //this.Disposables.Add(unitManager);
-
-                //DataTypeManager dataTypeManager = new DataTypeManager();
-                //this.Disposables.Add(dataTypeManager);
 
                 tempUnitList = unitOfWork.GetReadOnlyRepository<Dlm.Entities.DataStructure.Unit>().Get().ToList();
                 allDataypes = unitOfWork.GetReadOnlyRepository<DataType>().Get().ToList();
                 allDataAttributes = unitOfWork.GetReadOnlyRepository<DataAttribute>().Get().ToList();
-
-
-
-                //DataStructureManager dsm = new DataStructureManager();
-                //this.Disposables.Add(dsm);
-
-                //DataContainerManager dam = new DataContainerManager();
-                //this.Disposables.Add(dam);
 
 
                 //Important for jumping back to this step

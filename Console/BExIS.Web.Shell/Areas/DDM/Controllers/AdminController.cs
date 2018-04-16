@@ -5,6 +5,7 @@ using BExIS.Utils.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Telerik.Web.Mvc;
@@ -232,8 +233,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Search", this.Session.GetTenant());
             ISearchDesigner sd = GetSearchDesigner();
-            sd.Reload();
-
+            try
+            {
+                sd.Reload();
+            }
+            catch (Exception ex)
+            {
+                ViewData.ModelState.AddModelError("", ex);
+            }
             //ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>() as ISearchProvider;
 
             //((SearchProvider)provider).RefreshIndex();
@@ -360,6 +367,18 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         #endregion
 
+        // chekc if user exist
+        // if true return usernamem otherwise "DEFAULT"
+        public string GetUsernameOrDefault()
+        {
+            string username = string.Empty;
+            try
+            {
+                username = HttpContext.User.Identity.Name;
+            }
+            catch { }
 
+            return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
+        }
     }
 }

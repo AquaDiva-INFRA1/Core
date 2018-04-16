@@ -1,0 +1,59 @@
+﻿@using Telerik.Web.Mvc.UI;
+
+<!--Search bar and search button-->
+<div id="searchHeader">
+    @using (Html.BeginForm("Index", "SemanticSearch", new { area = "DDM" }))
+    {
+        <table>
+            <tr>
+                <td>
+                    <!--Search bar-->
+                    @(Html.Telerik().AutoComplete().Multiple()
+                                    .Name("searchTerm")
+                                    .DataBinding(dataBinding => dataBinding
+                                        .Ajax().Select("getAutocompletionFromFile", "SemanticSearch")
+                                        .Cache(false))
+                                    .Filterable(filtering =>
+                                    {
+                                        filtering.FilterMode(AutoCompleteFilterMode.StartsWith);
+                                        filtering.MinimumChars(3);
+                                    })
+                    )
+                </td>
+                <td>
+                    <table id="checkboxTable">
+                        <tr>
+                            <td>
+                                <label>
+                                    <!--Checkbox to enable/disable semedico search-->
+                                    <input type="checkbox" name="searchSemedico" checked />
+                                    Search on Semedico
+                                </label>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <label>
+                                    <!--Checkbox to enable/disable semantic search-->
+                                    <input type="checkbox" name="searchSemantically" checked />
+                                    Search Data Portal
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <!--Search button-->
+                    <button class="bx-button function" type="submit">Search</button>
+                </td>
+            </tr>
+        </table>
+    }
+</div>
+
+<style>
+    #checkboxTable td {
+        border: none;
+    }
+</style>
