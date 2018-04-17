@@ -218,6 +218,14 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                     ImportSchema("GBIF", "eml.xsd", "Dataset", entity.Name, entity.EntityType.FullName, titleXPath,
                         descriptionXpath);
                 }
+
+                if (!metadataStructureManager.Repo.Get().Any(m => m.Name.Equals("idiv")))
+                {
+                    string titleXPath = "DatasetLevelMetadata/Dataset/Title";
+                    string descriptionXpath = "DatasetLevelMetadata/Dataset/Abstract";
+
+                    ImportSchema("idiv", "iDiv.xsd", "Dataset", entity.Name, entity.EntityType.FullName, titleXPath, descriptionXpath);
+                }
                 //if (!metadataStructureManager.Repo.Get().Any(m => m.Name.Equals("Basic Eml")))
                 //    ImportSchema("Basic Eml", "eml-dataset.xsd", entity.Name, entity.Name, entity.EntityType.FullName);
                 #endregion
