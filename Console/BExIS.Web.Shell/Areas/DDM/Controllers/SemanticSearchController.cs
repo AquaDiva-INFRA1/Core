@@ -26,6 +26,7 @@ using VDS.RDF.Query;
 using BExIS.Modules.Ddm.UI.Helpers;
 using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
+using Npgsql;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -92,7 +93,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 model.resultListComponent = semResult;
                 model.detailsComponent = null;
                 ViewData.Model = model;
-                
+
             }
 
             if (model == null || model.semanticComponent == null)
@@ -128,7 +129,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             int newSubsetSize = currentSubsetSize;
 
             string result = consumeSemedicoREST(searchTermString, newSubsetStart, newSubsetSize);
-            
+
             if (result == null)
             {
                 model.semedicoServerError = "An error occured when trying to connect to Semedico. Please try again later.";
@@ -501,7 +502,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 #endregion
 
                 #region Store autocompletion terms in file
-                
+
                 using (StreamWriter writer = new StreamWriter(autocompletionFilePath, false))
                 {
                     foreach (KeyValuePair<String, List<OntologyMapping>> kvp in mappingDic)
@@ -647,13 +648,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     if (mappingList.Count >= 1)
                     {
-                        
+
                         foreach (OntologyMapping mapping in mappingList)
                         {
                             paramBuilder.Append(mapping.getDisplayName() + "+" + mapping.getMappedConceptGroup() + "+"
                         + mapping.getMappedConceptUri() + "+" + mapping.getBaseUri());
                             paramBuilder.Append("--");
-                           
+
                         }
                     }
 
@@ -739,7 +740,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
                         dataset = datasetRepo.Get(datasetID);
                     }
-                    
+
                     if (dataset != null)
                     {
                         //Grab the Metadata
@@ -754,7 +755,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                         m.Rows.Add(row);
                     }
-                    
+
                 }
             }
             #endregion
@@ -815,7 +816,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return headerItems;
         }
-        
+
 
 
         /*
@@ -871,6 +872,127 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             Session[key] = value;
 
             return this.Json(new { success = true });
+        }
+
+
+
+        /*
+         * this is the Semedico API consumption for the preposed papers
+         * */
+        private String consumeSemedicoREST_v2(String query_String, int subsetStart = 1, int subsetSize = 10)
+        {
+            #region Http-Request
+            //Construct a HttpClient for the search-Server
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(semedicoSearchURL);
+            client.Timeout = TimeSpan.FromSeconds(30);
+            //Set the searchTerm as query-String
+            String param = ("?inputstring=" + query_String + "&subsetstart=" + subsetStart + "&subsetsize=" + subsetSize);
+            String output = null;
+
+            try
+            {
+                HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
+                if (response.IsSuccessStatusCode)
+                {
+                    // Get the response body. Blocking!
+                    output = response.Content.ReadAsStringAsync().Result;
+                }
+            }
+            catch (SocketException e)
+            {
+            }
+            catch (AggregateException e)
+            {
+                //Returning null if the timeout triggers
+                return null;
+            }
+
+            #endregion
+
+            return output;
+        }
+
+        public String Get_Label_from_entity_rdf(String entity)
+        {
+            SparqlParameterizedString queryString = new SparqlParameterizedString();
+
+            queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
+            queryString.Namespaces.AddNamespace("owl", new Uri("http://www.w3.org/2002/07/owl#"));
+            queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+            queryString.Namespaces.AddNamespace("entity", new Uri(entity));
+            queryString.CommandText = "SELECT ?label WHERE" +
+                " { " +
+                "<" + entity + "> rdfs:label ?label " +
+                "} ";
+
+            IGraph g = new Graph();
+            g.LoadFromFile(Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl"));
+            SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+            String res = "";
+            if (results.Count != 0)
+            {
+                res = results[0]["label"].ToString().Split('^')[0];
+            }
+            if (res.Contains("@"))
+                return res.Substring(0, res.IndexOf("@"));
+            return res;
+        }
+
+        private String get_observations_contextualized_contextualizing(String id)
+        {
+            String request_string = "";
+            String Conx = "Server=localhost;Port=5433;Database=bpp211;Userid=postgres;Password=1;Pooling=true;MinPoolSize=2;MaxPoolSize=100;ConnectionIdleLifetime=3600;";
+            NpgsqlCommand MyCmd = null;
+            NpgsqlConnection MyCnx = null;
+
+            MyCnx = new NpgsqlConnection(Conx);
+            MyCnx.Open();
+            string select = "SELECT * FROM \"observation_contexts\" WHERE datasets_id=" + id;
+            MyCmd = new NpgsqlCommand(select, MyCnx);
+
+            NpgsqlDataReader dr = MyCmd.ExecuteReader();
+            int line = 0;
+            if (dr != null)
+            {
+                while (dr.Read())
+                {
+                    if (dr["contextualized_entity"] != System.DBNull.Value)
+                    {
+                        var Datasetref = dr["datasets_id"].ToSafeString();
+                        var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
+                        var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
+                        var contextualized_entity_label = this.Get_Label_from_entity_rdf(contextualized_entity.Trim());
+                        var contextualizing_entity_label = this.Get_Label_from_entity_rdf(contextualizing_entity.Trim());
+                        request_string = request_string + contextualizing_entity_label + " of " + contextualized_entity_label + ",";
+                        Debug.WriteLine("Row processed  number : " + line); line++;
+                        Debug.WriteLine(request_string);
+                    }
+                }
+            }
+            MyCnx.Close();
+            return request_string.Substring(0, request_string.Length - 1);
+        }
+
+        public String get_dataset_related_papers_by_ID(String id)
+        {
+            /*
+            if (model.resultListComponent == null)
+            {
+                return JsonConvert.SerializeObject(null, Newtonsoft.Json.Formatting.Indented);
+            }
+            if (model.resultListComponent.searchTermString == null)
+            {
+                return JsonConvert.SerializeObject(null, Newtonsoft.Json.Formatting.Indented);
+            }
+            */
+            String Query_4_API = get_observations_contextualized_contextualizing(id);
+            Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
+            String Semedico_Result = consumeSemedicoREST_v2(Query_4_API);
+            return Semedico_Result;
+            return JsonConvert.SerializeObject(Semedico_Result, Newtonsoft.Json.Formatting.Indented);
+
+
         }
     }
 }
