@@ -140,8 +140,11 @@
 	        dataType: 'json',
 	        contentType: 'application/json; charset=utf-8',
 	        error: function (xhr) {
-	            alert('Error: ' + xhr.statusText);
-
+                var redirect = window.confirm('Please make sure you are logged in to access details of datasets.\n' +
+                    'Redirect to Login page? ');
+                if (redirect) {
+                    window.location.href = '/Ldap/Login';
+                }
 	        },
 	        success: function (result) {
 	            if (result) {
