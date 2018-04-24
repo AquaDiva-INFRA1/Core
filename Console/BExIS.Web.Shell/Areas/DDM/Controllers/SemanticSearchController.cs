@@ -942,13 +942,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         private String get_observations_contextualized_contextualizing(String id)
         {
             String request_string = "";
-            String Conx = "Server=localhost;Port=5433;Database=bpp211;Userid=postgres;Password=1;Pooling=true;MinPoolSize=2;MaxPoolSize=100;ConnectionIdleLifetime=3600;";
+            String Conx = "Server=localhost;Port=5433;Database=BPP211;Userid=postgres;Password=1;Pooling=true;MinPoolSize=2;MaxPoolSize=100;ConnectionIdleLifetime=3600;";
             NpgsqlCommand MyCmd = null;
             NpgsqlConnection MyCnx = null;
 
             MyCnx = new NpgsqlConnection(Conx);
             MyCnx.Open();
-            string select = "SELECT * FROM \"observation_contexts\" WHERE datasets_id=" + id;
+            string select = "SELECT * FROM \"observation_contexts_uri_label\" WHERE datasets_id=" + id;
             MyCmd = new NpgsqlCommand(select, MyCnx);
 
             NpgsqlDataReader dr = MyCmd.ExecuteReader();
@@ -962,8 +962,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         var Datasetref = dr["datasets_id"].ToSafeString();
                         var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
                         var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
-                        var contextualized_entity_label = this.Get_Label_from_entity_rdf(contextualized_entity.Trim());
-                        var contextualizing_entity_label = this.Get_Label_from_entity_rdf(contextualizing_entity.Trim());
+                        var contextualized_entity_label = (String)dr["contextualized_entity_label"].ToSafeString();
+                        //var contextualized_entity_label = this.Get_Label_from_entity_rdf(contextualized_entity.Trim());
+                        var contextualizing_entity_label = (String)dr["contextualizing_entity_label"].ToSafeString();
+                        //var contextualizing_entity_label = this.Get_Label_from_entity_rdf(contextualizing_entity.Trim());
                         request_string = request_string + contextualizing_entity_label + " of " + contextualized_entity_label + ",";
                         Debug.WriteLine("Row processed  number : " + line); line++;
                         Debug.WriteLine(request_string);
@@ -974,8 +976,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             return request_string.Substring(0, request_string.Length - 1);
         }
 
-        public String get_dataset_related_papers_by_ID(String id)
+        public String get_dataset_related_papers_by_ID(String id,String flag)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             /*
             if (model.resultListComponent == null)
             {
@@ -986,13 +989,107 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 return JsonConvert.SerializeObject(null, Newtonsoft.Json.Formatting.Indented);
             }
             */
-            String Query_4_API = get_observations_contextualized_contextualizing(id);
-            Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
-            String Semedico_Result = consumeSemedicoREST_v2(Query_4_API);
-            return Semedico_Result;
-            return JsonConvert.SerializeObject(Semedico_Result, Newtonsoft.Json.Formatting.Indented);
+            String Semedico_Result ="";
+            String Query_4_API;
 
+            if (id != "")
+            {
+                Query_4_API = get_observations_contextualized_contextualizing(id);
+                Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
+                Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
+                if (model.resultListComponent == null)
+                {
+                    model.resultListComponent = new SemedicoResultModel();
+                    model.resultListComponent.searchTermString = Query_4_API;
+                }
+            }
+            else {
+                if (flag == "nextpage")
+                {
+                    model.resultListComponent.subsetstart = model.resultListComponent.subsetstart + 10;
+                    Semedico_Result = consumeSemedicoREST_v2(model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 10);
+                    
+                }
+                else if (flag == "prevpage")
+                {
+                    model.resultListComponent.subsetstart = model.resultListComponent.subsetstart - 10;
+                    if (model.resultListComponent.subsetstart < 0)
+                    {
+                        model.resultListComponent.subsetstart = 0;
+                    }
+                    Semedico_Result = consumeSemedicoREST_v2(model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 10);
+                }
+            }
+
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Debug.WriteLine("Execution time (millisecondes) for DDM/get_dataset_related_papers_by_ID ==> " +elapsedMs);
+
+            return Semedico_Result;
 
         }
+
+
+        #region refresh the observation_contexts table to the observation_contexts_URI_label
+        public void insert_into_DB_URI_Label()
+        {
+            DatasetManager dsm = new DatasetManager();
+            List<Int64>  ds_ids = dsm.GetDatasetLatestIds(true);
+
+            String Conx = "Server=localhost;Port=5433;Database=BPP211;Userid=postgres;Password=1;Pooling=true;MinPoolSize=2;MaxPoolSize=100;ConnectionIdleLifetime=3600;";
+            
+            foreach (Int64 ds_id in ds_ids)
+            {
+                NpgsqlConnection MyCnx = new NpgsqlConnection(Conx);
+                MyCnx.Open();
+
+                string select = "SELECT * FROM \"observation_contexts\" WHERE datasets_id=" + ds_id;
+                NpgsqlCommand MyCmd = new NpgsqlCommand(select, MyCnx);
+
+                NpgsqlDataReader dr = MyCmd.ExecuteReader();
+                int line = 0;
+                if (dr != null)
+                {
+                    while (dr.Read())
+                    {
+                        if (dr["datasets_id"] != System.DBNull.Value)
+                        {
+                            var Datasetref = dr["datasets_id"].ToSafeString();
+                            var version_id = dr["version_id"].ToSafeString();
+                            var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
+                            var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
+                            var contextualized_entity_label = this.Get_Label_from_entity_rdf(contextualized_entity.Trim());
+                            var contextualizing_entity_label = this.Get_Label_from_entity_rdf(contextualizing_entity.Trim());
+                            var contextualized_entity_id = dr["contextualized_entity_id"].ToSafeString();
+                            var contextualizing_entity_id = dr["contextualizing_entity_id"].ToSafeString();
+
+                            if (contextualized_entity_id == "")
+                                contextualized_entity_id = "0";
+                            if (contextualizing_entity_id == "")
+                                contextualizing_entity_id = "0";
+
+                            Debug.WriteLine("Row processed  number : " + line); line++;
+
+                            string insert = "INSERT INTO observation_contexts_uri_label " +
+                                "VALUES (" + Datasetref + ", " + version_id + ",  \'" + clean_entity_URI_for_insert(contextualized_entity) + 
+                                "\' ,  \'" + contextualized_entity_label+ "\' ,  \'" + clean_entity_URI_for_insert(contextualizing_entity) + 
+                                "\' ,  \'" +contextualizing_entity_label+ "\' , " + contextualized_entity_id+ " , " + contextualizing_entity_id+ " )";
+
+                            NpgsqlConnection MyCnx2 = new NpgsqlConnection(Conx);
+                            MyCnx2.Open();
+                            NpgsqlCommand MyCmd2 = new NpgsqlCommand(insert, MyCnx2);
+                            MyCmd2.ExecuteNonQuery();
+                            MyCnx2.Close();
+                        }
+                    }
+                }
+                MyCnx.Close();
+            }
+        }
+        public string clean_entity_URI_for_insert(string uri)
+        {
+            return uri.Replace("'", "''");
+        }
+        #endregion
     }
 }

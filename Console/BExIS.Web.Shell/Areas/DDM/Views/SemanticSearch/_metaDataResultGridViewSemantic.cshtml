@@ -149,7 +149,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="Close_button">Close</button>
+                    <!--<button type="button" class="btn btn-secondary" data-dismiss="modal" id="Close_button">Close</button>-->
+                    <button id="previous" type="button" style="float: left" onclick="get_dataset_related_papers_by_ID('','nextpage')">
+                        <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Next
+                    </button>
+                    <button id="previous" type="button" style="float: right" onclick="get_dataset_related_papers_by_ID('','prevpage')">
+                        <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Previous
+                    </button>
                 </div>
             </div>
         </div>
@@ -229,9 +235,17 @@
         addTooltips();
     }
 
-
-    function get_dataset_related_papers_by_ID(e) {
-
+    function refresh_observation_context() {
+        $.ajax({
+            url: '/DDM/SemanticSearch/insert_into_DB_URI_Label',
+            type: 'GET',
+            success: function (result) {
+                alert("refresh successful");
+            }
+        })
+    }
+    
+    function get_dataset_related_papers_by_ID(e, behaviour) {
         document.addEventListener("click", handler, true);
 
         document.getElementById("spinner_").removeAttribute("hidden");
@@ -243,11 +257,14 @@
 
         $('#papers').hide();
 
-        var id = e.getAttribute("id");
+        var id = null;
+        if (e) {
+            id = e.getAttribute("id");
+        }
         $.ajax({
             url: '/DDM/SemanticSearch/get_dataset_related_papers_by_ID',
             type: 'POST',
-            data: { 'id': id },
+            data: { 'id': id , 'flag':behaviour},
             success: function (result) {
                 try {
                     res = JSON.parse(result);
@@ -255,7 +272,8 @@
                         var text = "<h3> This Dataset is not coming from the semantic search</h3> <h4>It is the result of the normal search</h4>";
                         $('#results').html(text);
                     } else {
-                        var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
+                        //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
+                        var text = "";
                         for (i = 0; i < res.bibliographylist.length; i++) {
                             text = text + "<li><strong>" + res.bibliographylist[i].articleTitle + "</strong></li></br>";
                             console.log("Article => " + res.bibliographylist[i].articleTitle);
