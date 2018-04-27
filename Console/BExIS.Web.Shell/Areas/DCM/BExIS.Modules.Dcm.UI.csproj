@@ -187,6 +187,9 @@
     <Compile Include="Helpers\DcmSeedDataGenerator.cs" />
     <Compile Include="Helpers\EasyUploadSuggestion.cs" />
     <Compile Include="Helpers\FormHelper.cs" />
+    <Compile Include="Helpers\JaroWinklerDistance.cs" />
+    <Compile Include="Models\OntologyMappingSuggestion.cs" />
+    <Compile Include="Helpers\VariableOntologyMapping.cs" />
     <Compile Include="Models\AbstractStepModel.cs" />
     <Compile Include="Models\ChooseDatasetViewModel.cs" />
     <Compile Include="Models\CreateDatasetViewModel.cs" />
@@ -531,6 +534,7 @@
     <Content Include="Views\EasyUploadSelectAreas\SelectAreas.cshtml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <Content Include="Views\CreateDataset\_PiPartial.cshtml" />
+    <Content Include="Views\EasyUploadVerification\_mappingSuggestionDropdowns.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

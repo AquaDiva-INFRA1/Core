@@ -5,7 +5,15 @@
 @using BExIS.Dlm.Entities.DataStructure;
 @using BExIS.Web.Shell.Areas.DCM.Helpers;
 
-
+<style>
+    .ontologyMapping select {
+        width: 50%
+    }
+    /*Overwriting the css of the wizard*/
+    #Step5 .uploadWizardStep_Main {
+        width: 90%
+    }
+</style>
 
 <div id="Step5" class="uploadWizardStep">
 
@@ -17,21 +25,22 @@
         <div class="uploadWizardStep_Description stepper">
         </div>
 
-        <div class="uploadWizardStep_Content stepper" style="height: inherit; width: 800px;">
-            <table>
+        <div class="uploadWizardStep_Content stepper" style="height: inherit;">
+            <table id="verificationTable">
                 <thead>
                     <tr>
                         <th>Variable name</th>
                         <th>Unit</th>
                         <th>Datatype</th>
                         <th>Datatype description</th>
+                        <th>Ontology mapping</th>
                     </tr>
                 </thead>
                 <tbody>
                     @for (int i = 0; i < Model.HeaderFields.Length; i++)
                     {
-                        <tr>
-                            <td varName="@Html.Name(Model.HeaderFields[i])" index=@i>
+                        <tr data-index=@i>
+                            <td>
                                 <i class="fa" aria-hidden="true" title=""></i>
 
                                 <!--Dropdown-Menu to choose a suggested Attribute from - unit and datatype stored in html-Attributes for usage in javascript-->
@@ -113,13 +122,15 @@
                                         }
                                         else
                                         {
-                                            <option value="none" title="Please select a unit">Please select an unit</option>
+                                            <option value="none" title="Please select a unit">Please select a unit</option>
                                         }
                                     }
                                 </select>
                             </td>
                             <td class="datatypeinfo">
                                 @Html.Raw(datatypeDescription)
+                            </td>
+                            <td class="ontologyMapping">
                             </td>
                         </tr>
                     }
@@ -188,7 +199,8 @@
                     var error = response.errors[i];
                     //var VariableName = error.VariableName;
                     //var TitleCell = $('td[varName="' + VariableName + '"] > i');
-                    var TitleCell = $('td[index="' + error.Item1 + '"] > i');
+                    console.log(error);
+                    var TitleCell = $('tr[data-index="' + error.Item1 + '"] td > i');
 
                     //Show a warning sign, hide check marks if they were visible before
                     TitleCell.removeClass("fa-check");
@@ -256,6 +268,20 @@
             $.post('@Url.Action("SaveDataTypeSelection", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })', { headerfieldId: headerfieldId, selectedDataTypeId: selectedDataTypeId }, function (response) {
                 $('#StepView > div').first().html(response);
             });
+        });
+
+        //Get the annotation suggestions from the server
+        $('#verificationTable tr').each(function (index) {
+            var headerItemIndex = $(this).data("index");
+
+            //Dirty workaround to get the value of the javascript variable into the generated URL
+            var url = '@Url.Action("GetMappingSuggestionDropdown", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" }, { "headerIndex", "-1" } })';
+            url = url.replace("-1", headerItemIndex);
+
+            //Show preloader
+            $(this).find(".ontologyMapping").preloader(12, "Loading mapping suggestions")
+            //Load and show mapping suggestion select-boxes
+            $(this).find(".ontologyMapping").load(url);
         });
     });
 

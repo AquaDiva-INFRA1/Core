@@ -1,0 +1,15 @@
+﻿@model Dictionary<string, List<BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel>>
+@foreach(string category in Model.Keys)
+{
+    //For each category, create a separate dropdown
+    <div style="display:block">
+        <label for="@category annotation">@category</label>
+        <select name="@category annotation">
+            @foreach(BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel suggestion in Model[category])
+            {
+                //For each suggestion create an option
+                <option title="@suggestion.conceptURI">@suggestion.displayName</option>
+            }
+        </select>
+    </div>
+}
