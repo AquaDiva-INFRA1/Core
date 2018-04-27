@@ -321,9 +321,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     XmlElement orderElement = xmldoc.CreateElement("order");
 
 
-                    List<Tuple<int, string, UnitInfo>> MappedHeaders = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                    List<EasyUploadVariableInformation> MappedHeaders = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
                     //Sorting necessary to prevent problems when inserting the tuples
-                    MappedHeaders.Sort((head1, head2) => head1.Item1.CompareTo(head2.Item1));
+                    MappedHeaders.Sort((head1, head2) => head1.headerId.CompareTo(head2.headerId));
                     List<VariableIdentifier> identifiers = new List<VariableIdentifier>();
 
                     var dataTypeRepo = unitOfWork.GetReadOnlyRepository<DataType>();
@@ -332,16 +332,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     List<DataAttribute> allDataAttributes = dataAttributeRepo.Get().ToList();
 
-                    foreach (Tuple<int, string, UnitInfo> Entry in MappedHeaders)
+                    foreach (EasyUploadVariableInformation Entry in MappedHeaders)
                     {
                         int i = MappedHeaders.IndexOf(Entry);
 
-                        DataType dataType = dataTypeRepo.Get(Entry.Item3.SelectedDataTypeId);
-                        Unit CurrentSelectedUnit = unitRepo.Get(Entry.Item3.UnitId);
+                        DataType dataType = dataTypeRepo.Get(Entry.unitInfo.SelectedDataTypeId);
+                        Unit CurrentSelectedUnit = unitRepo.Get(Entry.unitInfo.UnitId);
 
                         DataAttribute CurrentDataAttribute = new DataAttribute();
                         //If possible, map the chosen variable name, unit and datatype to an existing DataAttribute (Exact match)
-                        DataAttribute existingDataAttribute = allDataAttributes.Where(da => da.Name.ToLower().Equals(TrimAndLimitString(Entry.Item2).ToLower()) &&
+                        DataAttribute existingDataAttribute = allDataAttributes.Where(da => da.Name.ToLower().Equals(TrimAndLimitString(Entry.variableName).ToLower()) &&
                                                                                             da.DataType.Id == dataType.Id &&
                                                                                             da.Unit.Id == CurrentSelectedUnit.Id).FirstOrDefault();
                         if (existingDataAttribute != null)
@@ -351,10 +351,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         else
                         {
                             //No matching DataAttribute => Create a new one
-                            CurrentDataAttribute = dam.CreateDataAttribute(TrimAndLimitString(Entry.Item2), Entry.Item2, "", false, false, "", MeasurementScale.Categorial, DataContainerType.ReferenceType, "", dataType, CurrentSelectedUnit, null, null, null, null, null, null);
+                            CurrentDataAttribute = dam.CreateDataAttribute(TrimAndLimitString(Entry.variableName), Entry.variableName, "", false, false, "", MeasurementScale.Categorial, DataContainerType.ReferenceType, "", dataType, CurrentSelectedUnit, null, null, null, null, null, null);
                         }
 
-                        Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, Entry.Item2, "", "", "");
+                        Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, Entry.variableName, "", "", "");
                         VariableIdentifier vi = new VariableIdentifier
                         {
                             name = newVariable.Label,
@@ -630,8 +630,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 string[][] DeserializedJsonArray = JsonConvert.DeserializeObject<string[][]>(JsonArray);
 
                 List<Error> ErrorList = new List<Error>();
-                List<Tuple<int, string, UnitInfo>> MappedHeaders = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-                Tuple<int, string, UnitInfo>[] MappedHeadersArray = MappedHeaders.ToArray();
+                List<EasyUploadVariableInformation> MappedHeaders = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                EasyUploadVariableInformation[] MappedHeadersArray = MappedHeaders.ToArray();
 
 
                 List<string> DataArea = (List<string>)TaskManager.Bus[EasyUploadTaskManager.SHEET_DATA_AREA];
@@ -654,17 +654,17 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             int SelectedX = x - (IntDataArea[1]);
                             string vv = DeserializedJsonArray[y][x];
 
-                            Tuple<int, string, UnitInfo> mappedHeader = MappedHeaders.Where(t => t.Item1 == SelectedX).FirstOrDefault();
+                            EasyUploadVariableInformation mappedHeader = MappedHeaders.Where(t => t.headerId == SelectedX).FirstOrDefault();
 
                             DataType datatype = null;
 
-                            if (mappedHeader.Item3.SelectedDataTypeId == -1)
+                            if (mappedHeader.unitInfo.SelectedDataTypeId == -1)
                             {
-                                datatype = dtm.Repo.Get(mappedHeader.Item3.DataTypeInfos.FirstOrDefault().DataTypeId);
+                                datatype = dtm.Repo.Get(mappedHeader.unitInfo.DataTypeInfos.FirstOrDefault().DataTypeId);
                             }
                             else
                             {
-                                datatype = dtm.Repo.Get(mappedHeader.Item3.SelectedDataTypeId);
+                                datatype = dtm.Repo.Get(mappedHeader.unitInfo.SelectedDataTypeId);
                             }
 
                             string datatypeName = datatype.SystemType;
@@ -676,16 +676,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             {
                                 if (vv.Contains("."))
                                 {
-                                    dtc = new DataTypeCheck(mappedHeader.Item2, datatypeName, DecimalCharacter.point);
+                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
                                 }
                                 else
                                 {
-                                    dtc = new DataTypeCheck(mappedHeader.Item2, datatypeName, DecimalCharacter.comma);
+                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.comma);
                                 }
                             }
                             else
                             {
-                                dtc = new DataTypeCheck(mappedHeader.Item2, datatypeName, DecimalCharacter.point);
+                                dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
                             }
 
                             var ValidationResult = dtc.Execute(vv, y);
