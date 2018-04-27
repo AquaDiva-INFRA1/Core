@@ -58,10 +58,10 @@
                                             string selected = "";
                                             if (Model.AssignedHeaderUnits.Count > 0)
                                             {
-                                                Tuple<int, String, UnitInfo> tuple = Model.AssignedHeaderUnits.Where(t => (t.Item1 == i) &&
-                                                                                                                    (t.Item2 == sug.attributeName) &&
-                                                                                                                    (t.Item3.UnitId == sug.unitID) &&
-                                                                                                                    (t.Item3.SelectedDataTypeId == sug.dataTypeID)).FirstOrDefault();
+                                                EasyUploadVariableInformation tuple = Model.AssignedHeaderUnits.Where(t => (t.headerId == i) &&
+                                                                                                                    (t.variableName == sug.attributeName) &&
+                                                                                                                    (t.unitInfo.UnitId == sug.unitID) &&
+                                                                                                                    (t.unitInfo.SelectedDataTypeId == sug.dataTypeID)).FirstOrDefault();
                                                 if (tuple != null)
                                                 {
                                                     selected = "selected";
@@ -85,7 +85,7 @@
 
                                         if (Model.AssignedHeaderUnits.Count > 0)
                                         {
-                                            Tuple<int, String, UnitInfo> tuple = Model.AssignedHeaderUnits.Where(t => t.Item3.UnitId == unit.UnitId && t.Item1 == i).FirstOrDefault();
+                                            EasyUploadVariableInformation tuple = Model.AssignedHeaderUnits.Where(t => t.unitInfo.UnitId == unit.UnitId && t.headerId == i).FirstOrDefault();
 
                                             if (tuple != null)
                                             {
@@ -102,16 +102,16 @@
                                 <select style="width: 80%" name="Datatype" headerfieldId="@(i)"  onfocus="deselect(this)" onblur="reselect(this)">
                                     @{
 
-                                        Tuple<int, String, UnitInfo> tupleBla = Model.AssignedHeaderUnits.Where(t => t.Item1 == i).FirstOrDefault();
+                                        EasyUploadVariableInformation tupleBla = Model.AssignedHeaderUnits.Where(t => t.headerId == i).FirstOrDefault();
                                         string datatypeDescription = "";
 
-                                        if (tupleBla != null && tupleBla.Item3.UnitId >= 0)
+                                        if (tupleBla != null && tupleBla.unitInfo.UnitId >= 0)
                                         {
-                                            foreach (DataTypeInfo dataTypeInfo in ((UnitInfo)tupleBla.Item3).DataTypeInfos)
+                                            foreach (DataTypeInfo dataTypeInfo in ((UnitInfo)tupleBla.unitInfo).DataTypeInfos)
                                             {
                                                 string selected = "";
 
-                                                if (tupleBla.Item3.SelectedDataTypeId == dataTypeInfo.DataTypeId)
+                                                if (tupleBla.unitInfo.SelectedDataTypeId == dataTypeInfo.DataTypeId)
                                                 {
                                                     selected = "selected";
                                                     datatypeDescription = dataTypeInfo.Description;

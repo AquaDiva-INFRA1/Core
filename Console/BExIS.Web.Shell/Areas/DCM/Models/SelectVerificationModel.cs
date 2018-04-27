@@ -13,7 +13,7 @@ namespace BExIS.Modules.Dcm.UI.Models
         public String[] HeaderFields { get; set; }
         public Dictionary<int, List<EasyUploadSuggestion>> Suggestions { get; set; } //Item1 = Attribute Name, Item2 = UnitID, Item3 = DataTypeID, Item4 = Unit Name, Item5 = DataType
         public List<UnitInfo> AvailableUnits { get; set; }
-        public List<Tuple<int, string, UnitInfo>> AssignedHeaderUnits { get; set; }
+        public List<EasyUploadVariableInformation> AssignedHeaderUnits { get; set; }
 
         public List<Error> ErrorList { get; set; }
 
@@ -21,7 +21,7 @@ namespace BExIS.Modules.Dcm.UI.Models
         {
             ErrorList = new List<Error>();
             AvailableUnits = new List<UnitInfo>();
-            AssignedHeaderUnits = new List<Tuple<int, string, UnitInfo>>();
+            AssignedHeaderUnits = new List<EasyUploadVariableInformation>();
         }
     }
 

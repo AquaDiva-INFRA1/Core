@@ -66,7 +66,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 //Important for jumping back to this step
                 if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
                 {
-                    model.AssignedHeaderUnits = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                    model.AssignedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
                 }
 
                 // get all DataTypes for each Units
@@ -184,9 +184,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
                     ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
 
-                    if (model.AssignedHeaderUnits.Where(t => t.Item1 == i).FirstOrDefault() == null)
+                    if (model.AssignedHeaderUnits.Where(t => t.headerId == i).FirstOrDefault() == null)
                     {
-                        model.AssignedHeaderUnits.Add(new Tuple<int, string, UnitInfo>(i, model.HeaderFields[i], currentUnitInfo));
+                        model.AssignedHeaderUnits.Add(new EasyUploadVariableInformation(i, model.HeaderFields[i], currentUnitInfo));
                     }
 
                     #region suggestions
@@ -248,16 +248,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
                 {
-                    List<Tuple<int, String, UnitInfo>> mappedHeaderUnits = (List<Tuple<int, String, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-                    //Moved handling of this case to SaveUnitSelection, just leaving it here in case of problems: 
-                    /*foreach (Tuple<int, String, UnitInfo> tuple in mappedHeaderUnits)
-                    {
-                        
-                        if (tuple.Item3.SelectedDataTypeId < 0)
-                        {
-                            tuple.Item3.SelectedDataTypeId = tuple.Item3.DataTypeInfos.FirstOrDefault().DataTypeId;
-                        }
-                    }*/
+                    List<EasyUploadVariableInformation> mappedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+
                     model.AssignedHeaderUnits = mappedHeaderUnits;
 
                     TaskManager.Current().SetValid(true);
@@ -308,12 +300,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             //Get variable name, unit and datatype for matching purposes
             TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-            List<Tuple<int, string, UnitInfo>> variableInformationList = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-            Tuple<int, string, UnitInfo> variableInformation = variableInformationList.Where(el => el.Item1 == headerIndex).FirstOrDefault();
-            string variableName = variableInformation.Item2;
-            string unit = variableInformation.Item3.Name;
+            List<EasyUploadVariableInformation> variableInformationList = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+            EasyUploadVariableInformation variableInformation = variableInformationList.Where(el => el.headerId == headerIndex).FirstOrDefault();
+            string variableName = variableInformation.variableName;
+            string unit = variableInformation.unitInfo.Name;
             //Why does this have to be so complicated...?
-            string datatype = variableInformation.Item3.DataTypeInfos.Where(dti => dti.DataTypeId == variableInformation.Item3.SelectedDataTypeId).FirstOrDefault().Name;
+            string datatype = variableInformation.unitInfo.DataTypeInfos.Where(dti => dti.DataTypeId == variableInformation.unitInfo.SelectedDataTypeId).FirstOrDefault().Name;
             Session["TaskManager"] = TaskManager;
             return PartialView("_mappingSuggestionDropdowns", GenerateOntologyMapping(variableName, datatype, unit));
         }
@@ -345,7 +337,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
             {
-                model.AssignedHeaderUnits = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                model.AssignedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             }
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS))
@@ -365,12 +357,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 string currentHeader = headerFields.ElementAt((int)selectFieldId);
                 UnitInfo currentUnit = availableUnits.Where(u => u.UnitId == selectOptionId).FirstOrDefault();
 
-                Tuple<int, string, UnitInfo> existingTuple = model.AssignedHeaderUnits.Where(t => t.Item1 == (int)selectFieldId).FirstOrDefault();
-                if (existingTuple != null)
+                EasyUploadVariableInformation existingInformation = model.AssignedHeaderUnits.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
+                if (existingInformation != null)
                 {
-                    model.AssignedHeaderUnits.Remove(existingTuple);
+                    model.AssignedHeaderUnits.Remove(existingInformation);
                 }
-                model.AssignedHeaderUnits.Add(new Tuple<int, string, UnitInfo>((int)selectFieldId, currentHeader, currentUnit));
+                model.AssignedHeaderUnits.Add(new EasyUploadVariableInformation((int)selectFieldId, currentHeader, currentUnit));
 
                 //Set the Datatype to the first one suitable for the selected unit
                 if (currentUnit.SelectedDataTypeId < 0)
@@ -490,20 +482,20 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
             {
-                model.AssignedHeaderUnits = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                model.AssignedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             }
 
             //Reset the name of the variable and save the new Datatype
             string[] headerFields = (string[])TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_HEADERFIELDS];
             string currentHeader = headerFields.ElementAt((int)selectFieldId);
-            Tuple<int, string, UnitInfo> existingTuple = model.AssignedHeaderUnits.Where(t => t.Item1 == selectFieldId).FirstOrDefault();
+            EasyUploadVariableInformation existingInformation = model.AssignedHeaderUnits.Where(t => t.headerId == selectFieldId).FirstOrDefault();
 
-            existingTuple = new Tuple<int, string, UnitInfo>(existingTuple.Item1, existingTuple.Item2, (UnitInfo)existingTuple.Item3.Clone());
+            existingInformation = new EasyUploadVariableInformation(existingInformation.headerId, existingInformation.variableName, (UnitInfo)existingInformation.unitInfo.Clone());
 
-            int j = model.AssignedHeaderUnits.FindIndex(i => ((i.Item1 == existingTuple.Item1)));
+            int j = model.AssignedHeaderUnits.FindIndex(i => ((i.headerId == existingInformation.headerId)));
 
-            model.AssignedHeaderUnits[j] = new Tuple<int, string, UnitInfo>(existingTuple.Item1, currentHeader, existingTuple.Item3);
-            model.AssignedHeaderUnits[j].Item3.SelectedDataTypeId = Convert.ToInt32(selectedDataTypeId);
+            model.AssignedHeaderUnits[j] = new EasyUploadVariableInformation(existingInformation.headerId, currentHeader, existingInformation.unitInfo);
+            model.AssignedHeaderUnits[j].unitInfo.SelectedDataTypeId = Convert.ToInt32(selectedDataTypeId);
 
             TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.AssignedHeaderUnits);
 
@@ -596,7 +588,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
             {
-                model.AssignedHeaderUnits = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                model.AssignedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             }
 
             /*
@@ -605,10 +597,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             if (selectFieldId != null)
             {
                 //Find the position of the Tuple that is about to be changed
-                Tuple<int, string, UnitInfo> exTuple = model.AssignedHeaderUnits.Where(t => t.Item1 == selectFieldId).FirstOrDefault();
-                int i = model.AssignedHeaderUnits.FindIndex(t => t.Equals(exTuple));
+                EasyUploadVariableInformation existingInformation = model.AssignedHeaderUnits.Where(t => t.headerId == selectFieldId).FirstOrDefault();
+                int i = model.AssignedHeaderUnits.FindIndex(t => t.Equals(existingInformation));
                 //Insert a new Tuple at this position
-                model.AssignedHeaderUnits[i] = new Tuple<int, string, UnitInfo>(exTuple.Item1, selectedVariableName, exTuple.Item3);
+                model.AssignedHeaderUnits[i] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, existingInformation.unitInfo);
             }
 
 
@@ -623,10 +615,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 currentUnit.SelectedDataTypeId = Convert.ToInt32(selectedDatatypeId);
 
                 //Find the index of the suggestion that is about to be changed
-                Tuple<int, string, UnitInfo> existingTuple = model.AssignedHeaderUnits.Where(t => t.Item1 == (int)selectFieldId).FirstOrDefault();
-                int j = model.AssignedHeaderUnits.FindIndex(t => t.Equals(existingTuple));
+                EasyUploadVariableInformation existingInformation = model.AssignedHeaderUnits.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
+                int j = model.AssignedHeaderUnits.FindIndex(t => t.Equals(existingInformation));
                 //Save the new unit with the new datatype
-                model.AssignedHeaderUnits[j] = new Tuple<int, string, UnitInfo>(existingTuple.Item1, selectedVariableName, currentUnit);
+                model.AssignedHeaderUnits[j] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, currentUnit);
             }
 
             TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.AssignedHeaderUnits);
@@ -790,8 +782,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 string[][] DeserializedJsonArray = JsonConvert.DeserializeObject<string[][]>(JsonArray);
 
                 List<Tuple<int, Error>> ErrorList = new List<Tuple<int, Error>>();
-                List<Tuple<int, string, UnitInfo>> MappedHeaders = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-                Tuple<int, string, UnitInfo>[] MappedHeadersArray = MappedHeaders.ToArray();
+                List<EasyUploadVariableInformation> MappedHeaders = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                EasyUploadVariableInformation[] MappedHeadersArray = MappedHeaders.ToArray();
 
 
                 List<string> DataArea = (List<string>)TaskManager.Bus[EasyUploadTaskManager.SHEET_DATA_AREA];
@@ -814,10 +806,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             int SelectedX = x - (IntDataArea[1]);
                             string vv = DeserializedJsonArray[y][x];
 
-                            Tuple<int, string, UnitInfo> mappedHeader = MappedHeaders.Where(t => t.Item1 == SelectedX).FirstOrDefault();
+                            EasyUploadVariableInformation mappedHeader = MappedHeaders.Where(t => t.headerId == SelectedX).FirstOrDefault();
 
                             DataType datatype = null;
-                            datatype = dtm.Repo.Get(mappedHeader.Item3.SelectedDataTypeId);
+                            datatype = dtm.Repo.Get(mappedHeader.unitInfo.SelectedDataTypeId);
                             string datatypeName = datatype.SystemType;
 
                             #region DataTypeCheck
@@ -827,16 +819,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             {
                                 if (vv.Contains("."))
                                 {
-                                    dtc = new DataTypeCheck(mappedHeader.Item2, datatypeName, DecimalCharacter.point);
+                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
                                 }
                                 else
                                 {
-                                    dtc = new DataTypeCheck(mappedHeader.Item2, datatypeName, DecimalCharacter.comma);
+                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.comma);
                                 }
                             }
                             else
                             {
-                                dtc = new DataTypeCheck(mappedHeader.Item2, datatypeName, DecimalCharacter.point);
+                                dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
                             }
                             #endregion
 
