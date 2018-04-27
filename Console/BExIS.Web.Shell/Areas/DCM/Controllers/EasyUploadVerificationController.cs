@@ -5,6 +5,7 @@ using BExIS.Dlm.Services.DataStructure;
 using BExIS.IO;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.IO.Transform.Validation.ValueCheck;
+using BExIS.Modules.Dcm.UI.Helpers;
 using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Utils.Models;
 using BExIS.Web.Shell.Areas.DCM.Helpers;
@@ -18,6 +19,7 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.UI.WebControls;
 using Vaiona.Persistence.Api;
+using Vaiona.Utils.Cfg;
 using Vaiona.Web.Mvc;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
@@ -25,6 +27,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
     public class EasyUploadVerificationController : BaseController
     {
         private EasyUploadTaskManager TaskManager;
+        static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
 
         //
         // GET: /DCM/SubmitSelectAreas/
@@ -300,6 +303,21 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             return PartialView(model);
         }
 
+        [HttpGet]
+        public ActionResult GetMappingSuggestionDropdown(int headerIndex)
+        {
+            //Get variable name, unit and datatype for matching purposes
+            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+            List<Tuple<int, string, UnitInfo>> variableInformationList = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+            Tuple<int, string, UnitInfo> variableInformation = variableInformationList.Where(el => el.Item1 == headerIndex).FirstOrDefault();
+            string variableName = variableInformation.Item2;
+            string unit = variableInformation.Item3.Name;
+            //Why does this have to be so complicated...?
+            string datatype = variableInformation.Item3.DataTypeInfos.Where(dti => dti.DataTypeId == variableInformation.Item3.SelectedDataTypeId).FirstOrDefault().Name;
+            Session["TaskManager"] = TaskManager;
+            return PartialView("_mappingSuggestionDropdowns", GenerateOntologyMapping(variableName, datatype, unit));
+        }
+
         [HttpPost]
         public ActionResult SaveUnitSelection()
         {
@@ -413,6 +431,33 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             return PartialView("Verification", model);
 
+        }
+
+        [HttpPost]
+        public ActionResult SaveAnnotationSelection()
+        {
+            int? selectFieldId = null;
+            string selectedAnnotationCategory = null;
+            int? selectedAnnotationURI = null;
+
+            //Keys submitted by Javascript in _mappingSuggestionDropdowns.cshtml
+            foreach (string key in Request.Form.AllKeys)
+            {
+                if ("headerfieldId" == key)
+                {
+                    selectFieldId = Convert.ToInt32(Request.Form[key]);
+                }
+                if ("selectedAnnotationCategory" == key)
+                {
+                    selectedAnnotationCategory = Request.Form[key];
+                }
+                if ("selectedAnnotationURI" == key)
+                {
+                    selectedAnnotationURI = Convert.ToInt32(Request.Form[key]);
+                }
+            }
+            //TODO Finish this function
+            return null;
         }
 
         /*
@@ -891,7 +936,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             {
                 if (!(a.Length == 0 || b.Length == 0))
                 {
-                    double sim = 1 - (levenshtein(a, b) / Convert.ToDouble(Math.Min(a.Length, b.Length)));
+                    double sim = 1 - (levenshtein(a, b) / Convert.ToDouble(Math.Max(a.Length, b.Length)));
                     return sim;
                 }
                 else
@@ -940,6 +985,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             similarities.Add(similarityLevenshtein(a, b));
             similarities.Add(similarityDiceCoefficient(a, b));
+            similarities.Add(JaroWinklerDistance.proximity(a, b));
 
             foreach (double sim in similarities)
             {
@@ -949,6 +995,63 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             return output / similarities.Count;
         }
 
+        /// <summary>
+        /// Generates, for a given variable (name, datatype, unit), sorted lists of entities/characteristics 
+        /// from the ontology that can be used for the annotation.
+        /// </summary>
+        /// <param name="variableIndex">Index of the header that is currently chosen</param>
+        /// <param name="variableName">Name of the variable that was picked for this header</param>
+        /// <param name="datatype">Currently selected datatype</param>
+        /// <param name="unit">Currently selected unit</param>
+        /// <returns>Dictionary with the category (Entity/Characteristic) as key and a (sorted) list of possible annotations as value</returns>
+        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(string variableName, string datatype, string unit)
+        {
+            //Order entire lists of entitites and characteristics according to a mapping metric
+            //For now: Just use a string similarity
+            List<String> ontologyTerms = global::System.IO.File.ReadAllLines(autocompletionFilePath).ToList<String>();
+            Dictionary<string, List<OntologyMappingSuggestionModel>> output = new Dictionary<string, List<OntologyMappingSuggestionModel>>();
+            string informationSeparator = "";
+            for (int i = 0; i < ontologyTerms.Count; i++)
+            {
+                if (i == 0)
+                {
+                    //First line, read the separator
+                    informationSeparator = ontologyTerms.ElementAt(i);
+                }
+                if (i >= 1)
+                {
+                    string entry = ontologyTerms.ElementAt(i);
+                    //Split entry into display name, uri and concept group
+                    string[] splitEntry = entry.Split(new string[] { informationSeparator }, StringSplitOptions.RemoveEmptyEntries);
+                    if(splitEntry.Length == 3)
+                    {
+                        string label = splitEntry[0];
+                        string uri = splitEntry[1];
+                        string category = splitEntry[2];
+
+                        if (!output.ContainsKey(category))
+                        {
+                            output.Add(category, new List<OntologyMappingSuggestionModel>());
+                        }
+
+                        //Calculate the similarity
+                        output[category].Add(new OntologyMappingSuggestionModel(uri, label, similarity(variableName, label)));
+                    }
+                    else
+                    {
+                        throw new Exception("Invalid entry in autocomplete file!");
+                    }
+                }
+            }
+            //Order suggested mappings according to their similarity
+            List<String> keys = new List<String>(output.Keys);
+            foreach(string key in keys)
+            {
+                List<OntologyMappingSuggestionModel> tmp = output[key];
+                output[key] = tmp.OrderByDescending(el => el.similarity).Take(50).ToList();
+            }
+            return output;
+        }
         #endregion
     }
 }
