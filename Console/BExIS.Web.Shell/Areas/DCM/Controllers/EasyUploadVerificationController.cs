@@ -66,7 +66,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 //Important for jumping back to this step
                 if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
                 {
-                    model.AssignedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                    model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
                 }
 
                 // get all DataTypes for each Units
@@ -184,9 +184,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
                     ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
 
-                    if (model.AssignedHeaderUnits.Where(t => t.headerId == i).FirstOrDefault() == null)
+                    if (model.HeaderVariableInformation.Where(t => t.headerId == i).FirstOrDefault() == null)
                     {
-                        model.AssignedHeaderUnits.Add(new EasyUploadVariableInformation(i, model.HeaderFields[i], currentUnitInfo));
+                        model.HeaderVariableInformation.Add(new EasyUploadVariableInformation(i, model.HeaderFields[i], currentUnitInfo));
                     }
 
                     #region suggestions
@@ -219,7 +219,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS, model.Suggestions);
 
-                TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.AssignedHeaderUnits);
+                TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
 
                 // when jumping back to this step
                 if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.SHEET_JSON_DATA))
@@ -250,7 +250,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 {
                     List<EasyUploadVariableInformation> mappedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
 
-                    model.AssignedHeaderUnits = mappedHeaderUnits;
+                    model.HeaderVariableInformation = mappedHeaderUnits;
 
                     TaskManager.Current().SetValid(true);
                 }
@@ -337,7 +337,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
             {
-                model.AssignedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             }
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS))
@@ -357,12 +357,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 string currentHeader = headerFields.ElementAt((int)selectFieldId);
                 UnitInfo currentUnit = availableUnits.Where(u => u.UnitId == selectOptionId).FirstOrDefault();
 
-                EasyUploadVariableInformation existingInformation = model.AssignedHeaderUnits.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
+                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
                 if (existingInformation != null)
                 {
-                    model.AssignedHeaderUnits.Remove(existingInformation);
+                    model.HeaderVariableInformation.Remove(existingInformation);
                 }
-                model.AssignedHeaderUnits.Add(new EasyUploadVariableInformation((int)selectFieldId, currentHeader, currentUnit));
+                model.HeaderVariableInformation.Add(new EasyUploadVariableInformation((int)selectFieldId, currentHeader, currentUnit));
 
                 //Set the Datatype to the first one suitable for the selected unit
                 if (currentUnit.SelectedDataTypeId < 0)
@@ -385,7 +385,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 }
             }
 
-            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.AssignedHeaderUnits);
+            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
             {
@@ -482,22 +482,22 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
             {
-                model.AssignedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             }
 
             //Reset the name of the variable and save the new Datatype
             string[] headerFields = (string[])TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_HEADERFIELDS];
             string currentHeader = headerFields.ElementAt((int)selectFieldId);
-            EasyUploadVariableInformation existingInformation = model.AssignedHeaderUnits.Where(t => t.headerId == selectFieldId).FirstOrDefault();
+            EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == selectFieldId).FirstOrDefault();
 
             existingInformation = new EasyUploadVariableInformation(existingInformation.headerId, existingInformation.variableName, (UnitInfo)existingInformation.unitInfo.Clone());
 
-            int j = model.AssignedHeaderUnits.FindIndex(i => ((i.headerId == existingInformation.headerId)));
+            int j = model.HeaderVariableInformation.FindIndex(i => ((i.headerId == existingInformation.headerId)));
 
-            model.AssignedHeaderUnits[j] = new EasyUploadVariableInformation(existingInformation.headerId, currentHeader, existingInformation.unitInfo);
-            model.AssignedHeaderUnits[j].unitInfo.SelectedDataTypeId = Convert.ToInt32(selectedDataTypeId);
+            model.HeaderVariableInformation[j] = new EasyUploadVariableInformation(existingInformation.headerId, currentHeader, existingInformation.unitInfo);
+            model.HeaderVariableInformation[j].unitInfo.SelectedDataTypeId = Convert.ToInt32(selectedDataTypeId);
 
-            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.AssignedHeaderUnits);
+            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
             {
@@ -588,7 +588,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
             {
-                model.AssignedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             }
 
             /*
@@ -597,10 +597,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             if (selectFieldId != null)
             {
                 //Find the position of the Tuple that is about to be changed
-                EasyUploadVariableInformation existingInformation = model.AssignedHeaderUnits.Where(t => t.headerId == selectFieldId).FirstOrDefault();
-                int i = model.AssignedHeaderUnits.FindIndex(t => t.Equals(existingInformation));
+                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == selectFieldId).FirstOrDefault();
+                int i = model.HeaderVariableInformation.FindIndex(t => t.Equals(existingInformation));
                 //Insert a new Tuple at this position
-                model.AssignedHeaderUnits[i] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, existingInformation.unitInfo);
+                model.HeaderVariableInformation[i] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, existingInformation.unitInfo);
             }
 
 
@@ -615,13 +615,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 currentUnit.SelectedDataTypeId = Convert.ToInt32(selectedDatatypeId);
 
                 //Find the index of the suggestion that is about to be changed
-                EasyUploadVariableInformation existingInformation = model.AssignedHeaderUnits.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
-                int j = model.AssignedHeaderUnits.FindIndex(t => t.Equals(existingInformation));
+                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
+                int j = model.HeaderVariableInformation.FindIndex(t => t.Equals(existingInformation));
                 //Save the new unit with the new datatype
-                model.AssignedHeaderUnits[j] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, currentUnit);
+                model.HeaderVariableInformation[j] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, currentUnit);
             }
 
-            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.AssignedHeaderUnits);
+            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
 
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
             {
