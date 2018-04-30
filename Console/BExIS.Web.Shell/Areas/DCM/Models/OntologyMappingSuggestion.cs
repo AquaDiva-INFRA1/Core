@@ -18,4 +18,19 @@ namespace BExIS.Modules.Dcm.UI.Models
             this.similarity = sim;
         }
     }
+
+    /*
+     * Class for saving the selected annotation in the bus
+     * */
+    public class OntologyAnnotation
+    {
+        string conceptURI;
+        public int headerID;
+
+        public OntologyAnnotation(string conceptURI, int headerID)
+        {
+            this.conceptURI = conceptURI;
+            this.headerID = headerID;
+        }
+    }
 }

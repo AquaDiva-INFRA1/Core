@@ -430,31 +430,42 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             int? selectFieldId = null;
             string selectedAnnotationCategory = null;
-            int? selectedAnnotationURI = null;
+            string selectedAnnotationURI = null;
 
             //Keys submitted by Javascript in _mappingSuggestionDropdowns.cshtml
             foreach (string key in Request.Form.AllKeys)
             {
-                if ("headerfieldId" == key)
+                if ("headerID" == key)
                 {
                     selectFieldId = Convert.ToInt32(Request.Form[key]);
                 }
-                if ("selectedAnnotationCategory" == key)
+                if ("uri" == key)
                 {
-                    selectedAnnotationCategory = Request.Form[key];
-                }
-                if ("selectedAnnotationURI" == key)
-                {
-                    selectedAnnotationURI = Convert.ToInt32(Request.Form[key]);
+                    selectedAnnotationURI = Request.Form[key];
                 }
             }
-            //TODO Finish this function
+
+            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+
+            List<OntologyAnnotation> currentAnnotations;
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
+            {
+                currentAnnotations = (List<OntologyAnnotation>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
+            }
+            else
+            {
+                currentAnnotations = new List<OntologyAnnotation>();
+            }
+            currentAnnotations.Add(new OntologyAnnotation(selectedAnnotationURI, (int) selectFieldId));
+            TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING] = currentAnnotations;
+
+            Session["TaskManager"] = TaskManager;
             return null;
         }
 
         /*
- * Saves the selected datatype in the MappedheaderUnits and saves them on the bus
- * */
+         * Saves the selected datatype in the MappedheaderUnits and saves them on the bus
+         * */
         [HttpPost]
         public ActionResult SaveDataTypeSelection()
         {

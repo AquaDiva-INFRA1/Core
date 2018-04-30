@@ -52,6 +52,7 @@ namespace BExIS.Dcm.UploadWizard
         public static string VERIFICATION_HEADERFIELDS = "VerificationHeaderFields";
         public static string VERIFICATION_MAPPEDHEADERUNITS = "VerificationMappedHeaderUnits";
         public static string VERIFICATION_ATTRIBUTESUGGESTIONS = "VerificationAttributeSuggestions";
+        public static string ANNOTATIONMAPPING = "AnnotationMapping";
 
         public static string NUMBERSOFROWS = "NUMBERSOFROWS";
         public static string CURRENTPACKAGE = "CURRENTPACKAGE";
