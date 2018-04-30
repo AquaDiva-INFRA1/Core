@@ -2,7 +2,7 @@
 @foreach(string category in Model.Keys)
 {
     //For each category, create a separate dropdown
-    <div style="display:block">
+    <div class="suggestionContainer">
         <label for="@category annotation">@category</label>
         <select name="@category annotation">
             @foreach(BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel suggestion in Model[category])
@@ -13,3 +13,16 @@
         </select>
     </div>
 }
+
+<style>
+    .suggestionContainer{
+        display: block;
+    }
+    .suggestionContainer label {
+        float: left;
+        clear: left;
+    }
+    .suggestionContainer select{
+        float: right;
+    }
+</style>
