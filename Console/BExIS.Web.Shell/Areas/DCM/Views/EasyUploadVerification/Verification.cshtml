@@ -56,9 +56,9 @@
                                         if (@sug.show)
                                         {
                                             string selected = "";
-                                            if (Model.AssignedHeaderUnits.Count > 0)
+                                            if (Model.HeaderVariableInformation.Count > 0)
                                             {
-                                                EasyUploadVariableInformation tuple = Model.AssignedHeaderUnits.Where(t => (t.headerId == i) &&
+                                                EasyUploadVariableInformation tuple = Model.HeaderVariableInformation.Where(t => (t.headerId == i) &&
                                                                                                                     (t.variableName == sug.attributeName) &&
                                                                                                                     (t.unitInfo.UnitId == sug.unitID) &&
                                                                                                                     (t.unitInfo.SelectedDataTypeId == sug.dataTypeID)).FirstOrDefault();
@@ -83,9 +83,9 @@
                                     {
                                         string selected = "";
 
-                                        if (Model.AssignedHeaderUnits.Count > 0)
+                                        if (Model.HeaderVariableInformation.Count > 0)
                                         {
-                                            EasyUploadVariableInformation tuple = Model.AssignedHeaderUnits.Where(t => t.unitInfo.UnitId == unit.UnitId && t.headerId == i).FirstOrDefault();
+                                            EasyUploadVariableInformation tuple = Model.HeaderVariableInformation.Where(t => t.unitInfo.UnitId == unit.UnitId && t.headerId == i).FirstOrDefault();
 
                                             if (tuple != null)
                                             {
@@ -102,7 +102,7 @@
                                 <select style="width: 80%" name="Datatype" headerfieldId="@(i)"  onfocus="deselect(this)" onblur="reselect(this)">
                                     @{
 
-                                        EasyUploadVariableInformation tupleBla = Model.AssignedHeaderUnits.Where(t => t.headerId == i).FirstOrDefault();
+                                        EasyUploadVariableInformation tupleBla = Model.HeaderVariableInformation.Where(t => t.headerId == i).FirstOrDefault();
                                         string datatypeDescription = "";
 
                                         if (tupleBla != null && tupleBla.unitInfo.UnitId >= 0)
@@ -271,6 +271,11 @@
         });
 
         //Get the annotation suggestions from the server
+        //Show a spinner while the next step is loading
+        loadMappingSuggestions();
+    });
+
+    function loadMappingSuggestions() {
         $('#verificationTable tr').each(function (index) {
             var headerItemIndex = $(this).data("index");
 
@@ -283,7 +288,7 @@
             //Load and show mapping suggestion select-boxes
             $(this).find(".ontologyMapping").load(url);
         });
-    });
+    }
 
     function suggestionSelected(suggestionSelectObject, i) {
         //Find the selected option object
