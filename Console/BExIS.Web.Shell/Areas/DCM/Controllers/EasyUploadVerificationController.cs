@@ -307,7 +307,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             //Why does this have to be so complicated...?
             string datatype = variableInformation.unitInfo.DataTypeInfos.Where(dti => dti.DataTypeId == variableInformation.unitInfo.SelectedDataTypeId).FirstOrDefault().Name;
             Session["TaskManager"] = TaskManager;
-            return PartialView("_mappingSuggestionDropdowns", GenerateOntologyMapping(variableName, datatype, unit));
+            //Model: (headerIndex, Dictionary)-Tuple
+            return PartialView("_mappingSuggestionDropdowns", 
+                new Tuple<int, Dictionary<string, List<OntologyMappingSuggestionModel>>>(headerIndex, GenerateOntologyMapping(headerIndex, variableName, datatype, unit)));
         }
 
         [HttpPost]
@@ -428,6 +430,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         [HttpPost]
         public ActionResult SaveAnnotationSelection()
         {
+
             int? selectFieldId = null;
             string selectedAnnotationCategory = null;
             string selectedAnnotationURI = null;
@@ -439,26 +442,46 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 {
                     selectFieldId = Convert.ToInt32(Request.Form[key]);
                 }
+                if("category" == key)
+                {
+                    selectedAnnotationCategory = Request.Form[key];
+                }
                 if ("uri" == key)
                 {
                     selectedAnnotationURI = Request.Form[key];
                 }
             }
 
+            if(selectFieldId == null)
+            {
+                //If no headerID was submitted, silently ignore the call
+                return null;
+            }
+
             EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
 
-            List<OntologyAnnotation> currentAnnotations;
+            /* Annotations stored on the bus in form of a dictionary
+             * Key: Tuple<headerID, category> Value: conceptURI
+             * Category is currently only "Entity" or "Characteristic"
+             * */
+            Dictionary<Tuple<int, string>, string> currentAnnotations;
+            //If there already are some annotations on the bus, grab them - otherwise create a new dictionary
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
             {
-                currentAnnotations = (List<OntologyAnnotation>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
+                currentAnnotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
             }
             else
             {
-                currentAnnotations = new List<OntologyAnnotation>();
+                currentAnnotations = new Dictionary<Tuple<int, string>, string>();
             }
-            currentAnnotations.Add(new OntologyAnnotation(selectedAnnotationURI, (int) selectFieldId));
+
+            //If there's already an annotation for this (headerID, category)-pair, replace it
+            currentAnnotations[new Tuple<int, string>((int)selectFieldId, selectedAnnotationCategory)] = selectedAnnotationURI;
+
+            //Store edited annotations in TaskManager
             TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING] = currentAnnotations;
 
+            //Store TaskManager back in session object
             Session["TaskManager"] = TaskManager;
             return null;
         }
@@ -1007,7 +1030,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// <param name="datatype">Currently selected datatype</param>
         /// <param name="unit">Currently selected unit</param>
         /// <returns>Dictionary with the category (Entity/Characteristic) as key and a (sorted) list of possible annotations as value</returns>
-        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(string variableName, string datatype, string unit)
+        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(int headerIndex, string variableName, string datatype, string unit)
         {
             //Order entire lists of entitites and characteristics according to a mapping metric
             //For now: Just use a string similarity

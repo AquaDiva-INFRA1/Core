@@ -25,11 +25,13 @@ namespace BExIS.Modules.Dcm.UI.Models
     public class OntologyAnnotation
     {
         string conceptURI;
+        string conceptCategory;
         public int headerID;
 
-        public OntologyAnnotation(string conceptURI, int headerID)
+        public OntologyAnnotation(string conceptURI, string conceptCategory, int headerID)
         {
             this.conceptURI = conceptURI;
+            this.conceptCategory = conceptCategory;
             this.headerID = headerID;
         }
     }
