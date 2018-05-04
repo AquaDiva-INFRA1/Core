@@ -1,11 +1,14 @@
-﻿@model Dictionary<string, List<BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel>>
-@foreach(string category in Model.Keys)
+﻿@model Tuple<int, Dictionary<string, List<BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel>>>
+@{ 
+    Dictionary<string, List<BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel>> suggestionDictionary = Model.Item2;
+}
+@foreach(string category in suggestionDictionary.Keys)
 {
     //For each category, create a separate dropdown
     <div class="suggestionContainer">
         <label for="@category annotation">@category</label>
-        <select name="@category annotation" onchange="mappingSelected(this)">
-            @foreach(BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel suggestion in Model[category])
+        <select data-headerid="@Model.Item1" name="@category annotation" onchange="mappingSelected(this)">
+            @foreach(BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel suggestion in suggestionDictionary[category])
             {
                 //For each suggestion create an option
                 <option title="@suggestion.conceptURI" data-category="@category">@suggestion.displayName</option>
@@ -18,7 +21,7 @@
     function mappingSelected(selectObject) {
         var select = $(selectObject);
         //Find the header ID
-        var headerID = select.closest("tr").data("index");
+        var headerID = select.data('headerid');
         //Find the category of the selected element
         var category = select.find("option:selected").data("category");
         //Get the selected URI
@@ -29,9 +32,14 @@
         $.post('@Url.Action("SaveAnnotationSelection", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })',
             {
                 headerID: headerID,
+                category: category,
                 uri: uri
             });
     }
+
+    $('.suggestionContainer select[data-headerid="@Model.Item1"]').each(function () {
+        mappingSelected(this);
+    });
 </script>
 
 <style>
