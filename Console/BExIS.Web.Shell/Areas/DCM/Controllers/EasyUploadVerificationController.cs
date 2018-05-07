@@ -307,9 +307,44 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             //Why does this have to be so complicated...?
             string datatype = variableInformation.unitInfo.DataTypeInfos.Where(dti => dti.DataTypeId == variableInformation.unitInfo.SelectedDataTypeId).FirstOrDefault().Name;
             Session["TaskManager"] = TaskManager;
+            
+            //Structure of variable "suggestions": Key=category ("Entity"|"Characteristic"), Value=List of the options that will be displayed in the dropdown
+            Dictionary<string, List<OntologyMappingSuggestionModel>> suggestions = GenerateOntologyMapping(headerIndex, variableName, datatype, unit);
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
+            {
+                //There are already annotations stored in the bus (from switching between steps) so set the "selected" properties accordingly
+                //Structure of variable "currentAnnotations": Key=(headerIndex, category), Value=URI of the selected concept
+                //TODO There's no guarantee that the annotation that is stored in the bus is actually in the (limited) list of suggestions
+                //Possible solution: Manually reconstruct the suggstion from the information that is stored in the bus
+                Dictionary<Tuple<int, string>, string> currentAnnotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
+                foreach(KeyValuePair<Tuple<int, string>, string> kvp in currentAnnotations)
+                {
+                    //First, check if we're looking at an annotation for the current headerIndex
+                    if(kvp.Key.Item1 == headerIndex)
+                    {
+                        //Now grab the option list for the correct category
+                        List<OntologyMappingSuggestionModel> optionList;
+                        if (suggestions.TryGetValue(kvp.Key.Item2, out optionList))
+                        {
+                            OntologyMappingSuggestionModel selected = optionList.Where(o => o.conceptURI == kvp.Value).FirstOrDefault();
+                            if(selected != null)
+                            {
+                                //Found the correct option in the list, now switch its "selected" state
+                                selected.selected = true;
+                            }
+                            else
+                            {
+                                //TODO This is the case where the annotation from the bus is not in the limited list!
+                            }
+                        }
+                    }
+                }
+            }
+            //Now we still have to set the "selected" property for all lists where we didn't find an annotation in the bus
+
             //Model: (headerIndex, Dictionary)-Tuple
             return PartialView("_mappingSuggestionDropdowns", 
-                new Tuple<int, Dictionary<string, List<OntologyMappingSuggestionModel>>>(headerIndex, GenerateOntologyMapping(headerIndex, variableName, datatype, unit)));
+                new Tuple<int, Dictionary<string, List<OntologyMappingSuggestionModel>>>(headerIndex, suggestions));
         }
 
         [HttpPost]

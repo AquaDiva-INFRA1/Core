@@ -10,12 +10,14 @@ namespace BExIS.Modules.Dcm.UI.Models
         public string conceptURI;
         public string displayName;
         public double similarity;
+        public Boolean selected;
 
-        public OntologyMappingSuggestionModel(string uri, string label, double sim)
+        public OntologyMappingSuggestionModel(string uri, string label, double sim, bool selected = false)
         {
             this.conceptURI = uri;
             this.displayName = label;
             this.similarity = sim;
+            this.selected = selected;
         }
     }
 
