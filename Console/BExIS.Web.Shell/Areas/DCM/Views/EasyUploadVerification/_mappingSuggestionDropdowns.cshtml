@@ -11,7 +11,7 @@
             @foreach(BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel suggestion in suggestionDictionary[category])
             {
                 //For each suggestion create an option
-                <option title="@suggestion.conceptURI" data-category="@category">@suggestion.displayName</option>
+                <option title="@suggestion.conceptURI" data-category="@category" @if (suggestion.selected) {<text>selected</text> }>@suggestion.displayName</option>
             }
         </select>
     </div>
