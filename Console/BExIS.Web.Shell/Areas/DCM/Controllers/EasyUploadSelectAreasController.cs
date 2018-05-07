@@ -214,15 +214,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
 
-            #region Reset selected units, datatypes, suggestions and annotations
-            //TODO Only reset when the header area was changed
-            TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS);
-            TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS);
-            TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS);
-            TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS);
-            TaskManager.Bus.Remove(EasyUploadTaskManager.ANNOTATIONMAPPING);
-            #endregion
-
             #region Generate table for selected sheet
             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
             FileStream fis = null;
@@ -342,6 +333,15 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             if (headerArea != null)
             {
                 TaskManager.AddToBus(EasyUploadTaskManager.SHEET_HEADER_AREA, headerArea);
+
+                #region Reset selected units, datatypes, suggestions and annotations
+                TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS);
+                TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS);
+                TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS);
+                TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS);
+                TaskManager.Bus.Remove(EasyUploadTaskManager.ANNOTATIONMAPPING);
+                #endregion
+
                 model.HeaderArea = headerArea;
             }
 
