@@ -214,11 +214,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
 
-            #region Reset selected units, datatypes and suggestions
+            #region Reset selected units, datatypes, suggestions and annotations
+            //TODO Only reset when the header area was changed
             TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS);
             TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS);
             TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS);
             TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS);
+            TaskManager.Bus.Remove(EasyUploadTaskManager.ANNOTATIONMAPPING);
             #endregion
 
             #region Generate table for selected sheet
