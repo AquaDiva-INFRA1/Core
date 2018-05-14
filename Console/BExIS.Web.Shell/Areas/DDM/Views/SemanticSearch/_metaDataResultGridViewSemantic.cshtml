@@ -83,6 +83,17 @@
                        .Sortable(false)
                        .Filterable(false);
 
+                        //Additional column with the "View Details"-Button
+                        columns.Bound("").Width(80).ClientTemplate(
+                        "<div class='searchResultFunctionDiv'>" +
+                        "<a id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class = 'bx bx-grid-function bx-show' title = 'Analyse DataSet' onclick='uploadfile(this)'>  </a>" +
+                        "</div>"
+                        )
+
+                       .Groupable(false)
+                       .Sortable(false)
+                       .Filterable(false);
+
                     }
                 }
 
@@ -123,39 +134,61 @@
 
 	}
 
-	function onclickDataset(e) {
+    function onclickDataset(e) {
 
         //checked
-	    var id = e.getAttribute("id");
+        var id = e.getAttribute("id");
 
 
-	    var data = {
-	        id: id
+        var data = {
+            id: id
         }
 
-	    $.ajax({
-	        url: '/DDM/Data/IsDatasetCheckedIn',
-	        type: 'POST',
-	        data: JSON.stringify(data),
-	        dataType: 'json',
-	        contentType: 'application/json; charset=utf-8',
-	        error: function (xhr) {
+        $.ajax({
+            url: '/DDM/Data/IsDatasetCheckedIn',
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            error: function (xhr) {
                 var redirect = window.confirm('Please make sure you are logged in to access details of datasets.\n' +
                     'Redirect to Login page? ');
                 if (redirect) {
                     window.location.href = '/Ldap/Login';
                 }
-	        },
-	        success: function (result) {
-	            if (result) {
-	                window.top.location = "/DDM/Data/ShowData/" + id;
-	            } else {
+            },
+            success: function (result) {
+                if (result) {
+                    window.top.location = "/DDM/Data/ShowData/" + id;
+                } else {
 
                     alert("Dataset is locked. Please try again later.");
-	            }
-	        }
-	    });
-	}
+                }
+            }
+        });
+    }
+
+    function uploadfile(e) {
+
+        //checked
+        var id = e.getAttribute("id");
+
+
+        var data = {
+            id: id
+        }
+
+        $.ajax({
+            url: '/DDM/SemanticSearch/UploadFiletoAnalysis2',
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            success: function () {
+                alert('The process might take some time ... You will be notified with an email for the analysis results')
+            }
+        });
+    }
 
 
 	function onDataBound()
