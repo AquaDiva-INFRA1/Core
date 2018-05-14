@@ -26,6 +26,8 @@ using VDS.RDF.Query;
 using BExIS.Modules.Ddm.UI.Helpers;
 using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
+using System.Net;
+using System.Collections.Specialized;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -872,5 +874,60 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return this.Json(new { success = true });
         }
+
+        public void UploadFiletoAnalysis2(){
+            String username = "PubServerAD";
+            String password = "pubserverad";
+            string FTPAddress = "ftp://10.0.0.101:21";
+            String filePath = @"C:\Users\admin\Desktop\paeruginosa-reads\SRR396637.sra_1.fastq";
+            String filename = Path.GetFileName(filePath);
+
+            // upload the file to analyse
+            WebRequest request = WebRequest.Create(FTPAddress + "/" + filename);
+            request.Credentials = new NetworkCredential(username, password);
+            request.Method = WebRequestMethods.Ftp.UploadFile;
+
+            try {
+                using (Stream fileStream = System.IO.File.OpenRead(filePath))
+                using (Stream ftpStream = request.GetRequestStream())
+                {
+                    fileStream.CopyTo(ftpStream);
+                }
+            }
+            catch (WebException e) {
+                Debug.WriteLine(e.ToSafeString());
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message.ToString());
+            }
+            
+            // run the analysis
+            try
+            {
+                string url = "http://10.0.0.101:5000";
+                var request2 = (HttpWebRequest)WebRequest.Create(url);
+                request2.Method = "POST";
+                request2.ContentType = "application/x-www-form-urlencoded";
+                byte[] bytes = Encoding.ASCII.GetBytes("file_path=" + filename + "&user_home_directory=" + username);
+                request2.ContentLength = bytes.Length;
+                using (var reqStream = request2.GetRequestStream())
+                {
+                    reqStream.Write(bytes, 0, bytes.Length);
+                    //var response = (HttpWebResponse)request2.GetResponse();
+                    //Debug.WriteLine("response ==> " + response.ToSafeString());
+                }
+            }
+            catch (WebException e)
+            {
+                Debug.WriteLine(e.ToSafeString());
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message.ToString());
+            }
+
+        }
+
     }
 }
