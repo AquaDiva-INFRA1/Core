@@ -44,23 +44,23 @@
     @Html.Partial("_searchBar")
     <div id="searchContent">
         @{
-        //Error when connecting to the server
-        if (Model != null && Model.semanticSearchServerError != null)
-        {
-            <div id="errorWrapper">
-                <div id="semanticSearchErrorMessage">@Model.semanticSearchServerError</div>
-            </div>
-    }
-    //Everything went well, display the result if there is one
-    else
-    {
-        if (Model != null && Model.semanticComponent != null)
-        {
-            @Html.Partial("_metaDataResultGridViewSemantic", Model.semanticComponent)
-            
-        }
+            //Error when connecting to the server
+            if (Model != null && Model.semanticSearchServerError != null)
+            {
+                <div id="errorWrapper">
+                    <div id="semanticSearchErrorMessage">@Model.semanticSearchServerError</div>
+                </div>
+            }
+            //Everything went well, display the result if there is one
+            else
+            {
+                if (Model != null && Model.semanticComponent != null)
+                {
+                    @Html.Partial("_metaDataResultGridViewSemantic", Model.semanticComponent)
+                    
+                }
 
-    }
+            }
         }
     </div>
 </div>

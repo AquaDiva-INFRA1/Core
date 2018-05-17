@@ -1024,7 +1024,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Debug.WriteLine("Execution time (millisecondes) for DDM/get_dataset_related_papers_by_ID ==> " +elapsedMs);
-
+            Debug.WriteLine("====> Semedico result " + Semedico_Result);
             return Semedico_Result;
 
         }
@@ -1091,5 +1091,52 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             return uri.Replace("'", "''");
         }
         #endregion
+
+
+
+
+        public String get_datasets_with_geolocalization_annotation()
+        {
+            List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
+
+            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
+            ontologies.Add(new OntologyNamePair(path, "ADOntology"));
+
+            //Just for testing purposes
+            StringBuilder sb = new StringBuilder();
+            foreach (OntologyNamePair ontology in ontologies)
+            {
+                String ontologyPath = ontology.getPath();
+                //Load the ontology as a graph
+                IGraph g = new Graph();
+                g.LoadFromFile(ontologyPath);
+
+                /*
+                //Debugging output
+                foreach(Triple t in g.Triples){
+                    Debug.WriteLine(t.ToString());
+                }
+                */
+
+                //Create a new queryString
+                SparqlParameterizedString queryString = new SparqlParameterizedString();
+                //Add some important namespaces
+                queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
+                queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+                queryString.Namespaces.AddNamespace("owl", new Uri("http://www.w3.org/2002/07/owl#"));
+                queryString.Namespaces.AddNamespace("ent", new Uri("http://purl.obolibrary.org/obo/BFO_0000029"));
+
+                queryString.CommandText =
+                    "SELECT ?s "+
+                    "WHERE "+
+                    "{ ?s rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000029> };";
+                //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
+                SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+                return results.ToSafeString();
+            }
+            return "No results ... sorry";
+
+
+        }
     }
 }

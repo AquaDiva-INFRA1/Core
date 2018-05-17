@@ -31,96 +31,96 @@
     if (!(bool)Session["Window"])
     {
         @(Html.Telerik().Grid<System.Data.DataRow>()
-                                        .Name("resultGrid")
+                                                        .Name("resultGrid")
 
-                                            .DataBinding(dataBinding => dataBinding
-                                            .Ajax()
-                                            .Select("_CustomBinding", "SemanticSearch", new { area = "DDM" })
-                                            )
+                                                            .DataBinding(dataBinding => dataBinding
+                                                            .Ajax()
+                                                            .Select("_CustomBinding", "SemanticSearch", new { area = "DDM" })
+                                                            )
 
-                                            .EnableCustomBinding(true)
-                                            .HtmlAttributes(new { @class = "result-grid" })
-                                            .Columns(columns =>
-                                            {
-
-                                                if (Model != null)
-                                                {
-                                                    for (int i = 0; i < Model.Columns.Count; i++)
-                                                    {
-                                                        DataColumn column = Model.Columns[i];
-                                                        if (DefaultHeaderList.Any(p => p.Name.Equals(column.ColumnName)))
-                                                        {
-                                                            string title;
-                                                            if (column.Caption == "")
+                                                            .EnableCustomBinding(true)
+                                                            .HtmlAttributes(new { @class = "result-grid" })
+                                                            .Columns(columns =>
                                                             {
-                                                                title = column.ColumnName;
-                                                            }
-                                                            else
-                                                            {
-                                                                title = column.Caption;
-                                                            }
 
-                                                            columns.Bound(column.DataType, column.ColumnName)
-                                                                .Title(title);
-                                                        }
-                                                        else
-                                                        {
-                                                            columns.Bound(column.DataType, column.ColumnName).Hidden()
-                                                                   .Title(column.Caption);
+                                                                if (Model != null)
+                                                                {
+                                                                    for (int i = 0; i < Model.Columns.Count; i++)
+                                                                    {
+                                                                        DataColumn column = Model.Columns[i];
+                                                                        if (DefaultHeaderList.Any(p => p.Name.Equals(column.ColumnName)))
+                                                                        {
+                                                                            string title;
+                                                                            if (column.Caption == "")
+                                                                            {
+                                                                                title = column.ColumnName;
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                title = column.Caption;
+                                                                            }
 
-                                                        }
-                                                    }
-                                                }
+                                                                            columns.Bound(column.DataType, column.ColumnName)
+                                                                                .Title(title);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            columns.Bound(column.DataType, column.ColumnName).Hidden()
+                                                                                   .Title(column.Caption);
 
-                                                if (Model != null)
-                                                {
-                                                    if (@Model.Columns.Count > 0)
-                                                    {
-                                            //Additional column with the "View Details"-Button
-                                            columns.Bound("").Width(60).ClientTemplate(
-                                                             "<div>  <center> " +
-                                                                 "<a>" +
-                                                                     "<i class=\"far fa-newspaper fa-2x \"  " +
-                                                                     "data-toggle=\"modal\" " +
-                                                                     "data-target=\"#exampleModalLong\" " +
-                                                                     "onclick='get_dataset_related_papers_by_ID(this)' " +
-                                                                     "id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>'" +
-                                                                     "title=\"Load Related Publication\" ></i> " +
-                                                                 "</a>" +
+                                                                        }
+                                                                    }
+                                                                }
 
-                                                             "</center> </div>"
-                                                                 )
+                                                                if (Model != null)
+                                                                {
+                                                                    if (@Model.Columns.Count > 0)
+                                                                    {
+                                                            //Additional column with the "View Details"-Button
+                                                            columns.Bound("").Width(60).ClientTemplate(
+                                                                             "<div>  <center> " +
+                                                                                 "<a>" +
+                                                                                     "<i class=\"far fa-newspaper fa-2x \"  " +
+                                                                                     "data-toggle=\"modal\" " +
+                                                                                     "data-target=\"#exampleModalLong\" " +
+                                                                                     "onclick='get_dataset_related_papers_by_ID(this)' " +
+                                                                                     "id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>'" +
+                                                                                     "title=\"Load Related Publication\" ></i> " +
+                                                                                 "</a>" +
 
-                                                         .Groupable(false)
-                                                         .Sortable(false)
-                                                         .Filterable(false);
+                                                                             "</center> </div>"
+                                                                                 )
 
-                                            //Additional column with the "View Details"-Button
-                                            columns.Bound("").Width(40).ClientTemplate(
-                                                        "<div class='searchResultFunctionDiv'>" +
-                                                        "<a  id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class = 'bx bx-grid-function bx-show' title = 'View details' onclick='onclickDataset(this)'></a>" +
-                                                        "</div>"
-                                                        )
+                                                                         .Groupable(false)
+                                                                         .Sortable(false)
+                                                                         .Filterable(false);
 
-                                                       .Groupable(false)
-                                                       .Sortable(false)
-                                                       .Filterable(false);
+                                                            //Additional column with the "View Details"-Button
+                                                            columns.Bound("").Width(40).ClientTemplate(
+                                                                        "<div class='searchResultFunctionDiv'>" +
+                                                                        "<a  id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class = 'bx bx-grid-function bx-show' title = 'View details' onclick='onclickDataset(this)'></a>" +
+                                                                        "</div>"
+                                                                        )
 
-                                                    }
-                                                }
+                                                                       .Groupable(false)
+                                                                       .Sortable(false)
+                                                                       .Filterable(false);
 
-                                            })
+                                                                    }
+                                                                }
 
-                                            .ClientEvents(events => events
-                                                        .OnRowDataBound("resultGrid_OnRowDataBound")
-                                                        .OnDataBound("onDataBound")
-                                                        .OnColumnShow("resultGrid_OnColumnChanged")
-                                                        .OnColumnHide("resultGrid_OnColumnChanged")
+                                                            })
 
-                                                        )
-                                            .Sortable()
-                                            .Pageable(paging => paging.Style(pagerStyles))
-                                            .ColumnContextMenu()
+                                                            .ClientEvents(events => events
+                                                                        .OnRowDataBound("resultGrid_OnRowDataBound")
+                                                                        .OnDataBound("onDataBound")
+                                                                        .OnColumnShow("resultGrid_OnColumnChanged")
+                                                                        .OnColumnHide("resultGrid_OnColumnChanged")
+
+                                                                        )
+                                                            .Sortable()
+                                                            .Pageable(paging => paging.Style(pagerStyles))
+                                                            .ColumnContextMenu()
 
 
         )
@@ -180,6 +180,80 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+
+<!-- maps view-->
+<style type="text/css">
+    /* Always set the map height explicitly to define the size of the div
+        * element that contains the map. */
+    #map {
+        height: 400px;
+        width: 400px;
+        margin: auto;
+        margin-left: auto;
+        margin-right: auto;
+        border: 3px solid black;
+        position: relative;
+        overflow: hidden;
+    }
+</style>
+
+    <div id="map" ></div>
+    <script>
+        var map;
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 10,
+                center: { lat: 51.080258, lng: 10.426260 },
+                mapTypeId: 'terrain'
+            });
+
+            // Create a <script> tag and set the USGS URL as the source.
+            var script = document.createElement('script');
+
+
+            script.src = 'https://developers.google.com/maps/documentation/javascript/examples/json/earthquake_GeoJSONP.js';
+            document.getElementsByTagName('head')[0].appendChild(script);
+
+            map.data.setStyle(function (feature) {
+                var magnitude = feature.getProperty('mag');
+                return {
+                    icon: getCircle(magnitude)
+                };
+            });
+        }
+
+        function getCircle(magnitude) {
+            return {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: 'red',
+                fillOpacity: .2,
+                scale: Math.pow(2, magnitude) / 2,
+                strokeColor: 'white',
+                strokeWeight: .5
+            };
+        }
+
+        function eqfeed_callback(results) {
+            map.data.addGeoJson(results);
+        }
+    </script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCSVWSy9l71v-E-ZGrODvnvr7KkP9W1XYU&callback=initMap">
+    </script>
+
+<!-- end of maps view-->
+
+
+
+
+
+
+
 
 
 <script type="text/javascript">
@@ -244,7 +318,7 @@
             }
         })
     }
-    
+
     function get_dataset_related_papers_by_ID(e, behaviour) {
         document.addEventListener("click", handler, true);
 
@@ -264,18 +338,24 @@
         $.ajax({
             url: '/DDM/SemanticSearch/get_dataset_related_papers_by_ID',
             type: 'POST',
-            data: { 'id': id , 'flag':behaviour},
+            data: { 'id': id, 'flag': behaviour },
             success: function (result) {
                 try {
                     res = JSON.parse(result);
-                    if (res.length == 0) {
-                        var text = "<h3> This Dataset is not coming from the semantic search</h3> <h4>It is the result of the normal search</h4>";
+                    if (result.length == 0) {
+                        var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
                         $('#results').html(text);
                     } else {
                         //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
-                        var text = "";
+                        var text = "<ol>";
                         for (i = 0; i < res.bibliographylist.length; i++) {
-                            text = text + "<li><strong>" + res.bibliographylist[i].articleTitle + "</strong></li></br>";
+                            text = text + "<li><strong>" + res.bibliographylist[i].articleTitle + "</strong></li>";
+                            text = text + "<h5>" + res.bibliographylist[i].abstractText + "<h5>";
+                            text = text + "<ul>";
+                            for (j = 0; j < res.bibliographylist[i].authors.length; j++) {
+                                text = text + "<li>" + res.bibliographylist[i].authors[j].firstname + " " + res.bibliographylist[i].authors[j].lastname + "</li>";
+                            }
+                            text = text + "</ul><br>";
                             console.log("Article => " + res.bibliographylist[i].articleTitle);
                         }
                         text = text + "</ol>";
@@ -283,7 +363,8 @@
                     }
                 }
                 catch (er) {
-                    var text = "<h3> This Dataset is not coming from the semantic search</h3> <h4>It is the result of the normal search</h4>";
+                    console.log("ERROR => " + er);
+                    var text = "<h3> Error </h3> <h4>Please a report the error</h4>";
                     $('#results').html(text);
                 }
             },

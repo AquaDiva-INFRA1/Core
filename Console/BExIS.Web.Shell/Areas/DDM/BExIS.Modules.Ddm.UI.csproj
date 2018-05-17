@@ -452,6 +452,7 @@
     <Content Include="Views\SemanticSearch\_metaDataResultGridViewSemantic.cshtml" />
     <Content Include="Views\SemanticSearch\_searchBar.cshtml" />
     <Content Include="Views\SemanticSearch\_semedicoSearchContent.cshtml" />
+    <Content Include="Views\SemanticSearch\_mapview.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
