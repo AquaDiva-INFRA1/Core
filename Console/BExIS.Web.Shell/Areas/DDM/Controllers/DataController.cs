@@ -262,7 +262,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         //
                         //List<AbstractTuple> dataTuples = dm.GetDatasetVersionEffectiveTuples(dsv, 0, 100);
                         //DataTable table = SearchUIHelper.ConvertPrimaryDataToDatatable(dsv, dataTuples);
-                        DataTable table = dm.GetLatestDatasetVersionTuples(dsv.Dataset.Id, 0, 100);
+                        DataTable table = dm.GetLatestDatasetVersionTuples(dsv.Dataset.Id, 0, 100, true);
 
                         Session["gridTotal"] = dm.GetDatasetVersionEffectiveTupleCount(dsv);
 
@@ -314,7 +314,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     //List<AbstractTuple> dataTuples = dm.GetDatasetVersionEffectiveTuples(dsv, command.Page - 1,
                     //    command.PageSize);
                     //DataTable table = SearchUIHelper.ConvertPrimaryDataToDatatable(dsv, dataTuples);
-                    DataTable table = dm.GetLatestDatasetVersionTuples(dsv.Dataset.Id, command.Page - 1, command.PageSize);
+                    DataTable table = dm.GetLatestDatasetVersionTuples(dsv.Dataset.Id, command.Page - 1, command.PageSize,true);
 
                     Session["gridTotal"] = dm.GetDatasetVersionEffectiveTupleCount(dsv);
 
