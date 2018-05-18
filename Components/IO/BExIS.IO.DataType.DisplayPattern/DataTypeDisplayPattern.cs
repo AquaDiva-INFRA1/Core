@@ -11,7 +11,7 @@ namespace BExIS.IO.DataType.DisplayPattern
         private static List<DataTypeDisplayPattern> displayPatterns = new List<DataTypeDisplayPattern>()
         {
             new DataTypeDisplayPattern() {Systemtype = DataTypeCode.DateTime,   Name = "DateTimeIso",       ExcelPattern=@"yyyy-MM-dd\Thh:mm:ss", DisplayPattern = "yyyy-MM-ddThh:mm:ss",     StringPattern = "yyyy-MM-ddTHH:mm:ss",      RegexPattern = null},
-            new DataTypeDisplayPattern() {Systemtype = DataTypeCode.DateTime,   Name = "DateTimeIsoWithPoints",       ExcelPattern=@"dd.MM.yyyy\Thh:mm:ss", DisplayPattern = "dd.MM.yyyyThh:mm:ss",     StringPattern = "dd.MM.yyyyTHH:mm:ss",      RegexPattern = null},
+            new DataTypeDisplayPattern() {Systemtype = DataTypeCode.DateTime,   Name = "DateTimeIsoWithPoints",       ExcelPattern=@"dd\.MM\.yyyy\Thh:mm:ss", DisplayPattern = "dd.MM.yyyyThh:mm:ss",     StringPattern = "dd.MM.yyyyTHH:mm:ss",      RegexPattern = null},
             new DataTypeDisplayPattern() {Systemtype = DataTypeCode.DateTime,   Name = "DateIso",           ExcelPattern="yyyy-MM-dd",          DisplayPattern= "yyyy-MM-dd",               StringPattern = "yyyy-MM-dd",               RegexPattern = null},
             new DataTypeDisplayPattern() {Systemtype = DataTypeCode.DateTime,   Name = "DateUs",            ExcelPattern=@"MM\/dd\/yyyy",         DisplayPattern="MM/dd/yyyy",                StringPattern = "MM/dd/yyyy",               RegexPattern = null},
             new DataTypeDisplayPattern() {Systemtype = DataTypeCode.DateTime,   Name = "DateUs yy",         ExcelPattern=@"MM\/dd\/yy",           DisplayPattern="MM/dd/yy",                  StringPattern = "MM/dd/yy",                 RegexPattern = null},
