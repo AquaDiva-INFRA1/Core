@@ -27,6 +27,7 @@ using BExIS.Modules.Ddm.UI.Helpers;
 using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
 using Npgsql;
+using System.Xml;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -997,6 +998,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 Query_4_API = get_observations_contextualized_contextualizing(id);
                 Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
                 Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
+                if (model == null)
+                {
+                    model = new ShowSemanticResultModel(CreateDataTable(makeHeader()));
+                }
                 if (model.resultListComponent == null)
                 {
                     model.resultListComponent = new SemedicoResultModel();
@@ -1095,48 +1100,148 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
 
 
-        public String get_datasets_with_geolocalization_annotation()
+        public DataTable get_datasets_with_geolocalization_annotation(String location_name)
         {
+            List<String> dataset_Ids_results_for_data_table = new List<string>();
+
             List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
 
             String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
             ontologies.Add(new OntologyNamePair(path, "ADOntology"));
 
+            String results_ = "";
             //Just for testing purposes
             StringBuilder sb = new StringBuilder();
             foreach (OntologyNamePair ontology in ontologies)
             {
                 String ontologyPath = ontology.getPath();
+                results_ = results_ + ontologyPath + "\n";
                 //Load the ontology as a graph
                 IGraph g = new Graph();
                 g.LoadFromFile(ontologyPath);
-
-                /*
-                //Debugging output
-                foreach(Triple t in g.Triples){
-                    Debug.WriteLine(t.ToString());
-                }
-                */
-
-                //Create a new queryString
                 SparqlParameterizedString queryString = new SparqlParameterizedString();
-                //Add some important namespaces
                 queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
-                queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
-                queryString.Namespaces.AddNamespace("owl", new Uri("http://www.w3.org/2002/07/owl#"));
-                queryString.Namespaces.AddNamespace("ent", new Uri("http://purl.obolibrary.org/obo/BFO_0000029"));
 
-                queryString.CommandText =
-                    "SELECT ?s "+
-                    "WHERE "+
-                    "{ ?s rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000029> };";
-                //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
+                //get all the classes annotated under the site entity which refers to location sites
+                queryString.CommandText = "SELECT ?subject ?object where { ?subject rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000029> } ";
+                // "SELECT ?subject ?object where { ?subject rdfs:subClassOf ?object } " ==> this returns all the classes and their subclasses
                 SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
-                return results.ToSafeString();
+                List<String> URI_classes = new List<string>();
+                URI_classes.Add("http://purl.obolibrary.org/obo/BFO_0000029");
+
+                foreach (SparqlResult res in results.Results)
+                {
+                    URI_classes.Add(res["subject"].ToString());
+                }
+                
+                String Conx = "Server=localhost;Port=5433;Database=BPP211;Userid=postgres;Password=1;Pooling=true;MinPoolSize=2;MaxPoolSize=100;ConnectionIdleLifetime=3600;";
+                NpgsqlCommand MyCmd = null;
+                NpgsqlConnection MyCnx = null;
+
+                
+                foreach(String uri in URI_classes)
+                {
+                    results_ = results_ + uri + "\n";
+                    MyCnx = new NpgsqlConnection(Conx);
+                    MyCnx.Open();
+                    String uri_ = uri.Replace("/", " \\/ ");
+                    string select = "SELECT datasets_id, variable_id, version_id FROM dataset_column_annotation WHERE entity= \'" + @uri + "\'";
+                    MyCmd = new NpgsqlCommand(select, MyCnx);
+
+                    NpgsqlDataReader dr = MyCmd.ExecuteReader();
+                    if (dr != null)
+                    {
+                        while (dr.Read())
+                        {
+                            if (dr["datasets_id"] != System.DBNull.Value)
+                            {
+                                var datasets_id = dr["datasets_id"].ToSafeString();
+                                var variable_id = dr["variable_id"].ToSafeString();
+                                results_ = results_ + datasets_id + " -->" + variable_id + "\n";
+                                Debug.WriteLine(datasets_id +" --->" );
+
+                                DatasetManager dsm = new DatasetManager();
+                                DatasetVersion dsv = dsm.GetDatasetLatestVersion(Int64.Parse(datasets_id));
+                                List<AbstractTuple> ds_tuples = dsm.GetDatasetVersionEffectiveTuples(dsv);
+                                foreach (AbstractTuple tuple in ds_tuples)
+                                {
+                                    XmlDocument xml = tuple.XmlVariableValues;
+
+                                    XmlNodeList item_List = xml.GetElementsByTagName("Item");//containing the tag <Item> to be parsed one by one
+                                    foreach (XmlNode item in item_List)
+                                    {
+                                        XmlNodeList childnodes = item.ChildNodes;//containing the tag <Property> to be parsed one by one
+                                        foreach (XmlNode childnode in childnodes)
+                                        {
+                                            if (childnode.Attributes[0].Value == "VariableId")
+                                            {
+                                                if (childnode.Attributes[2].Value == variable_id.ToSafeString())
+                                                {
+                                                    String Data_Value = childnodes[2].Attributes[2].Value;
+                                                    if (Data_Value == location_name)
+                                                    {
+                                                        //Debug.WriteLine(childnode.Attributes[2].Value);
+                                                        //Debug.WriteLine(Data_Value);
+                                                        results_ = results_ + Data_Value + "\n";
+                                                        if ( dataset_Ids_results_for_data_table.Find(x => x == datasets_id) == null )
+                                                        {
+                                                            dataset_Ids_results_for_data_table.Add(datasets_id);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    MyCnx.Close();
+                }
             }
-            return "No results ... sorry";
+            Debug.WriteLine("results after search : " + results_);
 
+            DataTable m;
+            m = CreateDataTable(headerItems);
+            if (dataset_Ids_results_for_data_table != null)
+            {
+                foreach (String dataset_id in dataset_Ids_results_for_data_table)
+                {
+                    DataRow row = m.NewRow();
+                    row["ID"] = Int64.Parse(dataset_id);
+                    //row["VersionID"] = Int64.Parse(r.versionno);
 
+                    //Grab the Metadata of the current ID
+                    long datasetID = long.Parse(dataset_id);
+                    string description = "";
+                    string title = "";
+                    string owner = "";
+
+                    Dataset dataset = null;
+                    using (IUnitOfWork uow = this.GetUnitOfWork())
+                    {
+                        var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
+                        dataset = datasetRepo.Get(datasetID);
+                    }
+
+                    if (dataset != null)
+                    {
+                        //Grab the Metadata
+                        XmlDatasetHelper helper = new XmlDatasetHelper();
+                        description = helper.GetInformation(datasetID, NameAttributeValues.description);
+                        title = helper.GetInformation(datasetID, NameAttributeValues.title);
+                        owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
+
+                        row["Title"] = title;
+                        row["Datasetdescription"] = description;
+                        row["Ownername"] = owner;
+
+                        m.Rows.Add(row);
+                    }
+
+                }
+            }
+            return m;
         }
     }
 }
