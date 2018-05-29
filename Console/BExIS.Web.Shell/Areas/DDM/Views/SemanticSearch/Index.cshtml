@@ -15,30 +15,6 @@
     </p>
 }
 
-@*
-@section LeftPane
-{
-    <div id="semedicoSearchContentContainer">
-        <!--Contains a list for the results of the semedico search-->
-        @{
-            if (!String.IsNullOrEmpty(Model.semedicoServerError))
-            {<div id="errorWrapper" style="text-align:center; margin-top:20px;background-color:#ef5c2f;">
-                    <div id="semedicoTimeoutMessage" style="display:inline-block;background-color:#ff8560;">@Model.semedicoServerError</div>
-                </div>
-            }
-            else
-            {
-                @Html.Partial("_semedicoSearchContent", Model)
-            }
-        }
-
-    </div>
-
-}
-*@
-
-
-
 <!--Search bar and search results-->
 <div class="searchContainer">
     @Html.Partial("_searchBar")
