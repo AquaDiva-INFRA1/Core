@@ -42,7 +42,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
         static String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
 
-        // GET: interactiveSearch
+        // start page - wellcome page for the interactive search 
+        // checks if the request is coming from a refresh page or from another feature controller to reset the data table or keep the old search
         public ActionResult Index()
         {
             string referrer_URI = Request.UrlReferrer.AbsoluteUri;
@@ -54,160 +55,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             return View(m);
         }
 
-        private DataTable CreateDataTable(List<HeaderItem> items)
-        {
-            DataTable table = new DataTable();
-            foreach (HeaderItem item in items)
-            {
-                table.Columns.Add(new DataColumn()
-                {
-                    ColumnName = item.Name,
-                    Caption = item.DisplayName,
-                    DataType = getDataType(item.DataType)
-                });
-            }
-            table.PrimaryKey = new DataColumn[] { table.Columns["ID"] };
-
-            return table;
-        }
-
-        private Type getDataType(string dataType)
-        {
-            switch (dataType)
-            {
-                case "String":
-                    {
-                        return Type.GetType("System.String");
-                    }
-
-                case "Double":
-                    {
-                        return Type.GetType("System.Double");
-                    }
-
-                case "Int16":
-                    {
-                        return Type.GetType("System.Int16");
-                    }
-
-                case "Int32":
-                    {
-                        return Type.GetType("System.Int32");
-                    }
-
-                case "Int64":
-                    {
-                        return Type.GetType("System.Int64");
-                    }
-
-                case "Decimal":
-                    {
-                        return Type.GetType("System.Decimal");
-                    }
-
-                case "DateTime":
-                    {
-                        return Type.GetType("System.DateTime");
-                    }
-
-                default:
-                    {
-                        return Type.GetType("System.String");
-                    }
-            }
-        }
-
-        [GridAction]
-        public ActionResult _CustomBinding(GridCommand command)
-        {
-            if (m != null)
-            {
-                return View(new GridModel(m));
-            }
-            return View();
-        }
-        
-        private List<HeaderItem> makeHeader()
-        {
-            headerItems = new List<HeaderItem>();
-
-            HeaderItem headerItem = new HeaderItem()
-            {
-                Name = "ID",
-                DisplayName = "ID",
-                DataType = "Int64"
-            };
-            headerItems.Add(headerItem);
-
-            idHeader = headerItem;
-            ViewData["ID"] = headerItem;
-
-            headerItem = new HeaderItem()
-            {
-                Name = "Title",
-                DisplayName = "Title",
-                DataType = "String"
-            };
-            headerItems.Add(headerItem);
-
-            headerItem = new HeaderItem()
-            {
-                Name = "Ownername",
-                DisplayName = "Owner",
-                DataType = "String"
-            };
-            headerItems.Add(headerItem);
-
-            headerItem = new HeaderItem()
-            {
-                Name = "Datasetdescription",
-                DisplayName = "Description",
-                DataType = "String"
-            };
-            headerItems.Add(headerItem);
-
-            ViewData["DefaultHeaderList"] = headerItems;
-
-            return headerItems;
-        }
-
-        public String parse_Json_location(String location_coordinates)
-        {
-            //"LatLng(51.080258, 10.42626)"
-            using (StreamReader r = new StreamReader(Gps_coordinates_for_wells))
-            {
-                string json = r.ReadToEnd();
-                List<coordinates_GPS> items = JsonConvert.DeserializeObject<List<coordinates_GPS>>(json);
-                if (location_coordinates.Length > 0)
-                {
-                    string lon = location_coordinates.Substring(location_coordinates.IndexOf('(') + 1, location_coordinates.IndexOf(',') - location_coordinates.IndexOf('(') - 1);
-                    string lat = location_coordinates.Substring(location_coordinates.IndexOf(", ") + 2, location_coordinates.IndexOf(')') - location_coordinates.IndexOf(',') - 2);
-
-                    foreach (coordinates_GPS item in items)
-                    {
-                        try {
-                            if ((item.Lat.ToSafeString().IndexOf(lon.Substring(0,lon.Length-1)) >-1) && (item.Lon.ToSafeString().IndexOf(lat.Substring(0, lat.Length - 1)) > -1))
-                            {
-                                return item.Well_name;
-                            }
-                        }
-                        catch (NullReferenceException e)
-                        {
-                            Debug.WriteLine(e.ToSafeString());
-                        }
-                        
-                    }
-                }
-                else
-                {
-                    return json;
-                }
-            }
-            return "";
-        }
-
-        [HttpPost]
-        public ActionResult Index(String location_coordinates)
+        // this action fills the data table after clicking on location name
+        // the data table is static due to the custom binding for the data table view in the table_result.cshtml
+        // after calling this method, the javascript fucntion will refresh the page so the binding of the data table will take effect
+        //[HttpPost] ActionResult
+        public Boolean fill_data_table_for_binding(String location_coordinates)
         {
             string well_name = parse_Json_location(location_coordinates);
             List<String> dataset_Ids_results_for_data_table = new List<string>();
@@ -286,7 +138,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                                 if (childnode.Attributes[2].Value == variable_id.ToSafeString())
                                                 {
                                                     String Data_Value = childnodes[2].Attributes[2].Value;
-                                                    if (well_name.ToLower().IndexOf(Data_Value.ToLower())>-1)
+                                                    if (well_name.ToLower().IndexOf(Data_Value.ToLower()) > -1)
                                                     {
                                                         //Debug.WriteLine(childnode.Attributes[2].Value);
                                                         //Debug.WriteLine(Data_Value);
@@ -350,15 +202,179 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             }
             ViewData["DefaultHeaderList"] = headerItems;
             ViewData["ID"] = idHeader;
-            return View(m);
+            if (m.Rows.Count > 0)
+            {
+                return true;
+            }
+            else return false;
+            //return View(m);
         }
 
+        // this action is related to display the data table "m" in the table_result.cshtml
+        [GridAction]
+        public ActionResult _CustomBinding(GridCommand command)
+        {
+            if (m != null)
+            {
+                return View(new GridModel(m));
+            }
+            return View();
+        }
+        private DataTable CreateDataTable(List<HeaderItem> items)
+        {
+            DataTable table = new DataTable();
+            foreach (HeaderItem item in items)
+            {
+                table.Columns.Add(new DataColumn()
+                {
+                    ColumnName = item.Name,
+                    Caption = item.DisplayName,
+                    DataType = getDataType(item.DataType)
+                });
+            }
+            table.PrimaryKey = new DataColumn[] { table.Columns["ID"] };
+
+            return table;
+        }
+
+        // this method parses the JSON file containing the well names and their coordinates to get the well name from the coordinates.
+        // It is made due to the fact that the leaflet.js map view return only the coordinates and a reason to fetch the well name from coordinates is needed
+        public String parse_Json_location(String location_coordinates)
+        {
+            //"LatLng(51.080258, 10.42626)"
+            using (StreamReader r = new StreamReader(Gps_coordinates_for_wells))
+            {
+                string json = r.ReadToEnd();
+                List<coordinates_GPS> items = JsonConvert.DeserializeObject<List<coordinates_GPS>>(json);
+                if (location_coordinates.Length > 0)
+                {
+                    string lon = location_coordinates.Substring(location_coordinates.IndexOf('(') + 1, location_coordinates.IndexOf(',') - location_coordinates.IndexOf('(') - 1);
+                    string lat = location_coordinates.Substring(location_coordinates.IndexOf(", ") + 2, location_coordinates.IndexOf(')') - location_coordinates.IndexOf(',') - 2);
+
+                    foreach (coordinates_GPS item in items)
+                    {
+                        try
+                        {
+                            if ((item.Lat.ToSafeString().IndexOf(lon.Substring(0, lon.Length - 1)) > -1) && (item.Lon.ToSafeString().IndexOf(lat.Substring(0, lat.Length - 1)) > -1))
+                            {
+                                return item.Well_name;
+                            }
+                        }
+                        catch (NullReferenceException e)
+                        {
+                            Debug.WriteLine(e.ToSafeString());
+                        }
+
+                    }
+                }
+                else
+                {
+                    return json;
+                }
+            }
+            return "";
+        }
+
+        // this class is made for the Deserialization of the JSON object of the JSON file containing the coordinates and well names.
         public class coordinates_GPS
         {
             public string Well_name;
             public string Lat;
             public string Lon;
         }
+
+        // creating the header of the data table 
+        private List<HeaderItem> makeHeader()
+        {
+            headerItems = new List<HeaderItem>();
+
+            HeaderItem headerItem = new HeaderItem()
+            {
+                Name = "ID",
+                DisplayName = "ID",
+                DataType = "Int64"
+            };
+            headerItems.Add(headerItem);
+
+            idHeader = headerItem;
+            ViewData["ID"] = headerItem;
+
+            headerItem = new HeaderItem()
+            {
+                Name = "Title",
+                DisplayName = "Title",
+                DataType = "String"
+            };
+            headerItems.Add(headerItem);
+
+            headerItem = new HeaderItem()
+            {
+                Name = "Ownername",
+                DisplayName = "Owner",
+                DataType = "String"
+            };
+            headerItems.Add(headerItem);
+
+            headerItem = new HeaderItem()
+            {
+                Name = "Datasetdescription",
+                DisplayName = "Description",
+                DataType = "String"
+            };
+            headerItems.Add(headerItem);
+
+            ViewData["DefaultHeaderList"] = headerItems;
+
+            return headerItems;
+        }
+
+        // filling the data type of the data table columns
+        private Type getDataType(string dataType)
+        {
+            switch (dataType)
+            {
+                case "String":
+                    {
+                        return Type.GetType("System.String");
+                    }
+
+                case "Double":
+                    {
+                        return Type.GetType("System.Double");
+                    }
+
+                case "Int16":
+                    {
+                        return Type.GetType("System.Int16");
+                    }
+
+                case "Int32":
+                    {
+                        return Type.GetType("System.Int32");
+                    }
+
+                case "Int64":
+                    {
+                        return Type.GetType("System.Int64");
+                    }
+
+                case "Decimal":
+                    {
+                        return Type.GetType("System.Decimal");
+                    }
+
+                case "DateTime":
+                    {
+                        return Type.GetType("System.DateTime");
+                    }
+
+                default:
+                    {
+                        return Type.GetType("System.String");
+                    }
+            }
+        }
+        
     }
 
 }
