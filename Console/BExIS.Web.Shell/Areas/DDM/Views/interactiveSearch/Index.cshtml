@@ -77,12 +77,12 @@
 
         <script type="text/javascript">
 
-            var mymap = L.map('mapid').setView([51.111821, 10.430585], 15);
+            var mymap = L.map('mapid').setView([51.111821, 10.430585], 10);
 
             L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
                 //maxZoom: 13,
-                minZoom:14,
+                //minZoom:14,
                 id: 'mapbox.streets',
                 accessToken: 'pk.eyJ1IjoiaGFtZGkxOTkyIiwiYSI6ImNqaGtmbGllejJzYzUzZG03dHdqOXoya3YifQ.pivL63h1QhfDBe7EQBKfXg'
             }).addTo(mymap);
@@ -139,7 +139,7 @@
                     .setContent("please wait to retreive datasets collected from this site")
                     .openOn(mymap);
                 $.ajax({
-                    url: '/DDM/InteractiveSearch/Index',
+                    url: '/DDM/InteractiveSearch/fill_data_table_for_binding',
                     type: 'POST',
                     data: { 'location_coordinates': e.latlng.toString() },
                     error: function (xhr) {
