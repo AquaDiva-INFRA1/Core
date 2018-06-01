@@ -9,7 +9,7 @@ using Vaiona.Entities.Common;
 
 namespace BExIS.Aam.Entities.Mapping
 {
-    public class Annotation
+    public class Annotation: BaseEntity
     {
         public virtual Dataset Dataset { get; set; }
         public virtual DatasetVersion DatasetVersion { get; set; }
@@ -21,6 +21,8 @@ namespace BExIS.Aam.Entities.Mapping
         public virtual long CharacteristicId { get; set; }
         public virtual long StandardId { get; set; }
         
+        public Annotation(){ }
+
         public Annotation(Dataset ds, DatasetVersion dsv, Variable var, String entity, String characteristic)
         {
             this.Dataset = ds;
