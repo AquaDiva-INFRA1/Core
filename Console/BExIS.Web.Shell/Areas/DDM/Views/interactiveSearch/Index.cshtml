@@ -144,6 +144,7 @@
                     data: { 'location_coordinates': e.latlng.toString() },
                     error: function (xhr) {
                         alert('OoOoOoOppps ... error happened, come back later ...');
+                        document.getElementById("spinner_loader").setAttribute("hidden", true);
                     },
                     success: function (result) {
                         document.getElementById("spinner_loader").setAttribute("hidden", true);

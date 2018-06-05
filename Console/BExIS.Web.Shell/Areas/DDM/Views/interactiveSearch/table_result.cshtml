@@ -261,15 +261,25 @@
                         var text = "<ol>";
                         for (i = 0; i < res.bibliographylist.length; i++) {
                             text = text + "<li><strong>" + res.bibliographylist[i].articleTitle + "</strong></li>";
-                            text = text + "<h5><p align=\"justify\">" + res.bibliographylist[i].abstractText + "</p><h5>";
+
+                            text = text + "<a id=\"_abstract" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5>ABSTRACT</h5> </a>";
+                            text = text + "<div id=\"abstract" + i + "\"  hidden=\"true\"> ";
+                            text = text + "<h5><p align=\"justify\">" + res.bibliographylist[i].abstractText + "</p></h5>";
+                            text = text + "</div>";
+
+
+                            text = text + "<a id=\"_authors" + i + "\" href=\"#\"  onclick='show_region(this,i)'> <h5>AUTHORS</h5> </a>";
+                            text = text + "<div id=\"authors" + i + "\" hidden=\"true\" >";
                             text = text + "<ul>";
                             for (j = 0; j < res.bibliographylist[i].authors.length; j++) {
                                 text = text + "<li>" + res.bibliographylist[i].authors[j].firstname + " " + res.bibliographylist[i].authors[j].lastname + "</li>";
                             }
-                            text = text + "</ul><br>";
+                            text = text + "</ul></div><br>";
+
                             console.log("Article => " + res.bibliographylist[i].articleTitle);
                         }
                         text = text + "</ol>";
+                        console.log("text => " + text);
                         $('#results').html(text);
                     }
                 }
@@ -277,6 +287,7 @@
                     console.log("ERROR => " + er);
                     var text = "<h3> Error </h3> <h4>Please a report the error</h4>";
                     $('#results').html(text);
+                    document.getElementById("spinner_loader").setAttribute("hidden", true);
                 }
             },
             complete: function () {
@@ -284,11 +295,22 @@
                 $('#Close_button').prop('disabled', false);
                 document.getElementById("spinner_loader").setAttribute("hidden", true);
                 $('#button').prop('disabled', true);
-
+                
                 $('#papers').show();
             },
         });
         return true;
+    }
+
+    function show_region(e, i) {
+        var id = e.getAttribute("id");
+        id = id.substring(1, id.length);
+
+        if (document.getElementById(id).getAttribute("hidden")) {
+            document.getElementById(id).removeAttribute("hidden");
+        } else {
+            document.getElementById(id).setAttribute("hidden", true);
+        }
     }
 
 </script>

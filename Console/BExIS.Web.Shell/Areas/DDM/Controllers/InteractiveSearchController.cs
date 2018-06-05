@@ -28,11 +28,13 @@ using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
 using Npgsql;
 using System.Xml;
+using System.Configuration;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
     public class InteractiveSearchController : Controller
     {
+        static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
         static DataTable m;
 
         static List<HeaderItem> headerItems;
@@ -94,7 +96,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     URI_classes.Add(res["subject"].ToString());
                 }
 
-                String Conx = "Server=localhost;Port=5433;Database=BPP211;Userid=postgres;Password=1;Pooling=true;MinPoolSize=2;MaxPoolSize=100;ConnectionIdleLifetime=3600;";
                 NpgsqlCommand MyCmd = null;
                 NpgsqlConnection MyCnx = null;
 
@@ -121,37 +122,43 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                 Debug.WriteLine(datasets_id + " --->");
 
                                 DatasetManager dsm = new DatasetManager();
-                                DatasetVersion dsv = dsm.GetDatasetLatestVersion(Int64.Parse(datasets_id));
-                                List<AbstractTuple> ds_tuples = dsm.GetDatasetVersionEffectiveTuples(dsv);
-                                foreach (AbstractTuple tuple in ds_tuples)
-                                {
-                                    XmlDocument xml = tuple.XmlVariableValues;
-
-                                    XmlNodeList item_List = xml.GetElementsByTagName("Item");//containing the tag <Item> to be parsed one by one
-                                    foreach (XmlNode item in item_List)
+                                try { 
+                                    DatasetVersion dsv = dsm.GetDatasetLatestVersion(Int64.Parse(datasets_id));
+                                    List<AbstractTuple> ds_tuples = dsm.GetDatasetVersionEffectiveTuples(dsv);
+                                    foreach (AbstractTuple tuple in ds_tuples)
                                     {
-                                        XmlNodeList childnodes = item.ChildNodes;//containing the tag <Property> to be parsed one by one
-                                        foreach (XmlNode childnode in childnodes)
+                                        XmlDocument xml = tuple.XmlVariableValues;
+
+                                        XmlNodeList item_List = xml.GetElementsByTagName("Item");//containing the tag <Item> to be parsed one by one
+                                        foreach (XmlNode item in item_List)
                                         {
-                                            if (childnode.Attributes[0].Value == "VariableId")
+                                            XmlNodeList childnodes = item.ChildNodes;//containing the tag <Property> to be parsed one by one
+                                            foreach (XmlNode childnode in childnodes)
                                             {
-                                                if (childnode.Attributes[2].Value == variable_id.ToSafeString())
+                                                if (childnode.Attributes[0].Value == "VariableId")
                                                 {
-                                                    String Data_Value = childnodes[2].Attributes[2].Value;
-                                                    if (well_name.ToLower().IndexOf(Data_Value.ToLower()) > -1)
+                                                    if (childnode.Attributes[2].Value == variable_id.ToSafeString())
                                                     {
-                                                        //Debug.WriteLine(childnode.Attributes[2].Value);
-                                                        //Debug.WriteLine(Data_Value);
-                                                        results_ = results_ + Data_Value + "\n";
-                                                        if (dataset_Ids_results_for_data_table.Find(x => x == datasets_id) == null)
+                                                        String Data_Value = childnodes[2].Attributes[2].Value;
+                                                        if (well_name.ToLower().IndexOf(Data_Value.ToLower()) > -1)
                                                         {
-                                                            dataset_Ids_results_for_data_table.Add(datasets_id);
+                                                            //Debug.WriteLine(childnode.Attributes[2].Value);
+                                                            //Debug.WriteLine(Data_Value);
+                                                            results_ = results_ + Data_Value + "\n";
+                                                            if (dataset_Ids_results_for_data_table.Find(x => x == datasets_id) == null)
+                                                            {
+                                                                dataset_Ids_results_for_data_table.Add(datasets_id);
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
                                         }
                                     }
+                                }
+                                catch (Exception ex)
+                                {
+                                    //throw ex;
                                 }
                             }
                         }
