@@ -28,11 +28,15 @@ using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
 using Npgsql;
 using System.Xml;
+using System.Web.Configuration;
+using System.Configuration;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
     public class SemanticSearchController : Controller
     {
+        static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
+
         static ShowSemanticResultModel model;
         static List<HeaderItem> headerItems;
         static String semanticSearchURL = "http://localhost:2607/bexis/search/";
@@ -44,6 +48,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "mappings.txt");
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
 
+        static string userName = WebConfigurationManager.AppSettings["connectionStrings"];
 
         private void setSessions()
         {
@@ -913,37 +918,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return output;
         }
-
-        public String Get_Label_from_entity_rdf(String entity)
-        {
-            SparqlParameterizedString queryString = new SparqlParameterizedString();
-
-            queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
-            queryString.Namespaces.AddNamespace("owl", new Uri("http://www.w3.org/2002/07/owl#"));
-            queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
-            queryString.Namespaces.AddNamespace("entity", new Uri(entity));
-            queryString.CommandText = "SELECT ?label WHERE" +
-                " { " +
-                "<" + entity + "> rdfs:label ?label " +
-                "} ";
-
-            IGraph g = new Graph();
-            g.LoadFromFile(Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl"));
-            SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
-            String res = "";
-            if (results.Count != 0)
-            {
-                res = results[0]["label"].ToString().Split('^')[0];
-            }
-            if (res.Contains("@"))
-                return res.Substring(0, res.IndexOf("@"));
-            return res;
-        }
-
+        
         private String get_observations_contextualized_contextualizing(String id)
         {
             String request_string = "";
-            String Conx = "Server=localhost;Port=5433;Database=BPP211;Userid=postgres;Password=1;Pooling=true;MinPoolSize=2;MaxPoolSize=100;ConnectionIdleLifetime=3600;";
+            
             NpgsqlCommand MyCmd = null;
             NpgsqlConnection MyCnx = null;
 
@@ -964,9 +943,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
                         var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
                         var contextualized_entity_label = (String)dr["contextualized_entity_label"].ToSafeString();
-                        //var contextualized_entity_label = this.Get_Label_from_entity_rdf(contextualized_entity.Trim());
                         var contextualizing_entity_label = (String)dr["contextualizing_entity_label"].ToSafeString();
-                        //var contextualizing_entity_label = this.Get_Label_from_entity_rdf(contextualizing_entity.Trim());
                         request_string = request_string + contextualizing_entity_label + " of " + contextualized_entity_label + ",";
                         Debug.WriteLine("Row processed  number : " + line); line++;
                         Debug.WriteLine(request_string);
@@ -1035,14 +1012,44 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         }
 
 
-        #region refresh the observation_contexts table to the observation_contexts_URI_label
+        #region refresh the observation_contexts table to the observation_contexts_URI_label 
+        /*
+         * refresh the observation_contexts table to the observation_contexts_URI_label + populate the table observation_contexts_URI_label in the database
+          -- Table: observation_contexts_uri_label
+            -- DROP TABLE observation_contexts_uri_label;
+
+            CREATE TABLE observation_contexts_uri_label
+            (
+              datasets_id bigint NOT NULL,
+              version_id integer NOT NULL,
+              contextualized_entity character varying NOT NULL,
+              contextualized_entity_label character varying NOT NULL,
+              contextualizing_entity character varying NOT NULL,
+              contextualizing_entity_label character varying NOT NULL,
+              contextualized_entity_id bigint,
+              contextualizing_entity_id bigint,
+              CONSTRAINT observation_contexts_uri_label_pkey PRIMARY KEY (datasets_id, version_id, contextualized_entity, contextualizing_entity)
+            )
+            WITH (
+              OIDS=FALSE
+            );
+            ALTER TABLE observation_contexts_uri_label
+              OWNER TO postgres;
+        */
         public void insert_into_DB_URI_Label()
         {
             DatasetManager dsm = new DatasetManager();
             List<Int64>  ds_ids = dsm.GetDatasetLatestIds(true);
-
-            String Conx = "Server=localhost;Port=5433;Database=BPP211;Userid=postgres;Password=1;Pooling=true;MinPoolSize=2;MaxPoolSize=100;ConnectionIdleLifetime=3600;";
             
+            //to load the graph one time and set the sparql query
+            SparqlParameterizedString queryString = new SparqlParameterizedString();
+            queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
+            queryString.Namespaces.AddNamespace("owl", new Uri("http://www.w3.org/2002/07/owl#"));
+            queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+            IGraph g = new Graph();
+            g.LoadFromFile(Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl"));
+            //end of loading the graph one time and set the sparql query
+
             foreach (Int64 ds_id in ds_ids)
             {
                 NpgsqlConnection MyCnx = new NpgsqlConnection(Conx);
@@ -1063,10 +1070,19 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                             var version_id = dr["version_id"].ToSafeString();
                             var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
                             var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
-                            var contextualized_entity_label = this.Get_Label_from_entity_rdf(contextualized_entity.Trim());
-                            var contextualizing_entity_label = this.Get_Label_from_entity_rdf(contextualizing_entity.Trim());
                             var contextualized_entity_id = dr["contextualized_entity_id"].ToSafeString();
                             var contextualizing_entity_id = dr["contextualizing_entity_id"].ToSafeString();
+
+                            //set the entity to search through the graph
+                            queryString.Namespaces.AddNamespace("entity", new Uri(contextualized_entity.Trim()));
+                            queryString.CommandText = "SELECT ?label WHERE" +
+                                " { " +
+                                "<" + contextualized_entity.Trim() + "> rdfs:label ?label " +
+                                "} ";
+                            // end ofthe settings
+
+                            var contextualized_entity_label = this.Get_Label_from_entity_rdf(contextualized_entity.Trim(), g, queryString);
+                            var contextualizing_entity_label = this.Get_Label_from_entity_rdf(contextualizing_entity.Trim(), g, queryString);
 
                             if (contextualized_entity_id == "")
                                 contextualized_entity_id = "0";
@@ -1091,157 +1107,25 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 MyCnx.Close();
             }
         }
+
         public string clean_entity_URI_for_insert(string uri)
         {
             return uri.Replace("'", "''");
         }
-        #endregion
 
-
-
-
-        public DataTable get_datasets_with_geolocalization_annotation(String location_name)
+        public String Get_Label_from_entity_rdf(String entity, IGraph g, SparqlParameterizedString queryString)
         {
-            List<String> dataset_Ids_results_for_data_table = new List<string>();
-
-            List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
-
-            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
-            ontologies.Add(new OntologyNamePair(path, "ADOntology"));
-
-            String results_ = "";
-            //Just for testing purposes
-            StringBuilder sb = new StringBuilder();
-            foreach (OntologyNamePair ontology in ontologies)
+            SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+            String res = "";
+            if (results.Count != 0)
             {
-                String ontologyPath = ontology.getPath();
-                results_ = results_ + ontologyPath + "\n";
-                //Load the ontology as a graph
-                IGraph g = new Graph();
-                g.LoadFromFile(ontologyPath);
-                SparqlParameterizedString queryString = new SparqlParameterizedString();
-                queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
-
-                //get all the classes annotated under the site entity which refers to location sites
-                queryString.CommandText = "SELECT ?subject ?object where { ?subject rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000029> } ";
-                // "SELECT ?subject ?object where { ?subject rdfs:subClassOf ?object } " ==> this returns all the classes and their subclasses
-                SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
-                List<String> URI_classes = new List<string>();
-                URI_classes.Add("http://purl.obolibrary.org/obo/BFO_0000029");
-
-                foreach (SparqlResult res in results.Results)
-                {
-                    URI_classes.Add(res["subject"].ToString());
-                }
-                
-                String Conx = "Server=localhost;Port=5433;Database=BPP211;Userid=postgres;Password=1;Pooling=true;MinPoolSize=2;MaxPoolSize=100;ConnectionIdleLifetime=3600;";
-                NpgsqlCommand MyCmd = null;
-                NpgsqlConnection MyCnx = null;
-
-                
-                foreach(String uri in URI_classes)
-                {
-                    results_ = results_ + uri + "\n";
-                    MyCnx = new NpgsqlConnection(Conx);
-                    MyCnx.Open();
-                    String uri_ = uri.Replace("/", " \\/ ");
-                    string select = "SELECT datasets_id, variable_id, version_id FROM dataset_column_annotation WHERE entity= \'" + @uri + "\'";
-                    MyCmd = new NpgsqlCommand(select, MyCnx);
-
-                    NpgsqlDataReader dr = MyCmd.ExecuteReader();
-                    if (dr != null)
-                    {
-                        while (dr.Read())
-                        {
-                            if (dr["datasets_id"] != System.DBNull.Value)
-                            {
-                                var datasets_id = dr["datasets_id"].ToSafeString();
-                                var variable_id = dr["variable_id"].ToSafeString();
-                                results_ = results_ + datasets_id + " -->" + variable_id + "\n";
-                                Debug.WriteLine(datasets_id +" --->" );
-
-                                DatasetManager dsm = new DatasetManager();
-                                DatasetVersion dsv = dsm.GetDatasetLatestVersion(Int64.Parse(datasets_id));
-                                List<AbstractTuple> ds_tuples = dsm.GetDatasetVersionEffectiveTuples(dsv);
-                                foreach (AbstractTuple tuple in ds_tuples)
-                                {
-                                    XmlDocument xml = tuple.XmlVariableValues;
-
-                                    XmlNodeList item_List = xml.GetElementsByTagName("Item");//containing the tag <Item> to be parsed one by one
-                                    foreach (XmlNode item in item_List)
-                                    {
-                                        XmlNodeList childnodes = item.ChildNodes;//containing the tag <Property> to be parsed one by one
-                                        foreach (XmlNode childnode in childnodes)
-                                        {
-                                            if (childnode.Attributes[0].Value == "VariableId")
-                                            {
-                                                if (childnode.Attributes[2].Value == variable_id.ToSafeString())
-                                                {
-                                                    String Data_Value = childnodes[2].Attributes[2].Value;
-                                                    if (Data_Value == location_name)
-                                                    {
-                                                        //Debug.WriteLine(childnode.Attributes[2].Value);
-                                                        //Debug.WriteLine(Data_Value);
-                                                        results_ = results_ + Data_Value + "\n";
-                                                        if ( dataset_Ids_results_for_data_table.Find(x => x == datasets_id) == null )
-                                                        {
-                                                            dataset_Ids_results_for_data_table.Add(datasets_id);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    MyCnx.Close();
-                }
+                res = results[0]["label"].ToString().Split('^')[0];
             }
-            Debug.WriteLine("results after search : " + results_);
-
-            DataTable m;
-            m = CreateDataTable(headerItems);
-            if (dataset_Ids_results_for_data_table != null)
-            {
-                foreach (String dataset_id in dataset_Ids_results_for_data_table)
-                {
-                    DataRow row = m.NewRow();
-                    row["ID"] = Int64.Parse(dataset_id);
-                    //row["VersionID"] = Int64.Parse(r.versionno);
-
-                    //Grab the Metadata of the current ID
-                    long datasetID = long.Parse(dataset_id);
-                    string description = "";
-                    string title = "";
-                    string owner = "";
-
-                    Dataset dataset = null;
-                    using (IUnitOfWork uow = this.GetUnitOfWork())
-                    {
-                        var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
-                        dataset = datasetRepo.Get(datasetID);
-                    }
-
-                    if (dataset != null)
-                    {
-                        //Grab the Metadata
-                        XmlDatasetHelper helper = new XmlDatasetHelper();
-                        description = helper.GetInformation(datasetID, NameAttributeValues.description);
-                        title = helper.GetInformation(datasetID, NameAttributeValues.title);
-                        owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
-
-                        row["Title"] = title;
-                        row["Datasetdescription"] = description;
-                        row["Ownername"] = owner;
-
-                        m.Rows.Add(row);
-                    }
-
-                }
-            }
-            return m;
+            if (res.Contains("@"))
+                return res.Substring(0, res.IndexOf("@"));
+            return res;
         }
+        #endregion
+        
     }
 }
