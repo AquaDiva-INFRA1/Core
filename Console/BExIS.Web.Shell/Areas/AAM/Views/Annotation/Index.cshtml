@@ -1,4 +1,4 @@
-﻿@model  List<BExIS.Aam.Entities.Mapping.Annotation>
+﻿@model  List<BExIS.Modules.Aam.UI.Models.AnnotationModel>
 
 @section Information
 {
@@ -19,12 +19,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach(BExIS.Aam.Entities.Mapping.Annotation ann in Model)
+                @foreach(BExIS.Modules.Aam.UI.Models.AnnotationModel ann in Model)
                 {
                     <tr>
-                        <td>@ann.Dataset.Id</td>
-                        <td>@ann.DatasetVersion.Id</td>
-                        <td>@ann.Variable.Label</td>
+                        <td>@ann.DatasetId</td>
+                        <td>@ann.DatasetVersionId</td>
+                        <td>@ann.VariableLabel</td>
                         <td>@ann.Entity</td>
                         <td>@ann.Characteristic</td>
                         <td>@ann.Standard</td>
