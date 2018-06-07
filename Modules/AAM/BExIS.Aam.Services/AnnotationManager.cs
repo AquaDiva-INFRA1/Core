@@ -72,7 +72,7 @@ namespace BExIS.Aam.Services
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<Annotation> repo = uow.GetRepository<Annotation>();
-                output = repo.Get().FirstOrDefault(an => an.Id == id);
+                output = repo.Get(id);
             }
             return output;
         }
@@ -306,6 +306,7 @@ namespace BExIS.Aam.Services
             return true;
         }
 
+        #region (Private) Helper functions
         /// <summary>
         /// Gets the id of the given standard from the given enumerable annotations.
         /// Generates a new id if the standard is not used in any annotation yet.
@@ -315,7 +316,7 @@ namespace BExIS.Aam.Services
         /// <returns>A new id for the given standard</returns>
         private long GetOrGenerateStandardId(IEnumerable<Annotation> allAnnotations, string standard)
         {
-            Annotation unicorn = allAnnotations.Where(an => an.Standard.Equals(standard)).FirstOrDefault();
+            Annotation unicorn = allAnnotations.Where(an => an.Standard!=null && an.Standard.Equals(standard)).FirstOrDefault();
             if (unicorn != null)
             {
                 return unicorn.StandardId;
@@ -335,7 +336,7 @@ namespace BExIS.Aam.Services
         /// <returns>A new id for the given characteristic</returns>
         private long GetOrGenerateCharacteristicId(IEnumerable<Annotation> allAnnotations, string characteristic)
         {
-            Annotation unicorn = allAnnotations.Where(an => an.Characteristic.Equals(characteristic)).FirstOrDefault();
+            Annotation unicorn = allAnnotations.Where(an => an.Characteristic!=null && an.Characteristic.Equals(characteristic)).FirstOrDefault();
             if (unicorn != null)
             {
                 return unicorn.CharacteristicId;
@@ -355,7 +356,7 @@ namespace BExIS.Aam.Services
         /// <returns>A new id for the given entity</returns>
         private long GetOrGenerateEntityID(IEnumerable<Annotation> allAnnotations, string entity)
         {
-            Annotation unicorn = allAnnotations.Where(an => an.Entity.Equals(entity)).FirstOrDefault();
+            Annotation unicorn = allAnnotations.Where(an => an.Entity!=null && an.Entity.Equals(entity)).FirstOrDefault();
             if (unicorn != null)
             {
                 return unicorn.EntityId;
@@ -398,6 +399,7 @@ namespace BExIS.Aam.Services
         {
             return allAnnotations.Select(an => an.EntityId).Max() + 1;
         }
+        #endregion
 
         #region IDisposable implementation
         private bool isDisposed = false;
