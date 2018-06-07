@@ -23,6 +23,19 @@ namespace BExIS.Aam.Entities.Mapping
         
         public Annotation(){ }
 
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Annotation:");
+            sb.AppendLine("\tDataset ID: " + this.Dataset.Id);
+            sb.AppendLine("\tDatasetVersion ID: " + this.DatasetVersion.Id);
+            sb.AppendLine("\tVariable: " + this.Variable.Id + " " + this.Variable.Label);
+            sb.AppendLine("\tEntity: " + this.Entity);
+            sb.AppendLine("\tCharacteristic: " + this.Characteristic);
+            sb.AppendLine("\tStandard: " + this.Standard);
+            return sb.ToString();
+        }
+
         public Annotation(Dataset ds, DatasetVersion dsv, Variable var, String entity, String characteristic)
         {
             this.Dataset = ds;
