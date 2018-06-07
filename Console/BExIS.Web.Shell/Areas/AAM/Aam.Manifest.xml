@@ -16,7 +16,7 @@
 
 		<Export tag="settings" id="manageAnnotations" order="1"
 						title="Manage Annotations" description="" icon=""
-						controller="Annotations" action="index"
+						controller="Annotation" action="index"
 						extends="./settingsRoot" />
 
 		<!-- INTERNAL-->
