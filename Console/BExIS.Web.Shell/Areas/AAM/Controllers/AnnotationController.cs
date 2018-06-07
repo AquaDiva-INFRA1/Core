@@ -29,6 +29,9 @@ namespace BExIS.Modules.Bam.UI.Controllers
             //Testing delete-functions (Script for adding the annotations is on my hard drive
             //am.DeleteAnnotation(12345);
             //am.DeleteAnnotation(new List<long>(new long[] {12346, 12347, 12348}));
+            //am.DeleteAnnotationsForDataset(199);
+            am.DeleteAnnotationsForDatasetVersion(5000);
+
             #endregion
 
             List<AnnotationModel> model = new List<AnnotationModel>();
