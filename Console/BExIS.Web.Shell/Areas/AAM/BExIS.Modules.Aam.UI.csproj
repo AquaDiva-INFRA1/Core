@@ -229,6 +229,10 @@
       <Project>{c8a05313-b960-406e-92ec-c1e5b3f47fcd}</Project>
       <Name>BExIS.IO.Transform.Validation</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Components\Utils\BExIS.Utils\BExIS.Utils.csproj">
+      <Project>{782b71c1-707f-4ab1-80e9-90d2880635b4}</Project>
+      <Name>BExIS.Utils</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
       <Project>{2b541d06-3259-4aa3-ae6a-452c8f67164d}</Project>
       <Name>BExIS.Aam.Entities</Name>

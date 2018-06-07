@@ -1,5 +1,5 @@
 ﻿@model  List<BExIS.Modules.Aam.UI.Models.AnnotationModel>
-
+@using BExIS.Modules.Aam.UI.Models
 @section Information
 {
     <p>This page shows a list of all current annotations.</p>
@@ -19,7 +19,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach(BExIS.Modules.Aam.UI.Models.AnnotationModel ann in Model)
+                @foreach(AnnotationModel ann in Model)
                 {
                     <tr>
                         <td>@ann.DatasetId</td>

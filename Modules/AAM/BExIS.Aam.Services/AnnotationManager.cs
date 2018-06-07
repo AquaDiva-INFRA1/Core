@@ -139,7 +139,7 @@ namespace BExIS.Aam.Services
         }
 
         /// <summary>
-        /// Create an annotation based on the given parameters and store it in the database.
+        /// Create an annotation based on the given parameters with a default standard and store it in the database.
         /// </summary>
         /// <param name="Dataset">Dataset that the annotation is refering to</param>
         /// <param name="DatasetVersion">DatasetVersion that the annotation is refering to</param>
@@ -149,59 +149,11 @@ namespace BExIS.Aam.Services
         /// <returns></returns>
         public Annotation CreateAnnotation(Dataset Dataset, DatasetVersion DatasetVersion, Variable Variable, String Entity, String Characteristic)
         {
-            //Create the new annotation object
-            Annotation newAnnotation = new Annotation(Dataset, DatasetVersion, Variable, Entity, Characteristic);
-
-            #region Get/Generate the ID's for Entity, Characteristic and Standard
-            IEnumerable<Annotation> allAnnotations = this.GetAnnotations();
-
-            //EntityID
-            Annotation unicorn = allAnnotations.Where(an => an.Entity.Equals(newAnnotation.Entity)).FirstOrDefault();
-            if (unicorn != null)
-            {
-                newAnnotation.EntityId = unicorn.EntityId;
-            }
-            else
-            {
-                newAnnotation.EntityId = GenerateNewEntityID(allAnnotations);
-            }
-
-            //CharacteristicID
-            unicorn = allAnnotations.Where(an => an.Characteristic.Equals(newAnnotation.Characteristic)).FirstOrDefault();
-            if (unicorn != null)
-            {
-                newAnnotation.CharacteristicId = unicorn.CharacteristicId;
-            }
-            else
-            {
-                newAnnotation.CharacteristicId = GenerateNewCharacteristicID(allAnnotations);
-            }
-
-            //StandardID
-            unicorn = allAnnotations.Where(an => an.Standard.Equals(newAnnotation.Standard)).FirstOrDefault();
-            if (unicorn != null)
-            {
-                newAnnotation.StandardId = unicorn.StandardId;
-            }
-            else
-            {
-                newAnnotation.StandardId = GenerateNewStandardID(allAnnotations);
-            }
-            #endregion
-
-            //Store the annotation in the DB
-            using (IUnitOfWork uow = this.GetUnitOfWork())
-            {
-                IRepository<Annotation> repo = uow.GetRepository<Annotation>();
-                repo.Put(newAnnotation);
-                uow.Commit();
-            }
-
-            return newAnnotation;
+            return this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, Characteristic, "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard");
         }
 
         /// <summary>
-        /// Create an annotation based on the given parameters and store it in the database.
+        /// Create an annotation based on the given parameters with a default standard and store it in the database.
         /// </summary>
         /// <param name="DatasetId">Id of the Dataset that the annotation is refering to</param>
         /// <param name="DatasetVersionId">Id of the DatasetVersion that the annotation is refering to</param>
@@ -217,8 +169,7 @@ namespace BExIS.Aam.Services
             DatasetVersion DatasetVersion = dsm.GetDatasetVersion(DatasetVersionId);
 
             //Create the new annotation object
-            Annotation newAnnotation = this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, Characteristic);
-            return newAnnotation;
+            return this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, Characteristic);
         }
 
         /// <summary>
