@@ -153,6 +153,7 @@
     <Compile Include="Controllers\AnnotationController.cs" />
     <Compile Include="Controllers\HelpController.cs" />
     <Compile Include="Helpers\AamSeedDataGenerator.cs" />
+    <Compile Include="Models\AnnotationModel.cs" />
     <Compile Include="Models\PartyTypeAccountModel.cs" />
     <Compile Include="AamModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
