@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace BExIS.Modules.Bam.UI.Helpers
+namespace BExIS.Modules.Aam.UI.Helpers
 {
     public class AamSeedDataGenerator
     {

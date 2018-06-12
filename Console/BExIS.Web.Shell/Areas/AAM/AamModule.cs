@@ -2,7 +2,7 @@
 using Vaiona.Logging;
 using Vaiona.Web.Mvc.Modularity;
 
-namespace BExIS.Modules.Bam.UI
+namespace BExIS.Modules.Aam.UI
 {
     public class AamModule : ModuleBase
     {
