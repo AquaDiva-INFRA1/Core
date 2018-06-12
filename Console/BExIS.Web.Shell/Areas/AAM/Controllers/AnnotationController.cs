@@ -12,7 +12,7 @@ using System.Web;
 using System.Web.Mvc;
 using Vaiona.Persistence.Api;
 
-namespace BExIS.Modules.Bam.UI.Controllers
+namespace BExIS.Modules.Aam.UI.Controllers
 {
     public class AnnotationController : Controller
     {
