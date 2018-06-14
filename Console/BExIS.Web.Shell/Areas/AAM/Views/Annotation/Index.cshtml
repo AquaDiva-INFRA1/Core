@@ -1,0 +1,36 @@
+﻿@model  List<BExIS.Modules.Aam.UI.Models.AnnotationModel>
+@using BExIS.Modules.Aam.UI.Models
+@section Information
+{
+    <p>This page shows a list of all current annotations.</p>
+}
+
+@section LeftPane{
+    <div id="main">
+        <table>
+            <thead>
+                <tr>
+                    <th>Dataset</th>
+                    <th>DatasetVersion</th>
+                    <th>Variable</th>
+                    <th>Entity</th>
+                    <th>Characteristic</th>
+                    <th>Standard</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(AnnotationModel ann in Model)
+                {
+                    <tr>
+                        <td>@ann.DatasetId</td>
+                        <td>@ann.DatasetVersionId</td>
+                        <td>@ann.VariableLabel</td>
+                        <td>@ann.Entity</td>
+                        <td>@ann.Characteristic</td>
+                        <td>@ann.Standard</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -489,8 +489,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if(selectFieldId == null)
             {
-                //If no headerID was submitted, silently ignore the call
-                return null;
+                //If no headerID was submitted, silently ignore the call (Returning empty Json to prevent javascript errors)
+                return Json(new{ });
             }
 
             EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
@@ -518,7 +518,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             //Store TaskManager back in session object
             Session["TaskManager"] = TaskManager;
-            return null;
+
+            //Returning empty Json to prevent javascript errors
+            return Json(new { });
         }
 
         /*
