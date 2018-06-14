@@ -41,7 +41,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static Dictionary<String, List<OntologyMapping>> mappingDic;
         static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "mappings.txt");
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
+        static String extendedautocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "extendedAutocompletion.txt");
         static String standardsFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "standards.txt");
+        static String informationSeparator = "+=+=+=+";
 
 
         private void setSessions()
@@ -546,11 +548,35 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     foreach (KeyValuePair<String, List<OntologyMapping>> kvp in mappingDic)
                     {
                         if (kvp.Value.Count >= 1)
+                        {
                             writer.WriteLine(kvp.Value.ElementAt(0).getDisplayName());
+                        }
+                            
                     }
                 }
 
                 #endregion
+
+                #region Store extended autocompletion terms in file
+                using (StreamWriter writer = new StreamWriter(extendedautocompletionFilePath, false))
+                {
+                    writer.WriteLine(informationSeparator);
+                    foreach (KeyValuePair<String, List<OntologyMapping>> kvp in mappingDic)
+                    {
+                        foreach (OntologyMapping map in kvp.Value)
+                        {
+                            StringBuilder outputBuilder = new StringBuilder();
+                            outputBuilder.Append(map.getDisplayName());
+                            outputBuilder.Append(informationSeparator);
+                            outputBuilder.Append(map.getMappedConceptUri());
+                            outputBuilder.Append(informationSeparator);
+                            outputBuilder.Append(map.getMappedConceptGroup());
+                            writer.WriteLine(outputBuilder.ToSafeString());
+                        }
+                    }
+                }
+                #endregion
+
             }
 
             return RedirectToAction("Index");

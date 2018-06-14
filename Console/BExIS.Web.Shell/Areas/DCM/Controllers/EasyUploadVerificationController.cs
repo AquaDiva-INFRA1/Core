@@ -1059,7 +1059,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         }
 
         /// <summary>
-        /// Generates, for a given variable (name, datatype, unit), sorted lists of entities/characteristics 
+        /// Generates, for a given variable (name, datatype, unit), a sorted lists of entities/characteristics 
         /// from the ontology that can be used for the annotation.
         /// </summary>
         /// <param name="variableIndex">Index of the header that is currently chosen</param>
