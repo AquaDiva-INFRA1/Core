@@ -41,6 +41,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static Dictionary<String, List<OntologyMapping>> mappingDic;
         static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "mappings.txt");
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
+        static String standardsFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "standards.txt");
 
 
         private void setSessions()
@@ -436,7 +437,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     "{?s rdfs:subClassOf* oboe.1.2:Entity ." +
                     "?s rdfs:label ?label . }";
 
-                //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
+                //Execute the query & Insert results in Dictionary with ConceptGroup "Entity"
                 results = (SparqlResultSet)g.ExecuteQuery(queryString);
 
                 foreach (SparqlResult res in results.Results)
@@ -489,6 +490,44 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                     }
                 }
+                #endregion
+
+                #region Standards
+                //Grab all subclasses (transitively) of oboe-core:Entity
+                queryString.CommandText =
+                    "SELECT DISTINCT ?s ?label WHERE " +
+                    "{?s rdfs:subClassOf* oboe.1.2:Standard ." +
+                    "?s rdfs:label ?label . }";
+
+                //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
+                results = (SparqlResultSet)g.ExecuteQuery(queryString);
+
+                List<String> standards = new List<string>();
+                foreach (SparqlResult res in results.Results)
+                {
+                    //Process the language tags - for now, just throw them away
+                    String s = res["label"].ToString();
+
+                    if (s.Contains("^^"))
+                    {
+                        s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
+                    }
+                    if (s.Contains("@"))
+                    {
+                        s = s.Split('@')[0];
+                    }
+
+                    standards.Add(s);
+                }
+                #region Store standards in file
+                using (StreamWriter writer = new StreamWriter(standardsFilePath, false))
+                {
+                    foreach (String standard in standards)
+                    {
+                       writer.WriteLine(standard);
+                    }
+                }
+                #endregion
                 #endregion
 
                 #region Store dictionary in file
