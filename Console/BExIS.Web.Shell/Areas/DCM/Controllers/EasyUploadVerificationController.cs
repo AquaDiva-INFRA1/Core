@@ -27,7 +27,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
     public class EasyUploadVerificationController : BaseController
     {
         private EasyUploadTaskManager TaskManager;
-        static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
+        static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "extendedAutocompletion.txt");
 
         //
         // GET: /DCM/SubmitSelectAreas/
