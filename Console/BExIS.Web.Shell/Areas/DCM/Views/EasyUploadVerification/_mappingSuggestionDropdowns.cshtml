@@ -27,7 +27,7 @@
         //Get the selected URI
         var uri = select.find("option:selected").attr("title");
 
-        console.log("Selected " + headerID + " - " + uri + " from category " + category);
+        //console.log("Selected " + headerID + " - " + uri + " from category " + category);
         //Send to bus
         $.post('@Url.Action("SaveAnnotationSelection", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })',
             {
