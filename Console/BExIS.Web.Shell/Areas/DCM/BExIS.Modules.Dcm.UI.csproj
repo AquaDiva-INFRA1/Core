@@ -190,7 +190,7 @@
     <Compile Include="Helpers\JaroWinklerDistance.cs" />
     <Compile Include="Models\EasyUploadVariableInformation.cs" />
     <Compile Include="Models\OntologyMappingSuggestion.cs" />
-    <Compile Include="Helpers\VariableOntologyMapping.cs" />
+    <Compile Include="Helpers\EntityCharacteristicPair.cs" />
     <Compile Include="Models\AbstractStepModel.cs" />
     <Compile Include="Models\ChooseDatasetViewModel.cs" />
     <Compile Include="Models\CreateDatasetViewModel.cs" />
