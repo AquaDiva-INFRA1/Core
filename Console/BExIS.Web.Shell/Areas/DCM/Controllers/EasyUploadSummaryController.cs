@@ -11,6 +11,7 @@ using BExIS.IO.Transform.Input;
 using BExIS.IO.Transform.Validation.DSValidation;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.IO.Transform.Validation.ValueCheck;
+using BExIS.Modules.Dcm.UI.Helpers;
 using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
@@ -332,6 +333,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     List<DataAttribute> allDataAttributes = dataAttributeRepo.Get().ToList();
 
+                    //CreatedVariables: <List<Tuple<headerId, Variable>>
+                    List<Tuple<int, Variable>> createdVariables = new List<Tuple<int, Variable>>();
+
                     foreach (EasyUploadVariableInformation Entry in MappedHeaders)
                     {
                         int i = MappedHeaders.IndexOf(Entry);
@@ -355,6 +359,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
 
                         Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, Entry.variableName, "", "", "");
+                        createdVariables.Add(Tuple.Create(Entry.headerId, newVariable));
                         VariableIdentifier vi = new VariableIdentifier
                         {
                             name = newVariable.Label,
@@ -378,10 +383,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     Dataset ds = null;
                     ds = dm.CreateEmptyDataset(sds, rp, metadataStructure);
-
-                    //TODO Should a template be created?
-                    /*ExcelTemplateProvider etp = new ExcelTemplateProvider();
-                    etp.CreateTemplate(sds);*/
 
                     long datasetId = ds.Id;
                     long sdsId = sds.Id;
@@ -555,6 +556,56 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
 
                     dm.CheckInDataset(ds.Id, "upload data from upload wizard", GetUsernameOrDefault());
+
+                    #region Persist annotations
+                    if (this.IsAccessibale("AAM", "Annotation", "CreateAnnotation"))
+                    {
+                        /* Annotations stored on the bus in form of a dictionary
+                        * Key: Tuple<headerID, category> Value: conceptURI
+                        * Category is currently only "Entity" or "Characteristic"
+                        * */
+                        Dictionary<Tuple<int, string>, string> annotations = null;
+                        if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
+                        {
+                            //Get the selected annotations from the bus
+                            annotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
+                        }
+                        //First I have to build a structure that contains the Entity and the Characteristic for each headerId
+                        //So the new structure will be Dictionary<headerId, EntityCharacteristicPair>
+                        Dictionary<int, EntityCharacteristicPair> annotationsPerHeaderId = new Dictionary<int, EntityCharacteristicPair>();
+                        foreach (KeyValuePair<Tuple<int, string>, string> kvp in annotations)
+                        {
+                            //If we didn't find annotations for this headerId yet, create a dummy that will be filled in the next step
+                            if (!annotationsPerHeaderId.ContainsKey(kvp.Key.Item1))
+                            {
+                                annotationsPerHeaderId.Add(kvp.Key.Item1, new EntityCharacteristicPair());
+                            }
+                            //Now we know there's at least a dummy and we can add entity or characteristic, depending on what we currently have in our iteration
+                            if (kvp.Key.Item2 == "Entity")
+                            {
+                                annotationsPerHeaderId[kvp.Key.Item1].mappedEntityURI = kvp.Value;
+                            }
+                            else if (kvp.Key.Item2 == "Characteristic")
+                            {
+                                annotationsPerHeaderId[kvp.Key.Item1].mappedCharacteristicURI = kvp.Value;
+                            }
+                        }
+
+                        //Now we can create and persist the annotation for each headerId (=Variable)
+                        foreach (KeyValuePair<int, EntityCharacteristicPair> kvp in annotationsPerHeaderId)
+                        {
+                            this.Run("AAM", "Annotation", "CreateAnnotation", new RouteValueDictionary()
+                            {
+                                {"DatasetId", ds.Id },
+                                {"DatasetVersionId", dm.GetDatasetLatestVersionId(ds.Id) },
+                                //CreatedVariables: <List<Tuple<headerId, Variable>>
+                                {"Variable", createdVariables.Where(v => v.Item1 == kvp.Key).FirstOrDefault().Item2 },
+                                {"Entity", kvp.Value.mappedEntityURI },
+                                {"Characteristic", kvp.Value.mappedCharacteristicURI }
+                            });
+                        }
+                    }
+                    #endregion
 
                     //Reindex search
                     if (this.IsAccessibale("DDM", "SearchIndex", "ReIndexSingle"))

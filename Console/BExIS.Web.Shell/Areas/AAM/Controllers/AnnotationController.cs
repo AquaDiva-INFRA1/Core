@@ -59,7 +59,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
         }
 
         /// <summary>
-        /// Create an annotation based on the given parameters and store it in the database.
+        /// Internal API to create an annotation and store it in the database.
         /// </summary>
         /// <param name="DatasetId">Id of the Dataset that the annotation is refering to</param>
         /// <param name="DatasetVersionId">Id of the DatasetVersion that the annotation is refering to</param>
@@ -67,19 +67,11 @@ namespace BExIS.Modules.Aam.UI.Controllers
         /// <param name="Entity">URI-String of the entity that the annotation is refering to</param>
         /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
         /// <param name="Standard">URI-String of the standard that the annotation is refering to</param>
-        /// <returns>True if everything went well</returns>
-        public Boolean CreateAnnotation(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String Characteristic, String Standard = null)
+        /// <returns>Json serialization of the created annotation object</returns>
+        public JsonResult CreateAnnotation(long DatasetId=-1, long DatasetVersionId=-1, Variable Variable=null, String Entity=null, String Characteristic=null)
         {
             AnnotationManager am = new AnnotationManager();
-            if(Standard == null)
-            {
-                am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic);
-            }
-            else
-            {
-                am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic, Standard);
-            }
-            return true;
+            return Json(am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic));
         }
     }
 }
