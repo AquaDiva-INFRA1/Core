@@ -456,7 +456,6 @@
     <Content Include="Views\SemanticSearch\_mapview.cshtml" />
     <Content Include="Views\interactiveSearch\Index.cshtml" />
     <Content Include="Views\interactiveSearch\table_result.cshtml" />
-    <Content Include="Views\interactiveSearch\analytics.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
