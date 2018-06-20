@@ -34,10 +34,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
     public class InteractiveSearchController : Controller
     {
         static string DatastructAPI = "http://localhost:5412/api/structures/";
-        static List<Variable_analytics> VA_list;
-
-
-
+        
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
         static DataTable m;
 
