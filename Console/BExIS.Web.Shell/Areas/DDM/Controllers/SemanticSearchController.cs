@@ -519,11 +519,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         s = s.Split('@')[0];
                     }
 
-                    standards.Add(s);
+                    standards.Add(s + informationSeparator + res["s"].ToString());
                 }
                 #region Store standards in file
                 using (StreamWriter writer = new StreamWriter(standardsFilePath, false))
                 {
+                    writer.WriteLine(informationSeparator);
                     foreach (String standard in standards)
                     {
                        writer.WriteLine(standard);
