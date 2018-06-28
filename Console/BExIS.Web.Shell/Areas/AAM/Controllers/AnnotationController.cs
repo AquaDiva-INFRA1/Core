@@ -7,10 +7,14 @@ using BExIS.Modules.Aam.UI.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Vaiona.Persistence.Api;
+using BExIS.Utils.Models;
+using Vaiona.Web.Mvc.Models;
+using Vaiona.Web.Extensions;
 
 namespace BExIS.Modules.Aam.UI.Controllers
 {
@@ -19,6 +23,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
         // GET: Annotation
         public ActionResult Index()
         {
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Annotation List", this.Session.GetTenant());
             AnnotationManager am = new AnnotationManager();
 
             #region Test functions
@@ -47,6 +52,8 @@ namespace BExIS.Modules.Aam.UI.Controllers
             //am.CreateAnnotation(199, 446, testVariable, "Test Entity", "Test Characteristic", "Test Standard");
             //am.CreateAnnotation(199, 446, testVariable, "Test Entity", "Test Characteristic");
             //am.CreateAnnotation(testDataset, testDsv, testVariable, "Test Entity", "Test Characteristic");
+
+            //var unicorn = this.GetExistingAnnotationsByVariableLabel("Date");
             #endregion
 
             List<Annotation> annotationList = am.GetAnnotations().OrderBy(an => an.Dataset.Id).ToList();
@@ -72,6 +79,32 @@ namespace BExIS.Modules.Aam.UI.Controllers
         {
             AnnotationManager am = new AnnotationManager();
             return Json(am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic));
+        }
+
+        /// <summary>
+        /// Get all annotations from the database that are assigned to variables having the given label.
+        /// </summary>
+        /// <param name="variableLabel">Label of the Variable</param>
+        /// <returns>A Dictionary containing the matching annotations as Keys and the number of occurences as Values.</returns>
+        public Dictionary<AnnotationResult, int> GetExistingAnnotationsByVariableLabel(String variableLabel)
+        {
+            Dictionary<AnnotationResult, int> output = new Dictionary<AnnotationResult, int>();
+            AnnotationManager am = new AnnotationManager();
+            List<Annotation> matchingAnnotations = am.GetAnnotationsByVariableLabel(variableLabel);
+            foreach(Annotation an in matchingAnnotations)
+            {
+                AnnotationResult currentAnnotation = new AnnotationResult(an.Entity, an.Characteristic, an.Standard);
+                if (output.ContainsKey(currentAnnotation))
+                {
+                    output[currentAnnotation]++;
+                }
+                else
+                {
+                    output.Add(currentAnnotation, 1);
+                }
+
+            }
+            return output;
         }
     }
 }
