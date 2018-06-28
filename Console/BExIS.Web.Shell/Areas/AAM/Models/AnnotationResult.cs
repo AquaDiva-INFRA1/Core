@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BExIS.Utils.Models
+namespace BExIS.Modules.Aam.UI.Models
 {
     public class AnnotationResult : IEquatable<AnnotationResult>
     {
