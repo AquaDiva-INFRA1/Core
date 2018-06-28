@@ -7,9 +7,9 @@ using System.Web;
 
 namespace BExIS.Modules.Aam.UI.Helpers
 {
-    public class AamSeedDataGenerator
+    public class AamSeedDataGenerator : IDisposable
     {
-        public static void GenerateSeedData()
+        public void GenerateSeedData()
         {
             FeatureManager featureManager = new FeatureManager();
             OperationManager operationManager = new OperationManager();
@@ -31,6 +31,12 @@ namespace BExIS.Modules.Aam.UI.Helpers
                 featureManager.Dispose();
                 operationManager.Dispose();
             }
+        }
+
+
+        public void Dispose()
+        {
+            //Do nothing for now
         }
     }
 }
