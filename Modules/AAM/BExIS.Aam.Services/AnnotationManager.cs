@@ -77,6 +77,16 @@ namespace BExIS.Aam.Services
             return output;
         }
 
+        public List<Annotation> GetAnnotationsByVariableLabel(String variableLabel)
+        {
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                IRepository<Annotation> repo = uow.GetRepository<Annotation>();
+                var all = repo.Get();
+                return all.Where(an => an.Variable.Label.Equals(variableLabel)).ToList();
+            }
+        }
+
         /// <summary>
         /// Create an annotation based on the given parameters and store it in the database.
         /// </summary>
