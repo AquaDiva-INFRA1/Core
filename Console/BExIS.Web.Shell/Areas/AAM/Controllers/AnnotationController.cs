@@ -7,6 +7,7 @@ using BExIS.Modules.Aam.UI.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -78,6 +79,16 @@ namespace BExIS.Modules.Aam.UI.Controllers
             else
             {
                 am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic, Standard);
+            }
+            return true;
+        }
+
+        public Boolean CreateAnnotationBulk(long DatasetId, long DatasetVersionId, List<Variable> Variables, List<String> Entities, List<String> Characteristics)
+        {
+            Contract.Requires(Variables.Count == Entities.Count && Entities.Count == Characteristics.Count);
+            for(int i = 0; i < Variables.Count; i++)
+            {
+                this.CreateAnnotation(DatasetId, DatasetVersionId, Variables.ElementAt(i), Entities.ElementAt(i), Characteristics.ElementAt(i));
             }
             return true;
         }
