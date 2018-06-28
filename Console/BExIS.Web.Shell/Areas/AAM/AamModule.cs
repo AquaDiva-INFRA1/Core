@@ -9,7 +9,7 @@ namespace BExIS.Modules.Aam.UI
     {
         public AamModule() : base("aam")
         {
-            LoggerFactory.GetFileLogger().LogCustom("...ctor of aam...");
+            LoggerFactory.GetFileLogger().LogCustom("...constructor of aam...");
         }
         public override void Install()
         {
