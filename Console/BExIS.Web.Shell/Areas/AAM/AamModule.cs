@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BExIS.Modules.Aam.UI.Helpers;
+using System;
 using Vaiona.Logging;
 using Vaiona.Web.Mvc.Modularity;
 
@@ -16,7 +17,12 @@ namespace BExIS.Modules.Aam.UI
             try
             {
                 base.Install();
-                
+
+                using (AamSeedDataGenerator generator = new AamSeedDataGenerator())
+                {
+                    generator.GenerateSeedData();
+                }
+
             }
             catch (Exception e)
             {
