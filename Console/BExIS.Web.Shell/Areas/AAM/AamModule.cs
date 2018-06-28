@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BExIS.Modules.Aam.UI.Helpers;
+using System;
 using Vaiona.Logging;
 using Vaiona.Web.Mvc.Modularity;
 
@@ -8,7 +9,7 @@ namespace BExIS.Modules.Aam.UI
     {
         public AamModule() : base("aam")
         {
-            LoggerFactory.GetFileLogger().LogCustom("...ctor of aam...");
+            LoggerFactory.GetFileLogger().LogCustom("...constructor of aam...");
         }
         public override void Install()
         {
@@ -16,7 +17,12 @@ namespace BExIS.Modules.Aam.UI
             try
             {
                 base.Install();
-                
+
+                using (AamSeedDataGenerator generator = new AamSeedDataGenerator())
+                {
+                    generator.GenerateSeedData();
+                }
+
             }
             catch (Exception e)
             {
