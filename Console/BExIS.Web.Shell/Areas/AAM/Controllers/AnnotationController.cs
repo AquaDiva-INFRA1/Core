@@ -75,17 +75,17 @@ namespace BExIS.Modules.Aam.UI.Controllers
         /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
         /// <param name="Standard">URI-String of the standard that the annotation is refering to</param>
         /// <returns>True if everything went well</returns>
-        public Boolean CreateAnnotation(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String Characteristic, String Standard = null)
+        public Boolean CreateAnnotation(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String EntityLabel, String Characteristic, String CharacteristicLabel)
         {
             AnnotationManager am = new AnnotationManager();
-            if(Standard == null)
-            {
-                am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic);
-            }
-            else
-            {
-                am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic, Standard);
-            }
+            am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, EntityLabel, Characteristic, CharacteristicLabel);
+            return true;
+        }
+
+        public Boolean CreateAnnotation(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String EntityLabel, String Characteristic, String CharacteristicLabel, String Standard, String StandardLabel)
+        {
+            AnnotationManager am = new AnnotationManager();
+            am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, EntityLabel, Characteristic, CharacteristicLabel, Standard, StandardLabel);
             return true;
         }
 
