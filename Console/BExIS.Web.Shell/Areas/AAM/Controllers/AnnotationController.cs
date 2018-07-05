@@ -15,6 +15,9 @@ using Vaiona.Persistence.Api;
 using BExIS.Utils.Models;
 using Vaiona.Web.Mvc.Models;
 using Vaiona.Web.Extensions;
+using System.Web.Routing;
+using Vaiona.Web.Mvc.Modularity;
+using Newtonsoft.Json;
 
 namespace BExIS.Modules.Aam.UI.Controllers
 {
@@ -54,6 +57,15 @@ namespace BExIS.Modules.Aam.UI.Controllers
             //am.CreateAnnotation(testDataset, testDsv, testVariable, "Test Entity", "Test Characteristic");
 
             //var unicorn = this.GetExistingAnnotationsByVariableLabel("Date");
+
+            /*List<Test> tests = new List<Test>();
+            tests.Add(new Test("Blabla", "Blublub", "Blibli", 1));
+            tests.Add(new Test("Bim", "Bam", "Bum", 2));
+            AnnotationResultList list = new AnnotationResultList(tests);
+            string serialized = JsonConvert.SerializeObject(list);
+            dynamic deserialized = JsonConvert.DeserializeObject(serialized);
+            Debug.WriteLine(deserialized);*/
+
             #endregion
 
             List<Annotation> annotationList = am.GetAnnotations().OrderBy(an => an.Dataset.Id).ToList();
@@ -82,29 +94,35 @@ namespace BExIS.Modules.Aam.UI.Controllers
         }
 
         /// <summary>
-        /// Get all annotations from the database that are assigned to variables having the given label.
+        /// Internal API to get all annotations from the database that are assigned to variables having the given label.
         /// </summary>
         /// <param name="variableLabel">Label of the Variable</param>
         /// <returns>A Dictionary containing the matching annotations as Keys and the number of occurences as Values.</returns>
-        public Dictionary<AnnotationResult, int> GetExistingAnnotationsByVariableLabel(String variableLabel)
+        public ContentResult GetExistingAnnotationsByVariableLabel(String variableLabel)
         {
-            Dictionary<AnnotationResult, int> output = new Dictionary<AnnotationResult, int>();
+            //Dictionary<AnnotationResult, int> output = new Dictionary<AnnotationResult, int>();
             AnnotationManager am = new AnnotationManager();
             List<Annotation> matchingAnnotations = am.GetAnnotationsByVariableLabel(variableLabel);
-            foreach(Annotation an in matchingAnnotations)
+
+            /*
+             * Create a distinct list of Annotations including the number of occurences in our annotations table
+             * */
+            List<AnnotationResult> output = new List<AnnotationResult>();
+            foreach(Annotation match in matchingAnnotations)
             {
-                AnnotationResult currentAnnotation = new AnnotationResult(an.Entity, an.Characteristic, an.Standard);
-                if (output.ContainsKey(currentAnnotation))
+                AnnotationResult unicorn = output.Where(an => an.Equals(match)).FirstOrDefault();
+                if(unicorn != null)
                 {
-                    output[currentAnnotation]++;
+                    //We already have this annotation in the List, just increase the occurences
+                    unicorn.Occurences++;
                 }
                 else
                 {
-                    output.Add(currentAnnotation, 1);
+                    output.Add(new AnnotationResult(match, 1));
                 }
-
             }
-            return output;
+            output.OrderByDescending(el => el.Occurences);
+            return Content(JsonConvert.SerializeObject(output), "application/json");
         }
     }
 }

@@ -83,7 +83,7 @@ namespace BExIS.Aam.Services
             {
                 IRepository<Annotation> repo = uow.GetRepository<Annotation>();
                 var all = repo.Get();
-                return all.Where(an => an.Variable.Label.Equals(variableLabel)).ToList();
+                return all.Where(an => an.Variable.Label.ToLower().Equals(variableLabel.ToLower())).ToList();
             }
         }
 
