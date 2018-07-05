@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
@@ -21,6 +22,7 @@ using System.Web.UI.WebControls;
 using Vaiona.Persistence.Api;
 using Vaiona.Utils.Cfg;
 using Vaiona.Web.Mvc;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
 {
@@ -300,13 +302,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             //Get variable name, unit and datatype for matching purposes
             TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+            Session["TaskManager"] = TaskManager;
             List<EasyUploadVariableInformation> variableInformationList = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             EasyUploadVariableInformation variableInformation = variableInformationList.Where(el => el.headerId == headerIndex).FirstOrDefault();
             string variableName = variableInformation.variableName;
             string unit = variableInformation.unitInfo.Name;
             //Why does this have to be so complicated...?
             string datatype = variableInformation.unitInfo.DataTypeInfos.Where(dti => dti.DataTypeId == variableInformation.unitInfo.SelectedDataTypeId).FirstOrDefault().Name;
-            Session["TaskManager"] = TaskManager;
             
             //Structure of variable "suggestions": Key=category ("Entity"|"Characteristic"), Value=List of the options that will be displayed in the dropdown
             Dictionary<string, List<OntologyMappingSuggestionModel>> suggestions = GenerateOntologyMapping(headerIndex, variableName, datatype, unit);
@@ -315,7 +317,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 //There are already annotations stored in the bus (from switching between steps) so set the "selected" properties accordingly
                 //Structure of variable "currentAnnotations": Key=(headerIndex, category), Value=URI of the selected concept
                 //TODO There's no guarantee that the annotation that is stored in the bus is actually in the (limited) list of suggestions
-                //Possible solution: Manually reconstruct the suggstion from the information that is stored in the bus
+                //Possible solution: Manually reconstruct the suggestion from the information that is stored in the bus
                 Dictionary<Tuple<int, string>, string> currentAnnotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
                 foreach(KeyValuePair<Tuple<int, string>, string> kvp in currentAnnotations)
                 {
@@ -340,7 +342,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     }
                 }
             }
-            //Now we still have to set the "selected" property for all lists where we didn't find an annotation in the bus
 
             //Model: (headerIndex, Dictionary)-Tuple
             return PartialView("_mappingSuggestionDropdowns", 
@@ -1113,6 +1114,26 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 List<OntologyMappingSuggestionModel> tmp = output[key];
                 output[key] = tmp.OrderByDescending(el => el.similarity).Take(50).ToList();
             }
+
+            //Now add the annotations that we already have in the database to the start of the list (and remove duplicates)
+            if (this.IsAccessibale("AAM", "Annotation", "GetExistingAnnotationsByVariableLabel"))
+            {
+                ContentResult res = (ContentResult)this.Run("AAM", "Annotation", "GetExistingAnnotationsByVariableLabel", new RouteValueDictionary()
+                {
+                    { "variableLabel", variableName }
+                });
+
+                dynamic response = JsonConvert.DeserializeObject(res.Content);
+                for (int i = 0; i < response.Count; i++)
+                {
+                    var unicorn = response[i];
+                    //Add to the start of the output
+                    output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity, double.MaxValue));
+                    output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic, double.MaxValue));
+                    output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic, double.MaxValue));
+                }
+            }
+
             return output;
         }
         #endregion

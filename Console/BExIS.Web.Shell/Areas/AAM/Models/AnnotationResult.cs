@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BExIS.Aam.Entities.Mapping;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,12 +12,43 @@ namespace BExIS.Modules.Aam.UI.Models
         public String Entity;
         public String Characteristic;
         public String Standard;
+        public int Occurences;
 
         public AnnotationResult(string entity, string characteristic, string standard)
         {
             this.Entity = entity;
             this.Characteristic = characteristic;
             this.Standard = standard;
+            this.Occurences = 0;
+        }
+
+        public AnnotationResult(string entity, string characteristic, string standard, int occurences)
+        {
+            this.Entity = entity;
+            this.Characteristic = characteristic;
+            this.Standard = standard;
+            this.Occurences = occurences;
+        }
+
+        public AnnotationResult(Annotation an)
+        {
+            this.Entity = an.Entity;
+            this.Characteristic = an.Characteristic;
+            this.Standard = an.Standard;
+            this.Occurences = 1;
+        }
+
+        public AnnotationResult(Annotation an, int occ)
+        {
+            this.Entity = an.Entity;
+            this.Characteristic = an.Characteristic;
+            this.Standard = an.Standard;
+            this.Occurences = occ;
+        }
+
+        public bool Equals(Annotation an)
+        {
+            return this.Entity.Equals(an.Entity) && this.Characteristic.Equals(an.Characteristic) && this.Standard.Equals(an.Standard);
         }
 
         /// <summary>
