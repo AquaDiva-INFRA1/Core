@@ -878,8 +878,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         public void UploadFiletoAnalysis2(){
             String username = "PubServerAD";
             String password = "pubserverad";
-            string FTPAddress = "ftp://10.0.0.101:21";
-            String filePath = @"C:\Users\admin\Desktop\paeruginosa-reads\SRR396637.sra_1.fastq";
+            string FTPAddress = "ftp://192.168.37.3:21";
+            String filePath = @"C:\Users\admin\Desktop\\sequence_data_examples\reads_se_01.fastq";
             String filename = Path.GetFileName(filePath);
 
             // upload the file to analyse
@@ -905,7 +905,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             // run the analysis
             try
             {
-                string url = "http://10.0.0.101:5000";
+                string url = "http://192.168.37.3:5000";
                 var request2 = (HttpWebRequest)WebRequest.Create(url);
                 request2.Method = "POST";
                 request2.ContentType = "application/x-www-form-urlencoded";
