@@ -1,0 +1,175 @@
+﻿@model System.Data.DataTable
+@using BExIS.Utils.Models;
+@using System.Data;
+@using BExIS.Dlm.Entities.DataStructure;
+@using Telerik.Web.Mvc.UI;
+
+
+<header>
+    <script type="text/javascript" src="/Scripts/trunk8.js"></script>
+    <script type="text/javascript" src="/Scripts/jquery.ba-resize.min.js"></script>
+</header>
+
+@section Information
+{
+    <p>Choose the file to process <b>Analysis</b> over.</p>
+    <p>Results from <b>Analysis</b> using <b>VrAP</b> are sent via Email.</p>
+}
+
+@{
+    List<HeaderItem> DefaultHeaderList = (List<HeaderItem>)ViewData["DefaultHeaderList"];
+    HeaderItem Id = (HeaderItem)ViewData["ID"];
+
+
+    StructuredDataStructure sds = new StructuredDataStructure();
+    Tuple<StructuredDataStructure, long> defaultModel = new Tuple<StructuredDataStructure, long>(sds, 0);
+
+
+    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
+    pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
+    pagerStyles |= GridPagerStyles.Numeric;
+
+}
+
+<!--Search bar and search results-->
+<div class="searchContainer">
+
+    <div id="searchContent">
+        @(Html.Telerik().Grid<System.Data.DataRow>()
+                            .Name("resultGrid")
+
+                                .DataBinding(dataBinding => dataBinding
+                                .Ajax()
+                                .Select("_CustomBinding", "Home", new { area = "UDAM" })
+                                )
+
+                                .EnableCustomBinding(true)
+                                .HtmlAttributes(new { @class = "result-grid" })
+                                .Columns(columns =>
+                                {
+                                    if (Model != null)
+                                    {
+                                        for (int i = 0; i < Model.Columns.Count; i++)
+                                        {
+                                            DataColumn column = Model.Columns[i];
+                                            if (DefaultHeaderList.Any(p => p.Name.Equals(column.ColumnName)))
+                                            {
+                                                string title;
+                                                if (column.Caption == "")
+                                                {
+                                                    title = column.ColumnName;
+                                                }
+                                                else
+                                                {
+                                                    title = column.Caption;
+                                                }
+
+                                                columns.Bound(column.DataType, column.ColumnName)
+                                                    .Title(title);
+                                            }
+                                            else
+                                            {
+                                                columns.Bound(column.DataType, column.ColumnName).Hidden()
+                                                       .Title(column.Caption);
+
+                                            }
+                                        }
+                                    }
+
+                                    if (Model != null)
+                                    {
+                                        if (@Model.Columns.Count > 0)
+                                        {
+                                            //Additional column with the "View Details"-Button
+                                            columns.Bound("").Width(80).ClientTemplate(
+                                                    "<div class='searchResultFunctionDiv'>" +
+                                                    "<a id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class = 'bx bx-grid-function bx-show' title = 'Analyse DataSet' " +
+                                                    "onclick='uploadfile(this)'>  </a>" +
+                                                    "</div>"
+                                                    ).Groupable(false)
+                                                        .Sortable(false)
+                                                        .Filterable(false);
+
+                                        }
+                                    }
+
+                                })
+
+                                .ClientEvents(events => events
+                                            .OnRowDataBound("resultGrid_OnRowDataBound")
+                                            .OnDataBound("onDataBound")
+                                            .OnColumnShow("resultGrid_OnColumnChanged")
+                                            .OnColumnHide("resultGrid_OnColumnChanged")
+
+                                            )
+                                .Sortable()
+                                .Pageable(paging => paging.Style(pagerStyles))
+                                .ColumnContextMenu()
+
+
+        )
+    </div>
+</div>
+
+
+
+<style>
+    #errorWrapper {
+        text-align: center;
+        margin-top: 20px;
+        background-color: #ef5c2f;
+    }
+
+        #errorWrapper div {
+            display: inline-block;
+            background-color: #ff8560;
+        }
+</style>
+
+
+<script type="text/javascript">
+
+    $('document').ready(function () {
+
+        $('.t-filter').attr("title", "Filter");
+
+    })
+
+    function resultGrid_OnColumnChanged(e) {
+    }
+
+
+    function resultGrid_OnRowDataBound(e) {
+
+    }
+
+    function uploadfile(e) {
+
+        //checked
+        var id = e.getAttribute("id");
+
+
+        var data = {
+            id: id
+        }
+
+        $.ajax({
+            url: '/DDM/SemanticSearch/UploadFiletoAnalysis2',
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            success: function () {
+                alert('The process might take some time ... You will be notified with an email for the analysis results')
+            }
+        });
+    }
+
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+
+</script>
