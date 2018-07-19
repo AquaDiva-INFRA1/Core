@@ -21,6 +21,7 @@ using BExIS.Xml.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
@@ -594,7 +595,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         //Now we can create and persist the annotation for each headerId (=Variable)
                         foreach (KeyValuePair<int, EntityCharacteristicPair> kvp in annotationsPerHeaderId)
                         {
-                            this.Run("AAM", "Annotation", "CreateAnnotation", new RouteValueDictionary()
+                            var unicorn = this.Run("AAM", "Annotation", "CreateAnnotationWithoutStandard", new RouteValueDictionary()
                             {
                                 {"DatasetId", ds.Id },
                                 {"DatasetVersionId", dm.GetDatasetLatestVersionId(ds.Id) },
@@ -603,6 +604,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 {"Entity", kvp.Value.mappedEntityURI },
                                 {"Characteristic", kvp.Value.mappedCharacteristicURI }
                             });
+                            Debug.WriteLine(unicorn);
                         }
                     }
                     #endregion

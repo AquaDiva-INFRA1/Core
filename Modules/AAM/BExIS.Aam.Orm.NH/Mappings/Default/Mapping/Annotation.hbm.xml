@@ -17,12 +17,24 @@
       <column name="entity" />
     </property>
     
+    <property name="Entity_Label" type="string">
+      <column name="entity_label" />
+    </property>
+    
     <property name="Characteristic" type="string">
       <column name="characteristic" />
     </property>
     
+    <property name="Characteristic_Label" type="string">
+      <column name="characteristic_label" />
+    </property>
+    
     <property name="Standard" type="string">
       <column name="standard" />
+    </property>
+    
+    <property name="Standard_Label" type="string">
+      <column name="standard_label" />
     </property>
     
     <property name="EntityId" type="Int64">

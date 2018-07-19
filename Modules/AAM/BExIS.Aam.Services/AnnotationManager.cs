@@ -94,13 +94,16 @@ namespace BExIS.Aam.Services
         /// <param name="DatasetVersion">DatasetVersion that the annotation is refering to</param>
         /// <param name="Variable">Variable that the annotation is refering to</param>
         /// <param name="Entity">URI-String of the entity that the annotation is refering to</param>
+        /// <param name="Entity_Label">Label of the Entity</param>
         /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
+        /// <param name="Characteristic_Label">Label of the Characteristic</param>
         /// <param name="Standard">URI-String of the standard that the annotation is refering to</param>
+        /// <param name="Standard_Label">Label of the Standard</param>
         /// <returns>The created annotation</returns>
-        public Annotation CreateAnnotation(Dataset Dataset, DatasetVersion DatasetVersion, Variable Variable, String Entity, String Characteristic, String Standard)
+        public Annotation CreateAnnotation(Dataset Dataset, DatasetVersion DatasetVersion, Variable Variable, String Entity, String Entity_Label, String Characteristic, String Characteristic_Label, String Standard, String Standard_Label)
         {
             //Create the new annotation object
-            Annotation newAnnotation = new Annotation(Dataset, DatasetVersion, Variable, Entity, Characteristic, Standard);
+            Annotation newAnnotation = new Annotation(Dataset, DatasetVersion, Variable, Entity, Entity_Label, Characteristic, Characteristic_Label, Standard, Standard_Label);
 
             #region Get/Generate the ID's for Entity, Characteristic and Standard
             IEnumerable<Annotation> allAnnotations = this.GetAnnotations();
@@ -129,14 +132,57 @@ namespace BExIS.Aam.Services
         /// <summary>
         /// Create an annotation based on the given parameters and store it in the database.
         /// </summary>
-        /// <param name="DatasetId">Id of the Dataset that the annotation is refering to</param>
-        /// <param name="DatasetVersionId">Id of the DatasetVersion that the annotation is refering to</param>
+        /// <param name="Dataset">Dataset that the annotation is refering to</param>
+        /// <param name="DatasetVersion">DatasetVersion that the annotation is refering to</param>
         /// <param name="Variable">Variable that the annotation is refering to</param>
         /// <param name="Entity">URI-String of the entity that the annotation is refering to</param>
         /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
         /// <param name="Standard">URI-String of the standard that the annotation is refering to</param>
         /// <returns>The created annotation</returns>
-        public Annotation CreateAnnotation(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String Characteristic, String Standard)
+        public Annotation CreateAnnotationWithoutLabels(Dataset Dataset, DatasetVersion DatasetVersion, Variable Variable, String Entity, String Characteristic, String Standard)
+        {
+            IEnumerable<Annotation> allAnnotations = this.GetAnnotations();
+
+            //Create the new annotation object
+            Annotation newAnnotation = new Annotation(Dataset, DatasetVersion, Variable, Entity, this.GetLabelForURI(allAnnotations, Entity), 
+                Characteristic, this.GetLabelForURI(allAnnotations, Characteristic), Standard, this.GetLabelForURI(allAnnotations, Standard));
+
+            #region Get/Generate the ID's for Entity, Characteristic and Standard
+            //EntityID
+            newAnnotation.EntityId = GetOrGenerateEntityID(allAnnotations, newAnnotation.Entity);
+
+            //CharacteristicID
+            newAnnotation.CharacteristicId = GetOrGenerateCharacteristicId(allAnnotations, newAnnotation.Characteristic);
+
+            //StandardID
+            newAnnotation.StandardId = GetOrGenerateStandardId(allAnnotations, newAnnotation.Standard);
+            #endregion
+
+            //Store the annotation in the DB
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                IRepository<Annotation> repo = uow.GetRepository<Annotation>();
+                repo.Put(newAnnotation);
+                uow.Commit();
+            }
+
+            return newAnnotation;
+        }
+
+        /// <summary>
+        /// Create an annotation based on the given parameters and store it in the database.
+        /// </summary>
+        /// <param name="DatasetId">Id of the Dataset that the annotation is refering to</param>
+        /// <param name="DatasetVersionId">Id of the DatasetVersion that the annotation is refering to</param>
+        /// <param name="Variable">Variable that the annotation is refering to</param>
+        /// <param name="Entity">URI-String of the entity that the annotation is refering to</param>
+        /// <param name="Entity_Label">Label of the Entity</param>
+        /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
+        /// <param name="Characteristic_Label">Label of the Characteristic</param>
+        /// <param name="Standard">URI-String of the standard that the annotation is refering to</param>
+        /// <param name="Standard_Label">Label of the Standard</param>
+        /// <returns>The created annotation</returns>
+        public Annotation CreateAnnotation(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String Entity_Label, String Characteristic, String Characteristic_Label, String Standard, String Standard_Label)
         {
             //Grab Dataset and DatasetVersion using the provided IDs
             DatasetManager dsm = new DatasetManager();
@@ -144,8 +190,49 @@ namespace BExIS.Aam.Services
             DatasetVersion DatasetVersion = dsm.GetDatasetVersion(DatasetVersionId);
 
             //Create the new annotation object
-            Annotation newAnnotation = this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, Characteristic, Standard);
+            Annotation newAnnotation = this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, Entity_Label, Characteristic, Characteristic_Label, Standard, Standard_Label);
             return newAnnotation;
+        }
+
+        /// <summary>
+        /// Create an annotation based on the given parameters and store it in the database.
+        /// </summary>
+        /// <param name="DatasetId">Id of the Dataset that the annotation is refering to</param>
+        /// <param name="DatasetVersionId">Id of the DatasetVersion that the annotation is refering to</param>
+        /// <param name="Variable">Variable that the annotation is refering to</param>
+        /// <param name="Entity">URI-String of the entity that the annotation is refering to</param>
+        /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
+        /// <param name="Standard">URI-String of the standard that the annotation is refering to</param>
+        /// <returns>The created annotation</returns>
+        public Annotation CreateAnnotationWithoutLabels(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String Characteristic, String Standard)
+        {
+            //Grab Dataset and DatasetVersion using the provided IDs
+            DatasetManager dsm = new DatasetManager();
+            Dataset Dataset = dsm.GetDataset(DatasetId);
+            DatasetVersion DatasetVersion = dsm.GetDatasetVersion(DatasetVersionId);
+
+            //Grab all annotations for the search for the labels
+            IEnumerable<Annotation> allAnnotations = this.GetAnnotations();
+
+            //Create the new annotation object
+            Annotation newAnnotation = this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, this.GetLabelForURI(allAnnotations, Entity), Characteristic, this.GetLabelForURI(allAnnotations, Characteristic), Standard, this.GetLabelForURI(allAnnotations, Standard));
+            return newAnnotation;
+        }
+
+        /// <summary>
+        /// Create an annotation based on the given parameters with a default standard and store it in the database.
+        /// </summary>
+        /// <param name="Dataset">Dataset that the annotation is refering to</param>
+        /// <param name="DatasetVersion">DatasetVersion that the annotation is refering to</param>
+        /// <param name="Variable">Variable that the annotation is refering to</param>
+        /// <param name="Entity">URI-String of the entity that the annotation is refering to</param>
+        /// <param name="Entity_Label">Label of the Entity</param>
+        /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
+        /// <param name="Characteristic_Label">Label of the Characteristic</param>
+        /// <returns></returns>
+        public Annotation CreateAnnotation(Dataset Dataset, DatasetVersion DatasetVersion, Variable Variable, String Entity, String Entity_Label, String Characteristic, String Characteristic_Label)
+        {
+            return this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, Entity_Label, Characteristic, Characteristic_Label, "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "Standard");
         }
 
         /// <summary>
@@ -157,9 +244,31 @@ namespace BExIS.Aam.Services
         /// <param name="Entity">URI-String of the entity that the annotation is refering to</param>
         /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
         /// <returns></returns>
-        public Annotation CreateAnnotation(Dataset Dataset, DatasetVersion DatasetVersion, Variable Variable, String Entity, String Characteristic)
+        public Annotation CreateAnnotationWithoutLabels(Dataset Dataset, DatasetVersion DatasetVersion, Variable Variable, String Entity, String Characteristic)
         {
-            return this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, Characteristic, "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard");
+            return this.CreateAnnotationWithoutLabels(Dataset, DatasetVersion, Variable, Entity, Characteristic, "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard");
+        }
+
+        /// <summary>
+        /// Create an annotation based on the given parameters with a default standard and store it in the database.
+        /// </summary>
+        /// <param name="DatasetId">Id of the Dataset that the annotation is refering to</param>
+        /// <param name="DatasetVersionId">Id of the DatasetVersion that the annotation is refering to</param>
+        /// <param name="Variable">Variable that the annotation is refering to</param>
+        /// <param name="Entity">URI-String of the entity that the annotation is refering to</param>
+        /// <param name="Entity_Label">Label of the Entity</param>
+        /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
+        /// <param name="Characteristic_Label">Label of the Characteristic</param>
+        /// <returns>The created annotation</returns>
+        public Annotation CreateAnnotation(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String Entity_Label, String Characteristic, String Characteristic_Label)
+        {
+            //Grab Dataset and DatasetVersion using the provided IDs
+            DatasetManager dsm = new DatasetManager();
+            Dataset Dataset = dsm.GetDataset(DatasetId);
+            DatasetVersion DatasetVersion = dsm.GetDatasetVersion(DatasetVersionId);
+
+            //Create the new annotation object
+            return this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, Entity_Label, Characteristic, Characteristic_Label);
         }
 
         /// <summary>
@@ -178,8 +287,11 @@ namespace BExIS.Aam.Services
             Dataset Dataset = dsm.GetDataset(DatasetId);
             DatasetVersion DatasetVersion = dsm.GetDatasetVersion(DatasetVersionId);
 
+            //Grab all annotations for the search for the labels
+            IEnumerable<Annotation> allAnnotations = this.GetAnnotations();
+
             //Create the new annotation object
-            return this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, Characteristic);
+            return this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, this.GetLabelForURI(allAnnotations, Entity), Characteristic, this.GetLabelForURI(allAnnotations, Characteristic));
         }
 
         /// <summary>
@@ -267,6 +379,47 @@ namespace BExIS.Aam.Services
             return true;
         }
 
+        /// <summary>
+        /// Edits the labels of the given URIs in all Annotations
+        /// </summary>
+        /// <param name="uris">List of the URIs</param>
+        /// <param name="labels">List of the labels (same length as the URI-List)</param>
+        /// <returns>True if the editing was successful</returns>
+        public bool EditLabels(List<String> uris, List<String> labels)
+        {
+            Contract.Requires(uris.Count == labels.Count);
+
+            using(IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                IRepository<Annotation> repo = uow.GetRepository<Annotation>();
+                IEnumerable<Annotation> allAnnotations = repo.Get();
+
+                //For each annotation, check for each URI if we have a label for it in our input-lists
+                foreach(Annotation an in allAnnotations)
+                {
+                    int index = uris.IndexOf(an.Entity);
+                    if(index != -1)
+                    {
+                        an.Entity_Label = labels.ElementAt(index);
+                    }
+
+                    index = uris.IndexOf(an.Characteristic);
+                    if(index != -1)
+                    {
+                        an.Characteristic_Label = labels.ElementAt(index);
+                    }
+
+                    index = uris.IndexOf(an.Standard);
+                    if(index != -1)
+                    {
+                        an.Standard_Label = labels.ElementAt(index);
+                    }
+                }
+                uow.Commit();
+            }
+            return true;
+        }
+
         #region (Private) Helper functions
         /// <summary>
         /// Gets the id of the given standard from the given enumerable annotations.
@@ -326,6 +479,32 @@ namespace BExIS.Aam.Services
             {
                 return GenerateNewEntityID(allAnnotations);
             }
+        }
+
+        /// <summary>
+        /// Gets the id of the given entity from the given enumerable annotations.
+        /// Generates a new id if the entity is not used in any annotation yet.
+        /// </summary>
+        /// <param name="allAnnotations">Enumerable annotations</param>
+        /// <param name="entity">Entity that the id should be generated for</param>
+        /// <returns>A new id for the given entity</returns>
+        private String GetLabelForURI(IEnumerable<Annotation> allAnnotations, string uri)
+        {
+            Annotation unicorn = allAnnotations.Where(an => an.Entity != null && an.Entity.Equals(uri)).FirstOrDefault();
+            if (unicorn != null)
+                return unicorn.Entity_Label;
+
+            unicorn = allAnnotations.Where(an => an.Characteristic != null && an.Characteristic.Equals(uri)).FirstOrDefault();
+            if (unicorn != null)
+                return unicorn.Characteristic_Label;
+
+            unicorn = allAnnotations.Where(an => an.Standard != null && an.Standard.Equals(uri)).FirstOrDefault();
+            if (unicorn != null)
+                return unicorn.Standard_Label;
+
+            //TODO: Search the ontology to get a label - call SemanticSearchController/FindOntologyLabels for that (can we even do that in here?)
+
+            return "No label found!";
         }
 
         /// <summary>

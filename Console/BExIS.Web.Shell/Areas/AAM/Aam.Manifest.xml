@@ -24,6 +24,11 @@
         title="Create Annotation" description="Create and persist a new annotation" icon=""
         controller="Annotation" action="CreateAnnotation"
         extends="" />
+
+    <Export tag="internalApi" id="CreateAnnotationWithoutStandard"
+        title="Create Annotation Without Standard" description="Create and persist a new annotation" icon=""
+        controller="Annotation" action="CreateAnnotationWithoutStandard"
+        extends="" />
     
     <Export tag="internalApi" id="GetAnnotationsForVariableName"
         title="Get Annotations for Variable Name" description="Get all Annotations for a given Variable Name" icon=""

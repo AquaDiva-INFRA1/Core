@@ -1048,7 +1048,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             double output = 0.0;
 
             similarities.Add(similarityLevenshtein(a, b));
-            similarities.Add(similarityDiceCoefficient(a, b));
+            //similarities.Add(similarityDiceCoefficient(a, b));
             similarities.Add(JaroWinklerDistance.proximity(a, b));
 
             foreach (double sim in similarities)
@@ -1128,9 +1128,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 {
                     var unicorn = response[i];
                     //Add to the start of the output
-                    output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity, double.MaxValue));
-                    output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic, double.MaxValue));
-                    output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic, double.MaxValue));
+                    output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity_Label, double.MaxValue));
+                    output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic_Label, double.MaxValue));
+                    //output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic, double.MaxValue));
                 }
             }
 
