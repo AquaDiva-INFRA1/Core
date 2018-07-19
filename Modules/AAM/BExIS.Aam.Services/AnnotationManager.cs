@@ -277,6 +277,41 @@ namespace BExIS.Aam.Services
             return true;
         }
 
+        public bool EditLabels(List<String> uris, List<String> labels)
+        {
+            Contract.Requires(uris.Count == labels.Count);
+
+            using(IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                IRepository<Annotation> repo = uow.GetRepository<Annotation>();
+                IEnumerable<Annotation> allAnnotations = repo.Get();
+
+                //For each annotation, check for each URI if we have a label for it in our input-lists
+                foreach(Annotation an in allAnnotations)
+                {
+                    int index = uris.IndexOf(an.Entity);
+                    if(index != -1)
+                    {
+                        an.Entity_Label = labels.ElementAt(index);
+                    }
+
+                    index = uris.IndexOf(an.Characteristic);
+                    if(index != -1)
+                    {
+                        an.Characteristic_Label = labels.ElementAt(index);
+                    }
+
+                    index = uris.IndexOf(an.Standard);
+                    if(index != -1)
+                    {
+                        an.Standard_Label = labels.ElementAt(index);
+                    }
+                }
+                uow.Commit();
+            }
+            return true;
+        }
+
         #region (Private) Helper functions
         /// <summary>
         /// Gets the id of the given standard from the given enumerable annotations.

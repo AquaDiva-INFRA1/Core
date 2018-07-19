@@ -15,6 +15,9 @@ using Vaiona.Persistence.Api;
 using BExIS.Utils.Models;
 using Vaiona.Web.Mvc.Models;
 using Vaiona.Web.Extensions;
+using Vaiona.Web.Mvc.Modularity;
+using System.Web.Routing;
+using Newtonsoft.Json;
 
 namespace BExIS.Modules.Aam.UI.Controllers
 {
@@ -113,6 +116,42 @@ namespace BExIS.Modules.Aam.UI.Controllers
 
             }
             return output;
+        }
+
+        public String FillLabelsInAnnotationTable()
+        {
+            AnnotationManager am = new AnnotationManager();
+            List<Annotation> allAnnotations = am.GetAnnotations().ToList();
+
+            //Build lists with all entity/characteristic/standard URIs
+            List<String> entityURIs = new List<string>();
+            List<String> charURIs = new List<string>();
+            List<String> standardURIs = new List<string>();
+            foreach(Annotation an in allAnnotations)
+            {
+                if (!entityURIs.Contains(an.Entity) && !String.IsNullOrWhiteSpace(an.Entity))
+                    entityURIs.Add(an.Entity);
+                if (!charURIs.Contains(an.Characteristic) && !String.IsNullOrWhiteSpace(an.Characteristic))
+                    charURIs.Add(an.Characteristic);
+                if (!standardURIs.Contains(an.Standard) && !String.IsNullOrWhiteSpace(an.Standard))
+                    standardURIs.Add(an.Standard);
+            }
+
+            //Send each of the lists to the SemanticSearchController to find the labels from the ontology
+            if (this.IsAccessibale("DDM", "SemanticSearch", "FindOntologyLabels"))
+            {
+                ContentResult entityLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(entityURIs) } });
+                ContentResult charLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(charURIs) } });
+                ContentResult standardLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(standardURIs) } });
+
+                List<String> entityLabels = JsonConvert.DeserializeObject<List<String>>(entityLabelsRes.Content);
+                List<String> charLabels = JsonConvert.DeserializeObject<List<String>>(charLabelsRes.Content);
+                List<String> standardLabels = JsonConvert.DeserializeObject<List<String>>(standardLabelsRes.Content);
+
+                am.EditLabels(entityURIs.Concat(charURIs).Concat(standardURIs).ToList(), entityLabels.Concat(charLabels).Concat(standardLabels).ToList());
+            }
+
+            return "<h1>Labels successfully updated! :-)</h1>";
         }
     }
 }

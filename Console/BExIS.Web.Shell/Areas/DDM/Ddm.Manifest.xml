@@ -75,5 +75,11 @@
             controller="home" action="ShowMyDatasets"
             extends="" />
 
+    <Export tag="internalApi" id="findOntologyLabels"
+            title="Find Ontology Labels" description="Find the Labels of the given URIs" icon=""
+            controller="SemanticSearch" action="FindOntologyLabels"
+            extends="" />
+    
+
   </Exports>
 </Manifest>

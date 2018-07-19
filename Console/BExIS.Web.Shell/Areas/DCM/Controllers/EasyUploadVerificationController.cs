@@ -1047,7 +1047,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             double output = 0.0;
 
             similarities.Add(similarityLevenshtein(a, b));
-            similarities.Add(similarityDiceCoefficient(a, b));
+            //similarities.Add(similarityDiceCoefficient(a, b));
             similarities.Add(JaroWinklerDistance.proximity(a, b));
 
             foreach (double sim in similarities)
