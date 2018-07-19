@@ -277,6 +277,12 @@ namespace BExIS.Aam.Services
             return true;
         }
 
+        /// <summary>
+        /// Edits the labels of the given URIs in all Annotations
+        /// </summary>
+        /// <param name="uris">List of the URIs</param>
+        /// <param name="labels">List of the labels (same length as the URI-List)</param>
+        /// <returns>True if the editing was successful</returns>
         public bool EditLabels(List<String> uris, List<String> labels)
         {
             Contract.Requires(uris.Count == labels.Count);
