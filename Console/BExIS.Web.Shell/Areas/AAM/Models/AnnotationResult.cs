@@ -10,39 +10,32 @@ namespace BExIS.Modules.Aam.UI.Models
     public class AnnotationResult : IEquatable<AnnotationResult>
     {
         public String Entity;
+        public String Entity_Label;
         public String Characteristic;
+        public String Characteristic_Label;
         public String Standard;
+        public String Standard_Label;
         public int Occurences;
 
-        public AnnotationResult(string entity, string characteristic, string standard)
+        public AnnotationResult(string entity, string entity_label, string characteristic, string characteristic_label, string standard, string standard_label, int occurences = 0)
         {
             this.Entity = entity;
+            this.Entity_Label = entity_label;
             this.Characteristic = characteristic;
+            this.Characteristic_Label = characteristic_label;
             this.Standard = standard;
-            this.Occurences = 0;
-        }
-
-        public AnnotationResult(string entity, string characteristic, string standard, int occurences)
-        {
-            this.Entity = entity;
-            this.Characteristic = characteristic;
-            this.Standard = standard;
+            this.Standard_Label = standard_label;
             this.Occurences = occurences;
         }
 
-        public AnnotationResult(Annotation an)
+        public AnnotationResult(Annotation an, int occ = 1)
         {
             this.Entity = an.Entity;
+            this.Entity_Label = an.Entity_Label;
             this.Characteristic = an.Characteristic;
+            this.Characteristic_Label = an.Characteristic_Label;
             this.Standard = an.Standard;
-            this.Occurences = 1;
-        }
-
-        public AnnotationResult(Annotation an, int occ)
-        {
-            this.Entity = an.Entity;
-            this.Characteristic = an.Characteristic;
-            this.Standard = an.Standard;
+            this.Standard_Label = an.Standard_Label;
             this.Occurences = occ;
         }
 

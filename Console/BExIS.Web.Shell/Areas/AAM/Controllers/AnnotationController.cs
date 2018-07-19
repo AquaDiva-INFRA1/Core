@@ -86,11 +86,21 @@ namespace BExIS.Modules.Aam.UI.Controllers
         /// <param name="Entity">URI-String of the entity that the annotation is refering to</param>
         /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
         /// <param name="Standard">URI-String of the standard that the annotation is refering to</param>
-        /// <returns>Json serialization of the created annotation object</returns>
-        public JsonResult CreateAnnotation(long DatasetId=-1, long DatasetVersionId=-1, Variable Variable=null, String Entity=null, String Characteristic=null)
+        /// <returns>True if everything went well</returns>
+        public Boolean CreateAnnotationWithoutStandard(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String Characteristic)
         {
             AnnotationManager am = new AnnotationManager();
-            return Json(am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic));
+            IEnumerable<Annotation> allAnnotations = am.GetAnnotations();
+
+            am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic);
+            return true;
+        }
+
+        public Boolean CreateAnnotation(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String EntityLabel, String Characteristic, String CharacteristicLabel, String Standard, String StandardLabel)
+        {
+            AnnotationManager am = new AnnotationManager();
+            am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, EntityLabel, Characteristic, CharacteristicLabel, Standard, StandardLabel);
+            return true;
         }
 
         /// <summary>
@@ -123,6 +133,42 @@ namespace BExIS.Modules.Aam.UI.Controllers
             }
             output.OrderByDescending(el => el.Occurences);
             return Content(JsonConvert.SerializeObject(output), "application/json");
+        }
+
+        public String FillLabelsInAnnotationTable()
+        {
+            AnnotationManager am = new AnnotationManager();
+            List<Annotation> allAnnotations = am.GetAnnotations().ToList();
+
+            //Build lists with all entity/characteristic/standard URIs
+            List<String> entityURIs = new List<string>();
+            List<String> charURIs = new List<string>();
+            List<String> standardURIs = new List<string>();
+            foreach(Annotation an in allAnnotations)
+            {
+                if (!entityURIs.Contains(an.Entity) && !String.IsNullOrWhiteSpace(an.Entity))
+                    entityURIs.Add(an.Entity);
+                if (!charURIs.Contains(an.Characteristic) && !String.IsNullOrWhiteSpace(an.Characteristic))
+                    charURIs.Add(an.Characteristic);
+                if (!standardURIs.Contains(an.Standard) && !String.IsNullOrWhiteSpace(an.Standard))
+                    standardURIs.Add(an.Standard);
+            }
+
+            //Send each of the lists to the SemanticSearchController to find the labels from the ontology
+            if (this.IsAccessibale("DDM", "SemanticSearch", "FindOntologyLabels"))
+            {
+                ContentResult entityLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(entityURIs) } });
+                ContentResult charLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(charURIs) } });
+                ContentResult standardLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(standardURIs) } });
+
+                List<String> entityLabels = JsonConvert.DeserializeObject<List<String>>(entityLabelsRes.Content);
+                List<String> charLabels = JsonConvert.DeserializeObject<List<String>>(charLabelsRes.Content);
+                List<String> standardLabels = JsonConvert.DeserializeObject<List<String>>(standardLabelsRes.Content);
+
+                am.EditLabels(entityURIs.Concat(charURIs).Concat(standardURIs).ToList(), entityLabels.Concat(charLabels).Concat(standardLabels).ToList());
+            }
+
+            return "<h1>Labels successfully updated! :-)</h1>";
         }
     }
 }
