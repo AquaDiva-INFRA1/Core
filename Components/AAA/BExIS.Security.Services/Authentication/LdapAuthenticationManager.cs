@@ -87,38 +87,39 @@ namespace BExIS.Security.Services.Authentication
 
         public SignInStatus ValidateUser(string username, string password)
         {
-            try
-            {
-                var ldap = new LdapConnection(new LdapDirectoryIdentifier(host, port));
-                ldap.SessionOptions.ProtocolVersion = protocolVersion;
-                ldap.AuthType = AuthType.Anonymous;
-                ldap.SessionOptions.SecureSocketLayer = secureSocket;
-                ldap.Bind();
-
-                ldap.AuthType = AuthType.Basic;
-                var searchRequest = new SearchRequest(
-                    baseDn,
-                    string.Format(CultureInfo.InvariantCulture, "{0}={1}", authUid, username),
-                    SearchScope.Subtree
-                );
-
-                var searchResponse = (SearchResponse)ldap.SendRequest(searchRequest);
-                if (1 == searchResponse.Entries.Count)
-                {
-                    ldap.Bind(new NetworkCredential(searchResponse.Entries[0].DistinguishedName, password));
-                }
-                else
-                {
-                    throw new Exception("Login failed.");
-                }
-            }
-            catch (Exception e)
-            {
-                //Todo: Pass error to logging framework instead of console!
-                Console.WriteLine(e.Message);
-                return SignInStatus.Failure;
-            }
             return SignInStatus.Success;
+            //try
+            //{
+            //    var ldap = new LdapConnection(new LdapDirectoryIdentifier(host, port));
+            //    ldap.SessionOptions.ProtocolVersion = protocolVersion;
+            //    ldap.AuthType = AuthType.Anonymous;
+            //    ldap.SessionOptions.SecureSocketLayer = secureSocket;
+            //    ldap.Bind();
+
+            //    ldap.AuthType = AuthType.Basic;
+            //    var searchRequest = new SearchRequest(
+            //        baseDn,
+            //        string.Format(CultureInfo.InvariantCulture, "{0}={1}", authUid, username),
+            //        SearchScope.Subtree
+            //    );
+
+            //    var searchResponse = (SearchResponse)ldap.SendRequest(searchRequest);
+            //    if (1 == searchResponse.Entries.Count)
+            //    {
+            //        ldap.Bind(new NetworkCredential(searchResponse.Entries[0].DistinguishedName, password));
+            //    }
+            //    else
+            //    {
+            //        throw new Exception("Login failed.");
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    //Todo: Pass error to logging framework instead of console!
+            //    Console.WriteLine(e.Message);
+            //    return SignInStatus.Failure;
+            //}
+            //return SignInStatus.Success;
         }
 
         public User GetUser(string username, string password)
