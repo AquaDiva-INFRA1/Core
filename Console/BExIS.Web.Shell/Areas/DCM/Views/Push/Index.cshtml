@@ -99,10 +99,9 @@
                 return false;
             } else {
 
-                //alert(file.size);
-                //alert(maxsize);
+                console.log(file.size + " " + maxsize +" "+maxsize*1024*1024 )
 
-                if (file.size > (maxsize*1024*1024)) {
+                if (file.size > (maxsize*1024)) {
 
                     alert("Max file : " +
                         maxsize +

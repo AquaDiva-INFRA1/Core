@@ -33,8 +33,8 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             ".fq",".fastq"
         };
 
-        private static String username = "AquaDivaAnalysis";
-        private static String password = "aquadivaanalysis";
+        private static String username = "hamdihamed";
+        private static String password = "hamdi1992";
         private static string FTPAddress = "ftp://192.168.37.3:21";
 
         // GET: Home
