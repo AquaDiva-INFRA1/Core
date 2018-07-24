@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BExIS.Modules.Sam.UI")]
+[assembly: AssemblyTitle("BExIS.Modules.UDAM.UI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("BExIS.Modules.Sam.UI")]
+[assembly: AssemblyProduct("BExIS.Modules.UDAM.UI")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("dec22f9c-47be-4146-94be-1c9aa969afc3")]
+[assembly: Guid("dec22f9c-47be-4146-94be-1c9aa969afe4")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -32,6 +32,7 @@
 }
 
 <!--Search bar and search results-->
+
 <div class="searchContainer">
 
     <div id="searchContent">
@@ -147,20 +148,18 @@
 
         //checked
         var id = e.getAttribute("id");
-
-
+        
         var data = {
             id: id
         }
-
         $.ajax({
-            url: '/DDM/SemanticSearch/UploadFiletoAnalysis2',
+            url: '/UDAM/Home/check_file_extension_to_analyse',
             type: 'POST',
             data: JSON.stringify(data),
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
-            success: function () {
-                alert('The process might take some time ... You will be notified with an email for the analysis results')
+            success: function (result) {
+                alert(result);
             }
         });
     }
