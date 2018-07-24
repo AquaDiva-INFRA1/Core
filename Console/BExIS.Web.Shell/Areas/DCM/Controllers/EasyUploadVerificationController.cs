@@ -310,15 +310,21 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             //Why does this have to be so complicated...?
             string datatype = variableInformation.unitInfo.DataTypeInfos.Where(dti => dti.DataTypeId == variableInformation.unitInfo.SelectedDataTypeId).FirstOrDefault().Name;
             
-            //Structure of variable "suggestions": Key=category ("Entity"|"Characteristic"), Value=List of the options that will be displayed in the dropdown
-            Dictionary<string, List<OntologyMappingSuggestionModel>> suggestions = GenerateOntologyMapping(headerIndex, variableName, datatype, unit);
+            //Structure of variable "currentAnnotations": Key=(headerIndex, category), Value=URI of the selected concept
+            Dictionary<Tuple<int, string>, string> currentAnnotations = null;
+            Dictionary<string, string> exAnnotations = null;
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
             {
+                currentAnnotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
+                exAnnotations = currentAnnotations.Where(kvp => kvp.Key.Item1 == headerIndex).ToDictionary(kvp => kvp.Key.Item2, kvp => kvp.Value);
+            }
+
+            //The following lines just make sure that the suggestions that were already selected will be correctly selected in the dropdown
+            //Structure of variable "suggestions": Key=category ("Entity"|"Characteristic"), Value=List of the options that will be displayed in the dropdown
+            Dictionary<string, List<OntologyMappingSuggestionModel>> suggestions = GenerateOntologyMapping(headerIndex, variableName, datatype, unit, exAnnotations);
+            if (currentAnnotations != null)
+            {
                 //There are already annotations stored in the bus (from switching between steps) so set the "selected" properties accordingly
-                //Structure of variable "currentAnnotations": Key=(headerIndex, category), Value=URI of the selected concept
-                //TODO There's no guarantee that the annotation that is stored in the bus is actually in the (limited) list of suggestions
-                //Possible solution: Manually reconstruct the suggestion from the information that is stored in the bus
-                Dictionary<Tuple<int, string>, string> currentAnnotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
                 foreach(KeyValuePair<Tuple<int, string>, string> kvp in currentAnnotations)
                 {
                     //First, check if we're looking at an annotation for the current headerIndex
@@ -333,10 +339,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             {
                                 //Found the correct option in the list, now switch its "selected" state
                                 selected.selected = true;
-                            }
-                            else
-                            {
-                                //TODO This is the case where the annotation from the bus is not in the limited list!
                             }
                         }
                     }
@@ -1067,8 +1069,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// <param name="variableName">Name of the variable that was picked for this header</param>
         /// <param name="datatype">Currently selected datatype</param>
         /// <param name="unit">Currently selected unit</param>
+        /// <param name="selectedAnnotations">Dictionary of currently selected annotations in the form of (Key=category, Value=uri)</param>
         /// <returns>Dictionary with the category (Entity/Characteristic) as key and a (sorted) list of possible annotations as value</returns>
-        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(int headerIndex, string variableName, string datatype, string unit)
+        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(int headerIndex, string variableName, string datatype, string unit, Dictionary<String, String> selectedAnnotations = null)
         {
             //Order entire lists of entitites and characteristics according to a mapping metric
             //For now: Just use a string similarity
@@ -1112,7 +1115,19 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             foreach(string key in keys)
             {
                 List<OntologyMappingSuggestionModel> tmp = output[key];
-                output[key] = tmp.OrderByDescending(el => el.similarity).Take(50).ToList();
+                String alreadySelected;
+                if(selectedAnnotations != null && selectedAnnotations.TryGetValue(key, out alreadySelected))
+                {
+                    //We have a selected annotation that we have to take care of - put it at the beginning of the list by tweaking its similarity
+                    var unicorn = tmp.OrderByDescending(el => el.conceptURI.Equals(alreadySelected) ? double.MaxValue : el.similarity).Take(50).ToList();
+                    output[key] = unicorn;
+                }
+                else
+                {
+                    //No selected annotation that we have to take care of
+                    var unicorn = tmp.OrderByDescending(el => el.similarity).Take(50).ToList();
+                    output[key] = unicorn;
+                }                               
             }
 
             //Now add the annotations that we already have in the database to the start of the list (and remove duplicates)
@@ -1130,7 +1145,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     //Add to the start of the output
                     output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity_Label, double.MaxValue));
                     output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic_Label, double.MaxValue));
-                    //output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic, double.MaxValue));
+                    //TODO Remove duplicates
                 }
             }
 
