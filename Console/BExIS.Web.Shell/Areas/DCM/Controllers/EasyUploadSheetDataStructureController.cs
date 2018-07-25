@@ -40,8 +40,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             model.StepInfo = TaskManager.Current();
 
-            return PartialView(model);
+            //return PartialView(model);
 
+            // to skip the orientation selection ... 
+            // sets the orientation TopDown and returns the view of the next button since it always passes null in the params
+            AddSelectedDatasetStructureToBus("TopDown");
+            return SheetDataStructure(null); 
         }
 
         /*
