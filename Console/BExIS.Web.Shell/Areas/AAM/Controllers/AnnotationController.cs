@@ -114,9 +114,8 @@ namespace BExIS.Modules.Aam.UI.Controllers
             AnnotationManager am = new AnnotationManager();
             List<Annotation> matchingAnnotations = am.GetAnnotationsByVariableLabel(variableLabel);
 
-            /*
-             * Create a distinct list of Annotations including the number of occurences in our annotations table
-             * */
+            
+            //Create a distinct list of Annotations including the number of occurences in our annotations table
             List<AnnotationResult> output = new List<AnnotationResult>();
             foreach(Annotation match in matchingAnnotations)
             {
@@ -135,7 +134,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
             return Content(JsonConvert.SerializeObject(output), "application/json");
         }
 
-        public String FillLabelsInAnnotationTable()
+        public ActionResult FillLabelsInAnnotationTable()
         {
             AnnotationManager am = new AnnotationManager();
             List<Annotation> allAnnotations = am.GetAnnotations().ToList();
@@ -168,7 +167,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 am.EditLabels(entityURIs.Concat(charURIs).Concat(standardURIs).ToList(), entityLabels.Concat(charLabels).Concat(standardLabels).ToList());
             }
 
-            return "<h1>Labels successfully updated! :-)</h1>";
+            return RedirectToAction("Index");
         }
     }
 }
