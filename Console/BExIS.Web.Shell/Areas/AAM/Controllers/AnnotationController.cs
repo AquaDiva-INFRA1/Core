@@ -87,12 +87,12 @@ namespace BExIS.Modules.Aam.UI.Controllers
         /// <param name="Characteristic">URI-String of the characteristic that the annotation is refering to</param>
         /// <param name="Standard">URI-String of the standard that the annotation is refering to</param>
         /// <returns>True if everything went well</returns>
-        public Boolean CreateAnnotationWithoutStandard(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String Characteristic)
+        public Boolean CreateAnnotationWithoutStandard(long DatasetId, long DatasetVersionId, Variable Variable, String Entity, String EntityLabel, String Characteristic, String CharacteristicLabel)
         {
             AnnotationManager am = new AnnotationManager();
             IEnumerable<Annotation> allAnnotations = am.GetAnnotations();
 
-            am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, Characteristic);
+            am.CreateAnnotation(DatasetId, DatasetVersionId, Variable, Entity, EntityLabel, Characteristic, CharacteristicLabel);
             return true;
         }
 

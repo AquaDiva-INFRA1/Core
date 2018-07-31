@@ -592,9 +592,33 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             }
                         }
 
+
                         //Now we can create and persist the annotation for each headerId (=Variable)
                         foreach (KeyValuePair<int, EntityCharacteristicPair> kvp in annotationsPerHeaderId)
                         {
+                            String entityLabel = null;
+                            String characteristicLabel = null;
+                            //TODO Find the labels for the annotations because we can't do that in the annotation manager
+                            if (this.IsAccessibale("DDM", "SemanticSearch", "FindOntologyLabels"))
+                            {
+                                List<String> uris = new List<string>() { kvp.Value.mappedEntityURI, kvp.Value.mappedCharacteristicURI };
+                                ContentResult labelResult = (ContentResult)this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary()
+                                {
+                                    {"serializedURIList", JsonConvert.SerializeObject(uris) }
+                                });
+                                List<String> labels = JsonConvert.DeserializeObject<List<String>>(labelResult.Content);
+
+                                //We should get exactly two labels, one for the characteristic and one for the entity
+                                if(labels.Count == 2)
+                                {
+                                    entityLabel = labels.ElementAt(0);
+                                    characteristicLabel = labels.ElementAt(1);
+                                }
+                                else {
+                                    throw new Exception("Incorrect number of labels!");
+                                }
+                            }
+
                             var unicorn = this.Run("AAM", "Annotation", "CreateAnnotationWithoutStandard", new RouteValueDictionary()
                             {
                                 {"DatasetId", ds.Id },
@@ -602,6 +626,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 //CreatedVariables: <List<Tuple<headerId, Variable>>
                                 {"Variable", createdVariables.Where(v => v.Item1 == kvp.Key).FirstOrDefault().Item2 },
                                 {"Entity", kvp.Value.mappedEntityURI },
+                                {"EntityLabel", entityLabel },
+                                {"CharacteristicLabel", characteristicLabel },
                                 {"Characteristic", kvp.Value.mappedCharacteristicURI }
                             });
                             Debug.WriteLine(unicorn);

@@ -482,11 +482,11 @@ namespace BExIS.Aam.Services
         }
 
         /// <summary>
-        /// Gets the id of the given entity from the given enumerable annotations.
-        /// Generates a new id if the entity is not used in any annotation yet.
+        /// Gets the label of the given concept.
+        /// Looks for it in the existing annotations first, then, if unsuccessful, searches the ontology.
         /// </summary>
         /// <param name="allAnnotations">Enumerable annotations</param>
-        /// <param name="entity">Entity that the id should be generated for</param>
+        /// <param name="uri">Concept-URI that the label should be found for</param>
         /// <returns>A new id for the given entity</returns>
         private String GetLabelForURI(IEnumerable<Annotation> allAnnotations, string uri)
         {
@@ -501,8 +501,6 @@ namespace BExIS.Aam.Services
             unicorn = allAnnotations.Where(an => an.Standard != null && an.Standard.Equals(uri)).FirstOrDefault();
             if (unicorn != null)
                 return unicorn.Standard_Label;
-
-            //TODO: Search the ontology to get a label - call SemanticSearchController/FindOntologyLabels for that (can we even do that in here?)
 
             return "No label found!";
         }
