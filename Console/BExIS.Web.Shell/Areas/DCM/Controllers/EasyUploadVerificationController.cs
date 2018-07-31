@@ -9,6 +9,7 @@ using BExIS.Modules.Dcm.UI.Helpers;
 using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Utils.Models;
 using BExIS.Web.Shell.Areas.DCM.Helpers;
+using F23.StringSimilarity;
 using Newtonsoft.Json;
 using OfficeOpenXml;
 using System;
@@ -197,12 +198,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     //Calculate similarity metric
                     //Accept suggestion if the similarity is greater than some threshold
-                    double threshold = 0.5;
-                    IEnumerable<DataAttribute> suggestions = allDataAttributes.Where(att => similarity(att.Name, model.HeaderFields[i]) >= threshold);
+                    double threshold = 0.4;
+                    IEnumerable<DataAttribute> suggestions = allDataAttributes.Where(att => Similarity(att.Name, model.HeaderFields[i]) >= threshold);
 
                     //Order the suggestions according to the similarity
                     List<DataAttribute> ordered = suggestions.ToList<DataAttribute>();
-                    ordered.Sort((x, y) => (similarity(y.Name, model.HeaderFields[i])).CompareTo(similarity(x.Name, model.HeaderFields[i])));
+                    ordered.Sort((x, y) => (Similarity(y.Name, model.HeaderFields[i])).CompareTo(Similarity(x.Name, model.HeaderFields[i])));
 
                     //Add the ordered suggestions to the model
                     foreach (DataAttribute att in ordered)
@@ -990,68 +991,19 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         }
 
         /// <summary>
-        /// String-similarity computed with levenshtein-distance
-        /// </summary>
-        private double similarityLevenshtein(string a, string b)
-        {
-            if (a.Equals(b))
-            {
-                return 1.0;
-            }
-            else
-            {
-                if (!(a.Length == 0 || b.Length == 0))
-                {
-                    double sim = 1 - (levenshtein(a, b) / Convert.ToDouble(Math.Max(a.Length, b.Length)));
-                    return sim;
-                }
-                else
-                    return 0.0;
-            }
-        }
-
-        /// <summary>
-        /// String-similarity computed with Dice Coefficient
-        /// </summary>
-        /// Source: https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Dice%27s_coefficient#C.23
-        /// Explanation: https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
-        private double similarityDiceCoefficient(string a, string b)
-        {
-            //Workaround for |a| == |b| == 1
-            if (a.Length <= 1 && b.Length <= 1)
-            {
-                if (a.Equals(b))
-                    return 1.0;
-                else
-                    return 0.0;
-            }
-
-            HashSet<string> setA = new HashSet<string>();
-            HashSet<string> setB = new HashSet<string>();
-
-            for (int i = 0; i < a.Length - 1; ++i)
-                setA.Add(a.Substring(i, 2));
-
-            for (int i = 0; i < b.Length - 1; ++i)
-                setB.Add(b.Substring(i, 2));
-
-            HashSet<string> intersection = new HashSet<string>(setA);
-            intersection.IntersectWith(setB);
-
-            return (2.0 * intersection.Count) / (setA.Count + setB.Count);
-        }
-
-        /// <summary>
         /// Combines multiple String-similarities with equal weight
         /// </summary>
-        private double similarity(string a, string b)
+        private double Similarity(string a, string b)
         {
             List<double> similarities = new List<double>();
             double output = 0.0;
 
-            similarities.Add(similarityLevenshtein(a, b));
-            //similarities.Add(similarityDiceCoefficient(a, b));
-            similarities.Add(JaroWinklerDistance.proximity(a, b));
+            var l = new NormalizedLevenshtein();
+            similarities.Add(l.Similarity(a, b));
+            var jw = new JaroWinkler();
+            similarities.Add(jw.Similarity(a, b));
+            var jac = new Jaccard();
+            similarities.Add(jac.Similarity(a, b));
 
             foreach (double sim in similarities)
             {
@@ -1102,7 +1054,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
 
                         //Calculate the similarity
-                        output[category].Add(new OntologyMappingSuggestionModel(uri, label, similarity(variableName, label)));
+                        output[category].Add(new OntologyMappingSuggestionModel(uri, label, Similarity(variableName, label)));
                     }
                     else
                     {
