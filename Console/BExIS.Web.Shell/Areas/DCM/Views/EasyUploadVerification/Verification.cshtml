@@ -13,6 +13,24 @@
     #Step5 .uploadWizardStep_Main {
         width: 90%
     }
+
+    /*Borders to visually separate the rows of the table*/
+    #verificationTable {
+        border-collapse: collapse
+    }
+
+    #verificationTable tr {
+        border: solid;
+        border-width: 1px 0;
+    }
+
+    #verificationTable tr:first-child {
+        border-top: none;
+    }
+
+    #verificationTable tr:last-child {
+        border-bottom: none;
+    }
 </style>
 
 <div id="Step5" class="uploadWizardStep">
