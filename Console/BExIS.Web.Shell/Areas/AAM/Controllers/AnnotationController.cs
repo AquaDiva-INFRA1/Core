@@ -68,7 +68,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
 
             #endregion
 
-            List<Annotation> annotationList = am.GetAnnotations().OrderBy(an => an.Dataset.Id).ToList();
+            List<Annotation> annotationList = am.GetAnnotations().OrderBy(an => an.Dataset.Id).ThenBy(an => an.DatasetVersion).ThenBy(an => an.Variable.Id).ToList();
             List<AnnotationModel> model = new List<AnnotationModel>();
             foreach(Annotation an in annotationList)
             {
