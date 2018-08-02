@@ -58,6 +58,9 @@ namespace BExIS.Dcm.UploadWizard
         public static string CURRENTPACKAGE = "CURRENTPACKAGE";
         public static string CURRENTPACKAGESIZE = "CURRENTPACKAGE";
 
+        //Annotation related
+        public static string NOCONCEPTSFOUND = "NoConceptsFound";
+
         /// <summary>
         /// 
         /// </summary>

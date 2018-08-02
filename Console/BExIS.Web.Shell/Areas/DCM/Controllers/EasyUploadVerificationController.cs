@@ -817,8 +817,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             return headerValues;
         }
-
-
+        
         /*
          * Validates each Data row and returns a JSON-Object with the errors (if there are any)
          * */
@@ -838,6 +837,41 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             }
 
             return Json(new { errors = ErrorMessageList.ToArray(), errorCount = (ErrorList.Count) });
+        }
+
+        /// <summary>
+        /// Store the information about not found concepts in the Bus.
+        /// Structure in the bus: List<(headerfieldId, category)>
+        /// </summary>
+        /// <param name="headerfieldId"></param>
+        /// <param name="category"></param>
+        /// <param name="checkboxChecked"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public Boolean NoConceptFound(int headerfieldId, string category, Boolean checkboxChecked)
+        {
+            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+            if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.NOCONCEPTSFOUND))
+            {
+                TaskManager.AddToBus(EasyUploadTaskManager.NOCONCEPTSFOUND, new List<Tuple<int, String>>());
+            }
+
+            if (checkboxChecked)
+            {
+                //The checkbox was checked so add the new information to the bus
+                List<Tuple<int, String>> unicorn = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
+                unicorn.Add(new Tuple<int, string>(headerfieldId, category));
+                TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND] = unicorn;
+            }
+            else
+            {
+                //The checkbox was unchecked, remove the respective tuple from our bus
+                List<Tuple<int, String>> unicorn = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
+                unicorn.RemoveAll(tuple => tuple.Item1 == headerfieldId && tuple.Item2 == category);
+                TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND] = unicorn;
+            }
+            Session["TaskManager"] = TaskManager;
+            return true;
         }
 
         #region private methods
