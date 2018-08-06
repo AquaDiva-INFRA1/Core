@@ -16,6 +16,15 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         public ActionResult SheetDataStructure(int index)
         {
             TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+            
+            if ((TaskManager != null) && (TaskManager.Current().GetActionInfo.ActionName.ToLower().Equals("selectareas")))
+            {
+                int step_index = TaskManager.GetCurrentStepInfoIndex();
+                StepInfo di = TaskManager.StepInfos[step_index - 2];
+                return RedirectToAction(di.GetActionInfo.ActionName.ToString(), 
+                    di.GetActionInfo.ControllerName.ToString(), 
+                    new { index = step_index-2 });
+            }
 
             //set current stepinfo based on index
             if (TaskManager != null)

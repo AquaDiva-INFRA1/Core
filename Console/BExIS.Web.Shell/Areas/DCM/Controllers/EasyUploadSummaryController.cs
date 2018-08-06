@@ -20,6 +20,7 @@ using BExIS.Xml.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
@@ -570,6 +571,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             }
             catch (Exception ex)
             {
+                Debug.WriteLine(ex.ToString());
                 temp.Add(new Error(ErrorType.Other, "An error occured during the upload. " +
                     "Please try again later. If this problem keeps occuring, please contact your administrator."));
                 return temp;
