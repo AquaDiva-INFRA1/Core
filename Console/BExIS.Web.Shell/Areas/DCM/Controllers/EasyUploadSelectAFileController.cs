@@ -17,7 +17,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
     {
 
         private EasyUploadTaskManager TaskManager;
-        private List<String> supportedExtensions = new List<string>() { ".xlsx", ".xlsm" };
+        private List<String> supportedExtensions = new List<string>() { ".xlsx", ".xlsm", ".csv" };
 
         [HttpGet]
         public ActionResult SelectAFile(int index)
