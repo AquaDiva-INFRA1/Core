@@ -1128,12 +1128,19 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 for (int i = 0; i < response.Count; i++)
                 {
                     var unicorn = response[i];
-                    //Add to the start of the output
+                    //Add to the start of the output (if the Entity/Characteristic is not empty and has a label)
                     //Remove entries with the same URIs that we're about to add so we won't have any duplicates
-                    output["Entity"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Entity));
-                    output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity_Label, double.MaxValue));
-                    output["Characteristic"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Characteristic));
-                    output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic_Label, double.MaxValue));
+                    if (unicorn.Entity != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity) && unicorn.Entity_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity_Label))
+                    {
+                        output["Entity"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Entity));
+                        output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity_Label, double.MaxValue));
+                    }
+
+                    if (unicorn.Characteristic != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic) && unicorn.Characteristic_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic_Label))
+                    {
+                        output["Characteristic"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Characteristic));
+                        output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic_Label, double.MaxValue));
+                    }
                 }
             }
 
