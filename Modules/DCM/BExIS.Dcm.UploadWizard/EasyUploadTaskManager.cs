@@ -52,14 +52,14 @@ namespace BExIS.Dcm.UploadWizard
         public static string VERIFICATION_HEADERFIELDS = "VerificationHeaderFields";
         public static string VERIFICATION_MAPPEDHEADERUNITS = "VerificationMappedHeaderUnits";
         public static string VERIFICATION_ATTRIBUTESUGGESTIONS = "VerificationAttributeSuggestions";
-        public static string ANNOTATIONMAPPING = "AnnotationMapping";
+        public static string ANNOTATIONMAPPING = "AnnotationMapping"; //Structure: Dictionary<Tuple<int:headerID, String:category>, String:conceptURI>
 
         public static string NUMBERSOFROWS = "NUMBERSOFROWS";
         public static string CURRENTPACKAGE = "CURRENTPACKAGE";
         public static string CURRENTPACKAGESIZE = "CURRENTPACKAGE";
 
         //Annotation related
-        public static string NOCONCEPTSFOUND = "NoConceptsFound";
+        public static string NOCONCEPTSFOUND = "NoConceptsFound"; //Structure: List<Tuple<int:headerId, String:Category>>
 
         /// <summary>
         /// 
