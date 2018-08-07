@@ -24,11 +24,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Xml;
 using System.Xml.Linq;
 using Vaiona.Persistence.Api;
+using Vaiona.Utils.Cfg;
 using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Modularity;
 
@@ -41,6 +43,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
         private static IDictionary<Guid, int> tasks = new Dictionary<Guid, int>();
+        private static String MissingConceptsLoggingPath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Logging", "MissingConcepts" + DateTime.Now.Year + "_" + DateTime.Now.Month + "_" + DateTime.Now.Day  + ".txt");
 
         [HttpGet]
         public ActionResult Summary(int index)
@@ -576,13 +579,38 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         #region Handle case "No matching concept found"
                         /*If the user stated that he didn't find an entity or characteristic, we should just set it to NULL
                         This will create partial or empty annotations that we can easily edit when we add the terms to the ontology
+                        Also we log those occurences into a file so we'll know that terms are missing in the ontology
                         */
                         if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.NOCONCEPTSFOUND))
                         {
                             List<Tuple<int, String>> noConceptsFoundList = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
                             foreach(Tuple<int, String> noConceptsFound in noConceptsFoundList)
                             {
-                                annotations[noConceptsFound] = null;
+                                annotations[noConceptsFound] = null; //Sets the Entity or Characteristic to null
+
+                                //Grab all information that we want to use for logging
+                                StringBuilder sb = new StringBuilder();
+                                DataTypeManager dtm = new DataTypeManager();
+                                sb.Append("User " + this.GetUsernameOrDefault() + " could not find " + noConceptsFound.Item2 + " for the following variable:\n");
+                                EasyUploadVariableInformation currentHeader = MappedHeaders.Where(mh => mh.headerId == noConceptsFound.Item1).FirstOrDefault();
+                                if(currentHeader != null)
+                                {
+                                    sb.Append("\tVariable Name: ");
+                                    sb.Append(currentHeader.variableName);
+                                    sb.Append("\n");
+                                    sb.Append("\tUnit: ");
+                                    sb.Append(currentHeader.unitInfo.Name);
+                                    sb.Append("\n");
+                                    sb.Append("\tDataType: ");
+                                    sb.Append(dtm.Repo.Get(currentHeader.unitInfo.SelectedDataTypeId).Name);
+                                    sb.Append("\n");
+                                    sb.Append("\n");
+                                }
+
+                                using (StreamWriter writer = new StreamWriter(MissingConceptsLoggingPath, true))
+                                {
+                                    writer.WriteLine(sb.ToString());
+                                }
                             }
                         }
                         #endregion
