@@ -359,6 +359,13 @@
                 //Maybe display a "Thank you for your feedback" message here?
             }
         );
+        //Dis-/Enable the dropdown
+        var dropdown = $(cb).closest('.suggestionContainer').find('select');
+        if (cb.checked) {
+            dropdown.attr('disabled', 'disabled');
+        } else {
+            dropdown.removeAttr('disabled');
+        }
     }
 
     //Necessary to trigger onChange even when the same option is selected again
