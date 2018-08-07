@@ -240,12 +240,23 @@ namespace BExIS.Modules.UDAM.UI.Controllers
 
                 if (allowed_extention.Contains(Path.GetExtension(c_d.URI)))
                 {
-                    UploadFiletoAnalysis(absolute_file_path);
-                    return "Results will be sent to your E-mail, Thank you for your patience. It might take some time";
+                    try
+                    {
+                        UploadFiletoAnalysis(absolute_file_path);
+                        return "Results will be sent to your E-mail, Thank you for your patience. It might take some time";
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message.ToString());
+                        return "Something happened... Please contact the portal's administration";
+                    }
+                    
+                }
+                else
+                {
+                    return "dataset extension is not analzable ";
                 }
             }
-
-            
             return "Something happened... Please contact the portal's administration";
         }
 
