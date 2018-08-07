@@ -559,6 +559,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     dm.CheckInDataset(ds.Id, "upload data from upload wizard", GetUsernameOrDefault());
 
                     #region Persist annotations
+
                     if (this.IsAccessibale("AAM", "Annotation", "CreateAnnotation"))
                     {
                         /* Annotations stored on the bus in form of a dictionary
@@ -571,6 +572,21 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             //Get the selected annotations from the bus
                             annotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
                         }
+
+                        #region Handle case "No matching concept found"
+                        /*If the user stated that he didn't find an entity or characteristic, we should just set it to NULL
+                        This will create partial or empty annotations that we can easily edit when we add the terms to the ontology
+                        */
+                        if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.NOCONCEPTSFOUND))
+                        {
+                            List<Tuple<int, String>> noConceptsFoundList = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
+                            foreach(Tuple<int, String> noConceptsFound in noConceptsFoundList)
+                            {
+                                annotations[noConceptsFound] = null;
+                            }
+                        }
+                        #endregion
+
                         //First I have to build a structure that contains the Entity and the Characteristic for each headerId
                         //So the new structure will be Dictionary<headerId, EntityCharacteristicPair>
                         Dictionary<int, EntityCharacteristicPair> annotationsPerHeaderId = new Dictionary<int, EntityCharacteristicPair>();
@@ -598,7 +614,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         {
                             String entityLabel = null;
                             String characteristicLabel = null;
-                            //TODO Find the labels for the annotations because we can't do that in the annotation manager
+
                             if (this.IsAccessibale("DDM", "SemanticSearch", "FindOntologyLabels"))
                             {
                                 List<String> uris = new List<string>() { kvp.Value.mappedEntityURI, kvp.Value.mappedCharacteristicURI };
