@@ -114,15 +114,39 @@
                     @{
                         SelectListItem tmp;
                         List<SelectListItem> listItems = new List<SelectListItem>();
-                        foreach (KeyValuePair<Uri, String> worksheetIdentifier in Model.SheetUriDictionary)
+                        string fileExt = "";
+                        if (System.IO.Path.GetExtension(Model.activeSheetUri) != null)
                         {
-                            tmp = new SelectListItem
+                            fileExt = System.IO.Path.GetExtension(Model.activeSheetUri.ToString());
+                        }
+                        if (fileExt.ToLower().Contains(".csv"))
+                        {
+                            foreach (KeyValuePair<Uri, String> worksheetIdentifier in Model.SheetUriDictionary)
                             {
-                                Text = worksheetIdentifier.Value,
-                                Value = worksheetIdentifier.Key.ToString(),
-                                Selected = (worksheetIdentifier.Key.ToString() == Model.activeSheetUri)
-                            };
-                            listItems.Add(tmp);
+                                string worksheet = worksheetIdentifier.Key.ToString().Replace("file:///", "");
+                                worksheet = worksheet.Replace("/", Path.DirectorySeparatorChar.ToString());
+                                tmp = new SelectListItem
+                                {
+                                    Text = worksheetIdentifier.Value,
+                                    Value = worksheetIdentifier.Key.ToString(),
+                                    Selected = (worksheet == Model.activeSheetUri)
+                                };
+                                listItems.Add(tmp);
+                            }
+                        }
+                        else
+                        {
+                            foreach (KeyValuePair<Uri, String> worksheetIdentifier in Model.SheetUriDictionary)
+                            {
+                                tmp = new SelectListItem
+                                {
+                                    Text = worksheetIdentifier.Value,
+                                    Value = worksheetIdentifier.Key.ToString(),
+                                    Selected = (worksheetIdentifier.Key.ToString() == Model.activeSheetUri)
+                                };
+                                listItems.Add(tmp);
+                            }
+
                         }
                     }
                     @Html.DropDownList("Sheet Select", listItems, "Select", new { @class = "buttonsRight", @id = "sheetSelect" })
@@ -372,6 +396,7 @@
         });
 
         //Trigger the initial loading of the table
+        console.log("Hello");
         $('#changeWorksheet').click();
     });
 

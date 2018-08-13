@@ -33,39 +33,27 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 // remove if existing
                 TaskManager.RemoveExecutedStep(TaskManager.Current());
             }
-
             
             //Use the given file and the given sheet format to create a json-table
             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
             FileStream fis = null;
-            string jsonTable = "[]";
+            List<String[]> Json_table = new List<string[]>();
 
             SelectAreasModel model = new SelectAreasModel();
             try
             {
                 string fileExt = System.IO.Path.GetExtension(filePath);
-                if (fileExt.ToLower().Contains("csv"))
+                if ( (fileExt.ToLower().Contains("csv")) )
                 {
                     //fis = new FileStream(Parse_csv_to_xlsx(filePath), FileMode.Open, FileAccess.Read);
                     // generating the JSONTABLEARRAY to select areas
-                    String Json_table = "[";
 
                     String[] all_lines = System.IO.File.ReadAllLines(filePath);
                     foreach (string line in all_lines)
                     {
-                        Json_table = Json_table + "[";
                         String[] tabs = line.Split(';');
-                        string li = tabs.ToString();
-                        foreach (string tab in tabs)
-                        {
-                            Json_table = Json_table + '"' + tab + '"' + ',';
-                        }
-                        Json_table = Json_table.Substring(0, Json_table.Length - 1);
-                        Json_table = Json_table + "],";
+                        Json_table.Add(tabs);
                     }
-                    Json_table = Json_table.Substring(0, Json_table.Length - 1);
-                    Json_table = Json_table + "]";
-                    
                     //If the active worksheet was never changed, we default to the first one
                     string activeWorksheet;
                     if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ACTIVE_WOKSHEET_URI))
@@ -83,10 +71,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     csv_dict.Add(new Uri(filePath),"csv Sheet");
                     model.SheetUriDictionary = csv_dict;
 
-                    if (!String.IsNullOrEmpty(Json_table))
-                    {
-                        TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, Json_table);
-                    }
+                    TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, JsonConvert.SerializeObject(Json_table.ToArray()));
 
                     //Add uri of the active sheet to the model to be able to preselect the correct option in the dropdown
                     model.activeSheetUri = activeWorksheet;
@@ -114,7 +99,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         activeWorksheet = TaskManager.Bus[EasyUploadTaskManager.ACTIVE_WOKSHEET_URI].ToString();
                     }
                     //Generate the table for the active worksheet
-                    jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
+                    string jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
 
                     //Save the worksheet uris to the model
                     model.SheetUriDictionary = EUEReader.GetWorksheetUris();
@@ -273,6 +258,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             #region Generate table for selected sheet
             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
+            
+            string fileExt = System.IO.Path.GetExtension(filePath);
+            if ((fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("csv")))
+            {
+                return Content((string)TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA], "application/json");
+            }
+
             FileStream fis = null;
             string jsonTable = "[]";
 
@@ -398,13 +390,25 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             try
             {
-                //FileStream for the users file
-                fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                string fileExt = System.IO.Path.GetExtension(filePath);
+                if (fileExt.ToLower().Contains("csv")  )
+                {
+                    Dictionary<Uri, string> csv_dict = new Dictionary<Uri, string>();
+                    csv_dict.Add(new Uri(filePath), "csv Sheet");
+                    model.SheetUriDictionary = csv_dict;
+                    model.activeSheetUri = filePath;
+                }
+                else
+                {
+                    //FileStream for the users file
+                    fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 
-                JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
+                    JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
 
-                //Get the worksheet uris and save them to the model
-                model.SheetUriDictionary = EUEReader.GetWorksheetUris();                
+                    //Get the worksheet uris and save them to the model
+                    model.SheetUriDictionary = EUEReader.GetWorksheetUris();
+                }
+                                
             }
             catch (Exception ex)
             {
@@ -422,7 +426,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             Session["TaskManager"] = TaskManager;
 
             model.StepInfo = TaskManager.Current();
-
+            
             return PartialView("SelectAreas", model);
 
         }
