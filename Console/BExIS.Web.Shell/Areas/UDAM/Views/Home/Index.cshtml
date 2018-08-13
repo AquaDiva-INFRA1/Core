@@ -158,8 +158,8 @@
             data: JSON.stringify(data),
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
-            success: function (result) {
-                alert(result);
+            complete: function (res_check_file_extension_to_analyse) {
+                alert(res_check_file_extension_to_analyse.responseText);
             }
         });
     }

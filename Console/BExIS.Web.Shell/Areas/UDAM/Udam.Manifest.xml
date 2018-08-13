@@ -3,9 +3,18 @@
   <Description>
     UDAM provides a process for analyzing the sequence data sets within the portal
   </Description>
+
+  <Assemblies>
+  </Assemblies>
+  
+  <Dependencies>
+    <Dependency moduleId="udam" version="*.*.*" />
+  </Dependencies>
+  
+  
   <Exports>
     <Export tag="menubar" id="analyses" order="1"
-        title="Aalysis Sequence Data" description="Quick Access to Sequence Data for Analysis" icon=""
+        title="Unstructred Datasets" description="Quick Access to Sequence Data for Analysisa" icon=""
         controller="Home" action="Index"
         extends="./menubarRoot" />
 
