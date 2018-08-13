@@ -3,6 +3,7 @@ using BExIS.Dcm.Wizard;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Models;
 using System;
+using System.Diagnostics;
 using System.Web.Mvc;
 using System.Web.Routing;
 
@@ -21,6 +22,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             {
                 int step_index = TaskManager.GetCurrentStepInfoIndex();
                 StepInfo di = TaskManager.StepInfos[step_index - 2];
+                TaskManager.RemoveExecutedStep(TaskManager.Current());
+
                 return RedirectToAction(di.GetActionInfo.ActionName.ToString(), 
                     di.GetActionInfo.ControllerName.ToString(), 
                     new { index = step_index-2 });

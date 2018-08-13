@@ -140,20 +140,20 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
                 string selectedHeaderAreaJson = TaskManager.Bus[EasyUploadTaskManager.SHEET_HEADER_AREA].ToString();
 
-                FileStream fis = null;
-                fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                ExcelPackage ep = new ExcelPackage(fis);
-                fis.Close();
+                //FileStream fis = null;
+                //fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                //ExcelPackage ep = new ExcelPackage(fis);
+                //fis.Close();
 
-                ExcelWorkbook excelWorkbook = ep.Workbook;
-                ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
+                //ExcelWorkbook excelWorkbook = ep.Workbook;
+                //ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
 
                 string sheetFormatString = Convert.ToString(TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT]);
 
                 SheetFormat sheetFormat = 0;
                 Enum.TryParse<SheetFormat>(sheetFormatString, true, out sheetFormat);
 
-                model.HeaderFields = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson).ToArray();
+                model.HeaderFields = GetExcelHeaderFields(sheetFormat, selectedHeaderAreaJson).ToArray();
 
                 if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
                 {
@@ -627,11 +627,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="excelWorksheet"></param>
         /// <param name="sheetFormat"></param>
         /// <param name="selectedAreaJsonArray"></param>
         /// <returns></returns>
-        private List<String> GetExcelHeaderFields(ExcelWorksheet excelWorksheet, SheetFormat sheetFormat, string selectedAreaJsonArray)
+        private List<String> GetExcelHeaderFields(SheetFormat sheetFormat, string selectedAreaJsonArray)
         {
             List<String> headerValues = new List<string>();
 
@@ -648,14 +647,14 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             switch (sheetFormat)
             {
                 case SheetFormat.TopDown:
-                    headerValues = GetExcelHeaderFieldsTopDown(excelWorksheet, selectedArea);
+                    headerValues = GetExcelHeaderFieldsTopDown( selectedArea);
                     break;
                 case SheetFormat.LeftRight:
-                    headerValues = GetExcelHeaderFieldsLeftRight(excelWorksheet, selectedArea);
+                    headerValues = GetExcelHeaderFieldsLeftRight(selectedArea);
                     break;
                 case SheetFormat.Matrix:
-                    headerValues.AddRange(GetExcelHeaderFieldsTopDown(excelWorksheet, selectedArea));
-                    headerValues.AddRange(GetExcelHeaderFieldsLeftRight(excelWorksheet, selectedArea));
+                    headerValues.AddRange(GetExcelHeaderFieldsTopDown( selectedArea));
+                    headerValues.AddRange(GetExcelHeaderFieldsLeftRight( selectedArea));
                     break;
                 default:
                     break;
@@ -667,10 +666,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// <summary>
         /// Gets all values from selected header area. This method is for top to down scheme, so the header fields are in one row
         /// </summary>
-        /// <param name="excelWorksheet">ExcelWorksheet with the data</param>
         /// <param name="selectedArea">Defined header area with start and end for rows and columns</param>
         /// <returns>Simple list with values of the header fields as string</returns>
-        private List<String> GetExcelHeaderFieldsTopDown(ExcelWorksheet excelWorksheet, SheetArea selectedArea)
+        private List<String> GetExcelHeaderFieldsTopDown( SheetArea selectedArea)
         {
             List<String> headerValues = new List<string>();
 
@@ -688,10 +686,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// <summary>
         /// Gets all values from selected header area. This method is for left to right scheme, so the header fields are in one coulumn
         /// </summary>
-        /// <param name="excelWorksheet">ExcelWorksheet with the data</param>
         /// <param name="selectedArea">Defined header area with start and end for rows and columns</param>
         /// <returns>Simple list with values of the header fields as string</returns>
-        private List<String> GetExcelHeaderFieldsLeftRight(ExcelWorksheet excelWorksheet, SheetArea selectedArea)
+        private List<String> GetExcelHeaderFieldsLeftRight( SheetArea selectedArea)
         {
             List<String> headerValues = new List<string>();
 

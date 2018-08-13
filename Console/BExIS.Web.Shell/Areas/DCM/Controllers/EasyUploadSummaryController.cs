@@ -437,9 +437,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
                     }
                     #endregion security
+                    
 
-
-                    #region excel reader
+                    #region excel and ASCII reader
 
                     int packageSize = 10000;
                     //HACK ?
@@ -485,12 +485,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     }
 
                     String worksheetUri = null;
+
                     //Get the Uri to identify the correct worksheet
                     if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ACTIVE_WOKSHEET_URI))
                     {
                         worksheetUri = TaskManager.Bus[EasyUploadTaskManager.ACTIVE_WOKSHEET_URI].ToString();
                     }
-
+                    
                     int batchSize = (new Object()).GetUnitOfWork().PersistenceManager.PreferredPushSize;
                     int batchnr = 1;
                     foreach (int[] areaDataValues in areaDataValuesList)
@@ -499,11 +500,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         int currentBatchStartRow = areaDataValues[0] + 1;
                         while (currentBatchStartRow <= areaDataValues[2] + 1) //While the end of the current data area has not yet been reached
                         {
-                            //Create a new reader each time because the reader saves ALL tuples it read and therefore the batch processing wouldn't work
-                            EasyUploadExcelReader reader = new EasyUploadExcelReader();
-                            // open file
-                            Stream = reader.Open(TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString());
-
                             //End row is start row plus batch size
                             int currentBatchEndRow = currentBatchStartRow + batchSize;
 
@@ -528,11 +524,52 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 Orientation = orientation
                             };
 
-                            //Set variable identifiers because they might differ from the variable names in the file
-                            reader.setSubmittedVariableIdentifiers(identifiers);
+                            // Hamdi
+                            // if the file is a csv file : 
+                            // AsciiFileReaderInfo (afri) is used to set the semicolon as a seperator
+                            // also parsing, working on the JSON table is better than reading the file and parsing it again
+                            // EasyUploadFileReaderInfo (fri) is used to get the start end of row and column of selection while selecting the areas
+                            // this method is just for getting the datatuples and variables from the csv file within the whole workflow of EXCEL files
+                            // it stores the data in the "rows" variable which is an array of Data Tuple (DataTuple[])
 
-                            //Read the rows and convert them to DataTuples
-                            rows = reader.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(), fri, sds, (int)datasetId, worksheetUri);
+                            if ((TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString().ToLower().Contains("csv"))  )
+                            {
+                                #region csv parsing to get data tuples and variables
+                                AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
+                                afri.Seperator = TextSeperator.semicolon;
+
+                                List<String[]> Json_table_ = JsonConvert.DeserializeObject<List<String[]>>
+                                    (TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA].ToString());
+
+                                AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload();
+                                Stream = reader_.Open(TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString());
+                                rows = reader_.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(),
+                                    Json_table_, afri, sds, ds.Id, packageSize, fri);
+                                Stream.Close();
+                                if (reader_.ErrorMessages.Count > 0)
+                                {
+                                    foreach (var err in reader_.ErrorMessages)
+                                    {
+                                        temp.Add(new Error(ErrorType.Dataset, err.GetMessage()));
+                                    }
+                                    //return temp;
+                                }
+                                #endregion csv parsing to get data tuples and variables 
+                            }
+                            else
+                            {
+                                //Create a new reader each time because the reader saves ALL tuples it read and therefore the batch processing wouldn't work
+                                EasyUploadExcelReader reader = new EasyUploadExcelReader();
+                                // open file
+                                Stream = reader.Open(TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString());
+
+                                //Set variable identifiers because they might differ from the variable names in the file
+                                reader.setSubmittedVariableIdentifiers(identifiers);
+
+                                //Read the rows and convert them to DataTuples
+                                rows = reader.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(), fri, sds, (int)datasetId, worksheetUri);
+
+                            }
 
                             //After reading the rows, add them to the dataset
                             if (rows != null)
