@@ -243,18 +243,17 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                     try
                     {
                         UploadFiletoAnalysis(absolute_file_path);
-                        return "Results will be sent to your E-mail, Thank you for your patience. It might take some time";
+                        return "Results will be sent to your e-mail, Thank you for your patience. It might take some time !";
                     }
                     catch (Exception ex)
                     {
                         Debug.WriteLine(ex.Message.ToString());
                         return "Something happened... Please contact the portal's administration";
                     }
-                    
                 }
                 else
                 {
-                    return "dataset extension is not analzable ";
+                    return "dataset extension is not analyzable ";
                 }
             }
             return "Something happened... Please contact the portal's administration";
