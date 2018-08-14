@@ -41,7 +41,7 @@ namespace BExIS.Modules.Aam.UI.Models
 
         public bool Equals(Annotation an)
         {
-            return this.Entity.Equals(an.Entity) && this.Characteristic.Equals(an.Characteristic) && this.Standard.Equals(an.Standard);
+            return this.Entity == an.Entity && this.Characteristic == an.Characteristic && this.Standard == an.Standard;
         }
 
         /// <summary>

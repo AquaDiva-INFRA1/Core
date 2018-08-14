@@ -343,12 +343,34 @@
                 selectedDataTypeId: datatypeID
             }, function (response) {
                 $('#StepView > div').first().html(response);
-            });
+        });
+    }
+
+    //Sends information to the backend that the user wasn't able to find the concept he was looking for
+    function noConceptFound(cb, category) {
+        var headerfieldId = $(cb).closest('tr').data('index');
+        $.post('@Url.Action("NoConceptFound", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } } )',
+            {
+                headerfieldId: headerfieldId,
+                category: category,
+                checkboxChecked: cb.checked
+            },
+            function (res) {
+                //Maybe display a "Thank you for your feedback" message here?
+            }
+        );
+        //Dis-/Enable the dropdown
+        var dropdown = $(cb).closest('.suggestionContainer').find('select');
+        if (cb.checked) {
+            dropdown.attr('disabled', 'disabled');
+        } else {
+            dropdown.removeAttr('disabled');
+        }
     }
 
     //Necessary to trigger onChange even when the same option is selected again
     function deselect(select) {
-        $(select).data('storedIndex', select.selectedIndex);
+    $(select).data('storedIndex', select.selectedIndex);
         select.selectedIndex = -1;
     }
 
@@ -358,5 +380,6 @@
             select.selectedIndex = $(select).data('storedIndex');
         }
     }
+
 
 </script>
