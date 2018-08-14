@@ -569,11 +569,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         * Key: Tuple<headerID, category> Value: conceptURI
                         * Category is currently only "Entity" or "Characteristic"
                         * */
-                        Dictionary<Tuple<int, string>, string> annotations = null;
+                        Dictionary<Tuple<int, string>, Tuple<string, Boolean>> annotations = null;
                         if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
                         {
                             //Get the selected annotations from the bus
-                            annotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
+                            annotations = (Dictionary<Tuple<int, string>, Tuple<string, Boolean>>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
                         }
 
                         #region Handle case "No matching concept found"
@@ -618,7 +618,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         //First I have to build a structure that contains the Entity and the Characteristic for each headerId
                         //So the new structure will be Dictionary<headerId, EntityCharacteristicPair>
                         Dictionary<int, EntityCharacteristicPair> annotationsPerHeaderId = new Dictionary<int, EntityCharacteristicPair>();
-                        foreach (KeyValuePair<Tuple<int, string>, string> kvp in annotations)
+                        foreach (KeyValuePair<Tuple<int, string>, Tuple<string, Boolean>> kvp in annotations)
                         {
                             //If we didn't find annotations for this headerId yet, create a dummy that will be filled in the next step
                             if (!annotationsPerHeaderId.ContainsKey(kvp.Key.Item1))
@@ -628,11 +628,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             //Now we know there's at least a dummy and we can add entity or characteristic, depending on what we currently have in our iteration
                             if (kvp.Key.Item2 == "Entity")
                             {
-                                annotationsPerHeaderId[kvp.Key.Item1].mappedEntityURI = kvp.Value;
+                                annotationsPerHeaderId[kvp.Key.Item1].mappedEntityURI = kvp.Value.Item1;
                             }
                             else if (kvp.Key.Item2 == "Characteristic")
                             {
-                                annotationsPerHeaderId[kvp.Key.Item1].mappedCharacteristicURI = kvp.Value;
+                                annotationsPerHeaderId[kvp.Key.Item1].mappedCharacteristicURI = kvp.Value.Item1;
                             }
                         }
 

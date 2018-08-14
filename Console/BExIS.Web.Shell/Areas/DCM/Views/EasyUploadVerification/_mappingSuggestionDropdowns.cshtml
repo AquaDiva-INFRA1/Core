@@ -22,7 +22,8 @@
 }
 
 <script>
-    function mappingSelected(selectObject) {
+    function mappingSelected(selectObject, userSelected) {
+        userSelected = (typeof userSelected === 'undefined') ? true : userSelected;
         var select = $(selectObject);
         //Find the header ID
         var headerID = select.data('headerid');
@@ -32,16 +33,18 @@
         var uri = select.find("option:selected").attr("title");
 
         //console.log("Selected " + headerID + " - " + uri + " from category " + category);
+
         //Send to bus
         $.post('@Url.Action("SaveAnnotationSelection", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })',
             {
                 headerID: headerID,
                 category: category,
-                uri: uri
+                uri: uri,
+                userSelected: userSelected
             });
     }
 
     $('.suggestionContainer select[data-headerid="@Model.Item1"]').each(function () {
-        mappingSelected(this);
+        mappingSelected(this, false);
     });
 </script>

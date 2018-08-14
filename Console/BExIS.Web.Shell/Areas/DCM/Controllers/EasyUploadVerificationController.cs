@@ -311,11 +311,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             long datatype = variableInformation.unitInfo.SelectedDataTypeId;
             
             //Structure of variable "currentAnnotations": Key=(headerIndex, category), Value=URI of the selected concept
-            Dictionary<Tuple<int, string>, string> currentAnnotations = null;
-            Dictionary<string, string> exAnnotations = null;
+            Dictionary<Tuple<int, string>, Tuple<string, Boolean>> currentAnnotations = null;
+            Dictionary<string, Tuple<string, Boolean>> exAnnotations = null;
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
             {
-                currentAnnotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
+                currentAnnotations = (Dictionary<Tuple<int, string>, Tuple<string, Boolean>>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
                 exAnnotations = currentAnnotations.Where(kvp => kvp.Key.Item1 == headerIndex).ToDictionary(kvp => kvp.Key.Item2, kvp => kvp.Value);
             }
 
@@ -325,7 +325,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             if (currentAnnotations != null)
             {
                 //There are already annotations stored in the bus (from switching between steps) so set the "selected" properties accordingly
-                foreach(KeyValuePair<Tuple<int, string>, string> kvp in currentAnnotations)
+                foreach(KeyValuePair<Tuple<int, string>, Tuple<string, Boolean>> kvp in currentAnnotations)
                 {
                     //First, check if we're looking at an annotation for the current headerIndex
                     if(kvp.Key.Item1 == headerIndex)
@@ -334,7 +334,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         List<OntologyMappingSuggestionModel> optionList;
                         if (suggestions.TryGetValue(kvp.Key.Item2, out optionList))
                         {
-                            OntologyMappingSuggestionModel selected = optionList.Where(o => o.conceptURI == kvp.Value).FirstOrDefault();
+                            OntologyMappingSuggestionModel selected = optionList.Where(o => o.conceptURI == kvp.Value.Item1).FirstOrDefault();
                             if(selected != null)
                             {
                                 //Found the correct option in the list, now switch its "selected" state
@@ -477,10 +477,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         [HttpPost]
         public ActionResult SaveAnnotationSelection()
         {
-
             int? selectFieldId = null;
             string selectedAnnotationCategory = null;
             string selectedAnnotationURI = null;
+            Boolean userSelected = false;
 
             //Keys submitted by Javascript in _mappingSuggestionDropdowns.cshtml
             foreach (string key in Request.Form.AllKeys)
@@ -497,6 +497,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 {
                     selectedAnnotationURI = Request.Form[key];
                 }
+                if("userSelected" == key)
+                {
+                    userSelected = Boolean.Parse(Request.Form[key]);
+                }
             }
 
             if(selectFieldId == null)
@@ -508,22 +512,22 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
 
             /* Annotations stored on the bus in form of a dictionary
-             * Key: Tuple<headerID, category> Value: conceptURI
+             * Key: Tuple<headerID, category> Value: Tuple<conceptURI, userSelected>
              * Category is currently only "Entity" or "Characteristic"
              * */
-            Dictionary<Tuple<int, string>, string> currentAnnotations;
+            Dictionary<Tuple<int, string>, Tuple<string, Boolean>> currentAnnotations;
             //If there already are some annotations on the bus, grab them - otherwise create a new dictionary
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
             {
-                currentAnnotations = (Dictionary<Tuple<int, string>, string>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
+                currentAnnotations = (Dictionary<Tuple<int, string>, Tuple<string, Boolean>>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
             }
             else
             {
-                currentAnnotations = new Dictionary<Tuple<int, string>, string>();
+                currentAnnotations = new Dictionary<Tuple<int, string>, Tuple<string, Boolean>>();
             }
 
             //If there's already an annotation for this (headerID, category)-pair, replace it
-            currentAnnotations[new Tuple<int, string>((int)selectFieldId, selectedAnnotationCategory)] = selectedAnnotationURI;
+            currentAnnotations[new Tuple<int, string>((int)selectFieldId, selectedAnnotationCategory)] = new Tuple<String, Boolean>(selectedAnnotationURI, userSelected);
 
             //Store edited annotations in TaskManager
             TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING] = currentAnnotations;
@@ -1065,7 +1069,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// <param name="unit">Currently selected unit</param>
         /// <param name="selectedAnnotations">Dictionary of currently selected annotations in the form of (Key=category, Value=uri)</param>
         /// <returns>Dictionary with the category (Entity/Characteristic) as key and a (sorted) list of possible annotations as value</returns>
-        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(int headerIndex, string variableName, long datatypeID, long unitID, Dictionary<String, String> selectedAnnotations = null)
+        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(int headerIndex, string variableName, long datatypeID, long unitID, Dictionary<String, Tuple<String, Boolean>> selectedAnnotations = null)
         {
             //Order entire lists of entitites and characteristics according to a mapping metric
             //For now: Just use a string similarity
@@ -1109,11 +1113,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             foreach(string key in keys)
             {
                 List<OntologyMappingSuggestionModel> tmp = output[key];
-                String alreadySelected;
+                Tuple<String, Boolean> alreadySelected;
                 if(selectedAnnotations != null && selectedAnnotations.TryGetValue(key, out alreadySelected))
                 {
                     //We have a selected annotation that we have to take care of - put it at the beginning of the list by tweaking its similarity
-                    var unicorn = tmp.OrderByDescending(el => el.conceptURI.Equals(alreadySelected) ? double.MaxValue : el.similarity).Take(50).ToList();
+                    var unicorn = tmp.OrderByDescending(el => el.conceptURI.Equals(alreadySelected.Item1) ? double.MaxValue : el.similarity).Take(50).ToList();
                     output[key] = unicorn;
                 }
                 else
