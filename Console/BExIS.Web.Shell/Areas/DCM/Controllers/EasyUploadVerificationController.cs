@@ -307,9 +307,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             List<EasyUploadVariableInformation> variableInformationList = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
             EasyUploadVariableInformation variableInformation = variableInformationList.Where(el => el.headerId == headerIndex).FirstOrDefault();
             string variableName = variableInformation.variableName;
-            string unit = variableInformation.unitInfo.Name;
-            //Why does this have to be so complicated...?
-            string datatype = variableInformation.unitInfo.DataTypeInfos.Where(dti => dti.DataTypeId == variableInformation.unitInfo.SelectedDataTypeId).FirstOrDefault().Name;
+            long unit = variableInformation.unitInfo.UnitId;
+            long datatype = variableInformation.unitInfo.SelectedDataTypeId;
             
             //Structure of variable "currentAnnotations": Key=(headerIndex, category), Value=URI of the selected concept
             Dictionary<Tuple<int, string>, string> currentAnnotations = null;
@@ -344,6 +343,15 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
                     }
                 }
+            }
+
+            //Since the checkbox with the "No suitable concept found"-functionality defaults to "unchecked", the information on the bus should
+            //be reset when new dropdowns are generated
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.NOCONCEPTSFOUND))
+            {
+                List<Tuple<int, String>> noConceptsFound = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
+                noConceptsFound.RemoveAll(m => m.Item1 == headerIndex);
+                TaskManager.AddToBus(EasyUploadTaskManager.NOCONCEPTSFOUND, noConceptsFound);
             }
 
             //Model: (headerIndex, Dictionary)-Tuple
@@ -1057,7 +1065,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// <param name="unit">Currently selected unit</param>
         /// <param name="selectedAnnotations">Dictionary of currently selected annotations in the form of (Key=category, Value=uri)</param>
         /// <returns>Dictionary with the category (Entity/Characteristic) as key and a (sorted) list of possible annotations as value</returns>
-        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(int headerIndex, string variableName, string datatype, string unit, Dictionary<String, String> selectedAnnotations = null)
+        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(int headerIndex, string variableName, long datatypeID, long unitID, Dictionary<String, String> selectedAnnotations = null)
         {
             //Order entire lists of entitites and characteristics according to a mapping metric
             //For now: Just use a string similarity
@@ -1125,25 +1133,60 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 });
 
                 dynamic response = JsonConvert.DeserializeObject(res.Content);
-                for (int i = 0; i < response.Count; i++)
-                {
-                    var unicorn = response[i];
-                    //Add to the start of the output (if the Entity/Characteristic is not empty and has a label)
-                    //Remove entries with the same URIs that we're about to add so we won't have any duplicates
-                    if (unicorn.Entity != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity) && unicorn.Entity_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity_Label))
-                    {
-                        output["Entity"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Entity));
-                        output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity_Label, double.MaxValue));
-                    }
 
-                    if (unicorn.Characteristic != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic) && unicorn.Characteristic_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic_Label))
+                if(response.Count != 0)
+                {
+                    for (int i = 0; i < response.Count; i++)
                     {
-                        output["Characteristic"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Characteristic));
-                        output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic_Label, double.MaxValue));
+                        var unicorn = response[i]; //Disclaimer: This is what my temporary variables usually look like..
+
+                        //Add to the start of the output (if the Entity/Characteristic is not empty and has a label)
+                        //Remove entries with the same URIs that we're about to add so we won't have any duplicates
+                        if (unicorn.Entity != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity) && unicorn.Entity_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity_Label))
+                        {
+                            output["Entity"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Entity));
+                            output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity_Label, double.MaxValue));
+                        }
+
+                        if (unicorn.Characteristic != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic) && unicorn.Characteristic_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic_Label))
+                        {
+                            output["Characteristic"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Characteristic));
+                            output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic_Label, double.MaxValue));
+                        }
                     }
                 }
-            }
+                else
+                {
+                    //If we didn't get a response that means we don't have annotations for this variable yet
+                    //So we should be looking for annotations of variables that share the same unit and datatype.
+                    res = (ContentResult)this.Run("AAM", "Annotation", "GetExistingAnnotationsByUnitAndDatatype", new RouteValueDictionary()
+                    {
+                        { "unitID", unitID },
+                        { "datatypeID", datatypeID }
+                    });
 
+                    response = JsonConvert.DeserializeObject(res.Content);
+
+                    for(int i = 0; i < response.Count; i++)
+                    {
+                        var unicorn = response[i]; //Disclaimer: This is what my temporary variables usually look like..
+
+                        //Add to the start of the output (if the Entity/Characteristic is not empty and has a label)
+                        //Remove entries with the same URIs that we're about to add so we won't have any duplicates
+                        if (unicorn.Entity != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity) && unicorn.Entity_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity_Label))
+                        {
+                            output["Entity"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Entity));
+                            output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity_Label, double.MaxValue));
+                        }
+
+                        if (unicorn.Characteristic != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic) && unicorn.Characteristic_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic_Label))
+                        {
+                            output["Characteristic"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Characteristic));
+                            output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic_Label, double.MaxValue));
+                        }
+                    }
+                }                
+            }
             return output;
         }
         #endregion
