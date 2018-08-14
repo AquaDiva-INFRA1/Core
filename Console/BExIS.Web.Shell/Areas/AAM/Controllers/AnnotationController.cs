@@ -134,6 +134,49 @@ namespace BExIS.Modules.Aam.UI.Controllers
             return Content(JsonConvert.SerializeObject(output), "application/json");
         }
 
+        /// <summary>
+        /// Internal API to get all annotations from the database that are assigned to variables having the given unit and datatype.
+        /// </summary>
+        /// <param name="unitID">ID of the unit</param>
+        /// <param name="datatypeID">ID of the datatype</param>
+        /// <returns>A Dictionary containing the matching annotations as Keys and the number of occurences as Values.</returns>
+        public ContentResult GetExistingAnnotationsByUnitAndDatatype(long unitID, long datatypeID)
+        {
+            AnnotationManager am = new AnnotationManager();
+            List<Annotation> allAnnotations = am.GetAnnotations().ToList();
+
+            List<AnnotationResult> output = new List<AnnotationResult>();
+
+            //First look for full matches
+            List<Annotation> fullMatches = allAnnotations.Where(an => an.Variable.Unit.Id == unitID && an.Variable.DataAttribute.DataType.Id == datatypeID).ToList();
+
+            if(fullMatches.Count != 0)
+            {
+                foreach(Annotation an in fullMatches)
+                {
+                    output.Add(new AnnotationResult(an));
+                }
+            }
+            else
+            {
+                //If we didn't find any full matches, look for partial matches
+                List<Annotation> matchingUnit = allAnnotations.Where(an => an.Variable.Unit.Id == unitID).ToList();
+                List<Annotation> matchingDatatype = allAnnotations.Where(an => an.Variable.DataAttribute.DataType.Id == datatypeID).ToList();
+
+                foreach(Annotation an in matchingUnit)
+                {
+                    output.Add(new AnnotationResult(an));
+                }
+
+                foreach(Annotation an in matchingDatatype)
+                {
+                    output.Add(new AnnotationResult(an));
+                }
+            }
+
+            return Content(JsonConvert.SerializeObject(output), "application/json");
+        }
+
         public ActionResult FillLabelsInAnnotationTable()
         {
             AnnotationManager am = new AnnotationManager();

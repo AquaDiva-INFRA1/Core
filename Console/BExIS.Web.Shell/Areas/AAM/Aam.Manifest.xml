@@ -35,6 +35,10 @@
         controller="Annotation" action="GetExistingAnnotationsByVariableLabel"
         extends="" />
 
+    <Export tag="internalApi" id="GetExistingAnnotationsByUnitAndDatatype"
+        title="Get Annotations for Unit and Datatype" description="Get all Annotations for a given Unit and Datatype" icon=""
+        controller="Annotation" action="GetExistingAnnotationsByUnitAndDatatype"
+        extends="" />
     
 		<Export tag="lunchbar" id="helpAam" order="1"
 						title="Annotations" description="Annotations Help Manual" icon=""
