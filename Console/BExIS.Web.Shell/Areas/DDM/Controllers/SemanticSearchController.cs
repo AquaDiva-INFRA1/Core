@@ -941,6 +941,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         }
 
         //Takes a JSON-Serialization of a List<String> of URIs and find the labels of these URIs in the AD-ontology
+        //Result contains null entries for whitespace or null string inputs
         public ContentResult FindOntologyLabels(string serializedURIList)
         {
             List<String> uriList = JsonConvert.DeserializeObject<List<String>>(serializedURIList);
@@ -957,36 +958,43 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             foreach (String uri in uriList)
             {
-                //Add current uri to CommandText
-                queryString.CommandText = String.Format(commandTextTemplate, uri);
-
-                //Execute the query
-                SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
-
-                string labelOutput = "";
-                foreach (SparqlResult res in results.Results)
+                if (String.IsNullOrWhiteSpace(uri))
                 {
-                    String s = res["label"].ToString();
-
-                    //Remove the ^^xsd:String
-                    if (s.Contains("^^"))
-                    {
-                        s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
-                    }
-
-                    if (labelOutput.Equals(""))
-                    {
-                        labelOutput += s;
-                    }
-                    else
-                    {
-                        labelOutput += " / " + s;
-                    }
+                    labelList.Add(null);
                 }
-                if (labelOutput.Equals(""))
-                    labelOutput = "No label found!";
+                else
+                {
+                    //Add current uri to CommandText
+                    queryString.CommandText = String.Format(commandTextTemplate, uri);
 
-                labelList.Add(labelOutput);
+                    //Execute the query
+                    SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+
+                    string labelOutput = "";
+                    foreach (SparqlResult res in results.Results)
+                    {
+                        String s = res["label"].ToString();
+
+                        //Remove the ^^xsd:String
+                        if (s.Contains("^^"))
+                        {
+                            s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
+                        }
+
+                        if (labelOutput.Equals(""))
+                        {
+                            labelOutput += s;
+                        }
+                        else
+                        {
+                            labelOutput += " / " + s;
+                        }
+                    }
+                    if (labelOutput.Equals(""))
+                        labelOutput = "No label found!";
+
+                    labelList.Add(labelOutput);
+                }
             }
             ContentResult result = new ContentResult();
             result.Content = JsonConvert.SerializeObject(labelList);

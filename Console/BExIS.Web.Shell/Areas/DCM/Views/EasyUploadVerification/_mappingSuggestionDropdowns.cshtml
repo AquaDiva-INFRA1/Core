@@ -14,6 +14,10 @@
                 <option title="@suggestion.conceptURI" data-category="@category" @if (suggestion.selected) {<text>selected</text> }>@suggestion.displayName</option>
             }
         </select>
+        <label>
+            <input type="checkbox" onclick="noConceptFound(this, '@category');"/>
+            No suitable @category found.
+        </label>
     </div>
 }
 
@@ -41,16 +45,3 @@
         mappingSelected(this);
     });
 </script>
-
-<style>
-    .suggestionContainer{
-        display: block;
-    }
-    .suggestionContainer label {
-        float: left;
-        clear: left;
-    }
-    .suggestionContainer select{
-        float: right;
-    }
-</style>
