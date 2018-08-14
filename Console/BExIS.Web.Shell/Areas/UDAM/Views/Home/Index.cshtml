@@ -8,6 +8,14 @@
 <header>
     <script type="text/javascript" src="/Scripts/trunk8.js"></script>
     <script type="text/javascript" src="/Scripts/jquery.ba-resize.min.js"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
 </header>
 
 @section Information
@@ -35,8 +43,9 @@
 
 <div class="searchContainer">
 
-    <div class="alert alert-warning alert-dismissible" role="alert" id="alerts" hidden="true">
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <br />
+    <div class="alert alert-danger" role="alert" id="alerts" hidden="true">
+        <div id="content_alert"></div>
     </div>
 
     <div id="searchContent">
@@ -116,6 +125,27 @@
     </div>
 </div>
 
+
+<div class="dropdown">
+    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        Dropdown
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+        <li><a href="#">Action</a></li>
+        <li><a href="#">Another action</a></li>
+        <li><a href="#">Something else here</a></li>
+        <li role="separator" class="divider"></li>
+        <li><a href="#">Separated link</a></li>
+    </ul>
+</div>
+
+
+
+
+
+
+
 <div id="spinner_loader" hidden="true">
     <center><i class="fa fa-spinner fa-spin" style="font-size:100px" id="spinner"></i></center>
 </div>
@@ -153,9 +183,10 @@
 
     function uploadfile(e) {
 
-        document.getElementById("spinner_loader").removeAttribute("hidden");
+        document.getElementById("spinner_loader").removeAttribute("hidden"); 
+        document.getElementById("alerts").removeAttribute("style");
         document.getElementById("alerts").removeAttribute("hidden");
-        document.getElementById("alerts").innerHTML = "processing your request ... please wait depending on the size of the file"; 
+        document.getElementById("content_alert").innerHTML = "processing your request ... please wait depending on the size of the file !"; 
 
         //checked
         var id = e.getAttribute("id");
@@ -171,10 +202,10 @@
             contentType: 'application/json; charset=utf-8',
             complete: function (res_check_file_extension_to_analyse) {
                 document.getElementById("spinner_loader").setAttribute("hidden", true);
-                document.getElementById("alerts").removeAttribute("hidden");
-                document.getElementById("alerts").innerHTML = res_check_file_extension_to_analyse.responseText; 
+                document.getElementById("content_alert").innerHTML = res_check_file_extension_to_analyse.responseText; 
+                $("#alerts").delay(3500).hide(500);
+                //alert(res_check_file_extension_to_analyse.responseText);
 
-                alert(res_check_file_extension_to_analyse.responseText);
             }
         });
     }
