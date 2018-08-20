@@ -328,7 +328,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 foreach(KeyValuePair<Tuple<int, string>, Tuple<string, Boolean>> kvp in currentAnnotations)
                 {
                     //First, check if we're looking at an annotation for the current headerIndex
-                    if(kvp.Key.Item1 == headerIndex)
+                    if(kvp.Key.Item1 == headerIndex && kvp.Value.Item2)
                     {
                         //Now grab the option list for the correct category
                         List<OntologyMappingSuggestionModel> optionList;

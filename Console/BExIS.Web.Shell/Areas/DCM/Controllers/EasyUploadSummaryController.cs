@@ -620,22 +620,24 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         Dictionary<int, EntityCharacteristicPair> annotationsPerHeaderId = new Dictionary<int, EntityCharacteristicPair>();
                         foreach (KeyValuePair<Tuple<int, string>, Tuple<string, Boolean>> kvp in annotations)
                         {
-                            //If we didn't find annotations for this headerId yet, create a dummy that will be filled in the next step
-                            if (!annotationsPerHeaderId.ContainsKey(kvp.Key.Item1))
+                            if(kvp.Value != null) //kvp.Value is null if the user selected "no concept found" without ever selecting an option in the first place
                             {
-                                annotationsPerHeaderId.Add(kvp.Key.Item1, new EntityCharacteristicPair());
-                            }
-                            //Now we know there's at least a dummy and we can add entity or characteristic, depending on what we currently have in our iteration
-                            if (kvp.Key.Item2 == "Entity")
-                            {
-                                annotationsPerHeaderId[kvp.Key.Item1].mappedEntityURI = kvp.Value.Item1;
-                            }
-                            else if (kvp.Key.Item2 == "Characteristic")
-                            {
-                                annotationsPerHeaderId[kvp.Key.Item1].mappedCharacteristicURI = kvp.Value.Item1;
+                                //If we didn't find annotations for this headerId yet, create a dummy that will be filled in the next step
+                                if (!annotationsPerHeaderId.ContainsKey(kvp.Key.Item1))
+                                {
+                                    annotationsPerHeaderId.Add(kvp.Key.Item1, new EntityCharacteristicPair());
+                                }
+                                //Now we know there's at least a dummy and we can add entity or characteristic, depending on what we currently have in our iteration
+                                if (kvp.Key.Item2 == "Entity")
+                                {
+                                    annotationsPerHeaderId[kvp.Key.Item1].mappedEntityURI = kvp.Value.Item1;
+                                }
+                                else if (kvp.Key.Item2 == "Characteristic")
+                                {
+                                    annotationsPerHeaderId[kvp.Key.Item1].mappedCharacteristicURI = kvp.Value.Item1;
+                                }
                             }
                         }
-
 
                         //Now we can create and persist the annotation for each headerId (=Variable)
                         foreach (KeyValuePair<int, EntityCharacteristicPair> kvp in annotationsPerHeaderId)
