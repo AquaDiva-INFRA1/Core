@@ -17,6 +17,7 @@ using Vaiona.Utils.Cfg;
 using System.Web.Configuration;
 using BExIS.Security.Services.Authentication;
 using BExIS.Security.Services.Subjects;
+using Newtonsoft.Json;
 
 namespace BExIS.Modules.UDAM.UI.Controllers
 {
@@ -37,6 +38,8 @@ namespace BExIS.Modules.UDAM.UI.Controllers
         private static String password = "hamdi1992";
         private static string FTPAddress = "ftp://192.168.37.3:21";
 
+        static Analysis_scripts analysis_scripts = new Analysis_scripts();
+
         // GET: Home
         public ActionResult Index()
         {
@@ -44,8 +47,14 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             DataTable result_table = CreateDataTable(header_items);
             model = new Unstructred_data(result_table);
             fill_data_table_unstructred(model.result_table);
+
+
+            ViewData["tools_list"] = analysis_scripts.tools_list;
+            ViewData["script_paths"] = analysis_scripts.script_paths;
+
             return View(model.result_table);
         }
+
 
         [GridAction]
         public ActionResult _CustomBinding(GridCommand command)
@@ -224,38 +233,45 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             * checks the extension of the file to analyse.
             * the current analysis tool excepts only fq and fastaq extensions
             * */
-        public string check_file_extension_to_analyse(long id)
+        public string check_file_extension_to_analyse(string ids, string id_tool)
         {
-            //Int64 id = Int64.Parse(id_);
-            //getting the file path of the dataset to send it to the ft´p server for analysis
-            DatasetManager dsm = new DatasetManager();
-            DatasetVersion dsv = dsm.GetDatasetVersion(dsm.GetDatasetLatestVersionId(id));
-            
-            ICollection<ContentDescriptor> cont_desc = dsv.ContentDescriptors;
-            foreach (ContentDescriptor c_d in cont_desc)
+            List<string> ids_ = JsonConvert.DeserializeObject<List<string>>(ids);
+
+            foreach(string id_string in ids_)
             {
-                string absolute_file_path = Path.Combine(datasets_root_folder, c_d.URI.ToString());
+                long id = Int64.Parse(id_string);
+                //Int64 id = Int64.Parse(id_);
+                //getting the file path of the dataset to send it to the ft´p server for analysis
+                DatasetManager dsm = new DatasetManager();
+                DatasetVersion dsv = dsm.GetDatasetVersion(dsm.GetDatasetLatestVersionId(id));
 
-                Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
+                ICollection<ContentDescriptor> cont_desc = dsv.ContentDescriptors;
+                foreach (ContentDescriptor c_d in cont_desc)
+                {
+                    string absolute_file_path = Path.Combine(datasets_root_folder, c_d.URI.ToString());
 
-                if (allowed_extention.Contains(Path.GetExtension(c_d.URI)))
-                {
-                    try
+                    Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
+
+                    if (allowed_extention.Contains(Path.GetExtension(c_d.URI)))
                     {
-                        UploadFiletoAnalysis(absolute_file_path);
-                        return "Results will be sent to your e-mail, Thank you for your patience. It might take some time !";
+                        try
+                        {
+                            UploadFiletoAnalysis(absolute_file_path, id_tool);
+                            return "Results will be sent to your e-mail, Thank you for your patience. It might take some time !";
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message.ToString());
+                            return "Something happened... Please contact the portal's administration";
+                        }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Debug.WriteLine(ex.Message.ToString());
-                        return "Something happened... Please contact the portal's administration";
+                        return "dataset extension is not analyzable ";
                     }
-                }
-                else
-                {
-                    return "dataset extension is not analyzable ";
                 }
             }
+            
             return "Something happened... Please contact the portal's administration";
         }
 
@@ -264,7 +280,7 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             * Uploads the file to analyse to the server of analysis using ftp connection
             * the analysis script is a python script called using a FLASK server on the VM
             * */
-        private void UploadFiletoAnalysis(string filePath)
+        private void UploadFiletoAnalysis(string filePath, string id_tool)
         {
             String filename = Path.GetFileName(filePath);
 
@@ -282,6 +298,7 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                 using (var resp = (FtpWebResponse)request_.GetResponse())
                 {
                     Console.WriteLine(resp.StatusCode);
+                    resp.Close();
                 }
             }
             catch (WebException e)
@@ -300,6 +317,7 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                 using (Stream ftpStream = request.GetRequestStream())
                 {
                     fileStream.CopyTo(ftpStream);
+                    fileStream.Close();
                 }
             }
             catch (WebException e)
@@ -312,13 +330,16 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                 Debug.WriteLine(ex.Message.ToString());
             }
 
-            // run the analysis
+            // run the analysis over server tool
             string url = "http://192.168.37.3:5000";
             var request2 = (HttpWebRequest)WebRequest.Create(url);
             request2.Method = "POST";
             request2.ContentType = "application/x-www-form-urlencoded";
 
-            byte[] bytes = Encoding.ASCII.GetBytes("file_path=" + filename + "&user_home_directory=" + name + "&email=" + email);
+            string params_ = "file_path=" + filename + "&user_home_directory=" + name + "&email=" + email + "&exec_tool=" + id_tool.ToLower();
+            params_ = params_ + "&exec_tool=" + id_tool.ToLower();
+
+            byte[] bytes = Encoding.ASCII.GetBytes(params_);
             request2.ContentLength = bytes.Length;
             try
             {
@@ -327,17 +348,15 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                     reqStream.Write(bytes, 0, bytes.Length);
                     //var response = (HttpWebResponse)request2.GetResponse();
                     //Debug.WriteLine("response ==> " + response.ToSafeString());
+                    reqStream.Close();
                 }
-                
-            }
-            catch (WebException e)
-            {
-                Debug.WriteLine(e.ToString());
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message.ToString());
             }
+            
+            
 
         }
     }
