@@ -3,10 +3,11 @@
 @using System;
 @using System.Web.Configuration;
 @using BExIS.Modules.Dcm.UI.Models;
+@using BExIS.IO;
 
 @{
 
-    HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
+HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
     int int_MaxRequestLength = section.MaxRequestLength;
     int mbMax = int_MaxRequestLength / 1024;
 
@@ -37,8 +38,10 @@
             <p>Please select a data file to be uploaded to the system.</p>
             <p>Note:  Large data files may take several minutes or hours to transfer, depending on your network speed. The system is freezed until the file has been transfered completely. Please be patient! </p>
             <p>For multiple large files you may use the "Push Big Data to Server" option before entering this Upload Wizard.</p>
-            <p>Supported file formats: @{foreach (string s in @Model.SupportedFileExtentions)
-                {<b>(*@s) </b>} }</p>
+            <p>
+                Supported file formats: @{foreach (string s in @Model.SupportedFileExtentions)
+                    {<b>(*@s) </b>} }
+            </p>
             <p>Maximum file size: @mbMax MB</p>
         </div>
 
@@ -49,19 +52,19 @@
 
                     <td>
                         @(Html.Telerik().Upload()
-                            .Name("SelectFileUploader")
-                            .Multiple(false)
-                            .ShowFileList(false)
-                            .HtmlAttributes(new { title = "Browse" })
-                            .ClientEvents(events =>
-                                events.OnSelect("SelectFileProcess_OnSelect")
-                                        .OnRemove("SelectFileProcess_OnRemove")
-                                        .OnSuccess("SelectFileProcess_OnSuccess")
+                                    .Name("SelectFileUploader")
+                                    .Multiple(false)
+                                    .ShowFileList(false)
+                                    .HtmlAttributes(new { title = "Browse" })
+                                    .ClientEvents(events =>
+                                        events.OnSelect("SelectFileProcess_OnSelect")
+                                                .OnRemove("SelectFileProcess_OnRemove")
+                                                .OnSuccess("SelectFileProcess_OnSuccess")
 
-                            )
-                            .Async(async => async
-                                .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName, new { area = "DCM" })
-                                .AutoUpload(true))
+                                    )
+                                    .Async(async => async
+                                        .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName, new { area = "DCM" })
+                                        .AutoUpload(true))
 
                         )
                     </td>
@@ -74,10 +77,10 @@
 
                     <td>
                         @(Html.Telerik().DropDownList()
-                                .Placeholder("Select, please")
-                                .Name("SelectedServerFileName")
-                                .BindTo(new SelectList(Model.serverFileList))
-                                .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
+                                        .Placeholder("Select, please")
+                                        .Name("SelectedServerFileName")
+                                        .BindTo(new SelectList(Model.serverFileList))
+                                        .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
 
                         @*@Html.DropDownListFor(m => m.SelectedServerFileName, new SelectList(Model.serverFileList), "Select")*@@*, new { disabled = "disabled" })*@
                     </td>
@@ -86,36 +89,32 @@
                     </td>
                 </tr>
 
-                <tr>
-                    <td>
-                        <input type="text" class="form-control" placeholder="CSV file delimiter" aria-describedby="sizing-addon1" id="CsvDelimiter" 
-                               name="CsvDelimiter" hidden="True">
-                    </td>
-                    <td>
-                        Write the CSV data delimiter
-                    </td>
-                </tr>
-
             </table>
+            <div id="CsvDelimiter" hidden="true">
+                <input type="text" class="form-control" placeholder="CSV file delimiter"
+                       aria-describedby="sizing-addon1" id="csv_delimiter_text_box" onchange="selectedDelimiter(this)">
+            </div>
         </div>
     </div>
 
     <div class="uploadWizardStep_Success stepper">
-        <div id="fileNameDiv">@if (Model.SelectedFileName != "")
-        {@Model.SelectedFileName}</div>
+        <div id="fileNameDiv">
+            @if (Model.SelectedFileName != "")
+            {@Model.SelectedFileName}
     </div>
+</div>
 
-    <div class="uploadWizardStep_Error stepper">
-        @if (Model != null && Model.ErrorList != null && Model.ErrorList.Count != 0)
-        {
-            <ul>
-                @foreach (BExIS.IO.Transform.Validation.Exceptions.Error s in @Model.ErrorList)
-                {
-                    <li>@s.ToString()</li>
-                }
-            </ul>
-        }
-    </div>
+<div class="uploadWizardStep_Error stepper">
+    @if (Model != null && Model.ErrorList != null && Model.ErrorList.Count != 0)
+    {
+        <ul>
+            @foreach (BExIS.IO.Transform.Validation.Exceptions.Error s in @Model.ErrorList)
+            {
+                <li>@s.ToString()</li>
+            }
+        </ul>
+    }
+</div>
 
 
 </div>
@@ -142,11 +141,13 @@
                 e.preventDefault();
                 return false;
             }
+            if (file.extension == ".csv") {
+                document.getElementById("CsvDelimiter").removeAttribute("hidden");
+            }
+            else {
+                document.getElementById("CsvDelimiter").setAttribute("hidden", true);
+            }
             Parameters.push("Extention:" + file.extension);
-
-
-            alert(document.getElementById('CsvDelimiter').value);
-            Parameters.push("CsvDelimiter:" + document.getElementById('CsvDelimiter').value);
         }
     }
 
@@ -181,14 +182,33 @@
 
     function SelectedServerFileName_onChange()
     {
-
         var value = $(this).val();
+        if (value.indexOf(".csv") > 0) {
+            document.getElementById("CsvDelimiter").removeAttribute("hidden");
+        }
+        else {
+            document.getElementById("CsvDelimiter").setAttribute("hidden", true);
+        }
 
-
-        $.post('@Url.Action("SelectFileFromServerProcess", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })', { fileName: value }, function (response)
+        $.post('@Url.Action("SelectFileFromServerProcess", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })',{ fileName: value }, function (response)
         {
             $('.uploadWizardStep_Error').empty();
             $('#fileNameDiv').text(value);
+        })
+    }
+
+    function selectedDelimiter() {
+        delimiter = document.getElementById('csv_delimiter_text_box').value;
+
+        if (delimiter != null) {
+            if ( delimiter.length != 1 ) {
+                alert("please put the delimiter as one single character")
+                return false;
+            }
+        }
+        $.post('@Url.Action("AddDelimiterToBus", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })',{ delimiter: delimiter }, function (response)
+        {
+
         })
     }
 

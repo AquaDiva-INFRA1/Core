@@ -51,7 +51,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     String[] all_lines = System.IO.File.ReadAllLines(filePath);
                     foreach (string line in all_lines)
                     {
-                        String[] tabs = line.Split(';');
+                        String[] tabs = line.Split(TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString()[0]);
                         Json_table.Add(tabs);
                     }
                     //If the active worksheet was never changed, we default to the first one
@@ -260,7 +260,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
             
             string fileExt = System.IO.Path.GetExtension(filePath);
-            if ((fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("csv")))
+            if (fileExt.ToLower().Contains("csv"))
             {
                 return Content((string)TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA], "application/json");
             }

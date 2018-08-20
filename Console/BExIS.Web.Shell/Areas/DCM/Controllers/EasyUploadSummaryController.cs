@@ -1,5 +1,4 @@
-﻿using BExIS.Dcm.UploadWizard;
-using BExIS.Dlm.Entities.Administration;
+﻿using BExIS.Dlm.Entities.Administration;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Entities.MetadataStructure;
@@ -30,6 +29,8 @@ using System.Xml.Linq;
 using Vaiona.Persistence.Api;
 using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Modularity;
+using BExIS.Dcm.UploadWizard;
+using BExIS.Dcm.Wizard;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
 {
@@ -536,7 +537,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             {
                                 #region csv parsing to get data tuples and variables
                                 AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
-                                afri.Seperator = TextSeperator.semicolon;
+
+                                afri.Seperator = TextSeperator.semicolon;// doesnt matter cauz the delimiter is already used to fill the JSONtable and to finish the upload it is using the JSON Table instead of reading the data again
 
                                 List<String[]> Json_table_ = JsonConvert.DeserializeObject<List<String[]>>
                                     (TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA].ToString());
