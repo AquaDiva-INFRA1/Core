@@ -47,6 +47,52 @@
     .suggestionContainer select {
         float: right;
     }
+
+    /*Tooltip-css from https://www.w3schools.com/howto/howto_css_tooltip.asp*/
+    /* Tooltip container */
+    .tooltipAD {
+        position: relative;
+        display: inline-block;
+        border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+    }
+
+    /* Tooltip text */
+    .tooltipAD .tooltiptextAD {
+        visibility: hidden;
+        width: 250px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        padding: 5px 0;
+        border-radius: 6px;
+        /* Position the tooltip text */
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -125px;
+        /* Fade in tooltip */
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+        /* Tooltip arrow */
+        .tooltipAD .tooltiptextAD::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltipAD:hover .tooltiptextAD {
+        visibility: visible;
+        opacity: 1;
+    } 
 </style>
 
 <div id="Step5" class="uploadWizardStep">
@@ -67,7 +113,15 @@
                         <th>Unit</th>
                         <th>Datatype</th>
                         <th>Datatype description</th>
-                        <th>Ontology mapping</th>
+                        <th>
+                            Ontology mapping 
+                            <div class="tooltipAD">
+                                <i class="fa fa-question-circle" aria-hidden="true"></i>
+                                <span class="tooltiptextAD">
+                                    Entity: The kind of observed object </br> Characteristic: The observed property
+                                </span>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
