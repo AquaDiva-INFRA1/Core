@@ -49,19 +49,19 @@
 
                     <td>
                         @(Html.Telerik().Upload()
-                                .Name("SelectFileUploader")
-                                .Multiple(false)
-                                .ShowFileList(false)
-                                .HtmlAttributes(new { title = "Browse" })
-                                .ClientEvents(events =>
-                                    events.OnSelect("SelectFileProcess_OnSelect")
-                                            .OnRemove("SelectFileProcess_OnRemove")
-                                            .OnSuccess("SelectFileProcess_OnSuccess")
+                            .Name("SelectFileUploader")
+                            .Multiple(false)
+                            .ShowFileList(false)
+                            .HtmlAttributes(new { title = "Browse" })
+                            .ClientEvents(events =>
+                                events.OnSelect("SelectFileProcess_OnSelect")
+                                        .OnRemove("SelectFileProcess_OnRemove")
+                                        .OnSuccess("SelectFileProcess_OnSuccess")
 
-                                )
-                                .Async(async => async
-                                    .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName, new { area = "DCM" })
-                                    .AutoUpload(true))
+                            )
+                            .Async(async => async
+                                .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName, new { area = "DCM" })
+                                .AutoUpload(true))
 
                         )
                     </td>
@@ -74,10 +74,10 @@
 
                     <td>
                         @(Html.Telerik().DropDownList()
-                                    .Placeholder("Select, please")
-                                    .Name("SelectedServerFileName")
-                                    .BindTo(new SelectList(Model.serverFileList))
-                                    .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
+                                .Placeholder("Select, please")
+                                .Name("SelectedServerFileName")
+                                .BindTo(new SelectList(Model.serverFileList))
+                                .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
 
                         @*@Html.DropDownListFor(m => m.SelectedServerFileName, new SelectList(Model.serverFileList), "Select")*@@*, new { disabled = "disabled" })*@
                     </td>
@@ -85,6 +85,17 @@
                         Select a data file previously uploaded to the server.
                     </td>
                 </tr>
+
+                <tr>
+                    <td>
+                        <input type="text" class="form-control" placeholder="CSV file delimiter" aria-describedby="sizing-addon1" id="CsvDelimiter" 
+                               name="CsvDelimiter" hidden="True">
+                    </td>
+                    <td>
+                        Write the CSV data delimiter
+                    </td>
+                </tr>
+
             </table>
         </div>
     </div>
@@ -105,6 +116,7 @@
             </ul>
         }
     </div>
+
 
 </div>
 
@@ -131,6 +143,10 @@
                 return false;
             }
             Parameters.push("Extention:" + file.extension);
+
+
+            alert(document.getElementById('CsvDelimiter').value);
+            Parameters.push("CsvDelimiter:" + document.getElementById('CsvDelimiter').value);
         }
     }
 
@@ -171,8 +187,6 @@
 
         $.post('@Url.Action("SelectFileFromServerProcess", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })', { fileName: value }, function (response)
         {
-
-
             $('.uploadWizardStep_Error').empty();
             $('#fileNameDiv').text(value);
         })
