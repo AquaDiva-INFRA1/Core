@@ -17,6 +17,7 @@
         <label>
             <input type="checkbox" onclick="noConceptFound(this, '@category');"/>
             No suitable @category found.
+            <div class="feedbackContainer text-success">Thank you for your feedback!</div>
         </label>
     </div>
 }
@@ -41,7 +42,7 @@
                 category: category,
                 uri: uri,
                 userSelected: userSelected
-            });
+        });
     }
 
     $('.suggestionContainer select[data-headerid="@Model.Item1"]').each(function () {
