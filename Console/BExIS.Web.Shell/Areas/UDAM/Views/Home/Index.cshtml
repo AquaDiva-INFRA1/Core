@@ -20,8 +20,9 @@
 
 @section Information
 {
-    <p>Choose the file to process <b>Analysis</b> over.</p>
-    <p>Results from <b>Analysis</b> using <b>VrAP</b> are sent via Email.</p>
+    <p>Choose the dataset to process <b>Analysis</b> over by selecting it throught the radio button</p>
+    <p>Choose the <b>script - tool</b> that you desire to process <b>Analysis</b> with.</p>
+    <p>Results from <b>Analysis</b> will be sent via Email.</p>
 }
 
 @{
@@ -37,9 +38,59 @@
     pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
     pagerStyles |= GridPagerStyles.Numeric;
 
+    List<string> tools_list = (List<string>)ViewData["tools_list"];
+    Dictionary<string, string> script_paths = (Dictionary<string, string>)ViewData["script_paths"];
 }
 
-<!--Search bar and search results-->
+@{
+    if (tools_list.Count > 0)
+    {
+        <div class="row">
+            @foreach (string tool in tools_list)
+            {
+                <div class="col-sm-2">
+                    <div class="card" style="width: 18rem;">
+                        <!--<img class="card-img-top" src="~/Images/Home/ad.jpg" alt="VrAP Analysis Tool">-->
+                        <div class="card-body">
+                            <center>
+                                <h5 class="card-title">@tool.ToUpper()</h5>
+                                <div class="searchResultFunctionDiv">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="uploadfile(this)" id="@tool">
+                                        <span class="glyphicon glyphicon-equalizer"></span>
+                                    </button>
+                                    <!--<a class="bx bx-grid-function bx-show" title="Analyse DataSet" onclick="uploadfile(this)"></a>-->
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="row">
+            @foreach (var kvp in script_paths)
+            {
+                <div class="col-sm-2">
+                    <div class="card" style="width: 18rem;">
+                        <!--<img class="card-img-top" src="~/Images/Home/ad.jpg" alt="VrAP Analysis Tool">-->
+                        <div class="card-body">
+                            <center>
+                                <h5 class="card-title">@kvp.Value.ToUpper()</h5>
+                                <div class="searchResultFunctionDiv">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="uploadfile(this)" id="@kvp.Value.ToLower()">
+                                        <span class="glyphicon glyphicon-equalizer"></span>
+                                    </button>
+                                    <!--<a class="bx bx-grid-function bx-show" title="Analyse DataSet" onclick="uploadfile(this)"></a>-->
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
 
 <div class="searchContainer">
 
@@ -50,98 +101,81 @@
 
     <div id="searchContent">
         @(Html.Telerik().Grid<System.Data.DataRow>()
-                            .Name("resultGrid")
+                                                                            .Name("resultGrid")
 
-                                .DataBinding(dataBinding => dataBinding
-                                .Ajax()
-                                .Select("_CustomBinding", "Home", new { area = "UDAM" })
-                                )
+                                                                                .DataBinding(dataBinding => dataBinding
+                                                                                .Ajax()
+                                                                                .Select("_CustomBinding", "Home", new { area = "UDAM" })
+                                                                                )
 
-                                .EnableCustomBinding(true)
-                                .HtmlAttributes(new { @class = "result-grid" })
-                                .Columns(columns =>
-                                {
-                                    if (Model != null)
-                                    {
-                                        for (int i = 0; i < Model.Columns.Count; i++)
-                                        {
-                                            DataColumn column = Model.Columns[i];
-                                            if (DefaultHeaderList.Any(p => p.Name.Equals(column.ColumnName)))
-                                            {
-                                                string title;
-                                                if (column.Caption == "")
-                                                {
-                                                    title = column.ColumnName;
-                                                }
-                                                else
-                                                {
-                                                    title = column.Caption;
-                                                }
+                                                                                .EnableCustomBinding(true)
+                                                                                .HtmlAttributes(new { @class = "result-grid" })
+                                                                                .Columns(columns =>
+                                                                                {
 
-                                                columns.Bound(column.DataType, column.ColumnName)
-                                                    .Title(title);
-                                            }
-                                            else
-                                            {
-                                                columns.Bound(column.DataType, column.ColumnName).Hidden()
-                                                       .Title(column.Caption);
+                                                                                    if (Model != null)
+                                                                                    {
+                                                                                        if (@Model.Columns.Count > 0)
+                                                                                        {
+                                                                                    //Additional column with the "View Details"-Button
+                                                                                    columns.Bound("").Width(50).ClientTemplate(
+                                                                                                            "<center>" +
+                                                                                                            "<input id='checkbox_for_analysis' type='radio'  name='checkbox_for_analysis' " +
+                                                                                                            "value= '<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class='chk' />" +
+                                                                                                            "</center>"
+                                                                                                            ).Groupable(false)
+                                                                                                                .Sortable(false)
+                                                                                                                .Filterable(false);
 
-                                            }
-                                        }
-                                    }
+                                                                                        }
+                                                                                    }
 
-                                    if (Model != null)
-                                    {
-                                        if (@Model.Columns.Count > 0)
-                                        {
-                                            //Additional column with the "View Details"-Button
-                                            columns.Bound("").Width(80).ClientTemplate(
-                                                    "<div class='searchResultFunctionDiv'>" +
-                                                    "<a id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class = 'bx bx-grid-function bx-show' title = 'Analyse DataSet' " +
-                                                    "onclick='uploadfile(this)'>  </a>" +
-                                                    "</div>"
-                                                    ).Groupable(false)
-                                                        .Sortable(false)
-                                                        .Filterable(false);
+                                                                                    if (Model != null)
+                                                                                    {
+                                                                                        for (int i = 0; i < Model.Columns.Count; i++)
+                                                                                        {
+                                                                                            DataColumn column = Model.Columns[i];
+                                                                                            if (DefaultHeaderList.Any(p => p.Name.Equals(column.ColumnName)))
+                                                                                            {
+                                                                                                string title;
+                                                                                                if (column.Caption == "")
+                                                                                                {
+                                                                                                    title = column.ColumnName;
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    title = column.Caption;
+                                                                                                }
 
-                                        }
-                                    }
+                                                                                                columns.Bound(column.DataType, column.ColumnName)
+                                                                                                    .Title(title);
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                columns.Bound(column.DataType, column.ColumnName).Hidden()
+                                                                                                       .Title(column.Caption);
 
-                                })
+                                                                                            }
+                                                                                        }
+                                                                                    }
 
-                                .ClientEvents(events => events
-                                            .OnRowDataBound("resultGrid_OnRowDataBound")
-                                            .OnDataBound("onDataBound")
-                                            .OnColumnShow("resultGrid_OnColumnChanged")
-                                            .OnColumnHide("resultGrid_OnColumnChanged")
+                                                                                })
 
-                                            )
-                                .Sortable()
-                                .Pageable(paging => paging.Style(pagerStyles))
-                                .ColumnContextMenu()
+                                                                                .ClientEvents(events => events
+                                                                                            .OnRowDataBound("resultGrid_OnRowDataBound")
+                                                                                            .OnDataBound("onDataBound")
+                                                                                            .OnColumnShow("resultGrid_OnColumnChanged")
+                                                                                            .OnColumnHide("resultGrid_OnColumnChanged")
+
+                                                                                            )
+                                                                                .Sortable()
+                                                                                .Pageable(paging => paging.Style(pagerStyles))
+                                                                                .ColumnContextMenu()
 
 
         )
     </div>
 </div>
-
-
-<div class="dropdown">
-    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        Dropdown
-        <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li><a href="#">Action</a></li>
-        <li><a href="#">Another action</a></li>
-        <li><a href="#">Something else here</a></li>
-        <li role="separator" class="divider"></li>
-        <li><a href="#">Separated link</a></li>
-    </ul>
-</div>
-
-
-
 
 
 
@@ -183,33 +217,47 @@
 
     function uploadfile(e) {
 
-        document.getElementById("spinner_loader").removeAttribute("hidden"); 
-        document.getElementById("alerts").removeAttribute("style");
-        document.getElementById("alerts").removeAttribute("hidden");
-        document.getElementById("content_alert").innerHTML = "processing your request ... please wait depending on the size of the file !"; 
-
-        //checked
-        var id = e.getAttribute("id");
-        
-        var data = {
-            id: id
-        }
-        $.ajax({
-            url: '/UDAM/Home/check_file_extension_to_analyse',
-            type: 'POST',
-            data: JSON.stringify(data),
-            dataType: 'json',
-            contentType: 'application/json; charset=utf-8',
-            complete: function (res_check_file_extension_to_analyse) {
-                document.getElementById("spinner_loader").setAttribute("hidden", true);
-                document.getElementById("content_alert").innerHTML = res_check_file_extension_to_analyse.responseText; 
-                $("#alerts").delay(3500).hide(500);
-                //alert(res_check_file_extension_to_analyse.responseText);
-
-            }
+        var val = [];
+        $('.chk:checked').each(function (i) {
+            val[i] = $(this).val();
         });
-    }
 
+        if (val.length == 0) {
+            alert("please check a dataset first");
+        }
+        else {
+            document.getElementById("spinner_loader").removeAttribute("hidden");
+            document.getElementById("alerts").removeAttribute("style");
+            document.getElementById("alerts").removeAttribute("hidden");
+            document.getElementById("content_alert").innerHTML = "processing your request ... please wait depending on the size of the file !";
+
+            var id_tool = e.getAttribute("id");
+
+            var data = {
+                ids: JSON.stringify(val),
+                id_tool: id_tool
+            }
+
+            $.ajax({
+                url: '/UDAM/Home/check_file_extension_to_analyse',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                complete: function (res_check_file_extension_to_analyse) {
+                    document.getElementById("spinner_loader").setAttribute("hidden", true);
+                    document.getElementById("content_alert").innerHTML = res_check_file_extension_to_analyse.responseText;
+                    $("#alerts").delay(3500).hide(500);
+
+                    $('.chk:checked').each(function (i, item) {
+                        $(item).attr('checked', !$(item).is(':checked'));
+                    });
+                }
+            });
+
+        }
+
+    }
 
     function onDataBound() {
         resetAllTelerikIconTitles();
