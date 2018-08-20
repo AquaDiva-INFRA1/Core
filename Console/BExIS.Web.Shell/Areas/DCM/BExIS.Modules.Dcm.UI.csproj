@@ -593,7 +593,7 @@
       <Name>BExIS.IO.Transform.Validation</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\IO\BExIS.IO\BExIS.IO.csproj">
-      <Project>{E4795F06-20C2-4C4C-A720-9A79896384DF}</Project>
+      <Project>{e4795f06-20c2-4c4c-a720-9a79896384df}</Project>
       <Name>BExIS.IO</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\UI\BExIS.UI\BExIS.UI.csproj">

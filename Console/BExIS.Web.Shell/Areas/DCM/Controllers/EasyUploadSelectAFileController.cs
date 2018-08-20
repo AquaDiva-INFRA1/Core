@@ -1,5 +1,6 @@
 ﻿using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
+using BExIS.IO;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Models;
 using System;
@@ -43,6 +44,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             model.serverFileList = GetServerFileList();
 
+            TextSeperator text_delimiter = new TextSeperator();
+            ViewData["text_delimiter"] = text_delimiter;
+
             return PartialView(model);
         }
 
@@ -63,14 +67,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             if (TaskManager != null)
             {
                 // is path of FileStream exist
-                if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.FILEPATH))
+                if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.FILEPATH) )
                 {
                     if (IsSupportedExtention(TaskManager))
                     {
                         try
                         {
                             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
-
+                            if (filePath.ToLower().Contains(".csv") ){
+                                string delimiter = TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString();
+                            }
                             //TaskManager.AddToBus(EasyUploadTaskManager.IS_TEMPLATE, "false");
 
                             TaskManager.Current().SetValid(true);
@@ -78,6 +84,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
                         catch
                         {
+                            if (TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString().ToLower().Contains(".csv")){
+                                model.ErrorList.Add(new Error(ErrorType.Other, "No delimiter character for the csv file is typed."));
+                            }
                             model.ErrorList.Add(new Error(ErrorType.Other, "Cannot access FileStream on server."));
                         }
                     }
@@ -91,6 +100,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 else
                 {
                     model.ErrorList.Add(new Error(ErrorType.Other, "No FileStream selected or submitted."));
+                    
                 }
 
                 if (TaskManager.Current().IsValid())
@@ -109,6 +119,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             return PartialView(model);
         }
         
+        public void AddDelimiterToBus(string delimiter)
+        {
+            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+            TaskManager.AddToBus(EasyUploadTaskManager.CSV_DELIMITER.ToString(), delimiter);
+        }
 
         #region private methods
 
