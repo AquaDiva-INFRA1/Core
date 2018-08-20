@@ -48,6 +48,10 @@
         float: right;
     }
 
+    .feedbackContainer{
+        display: none;
+    }
+
     /*Tooltip-css from https://www.w3schools.com/howto/howto_css_tooltip.asp*/
     /* Tooltip container */
     .tooltipAD {
@@ -411,6 +415,8 @@
             },
             function (res) {
                 //Maybe display a "Thank you for your feedback" message here?
+                if (cb.checked)
+                    $(cb).siblings().filter('.feedbackContainer').show();
             }
         );
         //Dis-/Enable the dropdown
@@ -419,6 +425,7 @@
             dropdown.attr('disabled', 'disabled');
         } else {
             dropdown.removeAttr('disabled');
+            $(cb).siblings().filter('.feedbackContainer').hide();
         }
     }
 
