@@ -108,6 +108,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             return PartialView(model);
         }
+        
 
         #region private methods
 
