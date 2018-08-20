@@ -7,7 +7,7 @@
     //For each category, create a separate dropdown
     <div class="suggestionContainer">
         <label for="@category annotation">@category</label>
-        <select data-headerid="@Model.Item1" name="@category annotation" onchange="mappingSelected(this)">
+        <select data-headerid="@Model.Item1" name="@category annotation" onchange="mappingSelected(this)" onfocus="deselect(this)" onblur="reselect(this)">
             @foreach(BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel suggestion in suggestionDictionary[category])
             {
                 //For each suggestion create an option
