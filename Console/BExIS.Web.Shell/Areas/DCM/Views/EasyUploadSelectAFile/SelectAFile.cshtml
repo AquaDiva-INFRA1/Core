@@ -5,9 +5,10 @@
 @using BExIS.Modules.Dcm.UI.Models;
 @using BExIS.IO;
 
+
 @{
 
-HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
+    HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
     int int_MaxRequestLength = section.MaxRequestLength;
     int mbMax = int_MaxRequestLength / 1024;
 
@@ -24,6 +25,8 @@ HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSectio
             fileExtListAsString = s;
         }
     }
+
+    string displayCsvDelimiterInput = Model.SelectedFileName.ToLower().EndsWith(".csv") ? "block" : "none";
 }
 
 <div id="Step1" class="uploadWizardStep">
@@ -52,19 +55,19 @@ HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSectio
 
                     <td>
                         @(Html.Telerik().Upload()
-                                    .Name("SelectFileUploader")
-                                    .Multiple(false)
-                                    .ShowFileList(false)
-                                    .HtmlAttributes(new { title = "Browse" })
-                                    .ClientEvents(events =>
-                                        events.OnSelect("SelectFileProcess_OnSelect")
-                                                .OnRemove("SelectFileProcess_OnRemove")
-                                                .OnSuccess("SelectFileProcess_OnSuccess")
+                .Name("SelectFileUploader")
+                .Multiple(false)
+                .ShowFileList(false)
+                .HtmlAttributes(new { title = "Browse" })
+                .ClientEvents(events =>
+                    events.OnSelect("SelectFileProcess_OnSelect")
+                            .OnRemove("SelectFileProcess_OnRemove")
+                            .OnSuccess("SelectFileProcess_OnSuccess")
 
-                                    )
-                                    .Async(async => async
-                                        .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName, new { area = "DCM" })
-                                        .AutoUpload(true))
+                )
+                .Async(async => async
+                    .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName, new { area = "DCM" })
+                    .AutoUpload(true))
 
                         )
                     </td>
@@ -77,10 +80,10 @@ HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSectio
 
                     <td>
                         @(Html.Telerik().DropDownList()
-                                        .Placeholder("Select, please")
-                                        .Name("SelectedServerFileName")
-                                        .BindTo(new SelectList(Model.serverFileList))
-                                        .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
+                    .Placeholder("Select, please")
+                    .Name("SelectedServerFileName")
+                    .BindTo(new SelectList(Model.serverFileList))
+                    .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
 
                         @*@Html.DropDownListFor(m => m.SelectedServerFileName, new SelectList(Model.serverFileList), "Select")*@@*, new { disabled = "disabled" })*@
                     </td>
@@ -90,8 +93,8 @@ HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSectio
                 </tr>
 
             </table>
-            <div id="CsvDelimiter" hidden="true">
-                <input type="text" class="form-control" placeholder="CSV file delimiter"
+            <div id="CsvDelimiter" style="display: @displayCsvDelimiterInput">
+                <input type="text" class="form-control" placeholder="CSV file delimiter" value="@Model.csvDelimiter"
                        aria-describedby="sizing-addon1" id="csv_delimiter_text_box" onchange="selectedDelimiter(this)">
             </div>
         </div>
@@ -99,8 +102,9 @@ HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSectio
 
     <div class="uploadWizardStep_Success stepper">
         <div id="fileNameDiv">
-            @if (Model.SelectedFileName != "")
-            {@Model.SelectedFileName}
+            <!--Display the filename if it's not empty and there are no errors (because of overlapping)-->
+            @if(Model.SelectedFileName != "" && (Model.ErrorList == null || !Model.ErrorList.Any()) )
+                {@Model.SelectedFileName}
     </div>
 </div>
 
@@ -142,10 +146,10 @@ HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSectio
                 return false;
             }
             if (file.extension == ".csv") {
-                document.getElementById("CsvDelimiter").removeAttribute("hidden");
+                $('#CsvDelimiter').show();
             }
             else {
-                document.getElementById("CsvDelimiter").setAttribute("hidden", true);
+                $('#CsvDelimiter').hide();
             }
             Parameters.push("Extention:" + file.extension);
         }
@@ -184,10 +188,10 @@ HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSectio
     {
         var value = $(this).val();
         if (value.indexOf(".csv") > 0) {
-            document.getElementById("CsvDelimiter").removeAttribute("hidden");
+            $('#CsvDelimiter').show();
         }
         else {
-            document.getElementById("CsvDelimiter").setAttribute("hidden", true);
+            $('#CsvDelimiter').hide();
         }
 
         $.post('@Url.Action("SelectFileFromServerProcess", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })',{ fileName: value }, function (response)

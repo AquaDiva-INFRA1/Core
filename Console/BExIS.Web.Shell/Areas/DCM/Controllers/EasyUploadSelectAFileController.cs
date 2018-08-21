@@ -36,6 +36,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 model.SelectedFileName = TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString();
             }
 
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.CSV_DELIMITER))
+            {
+                model.csvDelimiter = TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString();
+            }
+
             //get datastuctureType
             model.SupportedFileExtentions = supportedExtensions;
 
@@ -101,6 +106,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     {
                         model.ErrorList.Add(new Error(ErrorType.Other, "File is not supported."));
                     }
+                    model.SelectedFileName = TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString();
                 }
                 else
                 {
@@ -116,6 +122,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     ActionInfo actionInfo = TaskManager.Current().GetActionInfo;
                     return RedirectToAction(actionInfo.ActionName, actionInfo.ControllerName, new RouteValueDictionary { { "area", actionInfo.AreaName }, { "index", TaskManager.GetCurrentStepInfoIndex() } });
                 }
+            }
+
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.CSV_DELIMITER))
+            {
+                model.csvDelimiter = TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString();
             }
 
             model.serverFileList = GetServerFileList();
