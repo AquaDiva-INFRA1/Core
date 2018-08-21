@@ -66,7 +66,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager != null)
             {
-                // is path of FileStream exist
+                // if path of FileStream exists
                 if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.FILEPATH) )
                 {
                     if (IsSupportedExtention(TaskManager))
@@ -75,18 +75,25 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         {
                             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
                             if (filePath.ToLower().Contains(".csv") ){
-                                string delimiter = TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString();
+                                if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.CSV_DELIMITER))
+                                {
+                                    //No delimiter was entered
+                                    model.ErrorList.Add(new Error(ErrorType.Other, "Please enter a delimiter character for the csv file."));
+                                }
+                                else
+                                {
+                                    TaskManager.Current().SetValid(true);
+                                }
+                            }
+                            else
+                            {
+                                //Not a csv so we don't need a delimiter
+                                TaskManager.Current().SetValid(true);
                             }
                             //TaskManager.AddToBus(EasyUploadTaskManager.IS_TEMPLATE, "false");
-
-                            TaskManager.Current().SetValid(true);
-
                         }
                         catch
                         {
-                            if (TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString().ToLower().Contains(".csv")){
-                                model.ErrorList.Add(new Error(ErrorType.Other, "No delimiter character for the csv file is typed."));
-                            }
                             model.ErrorList.Add(new Error(ErrorType.Other, "Cannot access FileStream on server."));
                         }
                     }
@@ -94,8 +101,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     {
                         model.ErrorList.Add(new Error(ErrorType.Other, "File is not supported."));
                     }
-
-
                 }
                 else
                 {
