@@ -73,8 +73,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     {
                         try
                         {
-                            string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
-                            if (filePath.ToLower().Contains(".csv") ){
+                            string extension = TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString();
+                            if (extension.ToLower().Equals(".csv")){
                                 if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.CSV_DELIMITER))
                                 {
                                     //No delimiter was entered
