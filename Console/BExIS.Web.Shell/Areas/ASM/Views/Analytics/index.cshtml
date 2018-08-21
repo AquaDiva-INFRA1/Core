@@ -2,6 +2,7 @@
 @using BExIS.Modules.Asm.UI.Controllers;
 @using BExIS.Modules.Asm.UI.Models;
 @using Telerik.Web.Mvc.UI;
+@using BExIS.Modules.Rpm.UI.Models;
 
 <header>
     <script type="text/javascript" src="/Scripts/trunk8.js"></script>
@@ -72,8 +73,8 @@
         </thead>
         <tbody>
             <tr>
-                <td>@datacontaineranalytics.in_use_var_temps</td>
-                <td>@datacontaineranalytics.not_used_var_temps</td>
+                <td onclick="show_details_DataAttributeStruct(@datacontaineranalytics.DataAttributeStruct_list_in_use)">@datacontaineranalytics.DataAttributeStruct_list_in_use.Count</td>
+                <td onclick="show_details_DataAttributeStruct(@datacontaineranalytics.DataAttributeStruct_list_non_use)">@datacontaineranalytics.DataAttributeStruct_list_non_use.Count</td>
             </tr>
         </tbody>
     </table>
@@ -88,8 +89,10 @@
         </thead>
         <tbody>
             <tr>
-                <td>@datacontaineranalytics.in_use_unit</td>
-                <td>@datacontaineranalytics.not_used_unit</td>
+                <!--
+    <td onclick="show_details(@datacontaineranalytics.EditUnitModel_list_in_use)">@datacontaineranalytics.EditUnitModel_list_in_use.Count</td>
+    <td onclick="show_details(@datacontaineranalytics.EditUnitModel_list_non_use)">@datacontaineranalytics.EditUnitModel_list_non_use.Count</td>
+        -->
             </tr>
 
         </tbody>
@@ -105,8 +108,10 @@
         </thead>
         <tbody>
             <tr>
-                <td>@datacontaineranalytics.in_use_DataType</td>
-                <td>@datacontaineranalytics.not_used_DataType</td>
+                <!--
+    <td onclick="show_details(@datacontaineranalytics.DataType_in_use)">@datacontaineranalytics.DataType_in_use.Count</td>
+    <td onclick="show_details(@datacontaineranalytics.DataType_non_use)">@datacontaineranalytics.DataType_non_use.Count</td>
+    -->
             </tr>
 
         </tbody>
@@ -241,6 +246,42 @@
 
 </div>
 
+<div>
+    @(Html.Telerik().Grid(datacontaineranalytics.DataAttributeStruct_list_non_use)
+                    .Name("bx-rpm-attributeGrid")
+                    .Sortable()
+                    .Filterable()
+                    .Columns(columns =>
+                        {
+                            columns.Bound(c => c.Id)
+                            .Width(100);
+                            columns.Bound(c => c.Name);
+                            columns.Bound(c => c.ShortName);
+                            columns.Bound(c => c.Unit)
+                                .Title("Unit");
+                            columns.Bound(c => c.DataType)
+                                .Title("Data Type");
+                            columns.Template(
+                                @<text>
+                                    @if (!String.IsNullOrEmpty(item.FormalDescriptions))
+                                                {
+                                                    temp = item.FormalDescriptions.Split('.');
+                                                    foreach (string s in temp)
+                                                    {
+                                                        if (!String.IsNullOrEmpty(s))
+                                                        {
+                                                <span>@s.</span><br />
+                                                        }
+                                                    }
+                                                }
+                                </text>
+                                        )
+                                        .Title("Constraints");
+                                    columns.Bound(c => c.Description);
+                            }).ClientEvents(events => events.OnDataBound("onDataBound"))
+    )
+</div>
+
 <script type="text/javascript">
 
     function download() {
@@ -260,5 +301,6 @@
 
 			}
 		})
-	}
+    }
+    
 </script>
