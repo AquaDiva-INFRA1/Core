@@ -5,7 +5,99 @@
 @using BExIS.Dlm.Entities.DataStructure;
 @using BExIS.Web.Shell.Areas.DCM.Helpers;
 
+<style>
+    .ontologyMapping select {
+        width: 50%
+    }
+    /*Overwriting the css of the wizard*/
+    #Step5 .uploadWizardStep_Main {
+        width: 90%
+    }
 
+    /*Borders to visually separate the rows of the table*/
+    #verificationTable {
+        border-collapse: collapse
+    }
+
+    #verificationTable tr {
+        border: solid;
+        border-width: 1px 0;
+    }
+
+    #verificationTable tr:first-child {
+        border-top: none;
+    }
+
+    #verificationTable tr:last-child {
+        border-bottom: none;
+    }
+
+    /*Annotation Suggestion styling*/
+    .suggestionContainer {
+        display: block;
+        /*border: 1px dashed black;*/
+        overflow: hidden;
+    }
+
+    .suggestionContainer label {
+        float: left;
+        clear: left;
+    }
+
+    .suggestionContainer select {
+        float: right;
+    }
+
+    .feedbackContainer{
+        display: none;
+    }
+
+    /*Tooltip-css from https://www.w3schools.com/howto/howto_css_tooltip.asp*/
+    /* Tooltip container */
+    .tooltipAD {
+        position: relative;
+        display: inline-block;
+        border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+    }
+
+    /* Tooltip text */
+    .tooltipAD .tooltiptextAD {
+        visibility: hidden;
+        width: 250px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        padding: 5px 0;
+        border-radius: 6px;
+        /* Position the tooltip text */
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -125px;
+        /* Fade in tooltip */
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+        /* Tooltip arrow */
+        .tooltipAD .tooltiptextAD::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltipAD:hover .tooltiptextAD {
+        visibility: visible;
+        opacity: 1;
+    } 
+</style>
 
 <div id="Step5" class="uploadWizardStep">
 
@@ -17,21 +109,30 @@
         <div class="uploadWizardStep_Description stepper">
         </div>
 
-        <div class="uploadWizardStep_Content stepper" style="height: inherit; width: 800px;">
-            <table>
+        <div class="uploadWizardStep_Content stepper" style="height: inherit;">
+            <table id="verificationTable">
                 <thead>
                     <tr>
                         <th>Variable name</th>
                         <th>Unit</th>
                         <th>Datatype</th>
                         <th>Datatype description</th>
+                        <th>
+                            Ontology mapping 
+                            <div class="tooltipAD">
+                                <i class="fa fa-question-circle" aria-hidden="true"></i>
+                                <span class="tooltiptextAD">
+                                    Entity: The kind of observed object </br> Characteristic: The observed property
+                                </span>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     @for (int i = 0; i < Model.HeaderFields.Length; i++)
                     {
-                        <tr>
-                            <td varName="@Html.Name(Model.HeaderFields[i])" index=@i>
+                        <tr data-index=@i>
+                            <td>
                                 <i class="fa" aria-hidden="true" title=""></i>
 
                                 <!--Dropdown-Menu to choose a suggested Attribute from - unit and datatype stored in html-Attributes for usage in javascript-->
@@ -47,12 +148,12 @@
                                         if (@sug.show)
                                         {
                                             string selected = "";
-                                            if (Model.AssignedHeaderUnits.Count > 0)
+                                            if (Model.HeaderVariableInformation.Count > 0)
                                             {
-                                                Tuple<int, String, UnitInfo> tuple = Model.AssignedHeaderUnits.Where(t => (t.Item1 == i) &&
-                                                                                                                    (t.Item2 == sug.attributeName) &&
-                                                                                                                    (t.Item3.UnitId == sug.unitID) &&
-                                                                                                                    (t.Item3.SelectedDataTypeId == sug.dataTypeID)).FirstOrDefault();
+                                                EasyUploadVariableInformation tuple = Model.HeaderVariableInformation.Where(t => (t.headerId == i) &&
+                                                                                                                    (t.variableName == sug.attributeName) &&
+                                                                                                                    (t.unitInfo.UnitId == sug.unitID) &&
+                                                                                                                    (t.unitInfo.SelectedDataTypeId == sug.dataTypeID)).FirstOrDefault();
                                                 if (tuple != null)
                                                 {
                                                     selected = "selected";
@@ -74,9 +175,9 @@
                                     {
                                         string selected = "";
 
-                                        if (Model.AssignedHeaderUnits.Count > 0)
+                                        if (Model.HeaderVariableInformation.Count > 0)
                                         {
-                                            Tuple<int, String, UnitInfo> tuple = Model.AssignedHeaderUnits.Where(t => t.Item3.UnitId == unit.UnitId && t.Item1 == i).FirstOrDefault();
+                                            EasyUploadVariableInformation tuple = Model.HeaderVariableInformation.Where(t => t.unitInfo.UnitId == unit.UnitId && t.headerId == i).FirstOrDefault();
 
                                             if (tuple != null)
                                             {
@@ -93,16 +194,16 @@
                                 <select style="width: 80%" name="Datatype" headerfieldId="@(i)"  onfocus="deselect(this)" onblur="reselect(this)">
                                     @{
 
-                                        Tuple<int, String, UnitInfo> tupleBla = Model.AssignedHeaderUnits.Where(t => t.Item1 == i).FirstOrDefault();
+                                        EasyUploadVariableInformation tupleBla = Model.HeaderVariableInformation.Where(t => t.headerId == i).FirstOrDefault();
                                         string datatypeDescription = "";
 
-                                        if (tupleBla != null && tupleBla.Item3.UnitId >= 0)
+                                        if (tupleBla != null && tupleBla.unitInfo.UnitId >= 0)
                                         {
-                                            foreach (DataTypeInfo dataTypeInfo in ((UnitInfo)tupleBla.Item3).DataTypeInfos)
+                                            foreach (DataTypeInfo dataTypeInfo in ((UnitInfo)tupleBla.unitInfo).DataTypeInfos)
                                             {
                                                 string selected = "";
 
-                                                if (tupleBla.Item3.SelectedDataTypeId == dataTypeInfo.DataTypeId)
+                                                if (tupleBla.unitInfo.SelectedDataTypeId == dataTypeInfo.DataTypeId)
                                                 {
                                                     selected = "selected";
                                                     datatypeDescription = dataTypeInfo.Description;
@@ -113,13 +214,15 @@
                                         }
                                         else
                                         {
-                                            <option value="none" title="Please select a unit">Please select an unit</option>
+                                            <option value="none" title="Please select a unit">Please select a unit</option>
                                         }
                                     }
                                 </select>
                             </td>
                             <td class="datatypeinfo">
                                 @Html.Raw(datatypeDescription)
+                            </td>
+                            <td class="ontologyMapping">
                             </td>
                         </tr>
                     }
@@ -188,7 +291,8 @@
                     var error = response.errors[i];
                     //var VariableName = error.VariableName;
                     //var TitleCell = $('td[varName="' + VariableName + '"] > i');
-                    var TitleCell = $('td[index="' + error.Item1 + '"] > i');
+                    console.log(error);
+                    var TitleCell = $('tr[data-index="' + error.Item1 + '"] td > i');
 
                     //Show a warning sign, hide check marks if they were visible before
                     TitleCell.removeClass("fa-check");
@@ -257,7 +361,25 @@
                 $('#StepView > div').first().html(response);
             });
         });
+
+        //Get the annotation suggestions from the server
+        loadMappingSuggestions();
     });
+
+    function loadMappingSuggestions() {
+        $('#verificationTable tr').each(function (index) {
+            var headerItemIndex = $(this).data("index");
+
+            //Dirty workaround to get the value of the javascript variable into the generated URL
+            var url = '@Url.Action("GetMappingSuggestionDropdown", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" }, { "headerIndex", "-1" } })';
+            url = url.replace("-1", headerItemIndex);
+
+            //Show preloader
+            $(this).find(".ontologyMapping").preloader(12, "Loading mapping suggestions")
+            //Load and show mapping suggestion select-boxes
+            $(this).find(".ontologyMapping").load(url);
+        });
+    }
 
     function suggestionSelected(suggestionSelectObject, i) {
         //Find the selected option object
@@ -279,12 +401,37 @@
                 selectedDataTypeId: datatypeID
             }, function (response) {
                 $('#StepView > div').first().html(response);
-            });
+        });
+    }
+
+    //Sends information to the backend that the user wasn't able to find the concept he was looking for
+    function noConceptFound(cb, category) {
+        var headerfieldId = $(cb).closest('tr').data('index');
+        $.post('@Url.Action("NoConceptFound", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } } )',
+            {
+                headerfieldId: headerfieldId,
+                category: category,
+                checkboxChecked: cb.checked
+            },
+            function (res) {
+                //Maybe display a "Thank you for your feedback" message here?
+                if (cb.checked)
+                    $(cb).siblings().filter('.feedbackContainer').show();
+            }
+        );
+        //Dis-/Enable the dropdown
+        var dropdown = $(cb).closest('.suggestionContainer').find('select');
+        if (cb.checked) {
+            dropdown.attr('disabled', 'disabled');
+        } else {
+            dropdown.removeAttr('disabled');
+            $(cb).siblings().filter('.feedbackContainer').hide();
+        }
     }
 
     //Necessary to trigger onChange even when the same option is selected again
     function deselect(select) {
-        $(select).data('storedIndex', select.selectedIndex);
+    $(select).data('storedIndex', select.selectedIndex);
         select.selectedIndex = -1;
     }
 
@@ -294,5 +441,6 @@
             select.selectedIndex = $(select).data('storedIndex');
         }
     }
+
 
 </script>

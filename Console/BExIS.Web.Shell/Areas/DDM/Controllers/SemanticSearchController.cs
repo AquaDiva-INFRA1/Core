@@ -39,8 +39,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static HeaderItem idHeader;
 
         static Dictionary<String, List<OntologyMapping>> mappingDic;
+        String ADOntologyPath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
         static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "mappings.txt");
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
+        static String extendedautocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "extendedAutocompletion.txt");
+        static String standardsFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "standards.txt");
+        static String informationSeparator = "+=+=+=+";
 
 
         private void setSessions()
@@ -333,8 +337,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             mappingDic = new Dictionary<string, List<OntologyMapping>>();
             List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
 
-            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
-            ontologies.Add(new OntologyNamePair(path, "ADOntology"));
+            
+            ontologies.Add(new OntologyNamePair(ADOntologyPath, "ADOntology"));
 
             //Just for testing purposes
             StringBuilder sb = new StringBuilder();
@@ -436,7 +440,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     "{?s rdfs:subClassOf* oboe.1.2:Entity ." +
                     "?s rdfs:label ?label . }";
 
-                //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
+                //Execute the query & Insert results in Dictionary with ConceptGroup "Entity"
                 results = (SparqlResultSet)g.ExecuteQuery(queryString);
 
                 foreach (SparqlResult res in results.Results)
@@ -491,6 +495,45 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 }
                 #endregion
 
+                #region Standards
+                //Grab all subclasses (transitively) of oboe-core:Entity
+                queryString.CommandText =
+                    "SELECT DISTINCT ?s ?label WHERE " +
+                    "{?s rdfs:subClassOf* oboe.1.2:Standard ." +
+                    "?s rdfs:label ?label . }";
+
+                //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
+                results = (SparqlResultSet)g.ExecuteQuery(queryString);
+
+                List<String> standards = new List<string>();
+                foreach (SparqlResult res in results.Results)
+                {
+                    //Process the language tags - for now, just throw them away
+                    String s = res["label"].ToString();
+
+                    if (s.Contains("^^"))
+                    {
+                        s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
+                    }
+                    if (s.Contains("@"))
+                    {
+                        s = s.Split('@')[0];
+                    }
+
+                    standards.Add(s + informationSeparator + res["s"].ToString());
+                }
+                #region Store standards in file
+                using (StreamWriter writer = new StreamWriter(standardsFilePath, false))
+                {
+                    writer.WriteLine(informationSeparator);
+                    foreach (String standard in standards)
+                    {
+                       writer.WriteLine(standard);
+                    }
+                }
+                #endregion
+                #endregion
+
                 #region Store dictionary in file
                 String serializedDic = JsonConvert.SerializeObject(mappingDic, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings
                 {
@@ -507,11 +550,35 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     foreach (KeyValuePair<String, List<OntologyMapping>> kvp in mappingDic)
                     {
                         if (kvp.Value.Count >= 1)
+                        {
                             writer.WriteLine(kvp.Value.ElementAt(0).getDisplayName());
+                        }
+                            
                     }
                 }
 
                 #endregion
+
+                #region Store extended autocompletion terms in file
+                using (StreamWriter writer = new StreamWriter(extendedautocompletionFilePath, false))
+                {
+                    writer.WriteLine(informationSeparator);
+                    foreach (KeyValuePair<String, List<OntologyMapping>> kvp in mappingDic)
+                    {
+                        foreach (OntologyMapping map in kvp.Value)
+                        {
+                            StringBuilder outputBuilder = new StringBuilder();
+                            outputBuilder.Append(map.getDisplayName());
+                            outputBuilder.Append(informationSeparator);
+                            outputBuilder.Append(map.getMappedConceptUri());
+                            outputBuilder.Append(informationSeparator);
+                            outputBuilder.Append(map.getMappedConceptGroup());
+                            writer.WriteLine(outputBuilder.ToSafeString());
+                        }
+                    }
+                }
+                #endregion
+
             }
 
             return RedirectToAction("Index");
@@ -871,6 +938,67 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             Session[key] = value;
 
             return this.Json(new { success = true });
+        }
+
+        //Takes a JSON-Serialization of a List<String> of URIs and find the labels of these URIs in the AD-ontology
+        //Result contains null entries for whitespace or null string inputs
+        public ContentResult FindOntologyLabels(string serializedURIList)
+        {
+            List<String> uriList = JsonConvert.DeserializeObject<List<String>>(serializedURIList);
+            List<String> labelList = new List<string>();
+            //Load the ontology as a graph
+            IGraph g = new Graph();
+            g.LoadFromFile(ADOntologyPath);
+            //Create a new queryString
+            SparqlParameterizedString queryString = new SparqlParameterizedString();
+            //Add some important namespaces
+            queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
+            queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+            String commandTextTemplate = "SELECT ?label WHERE {{<{0}> rdfs:label ?label}}";
+
+            foreach (String uri in uriList)
+            {
+                if (String.IsNullOrWhiteSpace(uri))
+                {
+                    labelList.Add(null);
+                }
+                else
+                {
+                    //Add current uri to CommandText
+                    queryString.CommandText = String.Format(commandTextTemplate, uri);
+
+                    //Execute the query
+                    SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+
+                    string labelOutput = "";
+                    foreach (SparqlResult res in results.Results)
+                    {
+                        String s = res["label"].ToString();
+
+                        //Remove the ^^xsd:String
+                        if (s.Contains("^^"))
+                        {
+                            s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
+                        }
+
+                        if (labelOutput.Equals(""))
+                        {
+                            labelOutput += s;
+                        }
+                        else
+                        {
+                            labelOutput += " / " + s;
+                        }
+                    }
+                    if (labelOutput.Equals(""))
+                        labelOutput = "No label found!";
+
+                    labelList.Add(labelOutput);
+                }
+            }
+            ContentResult result = new ContentResult();
+            result.Content = JsonConvert.SerializeObject(labelList);
+            return result;
         }
     }
 }

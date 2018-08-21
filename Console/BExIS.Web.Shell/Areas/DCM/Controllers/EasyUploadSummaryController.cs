@@ -10,6 +10,7 @@ using BExIS.IO.Transform.Input;
 using BExIS.IO.Transform.Validation.DSValidation;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.IO.Transform.Validation.ValueCheck;
+using BExIS.Modules.Dcm.UI.Helpers;
 using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
@@ -22,11 +23,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Xml;
 using System.Xml.Linq;
 using Vaiona.Persistence.Api;
+using Vaiona.Utils.Cfg;
 using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Modularity;
 using BExIS.Dcm.UploadWizard;
@@ -41,6 +44,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
         private static IDictionary<Guid, int> tasks = new Dictionary<Guid, int>();
+        private static String MissingConceptsLoggingPath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Logging", "MissingConcepts" + DateTime.Now.Year + "_" + DateTime.Now.Month + "_" + DateTime.Now.Day  + ".txt");
 
         [HttpGet]
         public ActionResult Summary(int index)
@@ -323,9 +327,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     XmlElement orderElement = xmldoc.CreateElement("order");
 
 
-                    List<Tuple<int, string, UnitInfo>> MappedHeaders = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                    List<EasyUploadVariableInformation> MappedHeaders = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
                     //Sorting necessary to prevent problems when inserting the tuples
-                    MappedHeaders.Sort((head1, head2) => head1.Item1.CompareTo(head2.Item1));
+                    MappedHeaders.Sort((head1, head2) => head1.headerId.CompareTo(head2.headerId));
                     List<VariableIdentifier> identifiers = new List<VariableIdentifier>();
 
                     var dataTypeRepo = unitOfWork.GetReadOnlyRepository<DataType>();
@@ -334,16 +338,19 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     List<DataAttribute> allDataAttributes = dataAttributeRepo.Get().ToList();
 
-                    foreach (Tuple<int, string, UnitInfo> Entry in MappedHeaders)
+                    //CreatedVariables: <List<Tuple<headerId, Variable>>
+                    List<Tuple<int, Variable>> createdVariables = new List<Tuple<int, Variable>>();
+
+                    foreach (EasyUploadVariableInformation Entry in MappedHeaders)
                     {
                         int i = MappedHeaders.IndexOf(Entry);
 
-                        DataType dataType = dataTypeRepo.Get(Entry.Item3.SelectedDataTypeId);
-                        Unit CurrentSelectedUnit = unitRepo.Get(Entry.Item3.UnitId);
+                        DataType dataType = dataTypeRepo.Get(Entry.unitInfo.SelectedDataTypeId);
+                        Unit CurrentSelectedUnit = unitRepo.Get(Entry.unitInfo.UnitId);
 
                         DataAttribute CurrentDataAttribute = new DataAttribute();
                         //If possible, map the chosen variable name, unit and datatype to an existing DataAttribute (Exact match)
-                        DataAttribute existingDataAttribute = allDataAttributes.Where(da => da.Name.ToLower().Equals(TrimAndLimitString(Entry.Item2).ToLower()) &&
+                        DataAttribute existingDataAttribute = allDataAttributes.Where(da => da.Name.ToLower().Equals(TrimAndLimitString(Entry.variableName).ToLower()) &&
                                                                                             da.DataType.Id == dataType.Id &&
                                                                                             da.Unit.Id == CurrentSelectedUnit.Id).FirstOrDefault();
                         if (existingDataAttribute != null)
@@ -353,10 +360,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         else
                         {
                             //No matching DataAttribute => Create a new one
-                            CurrentDataAttribute = dam.CreateDataAttribute(TrimAndLimitString(Entry.Item2), Entry.Item2, "", false, false, "", MeasurementScale.Categorial, DataContainerType.ReferenceType, "", dataType, CurrentSelectedUnit, null, null, null, null, null, null);
+                            CurrentDataAttribute = dam.CreateDataAttribute(TrimAndLimitString(Entry.variableName), Entry.variableName, "", false, false, "", MeasurementScale.Categorial, DataContainerType.ReferenceType, "", dataType, CurrentSelectedUnit, null, null, null, null, null, null);
                         }
 
-                        Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, Entry.Item2, "", "", "");
+                        Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, Entry.variableName, "", "", "");
+                        createdVariables.Add(Tuple.Create(Entry.headerId, newVariable));
                         VariableIdentifier vi = new VariableIdentifier
                         {
                             name = newVariable.Label,
@@ -380,10 +388,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     Dataset ds = null;
                     ds = dm.CreateEmptyDataset(sds, rp, metadataStructure);
-
-                    //TODO Should a template be created?
-                    /*ExcelTemplateProvider etp = new ExcelTemplateProvider();
-                    etp.CreateTemplate(sds);*/
 
                     long datasetId = ds.Id;
                     long sdsId = sds.Id;
@@ -596,6 +600,126 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     dm.CheckInDataset(ds.Id, "upload data from upload wizard", GetUsernameOrDefault());
 
+                    #region Persist annotations
+
+                    if (this.IsAccessibale("AAM", "Annotation", "CreateAnnotation"))
+                    {
+                        /* Annotations stored on the bus in form of a dictionary
+                        * Key: Tuple<headerID, category> Value: conceptURI
+                        * Category is currently only "Entity" or "Characteristic"
+                        * */
+                        Dictionary<Tuple<int, string>, Tuple<string, Boolean>> annotations = null;
+                        if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
+                        {
+                            //Get the selected annotations from the bus
+                            annotations = (Dictionary<Tuple<int, string>, Tuple<string, Boolean>>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
+                        }
+
+                        #region Handle case "No matching concept found"
+                        /*If the user stated that he didn't find an entity or characteristic, we should just set it to NULL
+                        This will create partial or empty annotations that we can easily edit when we add the terms to the ontology
+                        Also we log those occurences into a file so we'll know that terms are missing in the ontology
+                        */
+                        if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.NOCONCEPTSFOUND))
+                        {
+                            List<Tuple<int, String>> noConceptsFoundList = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
+                            foreach(Tuple<int, String> noConceptsFound in noConceptsFoundList)
+                            {
+                                annotations[noConceptsFound] = null; //Sets the Entity or Characteristic to null
+
+                                //Grab all information that we want to use for logging
+                                StringBuilder sb = new StringBuilder();
+                                DataTypeManager dtm = new DataTypeManager();
+                                sb.Append("User " + this.GetUsernameOrDefault() + " could not find " + noConceptsFound.Item2 + " for the following variable:\n");
+                                EasyUploadVariableInformation currentHeader = MappedHeaders.Where(mh => mh.headerId == noConceptsFound.Item1).FirstOrDefault();
+                                if(currentHeader != null)
+                                {
+                                    sb.Append("\tVariable Name: ");
+                                    sb.Append(currentHeader.variableName);
+                                    sb.Append("\n");
+                                    sb.Append("\tUnit: ");
+                                    sb.Append(currentHeader.unitInfo.Name);
+                                    sb.Append("\n");
+                                    sb.Append("\tDataType: ");
+                                    sb.Append(dtm.Repo.Get(currentHeader.unitInfo.SelectedDataTypeId).Name);
+                                    sb.Append("\n");
+                                    sb.Append("\n");
+                                }
+
+                                using (StreamWriter writer = new StreamWriter(MissingConceptsLoggingPath, true))
+                                {
+                                    writer.WriteLine(sb.ToString());
+                                }
+                            }
+                        }
+                        #endregion
+
+                        //First I have to build a structure that contains the Entity and the Characteristic for each headerId
+                        //So the new structure will be Dictionary<headerId, EntityCharacteristicPair>
+                        Dictionary<int, EntityCharacteristicPair> annotationsPerHeaderId = new Dictionary<int, EntityCharacteristicPair>();
+                        foreach (KeyValuePair<Tuple<int, string>, Tuple<string, Boolean>> kvp in annotations)
+                        {
+                            if(kvp.Value != null) //kvp.Value is null if the user selected "no concept found" without ever selecting an option in the first place
+                            {
+                                //If we didn't find annotations for this headerId yet, create a dummy that will be filled in the next step
+                                if (!annotationsPerHeaderId.ContainsKey(kvp.Key.Item1))
+                                {
+                                    annotationsPerHeaderId.Add(kvp.Key.Item1, new EntityCharacteristicPair());
+                                }
+                                //Now we know there's at least a dummy and we can add entity or characteristic, depending on what we currently have in our iteration
+                                if (kvp.Key.Item2 == "Entity")
+                                {
+                                    annotationsPerHeaderId[kvp.Key.Item1].mappedEntityURI = kvp.Value.Item1;
+                                }
+                                else if (kvp.Key.Item2 == "Characteristic")
+                                {
+                                    annotationsPerHeaderId[kvp.Key.Item1].mappedCharacteristicURI = kvp.Value.Item1;
+                                }
+                            }
+                        }
+
+                        //Now we can create and persist the annotation for each headerId (=Variable)
+                        foreach (KeyValuePair<int, EntityCharacteristicPair> kvp in annotationsPerHeaderId)
+                        {
+                            String entityLabel = null;
+                            String characteristicLabel = null;
+
+                            if (this.IsAccessibale("DDM", "SemanticSearch", "FindOntologyLabels"))
+                            {
+                                List<String> uris = new List<string>() { kvp.Value.mappedEntityURI, kvp.Value.mappedCharacteristicURI };
+                                ContentResult labelResult = (ContentResult)this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary()
+                                {
+                                    {"serializedURIList", JsonConvert.SerializeObject(uris) }
+                                });
+                                List<String> labels = JsonConvert.DeserializeObject<List<String>>(labelResult.Content);
+
+                                //We should get exactly two labels, one for the characteristic and one for the entity
+                                if(labels.Count == 2)
+                                {
+                                    entityLabel = labels.ElementAt(0);
+                                    characteristicLabel = labels.ElementAt(1);
+                                }
+                                else {
+                                    throw new Exception("Incorrect number of labels!");
+                                }
+                            }
+
+                            var unicorn = this.Run("AAM", "Annotation", "CreateAnnotationWithoutStandard", new RouteValueDictionary()
+                            {
+                                {"DatasetId", ds.Id },
+                                {"DatasetVersionId", dm.GetDatasetLatestVersionId(ds.Id) },
+                                //CreatedVariables: <List<Tuple<headerId, Variable>>
+                                {"Variable", createdVariables.Where(v => v.Item1 == kvp.Key).FirstOrDefault().Item2 },
+                                {"Entity", kvp.Value.mappedEntityURI },
+                                {"EntityLabel", entityLabel },
+                                {"CharacteristicLabel", characteristicLabel },
+                                {"Characteristic", kvp.Value.mappedCharacteristicURI }
+                            });
+                            Debug.WriteLine(unicorn);
+                        }
+                    }
+                    #endregion
+
                     //Reindex search
                     if (this.IsAccessibale("DDM", "SearchIndex", "ReIndexSingle"))
                     {
@@ -671,8 +795,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 string[][] DeserializedJsonArray = JsonConvert.DeserializeObject<string[][]>(JsonArray);
 
                 List<Error> ErrorList = new List<Error>();
-                List<Tuple<int, string, UnitInfo>> MappedHeaders = (List<Tuple<int, string, UnitInfo>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-                Tuple<int, string, UnitInfo>[] MappedHeadersArray = MappedHeaders.ToArray();
+                List<EasyUploadVariableInformation> MappedHeaders = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                EasyUploadVariableInformation[] MappedHeadersArray = MappedHeaders.ToArray();
 
 
                 List<string> DataArea = (List<string>)TaskManager.Bus[EasyUploadTaskManager.SHEET_DATA_AREA];
@@ -695,17 +819,17 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             int SelectedX = x - (IntDataArea[1]);
                             string vv = DeserializedJsonArray[y][x];
 
-                            Tuple<int, string, UnitInfo> mappedHeader = MappedHeaders.Where(t => t.Item1 == SelectedX).FirstOrDefault();
+                            EasyUploadVariableInformation mappedHeader = MappedHeaders.Where(t => t.headerId == SelectedX).FirstOrDefault();
 
                             DataType datatype = null;
 
-                            if (mappedHeader.Item3.SelectedDataTypeId == -1)
+                            if (mappedHeader.unitInfo.SelectedDataTypeId == -1)
                             {
-                                datatype = dtm.Repo.Get(mappedHeader.Item3.DataTypeInfos.FirstOrDefault().DataTypeId);
+                                datatype = dtm.Repo.Get(mappedHeader.unitInfo.DataTypeInfos.FirstOrDefault().DataTypeId);
                             }
                             else
                             {
-                                datatype = dtm.Repo.Get(mappedHeader.Item3.SelectedDataTypeId);
+                                datatype = dtm.Repo.Get(mappedHeader.unitInfo.SelectedDataTypeId);
                             }
 
                             string datatypeName = datatype.SystemType;
@@ -717,16 +841,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             {
                                 if (vv.Contains("."))
                                 {
-                                    dtc = new DataTypeCheck(mappedHeader.Item2, datatypeName, DecimalCharacter.point);
+                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
                                 }
                                 else
                                 {
-                                    dtc = new DataTypeCheck(mappedHeader.Item2, datatypeName, DecimalCharacter.comma);
+                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.comma);
                                 }
                             }
                             else
                             {
-                                dtc = new DataTypeCheck(mappedHeader.Item2, datatypeName, DecimalCharacter.point);
+                                dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
                             }
 
                             var ValidationResult = dtc.Execute(vv, y);

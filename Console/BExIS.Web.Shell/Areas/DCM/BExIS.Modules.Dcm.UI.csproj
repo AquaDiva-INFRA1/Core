@@ -55,6 +55,9 @@
       <HintPath>..\..\..\..\packages\EPPlus.4.1.0\lib\net40\EPPlus.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="F23.StringSimilarity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\F23.StringSimilarity.3.0.0\lib\netstandard1.0\F23.StringSimilarity.dll</HintPath>
+    </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\..\..\..\Libraries\Ionic.Zip.dll</HintPath>
     </Reference>
@@ -81,12 +84,18 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+    </Reference>
+	<Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
@@ -193,6 +202,10 @@
     <Compile Include="Helpers\DcmSeedDataGenerator.cs" />
     <Compile Include="Helpers\EasyUploadSuggestion.cs" />
     <Compile Include="Helpers\FormHelper.cs" />
+    <Compile Include="Helpers\JaroWinklerDistance.cs" />
+    <Compile Include="Models\EasyUploadVariableInformation.cs" />
+    <Compile Include="Models\OntologyMappingSuggestion.cs" />
+    <Compile Include="Helpers\EntityCharacteristicPair.cs" />
     <Compile Include="Models\AbstractStepModel.cs" />
     <Compile Include="Models\ChooseDatasetViewModel.cs" />
     <Compile Include="Models\AsciiReaderEasyUpload.cs" />
@@ -470,16 +483,26 @@
     <Content Include="Dcm.Manifest.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Content\bootstrap-theme.css.map" />
     <None Include="Properties\PublishProfiles\Bpp211_dcm.pubxml" />
     <None Include="Properties\PublishProfiles\DCM.pubxml" />
     <None Include="Properties\PublishProfiles\DCM211.pubxml" />
     <None Include="Properties\PublishProfiles\DCM21105.pubxml" />
     <None Include="Properties\PublishProfiles\DCM21108.pubxml" />
     <None Include="Properties\PublishProfiles\DDM Publish.pubxml" />
+    <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Images\DCM_SelectFileStructure\left-right.png" />
     <Content Include="Images\DCM_SelectFileStructure\matrix.png" />
     <Content Include="Images\DCM_SelectFileStructure\top-down.png" />
     <Content Include="Scripts\Form.js" />
+    <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\respond.matchmedia.addListener.js" />
+    <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
     <Content Include="Views\Help\Informations.xml" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -540,6 +563,7 @@
     <Content Include="Views\EasyUploadSelectAreas\SelectAreas.cshtml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <Content Include="Views\CreateDataset\_PiPartial.cshtml" />
+    <Content Include="Views\EasyUploadVerification\_mappingSuggestionDropdowns.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

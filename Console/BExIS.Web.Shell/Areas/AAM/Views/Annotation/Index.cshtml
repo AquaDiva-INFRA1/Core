@@ -1,0 +1,43 @@
+﻿@model  List<BExIS.Modules.Aam.UI.Models.AnnotationModel>
+@using BExIS.Modules.Aam.UI.Models
+@section Information
+{
+    <p>This page shows a list of all current annotations.</p>
+}
+
+@section LeftPane{
+    <div id="main">
+        @Html.ActionLink("Update labels", "FillLabelsInAnnotationTable", "Annotation", new { @class = "bx-button action", @title = "Update labels for all annotations in the database." })
+        <table>
+            <thead>
+                <tr>
+                    <th>Dataset</th>
+                    <th>DatasetVersion</th>
+                    <th>Variable</th>
+                    <th>Entity</th>
+                    <th>Entity Label</th>
+                    <th>Characteristic</th>
+                    <th>Characteristic Label</th>
+                    <th>Standard</th>
+                    <th>Standard Label</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(AnnotationModel ann in Model)
+                {
+                <tr>
+                    <td>@ann.DatasetId</td>
+                    <td>@ann.DatasetVersionId</td>
+                    <td>@ann.VariableLabel</td>
+                    <td>@ann.Entity</td>
+                    <td>@ann.EntityLabel</td>
+                    <td>@ann.Characteristic</td>
+                    <td>@ann.CharacteristicLabel</td>
+                    <td>@ann.Standard</td>
+                    <td>@ann.StandardLabel</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
