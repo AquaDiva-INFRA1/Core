@@ -13,6 +13,7 @@ using System.Web.Routing;
 using Vaiona.Logging;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using System.Text.RegularExpressions;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
 {
@@ -43,15 +44,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             try
             {
                 string fileExt = System.IO.Path.GetExtension(filePath);
-                if ( (fileExt.ToLower().Contains("csv")) )
+                if ( (fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("txt")))
                 {
                     //fis = new FileStream(Parse_csv_to_xlsx(filePath), FileMode.Open, FileAccess.Read);
                     // generating the JSONTABLEARRAY to select areas
 
                     String[] all_lines = System.IO.File.ReadAllLines(filePath);
+
                     foreach (string line in all_lines)
                     {
-                        String[] tabs = line.Split(TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString()[0]);
+                        String[] tabs = Regex.Split(line, TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString());
                         Json_table.Add(tabs);
                     }
                     //If the active worksheet was never changed, we default to the first one
@@ -67,9 +69,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     }
 
                     //Save the worksheet uris to the model
-                    Dictionary<Uri, string> csv_dict = new Dictionary<Uri, string>();
-                    csv_dict.Add(new Uri(filePath),"csv Sheet");
-                    model.SheetUriDictionary = csv_dict;
+                    Dictionary<Uri, string> _dict = new Dictionary<Uri, string>();
+                    _dict.Add(new Uri(filePath),"Sheet");
+                    model.SheetUriDictionary = _dict;
 
                     TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, JsonConvert.SerializeObject(Json_table.ToArray()));
 
@@ -260,7 +262,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
             
             string fileExt = System.IO.Path.GetExtension(filePath);
-            if (fileExt.ToLower().Contains("csv"))
+            if ((fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("txt")))
             {
                 return Content((string)TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA], "application/json");
             }
@@ -391,11 +393,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             try
             {
                 string fileExt = System.IO.Path.GetExtension(filePath);
-                if (fileExt.ToLower().Contains("csv")  )
+                if ((fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("txt")))
                 {
-                    Dictionary<Uri, string> csv_dict = new Dictionary<Uri, string>();
-                    csv_dict.Add(new Uri(filePath), "csv Sheet");
-                    model.SheetUriDictionary = csv_dict;
+                    Dictionary<Uri, string> _dict = new Dictionary<Uri, string>();
+                    _dict.Add(new Uri(filePath), "Sheet");
+                    model.SheetUriDictionary = _dict;
                     model.activeSheetUri = filePath;
                 }
                 else
