@@ -118,52 +118,8 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     Debug.WriteLine(e.ToString());
                 }
             }
-
-            DataAttributeManagerModel dam = new DataAttributeManagerModel(false);
-            int in_use_var_temps = 0;
-            int not_used_var_temps = 0;
-            foreach (DataAttributeStruct var_temp in dam.DataAttributeStructs)
-            {
-                if (var_temp.InUse) in_use_var_temps++;
-                else not_used_var_temps++;
-            }
-
-            UnitManagerModel umm = new UnitManagerModel();
-            int in_use_unit = 0;
-            int not_used_unit = 0;
-            foreach (EditUnitModel unit in umm.editUnitModelList)
-            {
-                if (unit.inUse) in_use_unit++;
-                else not_used_unit++;
-            }
-
-            int in_use_DataType = 0;
-            int not_used_DataType = 0;
-            DataTypeManager dataTypeManager = null;
-            try
-            {
-                dataTypeManager = new DataTypeManager();
-                List<DataType> datatypeList = dataTypeManager.Repo.Get().Where(d => d.DataContainers.Count != null).ToList();
-                in_use_DataType = 0;
-                not_used_DataType = 0;
-                foreach (DataType datatype in datatypeList)
-                {
-                    if (datatype.DataContainers.Count > 0) in_use_DataType++;
-                    else not_used_DataType++;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message.ToString());
-            }
-            finally
-            {
-                dataTypeManager.Dispose();
-            }
-
-            Data_container_analytics datacontaineranalytics = new Data_container_analytics(in_use_var_temps, not_used_var_temps,
-            in_use_unit,not_used_unit,
-            in_use_DataType,not_used_DataType);
+            
+            Data_container_analytics datacontaineranalytics = new Data_container_analytics();
 
             ViewData["datacontaineranalytics"] = datacontaineranalytics;
 
@@ -229,6 +185,22 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 sb.ToString());
             
             return File(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "REPORT.csv"), "text/csv", "REPORT.csv");
+        }
+
+        public ActionResult DataAttributeStruct_list(List<DataAttributeStruct> DataAttributeStruct_)
+        {
+            ViewData["DataAttributeStruct"] = DataAttributeStruct_;
+            return PartialView();
+        }
+        public ActionResult EditUnitModel_list(List<EditUnitModel> EditUnitModel_)
+        {
+            ViewData["EditUnitModel_"] = EditUnitModel_;
+            return PartialView();
+        }
+        public ActionResult DataTypeModel_list(List<DataType> DataTypeModel_)
+        {
+            ViewData["DataTypeModel_"] = DataTypeModel_;
+            return PartialView();
         }
     }
     

@@ -18,7 +18,7 @@
             />
     -->    
     <Export tag="lunchbar" id="helpAsm" order="1"
-            title="Visualization" description="Visualization Help Manual" icon=""
+            title="Portal Statistics" description="Portal Statistics relating data attributes and semantic coverage" icon=""
             controller="Analytics" action="index"
             extends="./lunchbarRoot/help"
             />  
