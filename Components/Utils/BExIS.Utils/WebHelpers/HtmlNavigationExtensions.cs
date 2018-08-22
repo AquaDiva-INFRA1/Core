@@ -30,8 +30,17 @@ namespace BExIS.Utils.WebHelpers
                 {
                     sb.Append($"<li class='dropdown'><a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>{launchBarItem.Attribute("title").Value}<span class='caret'></span></a><ul class='dropdown-menu'>");
 
+                    var currentArea = "";
+
                     foreach (var child in launchBarItem.Elements())
                     {
+                        var area = child.Attribute("area").Value;
+                        if (currentArea != "" && area != currentArea)
+                        {
+                            sb.Append($"<li role=\"separator\"  class=\"divider\"></li>");
+                        }
+                        currentArea = area;
+
                         sb.Append($"<li><a href='");
                         if (!string.IsNullOrWhiteSpace(child.Attribute("area").Value))
                             sb.Append(@"/").Append(child.Attribute("area").Value);
