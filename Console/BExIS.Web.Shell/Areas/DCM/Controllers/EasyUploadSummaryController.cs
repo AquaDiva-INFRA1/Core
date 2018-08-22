@@ -533,9 +533,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             // this method is just for getting the datatuples and variables from the csv file within the whole workflow of EXCEL files
                             // it stores the data in the "rows" variable which is an array of Data Tuple (DataTuple[])
 
-                            if ((TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString().ToLower().Contains("csv"))  )
+                            if (  (TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString().ToLower().Contains("csv")) || 
+                                (TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString().ToLower().Contains("txt"))  )
                             {
-                                #region csv parsing to get data tuples and variables
+                                #region csv / txt parsing to get data tuples and variables
                                 AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
 
                                 afri.Seperator = TextSeperator.semicolon;// doesnt matter cauz the delimiter is already used to fill the JSONtable and to finish the upload it is using the JSON Table instead of reading the data again

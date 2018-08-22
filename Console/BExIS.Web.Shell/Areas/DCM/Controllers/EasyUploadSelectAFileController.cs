@@ -18,7 +18,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
     {
 
         private EasyUploadTaskManager TaskManager;
-        private List<String> supportedExtensions = new List<string>() { ".xlsx", ".xlsm", ".csv" };
+        private List<String> supportedExtensions = new List<string>() { ".xlsx", ".xlsm", ".csv", ".txt" };
 
         [HttpGet]
         public ActionResult SelectAFile(int index)
@@ -73,8 +73,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     {
                         try
                         {
-                            string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
-                            if (filePath.ToLower().Contains(".csv") ){
+                            string ext = TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString();
+                            if ( (ext.ToLower().Contains(".csv") ) || (ext.ToLower().Contains(".txt")) ){
                                 string delimiter = TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString();
                             }
                             //TaskManager.AddToBus(EasyUploadTaskManager.IS_TEMPLATE, "false");
@@ -84,7 +84,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
                         catch
                         {
-                            if (TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString().ToLower().Contains(".csv")){
+                            if ( (TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString().ToLower().Contains(".csv")) ||
+                                (TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString().ToLower().Contains(".csv")) ){
                                 model.ErrorList.Add(new Error(ErrorType.Other, "No delimiter character for the csv file is typed."));
                             }
                             model.ErrorList.Add(new Error(ErrorType.Other, "Cannot access FileStream on server."));
