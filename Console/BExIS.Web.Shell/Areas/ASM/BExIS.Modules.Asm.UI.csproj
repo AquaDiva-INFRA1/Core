@@ -331,7 +331,6 @@
       <DependentUpon>UploadLocalization.zh-CN.resx</DependentUpon>
     </Compile>
     <Compile Include="Controllers\AnalyticsController.cs" />
-    <Compile Include="Controllers\HelpController.cs" />
     <Compile Include="Models\Data_container_analytics.cs" />
     <Compile Include="Models\Variable_analytics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -593,12 +592,10 @@
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Views\Help\Informations.xml" />
     <Content Include="Views\Web.config">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\_ViewStart.cshtml" />
-    <Content Include="Views\Help\Index.cshtml" />
     <Content Include="Asm.Manifest.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -606,6 +603,8 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\Analytics\index.cshtml" />
+    <Content Include="Views\Analytics\DataAttributeStruct_list.cshtml" />
+    <Content Include="Views\Analytics\EditUnitModel_list.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
