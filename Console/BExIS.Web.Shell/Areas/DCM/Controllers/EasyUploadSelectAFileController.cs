@@ -18,7 +18,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
     {
 
         private EasyUploadTaskManager TaskManager;
-        private List<String> supportedExtensions = new List<string>() { ".xlsx", ".xlsm", ".csv" };
+        private List<String> supportedExtensions = new List<string>() { ".xlsx", ".xlsm", ".csv", ".txt" };
 
         [HttpGet]
         public ActionResult SelectAFile(int index)
@@ -79,7 +79,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         try
                         {
                             string extension = TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString();
-                            if (extension.ToLower().Equals(".csv")){
+                            if ((extension.ToLower().Contains(".csv")) || (extension.ToLower().Contains(".txt"))) {
                                 if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.CSV_DELIMITER))
                                 {
                                     //No delimiter was entered

@@ -26,7 +26,7 @@
         }
     }
 
-    string displayCsvDelimiterInput = Model.SelectedFileName.ToLower().EndsWith(".csv") ? "block" : "none";
+    string displayCsvDelimiterInput = (Model.SelectedFileName.ToLower().EndsWith(".csv") || Model.SelectedFileName.ToLower().EndsWith("txt")) ? "block" : "none";
 }
 
 <div id="Step1" class="uploadWizardStep">
@@ -94,8 +94,18 @@
 
             </table>
             <div id="CsvDelimiter" style="display: @displayCsvDelimiterInput">
-                <input type="text" class="form-control" placeholder="CSV file delimiter" value="@Model.csvDelimiter"
-                       aria-describedby="sizing-addon1" id="csv_delimiter_text_box" onchange="selectedDelimiter(this)">
+                <!--
+            <input type="text" class="form-control" placeholder="CSV file delimiter" value="@Model.csvDelimiter"
+                aria-describedby="sizing-addon1" id="csv_delimiter_text_box" onchange="selectedDelimiter(this)">
+                    -->
+                <select name="delimiter" size="1" id="delimiter" onchange="selectedDelimiter(this)">
+                    <option>Choose the delimiter here </option>
+                    <option value=";">semicolon   ";"</option>
+                    <option value=",">comma   ","</option>
+                    <option value=" ">space   " "</option>
+                    <option value="\t">tab   "    "</option>
+                    <option value=".">point   "."</option>
+                </select>
             </div>
         </div>
     </div>
@@ -187,7 +197,8 @@
     function SelectedServerFileName_onChange()
     {
         var value = $(this).val();
-        if (value.indexOf(".csv") > 0) {
+        if ((value.indexOf(".csv") > 0) || (value.indexOf(".txt") > 0)) {
+            //document.getElementById("CsvDelimiter").removeAttribute("hidden");
             $('#CsvDelimiter').show();
         }
         else {
@@ -202,14 +213,14 @@
     }
 
     function selectedDelimiter() {
-        delimiter = document.getElementById('csv_delimiter_text_box').value;
-
-        if (delimiter != null) {
-            if ( delimiter.length != 1 ) {
-                alert("please put the delimiter as one single character")
-                return false;
-            }
-        }
+        //delimiter = document.getElementById('csv_delimiter_text_box').value;
+        delimiter = document.getElementById("delimiter").value;
+        //if (delimiter != null) {
+        //    if ( delimiter.length != 1 ) {
+        //        alert("please put the delimiter as one single character")
+        //        return false;
+        //    }
+        //}
         $.post('@Url.Action("AddDelimiterToBus", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })',{ delimiter: delimiter }, function (response)
         {
 
