@@ -1194,7 +1194,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         }
         #endregion
         
-    }
+    
 
         //Takes a JSON-Serialization of a List<String> of URIs and find the labels of these URIs in the AD-ontology
         //Result contains null entries for whitespace or null string inputs
