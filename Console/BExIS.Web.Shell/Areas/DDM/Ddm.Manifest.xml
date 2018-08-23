@@ -32,11 +32,6 @@
             controller="SemanticSearch" action="index"
             extends="./menubarRoot/search" />
 
-    <Export tag="menubar" id="interactiveSearch" order="2"
-            title="Interactive Search" description="Based search on geo-localisation" icon=""
-            controller="interactiveSearch" action="index"
-            extends="./menubarRoot/search" />
-
     <Export tag="lunchbar" id="helpDdm" order="1"
             title="Search" description="Search Help Manual" icon=""
             controller="help" action="index"
