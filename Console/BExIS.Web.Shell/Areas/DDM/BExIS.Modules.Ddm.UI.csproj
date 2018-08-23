@@ -463,6 +463,8 @@
     <Content Include="Views\SemanticSearch\_searchBar.cshtml" />
     <Content Include="Views\SemanticSearch\_semedicoSearchContent.cshtml" />
     <Content Include="Views\SemanticSearch\_mapview.cshtml" />
+    <Content Include="Views\interactiveSearch\Index.cshtml" />
+    <Content Include="Views\interactiveSearch\table_result.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
