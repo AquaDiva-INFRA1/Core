@@ -26,11 +26,17 @@ using VDS.RDF.Query;
 using BExIS.Modules.Ddm.UI.Helpers;
 using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
+using Npgsql;
+using System.Xml;
+using System.Web.Configuration;
+using System.Configuration;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
     public class SemanticSearchController : Controller
     {
+        static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
+
         static ShowSemanticResultModel model;
         static List<HeaderItem> headerItems;
         static String semanticSearchURL = "http://localhost:2607/bexis/search/";
@@ -46,6 +52,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static String standardsFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "standards.txt");
         static String informationSeparator = "+=+=+=+";
 
+        static string userName = WebConfigurationManager.AppSettings["connectionStrings"];
 
         private void setSessions()
         {
@@ -96,7 +103,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 model.resultListComponent = semResult;
                 model.detailsComponent = null;
                 ViewData.Model = model;
-                
+
             }
 
             if (model == null || model.semanticComponent == null)
@@ -132,7 +139,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             int newSubsetSize = currentSubsetSize;
 
             string result = consumeSemedicoREST(searchTermString, newSubsetStart, newSubsetSize);
-            
+
             if (result == null)
             {
                 model.semedicoServerError = "An error occured when trying to connect to Semedico. Please try again later.";
@@ -544,7 +551,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 #endregion
 
                 #region Store autocompletion terms in file
-                
+
                 using (StreamWriter writer = new StreamWriter(autocompletionFilePath, false))
                 {
                     foreach (KeyValuePair<String, List<OntologyMapping>> kvp in mappingDic)
@@ -714,13 +721,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     if (mappingList.Count >= 1)
                     {
-                        
+
                         foreach (OntologyMapping mapping in mappingList)
                         {
                             paramBuilder.Append(mapping.getDisplayName() + "+" + mapping.getMappedConceptGroup() + "+"
                         + mapping.getMappedConceptUri() + "+" + mapping.getBaseUri());
                             paramBuilder.Append("--");
-                           
+
                         }
                     }
 
@@ -806,7 +813,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
                         dataset = datasetRepo.Get(datasetID);
                     }
-                    
+
                     if (dataset != null)
                     {
                         //Grab the Metadata
@@ -821,7 +828,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                         m.Rows.Add(row);
                     }
-                    
+
                 }
             }
             #endregion
@@ -882,7 +889,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return headerItems;
         }
-        
+
 
 
         /*
@@ -939,6 +946,255 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return this.Json(new { success = true });
         }
+
+
+
+        /*
+         * this is the Semedico API consumption for the preposed papers
+         * */
+        private String consumeSemedicoREST_v2(String query_String, int subsetStart = 1, int subsetSize = 10)
+        {
+            #region Http-Request
+            //Construct a HttpClient for the search-Server
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(semedicoSearchURL);
+            client.Timeout = TimeSpan.FromSeconds(30);
+            //Set the searchTerm as query-String
+            String param = ("?inputstring=" + query_String + "&subsetstart=" + subsetStart + "&subsetsize=" + subsetSize);
+            String output = null;
+
+            try
+            {
+                HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
+                if (response.IsSuccessStatusCode)
+                {
+                    // Get the response body. Blocking!
+                    output = response.Content.ReadAsStringAsync().Result;
+                }
+            }
+            catch (SocketException e)
+            {
+            }
+            catch (AggregateException e)
+            {
+                //Returning null if the timeout triggers
+                return null;
+            }
+
+            #endregion
+
+            return output;
+        }
+        
+        private String get_observations_contextualized_contextualizing(String id)
+        {
+            String request_string = "";
+            
+            NpgsqlCommand MyCmd = null;
+            NpgsqlConnection MyCnx = null;
+
+            MyCnx = new NpgsqlConnection(Conx);
+            MyCnx.Open();
+            string select = "SELECT * FROM \"observation_contexts_uri_label\" WHERE datasets_id=" + id;
+            MyCmd = new NpgsqlCommand(select, MyCnx);
+
+            NpgsqlDataReader dr = MyCmd.ExecuteReader();
+            int line = 0;
+            if (dr != null)
+            {
+                while (dr.Read())
+                {
+                    if (dr["contextualized_entity"] != System.DBNull.Value)
+                    {
+                        var Datasetref = dr["datasets_id"].ToSafeString();
+                        var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
+                        var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
+                        var contextualized_entity_label = (String)dr["contextualized_entity_label"].ToSafeString();
+                        var contextualizing_entity_label = (String)dr["contextualizing_entity_label"].ToSafeString();
+                        request_string = request_string + contextualizing_entity_label + " of " + contextualized_entity_label + ",";
+                        Debug.WriteLine("Row processed  number : " + line); line++;
+                        Debug.WriteLine(request_string);
+                    }
+                }
+            }
+            MyCnx.Close();
+            return request_string.Substring(0, request_string.Length - 1);
+        }
+
+        public String get_dataset_related_papers_by_ID(String id,String flag)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            /*
+            if (model.resultListComponent == null)
+            {
+                return JsonConvert.SerializeObject(null, Newtonsoft.Json.Formatting.Indented);
+            }
+            if (model.resultListComponent.searchTermString == null)
+            {
+                return JsonConvert.SerializeObject(null, Newtonsoft.Json.Formatting.Indented);
+            }
+            */
+            String Semedico_Result ="";
+            String Query_4_API;
+
+            if (id != "")
+            {
+                Query_4_API = get_observations_contextualized_contextualizing(id);
+                Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
+                Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
+                if (model == null)
+                {
+                    model = new ShowSemanticResultModel(CreateDataTable(makeHeader()));
+                }
+                if (model.resultListComponent == null)
+                {
+                    model.resultListComponent = new SemedicoResultModel();
+                    model.resultListComponent.searchTermString = Query_4_API;
+                }
+            }
+            else {
+                if (flag == "nextpage")
+                {
+                    model.resultListComponent.subsetstart = model.resultListComponent.subsetstart + 10;
+                    Semedico_Result = consumeSemedicoREST_v2(model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 10);
+                    
+                }
+                else if (flag == "prevpage")
+                {
+                    model.resultListComponent.subsetstart = model.resultListComponent.subsetstart - 10;
+                    if (model.resultListComponent.subsetstart < 0)
+                    {
+                        model.resultListComponent.subsetstart = 0;
+                    }
+                    Semedico_Result = consumeSemedicoREST_v2(model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 10);
+                }
+            }
+
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Debug.WriteLine("Execution time (millisecondes) for DDM/get_dataset_related_papers_by_ID ==> " +elapsedMs);
+            Debug.WriteLine("====> Semedico result " + Semedico_Result);
+            return Semedico_Result;
+
+        }
+
+
+        #region refresh the observation_contexts table to the observation_contexts_URI_label 
+        /*
+         * refresh the observation_contexts table to the observation_contexts_URI_label + populate the table observation_contexts_URI_label in the database
+          -- Table: observation_contexts_uri_label
+            -- DROP TABLE observation_contexts_uri_label;
+
+            CREATE TABLE observation_contexts_uri_label
+            (
+              datasets_id bigint NOT NULL,
+              version_id integer NOT NULL,
+              contextualized_entity character varying NOT NULL,
+              contextualized_entity_label character varying NOT NULL,
+              contextualizing_entity character varying NOT NULL,
+              contextualizing_entity_label character varying NOT NULL,
+              contextualized_entity_id bigint,
+              contextualizing_entity_id bigint,
+              CONSTRAINT observation_contexts_uri_label_pkey PRIMARY KEY (datasets_id, version_id, contextualized_entity, contextualizing_entity)
+            )
+            WITH (
+              OIDS=FALSE
+            );
+            ALTER TABLE observation_contexts_uri_label
+              OWNER TO postgres;
+        */
+        public void insert_into_DB_URI_Label()
+        {
+            DatasetManager dsm = new DatasetManager();
+            List<Int64>  ds_ids = dsm.GetDatasetLatestIds(true);
+            
+            //to load the graph one time and set the sparql query
+            SparqlParameterizedString queryString = new SparqlParameterizedString();
+            queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
+            queryString.Namespaces.AddNamespace("owl", new Uri("http://www.w3.org/2002/07/owl#"));
+            queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+            IGraph g = new Graph();
+            g.LoadFromFile(Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl"));
+            //end of loading the graph one time and set the sparql query
+
+            foreach (Int64 ds_id in ds_ids)
+            {
+                NpgsqlConnection MyCnx = new NpgsqlConnection(Conx);
+                MyCnx.Open();
+
+                string select = "SELECT * FROM \"observation_contexts\" WHERE datasets_id=" + ds_id;
+                NpgsqlCommand MyCmd = new NpgsqlCommand(select, MyCnx);
+
+                NpgsqlDataReader dr = MyCmd.ExecuteReader();
+                int line = 0;
+                if (dr != null)
+                {
+                    while (dr.Read())
+                    {
+                        if (dr["datasets_id"] != System.DBNull.Value)
+                        {
+                            var Datasetref = dr["datasets_id"].ToSafeString();
+                            var version_id = dr["version_id"].ToSafeString();
+                            var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
+                            var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
+                            var contextualized_entity_id = dr["contextualized_entity_id"].ToSafeString();
+                            var contextualizing_entity_id = dr["contextualizing_entity_id"].ToSafeString();
+
+                            //set the entity to search through the graph
+                            queryString.Namespaces.AddNamespace("entity", new Uri(contextualized_entity.Trim()));
+                            queryString.CommandText = "SELECT ?label WHERE" +
+                                " { " +
+                                "<" + contextualized_entity.Trim() + "> rdfs:label ?label " +
+                                "} ";
+                            // end ofthe settings
+
+                            var contextualized_entity_label = this.Get_Label_from_entity_rdf(contextualized_entity.Trim(), g, queryString);
+                            var contextualizing_entity_label = this.Get_Label_from_entity_rdf(contextualizing_entity.Trim(), g, queryString);
+
+                            if (contextualized_entity_id == "")
+                                contextualized_entity_id = "0";
+                            if (contextualizing_entity_id == "")
+                                contextualizing_entity_id = "0";
+
+                            Debug.WriteLine("Row processed  number : " + line); line++;
+
+                            string insert = "INSERT INTO observation_contexts_uri_label " +
+                                "VALUES (" + Datasetref + ", " + version_id + ",  \'" + clean_entity_URI_for_insert(contextualized_entity) + 
+                                "\' ,  \'" + contextualized_entity_label+ "\' ,  \'" + clean_entity_URI_for_insert(contextualizing_entity) + 
+                                "\' ,  \'" +contextualizing_entity_label+ "\' , " + contextualized_entity_id+ " , " + contextualizing_entity_id+ " )";
+
+                            NpgsqlConnection MyCnx2 = new NpgsqlConnection(Conx);
+                            MyCnx2.Open();
+                            NpgsqlCommand MyCmd2 = new NpgsqlCommand(insert, MyCnx2);
+                            MyCmd2.ExecuteNonQuery();
+                            MyCnx2.Close();
+                        }
+                    }
+                }
+                MyCnx.Close();
+            }
+        }
+
+        public string clean_entity_URI_for_insert(string uri)
+        {
+            return uri.Replace("'", "''");
+        }
+
+        public String Get_Label_from_entity_rdf(String entity, IGraph g, SparqlParameterizedString queryString)
+        {
+            SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+            String res = "";
+            if (results.Count != 0)
+            {
+                res = results[0]["label"].ToString().Split('^')[0];
+            }
+            if (res.Contains("@"))
+                return res.Substring(0, res.IndexOf("@"));
+            return res;
+        }
+        #endregion
+        
+    }
 
         //Takes a JSON-Serialization of a List<String> of URIs and find the labels of these URIs in the AD-ontology
         //Result contains null entries for whitespace or null string inputs
