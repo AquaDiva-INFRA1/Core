@@ -6,6 +6,7 @@ using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Services.Authorization;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
@@ -126,6 +127,7 @@ namespace BExIS.Modules.Sam.UI.Controllers
 
             // dataset id, dataset status, number of data tuples of the latest version, number of variables in the dataset's structure
             List<DatasetStatModel> datasetStat = new List<DatasetStatModel>();
+            long somme = 0;
             foreach (Dataset ds in datasets)
             {
                 long noColumns = ds.DataStructure.Self is StructuredDataStructure ? (ds.DataStructure.Self as StructuredDataStructure).Variables.Count() : 0L;
@@ -137,7 +139,13 @@ namespace BExIS.Modules.Sam.UI.Controllers
                         && ds.StateInfo?.Timestamp < DateTime.MaxValue)
                     synced = ds.StateInfo?.Timestamp >= ds.LastCheckIOTimestamp;
                 datasetStat.Add(new DatasetStatModel { Id = ds.Id, Status = ds.Status, NoOfRows = noRows, NoOfCols = noColumns, IsSynced = synced });
+                if (ds.Status == DatasetStatus.CheckedIn)
+                {
+                    somme = somme + (noRows * noRows);
+                }
             }
+            Debug.WriteLine(" Number of Data Points ==> " + somme);
+
             ViewData["DatasetIds"] = datasetIds;
             return View(datasetStat);
         }

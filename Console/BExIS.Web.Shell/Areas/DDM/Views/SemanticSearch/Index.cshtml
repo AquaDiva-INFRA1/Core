@@ -15,49 +15,28 @@
     </p>
 }
 
-@section LeftPane
-{
-    <div id="semedicoSearchContentContainer">
-        <!--Contains a list for the results of the semedico search-->
-        @{
-            if (!String.IsNullOrEmpty(Model.semedicoServerError))
-            {<div id="errorWrapper" style="text-align:center; margin-top:20px;background-color:#ef5c2f;">
-                    <div id="semedicoTimeoutMessage" style="display:inline-block;background-color:#ff8560;">@Model.semedicoServerError</div>
-                </div>
-            }
-            else
-            {
-                @Html.Partial("_semedicoSearchContent", Model)
-
-            }
-        }
-
-    </div>
-
-}
-
 <!--Search bar and search results-->
 <div class="searchContainer">
     @Html.Partial("_searchBar")
     <div id="searchContent">
         @{
-        //Error when connecting to the server
-        if (Model != null && Model.semanticSearchServerError != null)
-        {
-            <div id="errorWrapper">
-                <div id="semanticSearchErrorMessage">@Model.semanticSearchServerError</div>
-            </div>
-    }
-    //Everything went well, display the result if there is one
-    else
-    {
-        if (Model != null && Model.semanticComponent != null)
-        {
-            @Html.Partial("_metaDataResultGridViewSemantic", Model.semanticComponent)
-            
-        }
+            //Error when connecting to the server
+            if (Model != null && Model.semanticSearchServerError != null)
+            {
+                <div id="errorWrapper">
+                    <div id="semanticSearchErrorMessage">@Model.semanticSearchServerError</div>
+                </div>
+            }
+            //Everything went well, display the result if there is one
+            else
+            {
+                if (Model != null && Model.semanticComponent != null)
+                {
+                    @Html.Partial("_metaDataResultGridViewSemantic", Model.semanticComponent)
+                    
+                }
 
-    }
+            }
         }
     </div>
 </div>
