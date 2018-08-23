@@ -1,0 +1,367 @@
+﻿
+@using BExIS.Modules.Asm.UI.Controllers;
+@using BExIS.Modules.Asm.UI.Models;
+@using Telerik.Web.Mvc.UI;
+@using BExIS.Modules.Rpm.UI.Models;
+@using BExIS.Dlm.Entities.DataStructure;
+
+<header>
+    <script type="text/javascript" src="/Scripts/trunk8.js"></script>
+    <script type="text/javascript" src="/Scripts/jquery.ba-resize.min.js"></script>
+</header>
+
+
+@section Information
+{
+    <p>Click on the <b>Well location</b> to retreive <b>the dataset</b> that have samples from that location..</p>
+    <p>
+        Datasets from <b>Aquadiva</b> that are connected to the selected location are displayed in a table under the map.<br />
+        To view the details of a dataset, click the <b>View Details</b> button available at the end of each row.
+    </p>
+}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div id="searchContent">
+
+    @{
+        Data_container_analytics datacontaineranalytics = (Data_container_analytics)ViewData["datacontaineranalytics"];
+        string temp;
+    }
+
+    <h3> Variable Templates Report</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Variables in use</th>
+                <th scope="col">Variables not used</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(0)">@datacontaineranalytics.DataAttributeStruct_list_in_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(1)">@datacontaineranalytics.DataAttributeStruct_list_non_use.Count </a></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3> Units Report</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Units in use</th>
+                <th scope="col">Units not used</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(2)">@datacontaineranalytics.EditUnitModel_list_in_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(3)">@datacontaineranalytics.EditUnitModel_list_non_use.Count </a></td>
+
+            </tr>
+
+        </tbody>
+    </table>
+
+    <h3> Data Type Report</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Data Type in use</th>
+                <th scope="col">Data Type not used</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                
+                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(4)">@datacontaineranalytics.DataType_in_use.Count</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(5)">@datacontaineranalytics.DataType_non_use.Count</td>
+                
+            </tr>
+
+        </tbody>
+    </table>
+
+
+    <h3> General Report related to semantic coverage ofthe portal</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Dataset Count</th>
+                <th scope="col">Variables Count</th>
+                <th scope="col">Concepts Count</th>
+                <th scope="col">Characteristics Count</th>
+                <th scope="col">Total Semantic Coverage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                List<Variable_analytics> VA_listt = (List<Variable_analytics>)ViewData["VA_list"];
+
+                int ds_count = VA_listt.Count;
+                int somme_Variables = 0;
+                int somme_Concepts = 0;
+                int somme_Caracteristics = 0;
+
+                foreach (Variable_analytics va in VA_listt)
+                {
+                    foreach (String s in va.variable_concept_entity)
+                    {
+                        if (s != "No Annotation")
+                        {
+                            somme_Concepts = somme_Concepts + 1;
+                        }
+                    }
+                    foreach (String s in va.variable_concept_caracteristic)
+                    {
+                        if (s != "No Annotation")
+                        {
+                            somme_Caracteristics = somme_Caracteristics + 1;
+                        }
+                    }
+                    somme_Variables = somme_Variables + va.variable_id.Count;
+                }
+
+                <tr>
+                    <td>@ds_count</td>
+                    <td>@somme_Variables</td>
+                    <td>@somme_Concepts</td>
+                    <td>@somme_Caracteristics</td>
+                    <td>@somme_Concepts/ @somme_Variables</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    <br />
+    <button id="downloadCsvButton" class="bx-button function" title="Csv download" onclick="download()">Download Semantic Coverage Report</button>
+    <br />
+
+    
+    <h3> Detailed Report related to semantic coverage ofthe portal</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Dataset id</th>
+                <th scope="col">Semantic Coverage</th>
+                <th scope="col">Variables id</th>
+                <th scope="col">Variables label</th>
+                <th scope="col">Concepts URI</th>
+                <th scope="col">Characteristics URI</th>
+                <th scope="col">Unit</th>
+                <th scope="col">Data type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                List<Variable_analytics> VA_list = (List<Variable_analytics>)ViewData["VA_list"];
+
+                foreach (Variable_analytics va in VA_list)
+                {
+                    if (va.variable_id.Count > 0)
+                    {
+                        int Concepts_count = 0;
+                        int Caracteristics_count = 0;
+
+
+                        foreach (String s in va.variable_concept_entity)
+                        {
+                            if (s != "No Annotation")
+                            {
+                                Concepts_count = Concepts_count + 1;
+                            }
+                        }
+                        foreach (String s in va.variable_concept_caracteristic)
+                        {
+                            if (s != "No Annotation")
+                            {
+                                Caracteristics_count = Caracteristics_count + 1;
+                            }
+                        }
+
+                        <tr>
+                            <td rowspan="@va.variable_id.Count">@va.dataset_id</td>
+                            <td rowspan="@va.variable_id.Count">Concept Coverage : @Concepts_count/@va.variable_id.Count <br /> Characteristics Coverage : @Caracteristics_count/@va.variable_id.Count</td>
+                            <td>@va.variable_id[0] </td>
+                            <td>@va.variable_label[0] </td>
+                            <td>@va.variable_concept_entity[0] </td>
+                            <td>@va.variable_concept_caracteristic[0] </td>
+                            <td>@va.unit[0] </td>
+                            <td>@va.dataType[0] </td>
+
+                        </tr>
+
+                        for (int kk = 1; kk < @va.variable_id.Count; kk++)
+                        {
+                            <tr>
+                                <td>@va.variable_id[kk] </td>
+                                <td>@va.variable_label[kk] </td>
+                                <td>@va.variable_concept_entity[kk] </td>
+                                <td>@va.variable_concept_caracteristic[kk] </td>
+                                <td>@va.unit[kk] </td>
+                                <td>@va.dataType[kk] </td>
+                            </tr>
+                        }
+                    }
+                }
+            }
+
+        </tbody>
+    </table>
+
+
+</div>
+
+
+<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Variable Templates</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="ModalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script type="text/javascript">
+
+    function download() {
+		$.ajax({
+			url: '@Url.Action("Download_Report", "InteractiveSearch")',
+			contentType: 'application/json; charset=utf-8',
+			datatype: 'json',
+			type: "GET",
+			success: function (e) {
+
+			    if (e) {
+			        window.location = '@Url.Action("Download_Report", "InteractiveSearch")';
+			    }
+			    else {
+			        alert("We can not generate file right now, report the error please");
+			    }
+
+			}
+		})
+    }
+
+    function show_details_(behavior) {
+        var data = "";
+        switch (behavior) {
+            case 0:
+                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.DataAttributeStruct_list_in_use.OrderBy(o => o.Id))
+                      .Name("bx-rpm-attributeGrid")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(c => c.Id)
+                          .Width(100);
+                          columns.Bound(c => c.Name);
+                          columns.Bound(c => c.ShortName);
+                          columns.Bound(c => c.Unit).Title("Unit");
+                          columns.Bound(c => c.DataType).Title("Data Type");
+                          columns.Bound(c => c.Description);
+                      }).ClientEvents(events => events.OnDataBound("onDataBound"))
+                   )';
+                $('#ModalBody').html(x);
+                break;
+             case 1:
+                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.DataAttributeStruct_list_non_use.OrderBy(o => o.Id))
+                      .Name("bx-rpm-attributeGrid")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(c => c.Id)
+                          .Width(100);
+                          columns.Bound(c => c.Name);
+                          columns.Bound(c => c.ShortName);
+                          columns.Bound(c => c.Unit).Title("Unit");
+                          columns.Bound(c => c.DataType).Title("Data Type");
+                          columns.Bound(c => c.Description);
+                      }).ClientEvents(events => events.OnDataBound("onDataBound"))
+                   )';
+                $('#ModalBody').html(x);
+                break;
+             case 2:
+                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.EditUnitModel_list_in_use.OrderBy(o => o.Unit.Id))
+                                    .Name("bx-rpm-unitGrid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(c => c.Unit.Id)
+                                            .Width(100);
+                                        columns.Bound(c => c.Unit.Name);
+                                        columns.Bound(c => c.Unit.Abbreviation);
+                                        columns.Bound(c => c.Unit.Dimension.Name).Title("Dimension Name");
+                                        columns.Bound(c => c.Unit.MeasurementSystem);
+                                        columns.Bound(c => c.Unit.Description).HtmlAttributes(new { @style = "max-width:500px" });
+
+                                    }).ClientEvents(events => events.OnDataBound("onDataBound"))
+                         )';
+                $('#ModalBody').html(x);
+                break;
+            case 3:
+                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.EditUnitModel_list_non_use.OrderBy(o=>o.Unit.Id))
+                                    .Name("bx-rpm-unitGrid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(c => c.Unit.Id).Width(100);
+                                        columns.Bound(c => c.Unit.Name);
+                                        columns.Bound(c => c.Unit.Abbreviation);
+                                        columns.Bound(c => c.Unit.Dimension.Name).Title("Dimension Name");
+                                        columns.Bound(c => c.Unit.MeasurementSystem);
+                                        columns.Bound(c => c.Unit.Description).HtmlAttributes(new { @style = "max-width:500px" });
+
+                                    }).ClientEvents(events => events.OnDataBound("onDataBound"))
+                         )';
+                $('#ModalBody').html(x);
+                break;
+            case 4:
+                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.DataType_in_use.OrderBy(o=>o.Id))
+                                    .Name("bx-rpm-unitGrid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(c => c.Id);
+                                        columns.Bound(c => c.Name);
+                                        columns.Bound(c => c.SystemType);
+                                        columns.Bound(c => c.Description).Width(100);
+
+                                    }).ClientEvents(events => events.OnDataBound("onDataBound"))
+                         )';
+                $('#ModalBody').html(x);
+                break;
+            case 5:
+                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.DataType_non_use.OrderBy(o=>o.Id))
+                                    .Name("bx-rpm-unitGrid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(c => c.Id);
+                                        columns.Bound(c => c.Name);
+                                        columns.Bound(c => c.SystemType);
+                                        columns.Bound(c => c.Description).Width(100);
+
+                                    }).ClientEvents(events => events.OnDataBound("onDataBound"))
+                         )';
+                $('#ModalBody').html(x);
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+</script>
