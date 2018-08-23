@@ -647,9 +647,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                     sb.Append("\n");
                                 }
 
+                                if (!System.IO.File.Exists(MissingConceptsLoggingPath))
+                                {
+                                    var d = Directory.CreateDirectory(Path.GetDirectoryName(MissingConceptsLoggingPath));
+                                    var f = System.IO.File.Create(MissingConceptsLoggingPath);
+                                    f.Close();
+                                }
                                 using (StreamWriter writer = new StreamWriter(MissingConceptsLoggingPath, true))
                                 {
                                     writer.WriteLine(sb.ToString());
+                                    writer.Close();
                                 }
                             }
                         }
