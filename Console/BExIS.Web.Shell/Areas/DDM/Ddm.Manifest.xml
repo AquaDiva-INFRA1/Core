@@ -42,6 +42,10 @@
             controller="home" action="index"
             extends="./apiRoot" />
     
+    <Export tag="menubar" id="interactiveSearch" order="2"
+            title="Interactive Search" description="Interactive Search Based search on geo-localisation" icon=""
+            controller="interactiveSearch" action="index"
+            extends="./menubarRoot/search" />
     
     <!-- INTERNAL-->
 
