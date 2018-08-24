@@ -186,6 +186,7 @@
     <None Include="Properties\PublishProfiles\BAM21108.pubxml" />
     <None Include="Properties\PublishProfiles\BAS Publish.pubxml" />
     <None Include="Properties\PublishProfiles\BPP211_bam.pubxml" />
+    <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <None Include="Properties\PublishProfiles\FileSystem.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
