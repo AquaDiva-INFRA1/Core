@@ -40,11 +40,11 @@
         controller="Annotation" action="GetExistingAnnotationsByUnitAndDatatype"
         extends="" />
     
-		<Export tag="lunchbar" id="helpAam" order="1"
+		<!--<Export tag="lunchbar" id="helpAam" order="1"
 						title="Annotations" description="Annotations Help Manual" icon=""
 						controller="Help" action="index"
 						extends="./lunchbarRoot/help"
-						/>
+						/>-->
 	<!-- Settings Example-->
 		<!--<Export tag="settings" id="manageMetadata" order="1"
 						title="Manage Metadata Structure" description="Edit or Importa new Metadata Structure" icon=""
