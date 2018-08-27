@@ -92,7 +92,7 @@
                 type: 'POST',
                 data: { 'location_coordinates': "" },
                 error: function (xhr) {
-                    alert('OoOoOoOppps ... error happened, come back later ...');
+                    alert('Error Occured, please contact the portal\'s administrator');
                 },
                 success: function (result) {
                     jsonObject = JSON.parse(result);
@@ -108,16 +108,19 @@
                             var marker = L.marker([lat, lon]).addTo(mymap).on('click', onMapClick);
 
                             marker.on('mouseover', function (e) {
+
+                                var latlng = mymap.mouseEventToLatLng(e.originalEvent);
+                                var popup_coordinates = L.latLng(latlng.lat,latlng.lng - 0,5);
                                 $.ajax({
                                     url: '/DDM/InteractiveSearch/parse_Json_location',
                                     type: 'POST',
                                     data: { 'location_coordinates': e.latlng.toString() },
                                     error: function (xhr) {
-                                        alert('OoOoOoOppps ... error happened, come back later ...');
+                                        alert('Error Occured, please contact the portal\'s administrator');
                                     },
                                     success: function (result) {
                                         var popup = L.popup()
-                                            .setLatLng(e.latlng)
+                                            .setLatLng(popup_coordinates)
                                             .setContent(result)
                                             .openOn(mymap);
                                     }
@@ -135,7 +138,10 @@
             function onMapClick(e) {
                 document.getElementById("spinner_loader").removeAttribute("hidden");
 
-                popup.setLatLng(e.latlng)
+                var latlng = mymap.mouseEventToLatLng(e.originalEvent);
+                var popup_coordinates = L.latLng(latlng.lat, latlng.lng - 0, 5);
+
+                popup.setLatLng(popup_coordinates)
                     .setContent("please wait to retreive datasets collected from this site")
                     .openOn(mymap);
                 $.ajax({
@@ -143,7 +149,7 @@
                     type: 'POST',
                     data: { 'location_coordinates': e.latlng.toString() },
                     error: function (xhr) {
-                        alert('OoOoOoOppps ... error happened, come back later ...');
+                        alert('Error Occured, please contact the portal\'s administrator');
                         document.getElementById("spinner_loader").setAttribute("hidden", true);
                     },
                     success: function (result) {
