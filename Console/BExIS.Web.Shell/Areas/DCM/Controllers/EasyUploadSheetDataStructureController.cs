@@ -16,30 +16,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         [HttpGet]
         public ActionResult SheetDataStructure(int index)
         {
+            /* SKIP BECAUSE ONLY ONE SELECTION IS POSSIBLE
             TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-            
-            if ((TaskManager != null) && (TaskManager.Current().GetActionInfo.ActionName.ToLower().Equals("selectareas")))
-            {
-                int step_index = TaskManager.GetCurrentStepInfoIndex();
-                StepInfo di = TaskManager.StepInfos[step_index - 2];
-                TaskManager.RemoveExecutedStep(TaskManager.Current());
-
-                return RedirectToAction(di.GetActionInfo.ActionName.ToString(), 
-                    di.GetActionInfo.ControllerName.ToString(), 
-                    new { index = step_index-2 });
-            }
-
             //set current stepinfo based on index
             if (TaskManager != null)
             {
                 TaskManager.SetCurrent(index);
-
                 // remove if existing
                 TaskManager.RemoveExecutedStep(TaskManager.Current());
             }
-
             SelectSheetFormatModel model = new SelectSheetFormatModel();
-
             // when jumping back to this step
             // check if sheet format is selected
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.SHEET_FORMAT))
@@ -49,15 +35,28 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     model.SelectedSheetFormat = TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT].ToString();
                 }
             }
-
             model.StepInfo = TaskManager.Current();
+            */
 
-            //return PartialView(model);
+            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
 
-            // to skip the orientation selection ... 
-            // sets the orientation TopDown and returns the view of the next button since it always passes null in the params
-            AddSelectedDatasetStructureToBus("TopDown");
-            return SheetDataStructure(null); 
+            if (TaskManager != null)
+            {
+                // set SHEET_FORMAT
+                TaskManager.AddToBus(EasyUploadTaskManager.SHEET_FORMAT, "LeftRight");
+                TaskManager.Current().SetValid(true);
+
+                if (TaskManager.Current().IsValid())
+                {
+                    TaskManager.GoToNext();
+                    Session["TaskManager"] = TaskManager;
+                    ActionInfo actionInfo = TaskManager.Current().GetActionInfo;
+                    return RedirectToAction(actionInfo.ActionName, actionInfo.ControllerName, new RouteValueDictionary { { "area", actionInfo.AreaName }, { "index", TaskManager.GetCurrentStepInfoIndex() } });
+                }
+            }
+
+
+            return PartialView(new SelectSheetFormatModel());
         }
 
         /*
