@@ -385,7 +385,7 @@ namespace BExIS.Aam.Services
         /// <param name="uris">List of the URIs</param>
         /// <param name="labels">List of the labels (same length as the URI-List)</param>
         /// <returns>True if the editing was successful</returns>
-        public bool EditLabels(List<String> uris, List<String> labels)
+        public int EditLabels(List<String> uris, List<String> labels)
         {
             Contract.Requires(uris.Count == labels.Count);
 
@@ -394,6 +394,8 @@ namespace BExIS.Aam.Services
                 IRepository<Annotation> repo = uow.GetRepository<Annotation>();
                 IEnumerable<Annotation> allAnnotations = repo.Get();
 
+                int changes = 0;
+
                 //For each annotation, check for each URI if we have a label for it in our input-lists
                 foreach(Annotation an in allAnnotations)
                 {
@@ -401,23 +403,27 @@ namespace BExIS.Aam.Services
                     if(index != -1)
                     {
                         an.Entity_Label = labels.ElementAt(index);
+                        changes++;
                     }
 
                     index = uris.IndexOf(an.Characteristic);
                     if(index != -1)
                     {
                         an.Characteristic_Label = labels.ElementAt(index);
+                        changes++;
                     }
 
                     index = uris.IndexOf(an.Standard);
                     if(index != -1)
                     {
                         an.Standard_Label = labels.ElementAt(index);
+                        changes++;
                     }
                 }
                 uow.Commit();
+                return changes;
             }
-            return true;
+            return -1;
         }
 
         #region (Private) Helper functions
