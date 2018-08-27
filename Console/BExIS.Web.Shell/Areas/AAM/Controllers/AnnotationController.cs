@@ -18,6 +18,7 @@ using Vaiona.Web.Extensions;
 using System.Web.Routing;
 using Vaiona.Web.Mvc.Modularity;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace BExIS.Modules.Aam.UI.Controllers
 {
@@ -207,7 +208,9 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 List<String> charLabels = JsonConvert.DeserializeObject<List<String>>(charLabelsRes.Content);
                 List<String> standardLabels = JsonConvert.DeserializeObject<List<String>>(standardLabelsRes.Content);
 
-                am.EditLabels(entityURIs.Concat(charURIs).Concat(standardURIs).ToList(), entityLabels.Concat(charLabels).Concat(standardLabels).ToList());
+                int numberOfModifiedLabels = am.EditLabels(entityURIs.Concat(charURIs).Concat(standardURIs).ToList(), entityLabels.Concat(charLabels).Concat(standardLabels).ToList());
+                
+                //return Content("Number of modified labels: " + numberOfModifiedLabels.ToString()); //For Debugging purposes
             }
 
             return RedirectToAction("Index");
