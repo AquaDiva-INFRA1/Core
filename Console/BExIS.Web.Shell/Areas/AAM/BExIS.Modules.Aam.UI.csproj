@@ -161,6 +161,19 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Aam.Manifest.xml" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.bootstrap.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.bootstrap.min.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.bootstrap4.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.bootstrap4.min.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.dataTables.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.dataTables.min.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.foundation.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.foundation.min.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.jqueryui.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.jqueryui.min.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.semanticui.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\buttons.semanticui.min.css" />
+    <Content Include="Content\AAM\Buttons-1.5.2\swf\flashExport.swf" />
     <Content Include="Content\AAM\DataTables-1.10.18\css\dataTables.bootstrap.css" />
     <Content Include="Content\AAM\DataTables-1.10.18\css\dataTables.bootstrap.min.css" />
     <Content Include="Content\AAM\DataTables-1.10.18\css\dataTables.bootstrap4.css" />
@@ -197,6 +210,27 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.bootstrap.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.bootstrap.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.bootstrap4.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.bootstrap4.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.colVis.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.colVis.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.flash.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.flash.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.foundation.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.foundation.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.html5.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.html5.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.jqueryui.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.jqueryui.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.print.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.print.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.semanticui.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\buttons.semanticui.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\dataTables.buttons.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\js\dataTables.buttons.min.js" />
+    <Content Include="Scripts\AAM\Buttons-1.5.2\swf\flashExport.swf" />
     <Content Include="Scripts\AAM\DataTables-1.10.18\images\sort_asc.png" />
     <Content Include="Scripts\AAM\DataTables-1.10.18\images\sort_asc_disabled.png" />
     <Content Include="Scripts\AAM\DataTables-1.10.18\images\sort_both.png" />
@@ -242,6 +276,8 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\bootstrap.css.map" />
     <Content Include="Content\bootstrap-theme.css.map" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\common.scss" />
+    <Content Include="Content\AAM\Buttons-1.5.2\css\mixins.scss" />
     <None Include="Properties\PublishProfiles\BAM-Pub.pubxml" />
     <None Include="Properties\PublishProfiles\BAM.pubxml" />
     <None Include="Properties\PublishProfiles\BAM21105.pubxml" />
