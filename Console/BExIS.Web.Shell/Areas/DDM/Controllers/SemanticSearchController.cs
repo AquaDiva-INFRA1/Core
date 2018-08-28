@@ -84,7 +84,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             *      String searchSemantically = value of a checkBox = "on" when checked, NULL otherwise
             * */
         [HttpPost]
-        public ActionResult Index(String searchTerm, String searchSemedico, String searchSemantically)
+        public ActionResult Index(String searchTerm)
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Semantic Search", this.Session.GetTenant());
             Session["Window"] = false;
@@ -92,18 +92,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             searchTerm = searchTerm.Trim();
             //Semedico Search
-            if ((searchSemedico != null) && (searchTerm != null) && (!searchTerm.Equals("")))
+            if ((searchTerm != null) && (!searchTerm.Equals("")))
             {
                 model = new ShowSemanticResultModel(CreateDataTable(makeHeader()));
-                SemedicoResultModel semResult = semedicoSearch(searchTerm);
-                if (semResult == null)
-                {
-                    model.semedicoServerError = "An error occured when trying to connect to Semedico. Please try again later.";
-                }
-                model.resultListComponent = semResult;
                 model.detailsComponent = null;
                 ViewData.Model = model;
-
             }
 
             if (model == null || model.semanticComponent == null)
@@ -112,7 +105,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             }
 
             //Semantic Search
-            if ((searchSemantically != null) && (searchTerm != null))
+            if (searchTerm != null)
             {
                 //Merge the results from the semantic search with the results from the normal bexis-search
                 //Alternative: Skip the merging: 
@@ -1114,7 +1107,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             queryString.Namespaces.AddNamespace("owl", new Uri("http://www.w3.org/2002/07/owl#"));
             queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
             IGraph g = new Graph();
-            g.LoadFromFile(Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl"));
+            g.LoadFromFile(Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl"));
             //end of loading the graph one time and set the sparql query
 
             foreach (Int64 ds_id in ds_ids)
