@@ -1033,6 +1033,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 Query_4_API = get_observations_contextualized_contextualizing(id);
                 Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
                 Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
+                // to resolve the semedico API "session" problem
                 Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
                 if (model == null)
                 {
