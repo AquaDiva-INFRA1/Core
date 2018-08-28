@@ -81,37 +81,41 @@
 
                         if (Model != null)
                         {
-                            if ( (@Model.Columns.Count > 0) && (@serachFlag == true) )
+                            if ( (@Model.Columns.Count > 0))
                             {
-                    //Additional column with the "View Details"-Button
-                    columns.Bound("").Width(60).ClientTemplate(
-                                     "<div>  <center> " +
-                                         "<a>" +
-                                             "<i class=\"far fa-newspaper fa-2x \"  " +
-                                             "data-toggle=\"modal\" " +
-                                             "data-target=\"#exampleModalLong\" " +
-                                             "onclick='get_dataset_related_papers_by_ID(this)' " +
-                                             "id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>'" +
-                                             "title=\"Load Related Publication\" ></i> " +
-                                         "</a>" +
+                                if ((@serachFlag == true))
+                                {
+                                    //Additional column with the "View Details"-Button
+                                    columns.Bound("").Width(60).ClientTemplate(
+                                                     "<div>  <center> " +
+                                                         "<a>" +
+                                                             "<i class=\"far fa-newspaper fa-2x \"  " +
+                                                             "data-toggle=\"modal\" " +
+                                                             "data-target=\"#exampleModalLong\" " +
+                                                             "onclick='get_dataset_related_papers_by_ID(this)' " +
+                                                             "id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>'" +
+                                                             "title=\"Load Related Publication\" ></i> " +
+                                                         "</a>" +
 
-                                     "</center> </div>"
-                                         )
+                                                     "</center> </div>"
+                                                         )
 
-                                 .Groupable(false)
-                                 .Sortable(false)
-                                 .Filterable(false);
+                                                 .Groupable(false)
+                                                 .Sortable(false)
+                                                 .Filterable(false);
+                                }
 
-                    //Additional column with the "View Details"-Button
-                    columns.Bound("").Width(40).ClientTemplate(
-                                "<div class='searchResultFunctionDiv'>" +
-                                "<a  id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class = 'bx bx-grid-function bx-show' title = 'View details' onclick='onclickDataset(this)'></a>" +
-                                "</div>"
-                                )
 
-                               .Groupable(false)
-                               .Sortable(false)
-                               .Filterable(false);
+                                //Additional column with the "View Details"-Button
+                                columns.Bound("").Width(40).ClientTemplate(
+                                            "<div class='searchResultFunctionDiv'>" +
+                                            "<a  id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class = 'bx bx-grid-function bx-show' title = 'View details' onclick='onclickDataset(this)'></a>" +
+                                            "</div>"
+                                            )
+
+                                           .Groupable(false)
+                                           .Sortable(false)
+                                           .Filterable(false);
 
                             }
                         }
