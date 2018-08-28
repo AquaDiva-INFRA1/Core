@@ -7,11 +7,15 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using Microsoft.AspNet.Identity.Owin;
+using Vaiona.Utils.Cfg;
+using System.IO;
 
 namespace BExIS.Security.Services.Authentication
 {
     public class LdapAuthenticationManager
     {
+        private static String LdapControllerLoggingPath = System.IO.Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Logging", "LdapControllerLoggingPath" + DateTime.Now.Year + "_" + DateTime.Now.Month + "_" + DateTime.Now.Day + ".txt");
+
         private readonly IUnitOfWork _guow;
         private bool _isDisposed;
 
@@ -116,6 +120,17 @@ namespace BExIS.Security.Services.Authentication
             {
                 //Todo: Pass error to logging framework instead of console!
                 Console.WriteLine(e.Message);
+                if (!System.IO.File.Exists(LdapControllerLoggingPath))
+                {
+                    var d = Directory.CreateDirectory(Path.GetDirectoryName(LdapControllerLoggingPath));
+                    var f = System.IO.File.Create(LdapControllerLoggingPath);
+                    f.Close();
+                }
+                using (StreamWriter writer = new StreamWriter(LdapControllerLoggingPath, true))
+                {
+                    writer.WriteLine(e.ToString());
+                    writer.Close();
+                }
                 return SignInStatus.Failure;
             }
             return SignInStatus.Success;

@@ -21,5 +21,8 @@ namespace BExIS.Modules.Ddm.UI.Models
         public DataTable semanticComponent;
         public String semanticSearchServerError;
         public String semedicoServerError;
+
+        // this variable is a flag if the user requested the search or not to display the papers button
+        public Boolean serachFlag = false ;
     }
 }
