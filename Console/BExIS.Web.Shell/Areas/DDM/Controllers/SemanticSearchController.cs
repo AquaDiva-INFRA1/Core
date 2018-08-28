@@ -122,6 +122,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             headerItems = makeHeader();
             ViewData["DefaultHeaderList"] = headerItems;
+            ViewData["serachFlag"] = model.serachFlag;
             return View(model);
         }
 
@@ -689,7 +690,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             * Then looks for the specified DatasetVersion and displays it
             * */
         private DataTable semanticSearch(String searchTerm)
-        {
+        {   
             #region Load mapping dictionary from file
             string[] lines = global::System.IO.File.ReadAllLines(mappingDictionaryFilePath);
             string json = String.Join("", lines);
@@ -758,6 +759,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
                 if (response.IsSuccessStatusCode)
                 {
+                    model.serachFlag = true;
                     // Get the response body. Blocking!
                     output = response.Content.ReadAsStringAsync().Result;
 
@@ -972,15 +974,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     output = response.Content.ReadAsStringAsync().Result;
                 }
             }
-            catch (SocketException e)
+            catch (Exception e)
             {
-            }
-            catch (AggregateException e)
-            {
-                //Returning null if the timeout triggers
+                Debug.WriteLine(e.ToString());
                 return null;
             }
-
             #endregion
 
             return output;
@@ -1041,6 +1039,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 Query_4_API = get_observations_contextualized_contextualizing(id);
                 Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
+                Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
                 Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
                 if (model == null)
                 {

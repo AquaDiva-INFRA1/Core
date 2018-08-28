@@ -17,6 +17,11 @@
     List<HeaderItem> DefaultHeaderList = (List<HeaderItem>)ViewData["DefaultHeaderList"];
     HeaderItem Id = (HeaderItem)ViewData["ID"];
 
+    Boolean serachFlag = false;
+    if (ViewData["serachFlag"] != null)
+    {
+        serachFlag = (Boolean)ViewData["serachFlag"];
+    }
 
     StructuredDataStructure sds = new StructuredDataStructure();
     Tuple<StructuredDataStructure, long> defaultModel = new Tuple<StructuredDataStructure, long>(sds, 0);
@@ -76,7 +81,7 @@
 
                         if (Model != null)
                         {
-                            if (@Model.Columns.Count > 0)
+                            if ( (@Model.Columns.Count > 0) && (@serachFlag == true) )
                             {
                     //Additional column with the "View Details"-Button
                     columns.Bound("").Width(60).ClientTemplate(
@@ -146,8 +151,7 @@
                 </div>
                 <div class="modal-body">
                     <div id="results">
-                        <h3> This Dataset is not coming from the semantic search</h3>
-                        <h4>It is the result of the normal search</h4>
+                        <h3> Error Occured, please contact the Portal's administrator</h3>
                     </div>
                 </div>
 
