@@ -28,11 +28,14 @@ using Newtonsoft.Json.Linq;
 using BExIS.IO.Transform.Output;
 using System.IO;
 using Vaiona.Logging;
+using BExIS.Dlm.Services.Data;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
     public class InteractiveSearchController : Controller
     {
+        private XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+
         static string DatastructAPI = "http://localhost:5412/api/structures/";
         
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
@@ -168,6 +171,23 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 }
             }
             Debug.WriteLine("results after search : " + results_);
+
+            //fill the results including the title of the datasets which can cover more results
+            DatasetManager dsm_ = new DatasetManager();
+            Dictionary<Int64, XmlDocument>  datasets_ids = dsm_.GetDatasetLatestMetadataVersions();
+            foreach(KeyValuePair<Int64, XmlDocument> kvp in datasets_ids)
+            {
+                string title = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.title);
+                string description = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.description);
+                if (title.Contains(well_name))
+                {
+                    if (dataset_Ids_results_for_data_table.Find(x => x == kvp.Key.ToString()) == null)
+                    {
+                        dataset_Ids_results_for_data_table.Add(kvp.Key.ToString());
+                    }
+                }
+                
+            }
 
             //DataTable m;
             m = CreateDataTable(headerItems);
