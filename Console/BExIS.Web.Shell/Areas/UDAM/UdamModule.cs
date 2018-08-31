@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BExIS.Modules.UDAM.UI.Helpers;
+using System;
 using Vaiona.Logging;
 using Vaiona.Web.Mvc.Modularity;
 
@@ -17,11 +18,7 @@ namespace BExIS.Modules.UDAM.UI
             try
             {
                 base.Install();
-
-                //using (var generator = new SamSeedDataGenerator())
-                //{
-                //    generator.GenerateSeedData();
-                //}
+                UdamSeedDataGenerator.GenerateSeedData();
             }
             catch (Exception e)
             {

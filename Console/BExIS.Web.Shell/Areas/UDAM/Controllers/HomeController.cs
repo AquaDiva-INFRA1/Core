@@ -38,7 +38,9 @@ namespace BExIS.Modules.UDAM.UI.Controllers
         private static String password = "hamdi1992";
         private static string FTPAddress = "ftp://192.168.37.3:21";
 
-        static Analysis_scripts analysis_scripts = new Analysis_scripts();
+        static Analysis_Model analysis_scripts = new Analysis_Model();
+
+
 
         // GET: Home
         public ActionResult Index()
@@ -50,7 +52,8 @@ namespace BExIS.Modules.UDAM.UI.Controllers
 
 
             ViewData["tools_list"] = analysis_scripts.tools_list;
-            ViewData["script_paths"] = analysis_scripts.script_paths;
+            ViewData["R_script_paths"] = analysis_scripts.R_script_paths;
+            ViewData["Python_script_paths"] = analysis_scripts.Python_script_paths;
 
             return View(model.result_table);
         }
@@ -233,11 +236,10 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             * checks the extension of the file to analyse.
             * the current analysis tool excepts only fq and fastaq extensions
             * */
-        public string check_file_extension_to_analyse(string ids, string id_tool)
+        public string check_file_extension_to_analyse(string ids, string index, string flag)
         {
             List<string> ids_ = JsonConvert.DeserializeObject<List<string>>(ids);
-
-            foreach(string id_string in ids_)
+            foreach (string id_string in ids_)
             {
                 long id = Int64.Parse(id_string);
                 //Int64 id = Int64.Parse(id_);
@@ -256,7 +258,24 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                     {
                         try
                         {
-                            UploadFiletoAnalysis(absolute_file_path, id_tool);
+                            switch (flag)
+                            {
+                                case "Rscript":
+                                    KeyValuePair<Scripts, string> RScript = analysis_scripts.get_key(Int32.Parse(index), analysis_scripts.R_script_paths);
+                                    UploadFiletoAnalysis(absolute_file_path, RScript.Key, RScript.Value);
+                                    break;
+                                case "Pythonscripts":
+                                    KeyValuePair<Scripts, string> PythonScript = analysis_scripts.get_key(Int32.Parse(index), analysis_scripts.Python_script_paths);
+                                    UploadFiletoAnalysis(absolute_file_path, PythonScript.Key,PythonScript.Value);
+                                    break;
+                                case "tool":
+                                    KeyValuePair<AnalysisTool, string> AT = analysis_scripts.get_key(Int32.Parse(index), analysis_scripts.tools_list);
+                                    UploadFiletoAnalysis(absolute_file_path, AT.Key,AT.Value);
+                                    break;
+                                default:
+                                    return "";
+                            }
+                            
                             return "Results will be sent to your e-mail, Thank you for your patience. It might take some time !";
                         }
                         catch (Exception ex)
@@ -280,14 +299,28 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             * Uploads the file to analyse to the server of analysis using ftp connection
             * the analysis script is a python script called using a FLASK server on the VM
             * */
-        private void UploadFiletoAnalysis(string filePath, string id_tool)
+        private void UploadFiletoAnalysis(string filePath, ScriptAndTool id_tool , string value)
         {
             String filename = Path.GetFileName(filePath);
 
-            var name = HttpContext.User.Identity.Name;
-            var userManager = new UserManager();
-            var user = userManager.FindByNameAsync(name).Result;
-            string email = "hamdi.hamed1992@gmail.com";
+            string name="";
+            string email="";
+            try
+            {
+                name = HttpContext.User.Identity.Name;
+                var userManager = new UserManager();
+                var user = userManager.FindByNameAsync(name).Result;
+                email = user.Email;
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.ToString());
+            }
+
+            //Hamdi : this line should be deleted for seeting username and email 
+            //Hamdi : the name is set to hamdi and email is set to hamdi.hamed1992@gmail.com
+            //email = "hamdi.hamed1992@gmail.com";
+            //name = "hamdi";
 
             //create the user folder
             WebRequest request_ = WebRequest.Create(FTPAddress + "/" + name);
@@ -329,15 +362,27 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             {
                 Debug.WriteLine(ex.Message.ToString());
             }
+            
 
             // run the analysis over server tool
             string url = "http://192.168.37.3:5000";
             var request2 = (HttpWebRequest)WebRequest.Create(url);
             request2.Method = "POST";
             request2.ContentType = "application/x-www-form-urlencoded";
-
-            string params_ = "file_path=" + filename + "&user_home_directory=" + name + "&email=" + email + "&exec_tool=" + id_tool.ToLower();
-            params_ = params_ + "&exec_tool=" + id_tool.ToLower();
+            
+            string params_ = "file_path=" + filename + "&user_home_directory=" + name + "&email=" + email;
+            
+            if (id_tool is AnalysisTool)
+            {
+                AnalysisTool AT = id_tool as AnalysisTool;
+                params_ = params_ + "&exec_tool=" + value.ToLower();
+            }
+            
+            if (id_tool is Scripts)
+            {
+                Scripts script = id_tool as Scripts;
+                params_ = params_ + "&script=" + script.script + "&language=" + script.script_Type.ToString().ToLower();
+            }
 
             byte[] bytes = Encoding.ASCII.GetBytes(params_);
             request2.ContentLength = bytes.Length;

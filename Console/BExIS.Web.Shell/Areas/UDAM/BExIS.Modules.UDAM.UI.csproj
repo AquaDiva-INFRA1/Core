@@ -148,7 +148,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Models\Analysis_scripts.cs" />
+    <Compile Include="Helpers\UdamSeedDataGenerator.cs" />
+    <Compile Include="Models\AnalysisTool.cs" />
+    <Compile Include="Models\Analysis_Model.cs" />
+    <Compile Include="Models\ScriptAndTool.cs" />
+    <Compile Include="Models\Scripts.cs" />
     <Compile Include="Models\Unstructred_data.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UdamModule.cs" />
@@ -194,9 +198,7 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
