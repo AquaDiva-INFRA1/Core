@@ -86,7 +86,7 @@
                                 if ((@serachFlag == true))
                                 {
                                     //Additional column with the "View Details"-Button
-                                    columns.Bound("").Width(60).ClientTemplate(
+                                    columns.Bound("").Width(80).ClientTemplate(
                                                      "<div>  <center> " +
                                                          "<a>" +
                                                              "<i class=\"far fa-newspaper fa-2x \"  " +
@@ -99,7 +99,7 @@
 
                                                      "</center> </div>"
                                                          )
-
+                                                .Title("Semedico")
                                                  .Groupable(false)
                                                  .Sortable(false)
                                                  .Filterable(false);
@@ -107,12 +107,12 @@
 
 
                                 //Additional column with the "View Details"-Button
-                                columns.Bound("").Width(40).ClientTemplate(
+                                columns.Bound("").Width(50).ClientTemplate(
                                             "<div class='searchResultFunctionDiv'>" +
                                             "<a  id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class = 'bx bx-grid-function bx-show' title = 'View details' onclick='onclickDataset(this)'></a>" +
                                             "</div>"
                                             )
-
+                                            .Title("View")
                                            .Groupable(false)
                                            .Sortable(false)
                                            .Filterable(false);
@@ -358,6 +358,14 @@
 
     #resultGrid .searchResultFunctionDiv {
         text-align: right;
+    }
+
+    .fa-newspaper {
+        color: green;
+    }
+
+    .fa-newspaper:hover {
+        color: red;
     }
 </style>
 

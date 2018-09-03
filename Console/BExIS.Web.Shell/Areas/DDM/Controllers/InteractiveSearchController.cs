@@ -177,16 +177,22 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             Dictionary<Int64, XmlDocument>  datasets_ids = dsm_.GetDatasetLatestMetadataVersions();
             foreach(KeyValuePair<Int64, XmlDocument> kvp in datasets_ids)
             {
-                string title = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.title);
-                string description = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.description);
-                if (title.Contains(well_name))
+                try
                 {
-                    if (dataset_Ids_results_for_data_table.Find(x => x == kvp.Key.ToString()) == null)
+                    string title = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.title);
+                    string description = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.description);
+                    if (title.Contains(well_name))
                     {
-                        dataset_Ids_results_for_data_table.Add(kvp.Key.ToString());
+                        if (dataset_Ids_results_for_data_table.Find(x => x == kvp.Key.ToString()) == null)
+                        {
+                            dataset_Ids_results_for_data_table.Add(kvp.Key.ToString());
+                        }
                     }
                 }
-                
+                catch (Exception ex_)
+                {
+                    Debug.WriteLine(ex_.ToString());
+                }
             }
 
             //DataTable m;
