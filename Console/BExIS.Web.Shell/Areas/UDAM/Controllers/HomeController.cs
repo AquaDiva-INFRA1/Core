@@ -18,6 +18,9 @@ using System.Web.Configuration;
 using BExIS.Security.Services.Authentication;
 using BExIS.Security.Services.Subjects;
 using Newtonsoft.Json;
+using BExIS.Dlm.Services.DataStructure;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Entities.Authorization;
 
 namespace BExIS.Modules.UDAM.UI.Controllers
 {
@@ -85,7 +88,7 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                 if (!(ds.DataStructure.Self is StructuredDataStructure))
                 {
                     Debug.WriteLine("Dataset id : " + ds_id + " is unstructred");
-                    
+
                     DataRow row = m.NewRow();
                     row["ID"] = Int64.Parse(ds_id.ToString());
 
@@ -95,14 +98,14 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                     row["Ownername"] = helper.GetInformation(ds_id, NameAttributeValues.owner);
 
                     m.Rows.Add(row);
-                    
+
                     List<DatasetVersion> dsv = dsm.GetDatasetVersions(Int64.Parse(ds_id.ToString()));
                     foreach (DatasetVersion dataset_v in dsv)
                     {
-                        ICollection<ContentDescriptor>  cont_desc = dataset_v.ContentDescriptors;
-                        foreach(ContentDescriptor c_d in cont_desc)
+                        ICollection<ContentDescriptor> cont_desc = dataset_v.ContentDescriptors;
+                        foreach (ContentDescriptor c_d in cont_desc)
                         {
-                            Debug.WriteLine("Dataset id : " + Int64.Parse(ds_id.ToString()) + "has path : " + c_d.URI); 
+                            Debug.WriteLine("Dataset id : " + Int64.Parse(ds_id.ToString()) + "has path : " + c_d.URI);
                         }
                     }
                 }
@@ -242,6 +245,10 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             foreach (string id_string in ids_)
             {
                 long id = Int64.Parse(id_string);
+                if (!this.CheckPermission(id))
+                {
+                    return ("You do not have the right to read this dataset, therefore no analysis are permitted over this dataset.");
+                }
                 //Int64 id = Int64.Parse(id_);
                 //getting the file path of the dataset to send it to the ft´p server for analysis
                 DatasetManager dsm = new DatasetManager();
@@ -266,16 +273,16 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                                     break;
                                 case "Pythonscripts":
                                     KeyValuePair<Scripts, string> PythonScript = analysis_scripts.get_key(Int32.Parse(index), analysis_scripts.Python_script_paths);
-                                    UploadFiletoAnalysis(absolute_file_path, PythonScript.Key,PythonScript.Value);
+                                    UploadFiletoAnalysis(absolute_file_path, PythonScript.Key, PythonScript.Value);
                                     break;
                                 case "tool":
                                     KeyValuePair<AnalysisTool, string> AT = analysis_scripts.get_key(Int32.Parse(index), analysis_scripts.tools_list);
-                                    UploadFiletoAnalysis(absolute_file_path, AT.Key,AT.Value);
+                                    UploadFiletoAnalysis(absolute_file_path, AT.Key, AT.Value);
                                     break;
                                 default:
                                     return "";
                             }
-                            
+
                             return "Results will be sent to your e-mail, Thank you for your patience. It might take some time !";
                         }
                         catch (Exception ex)
@@ -290,7 +297,7 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                     }
                 }
             }
-            
+
             return "Something happened... Please contact the portal's administration";
         }
 
@@ -299,12 +306,12 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             * Uploads the file to analyse to the server of analysis using ftp connection
             * the analysis script is a python script called using a FLASK server on the VM
             * */
-        private void UploadFiletoAnalysis(string filePath, ScriptAndTool id_tool , string value)
+        private void UploadFiletoAnalysis(string filePath, ScriptAndTool id_tool, string value)
         {
             String filename = Path.GetFileName(filePath);
 
-            string name="";
-            string email="";
+            string name = "";
+            string email = "";
             try
             {
                 name = HttpContext.User.Identity.Name;
@@ -340,7 +347,7 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             }
 
             // upload the file to analyse
-            WebRequest request = WebRequest.Create(FTPAddress + "/" + name + "/"+ filename);
+            WebRequest request = WebRequest.Create(FTPAddress + "/" + name + "/" + filename);
             request.Credentials = new NetworkCredential(username, password);
             request.Method = WebRequestMethods.Ftp.UploadFile;
 
@@ -362,22 +369,22 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             {
                 Debug.WriteLine(ex.Message.ToString());
             }
-            
+
 
             // run the analysis over server tool
             string url = "http://192.168.37.3:5000";
             var request2 = (HttpWebRequest)WebRequest.Create(url);
             request2.Method = "POST";
             request2.ContentType = "application/x-www-form-urlencoded";
-            
+
             string params_ = "file_path=" + filename + "&user_home_directory=" + name + "&email=" + email;
-            
+
             if (id_tool is AnalysisTool)
             {
                 AnalysisTool AT = id_tool as AnalysisTool;
                 params_ = params_ + "&exec_tool=" + value.ToLower();
             }
-            
+
             if (id_tool is Scripts)
             {
                 Scripts script = id_tool as Scripts;
@@ -400,8 +407,37 @@ namespace BExIS.Modules.UDAM.UI.Controllers
             {
                 Debug.WriteLine(ex.Message.ToString());
             }
-            
-            
+
+        }
+
+        private bool CheckPermission(long datasetID)
+        {
+            DatasetManager dm = new DatasetManager();
+            EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+            try
+            {
+                if (dm.IsDatasetCheckedIn(datasetID))
+                {
+                    // TODO: refactor Download Right not existing, so i set it to read
+                    bool downloadAccess = entityPermissionManager.HasEffectiveRight(HttpContext.User.Identity.Name,
+                        "Dataset", typeof(Dataset), datasetID, RightType.Read);
+                    return downloadAccess;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception Except)
+            {
+                Debug.WriteLine(Except.ToString());
+                return false;
+            }
+            finally
+            {
+                dm.Dispose();
+                entityPermissionManager.Dispose();
+            }
 
         }
     }
