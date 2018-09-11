@@ -86,7 +86,7 @@
                                 if ((@serachFlag == true))
                                 {
                                     //Additional column with the "View Details"-Button
-                                    columns.Bound("").Width(80).ClientTemplate(
+                                    columns.Bound("").Width(100).ClientTemplate(
                                                      "<div>  <center> " +
                                                          "<a>" +
                                                              "<i class=\"far fa-newspaper fa-2x \"  " +
@@ -99,7 +99,7 @@
 
                                                      "</center> </div>"
                                                          )
-                                                .Title("Semedico")
+                                                .Title("Publications")
                                                  .Groupable(false)
                                                  .Sortable(false)
                                                  .Filterable(false);
@@ -290,15 +290,24 @@
                         //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
                         var text = "<ol>";
                         for (i = 0; i < res.bibliographylist.length; i++) {
-                            text = text + "<li><strong>" + res.bibliographylist[i].articleTitle + "</strong></li>";
+                            text = text + "<li><strong><b>" + res.bibliographylist[i].articleTitle + "</b></strong></li>";
 
-                            text = text + "<a id=\"_abstract" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5>ABSTRACT</h5> </a>";
+                            text = text + "<a id=\"_abstract" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>ABSTRACT</b></h5> </a>";
                             text = text +"<div id=\"abstract"+i+"\"  hidden=\"true\"> ";
                             text = text + "<h5><p align=\"justify\">" + res.bibliographylist[i].abstractText + "</p></h5>";
                             text = text + "</div>";
 
+                            text = text + "<a id=\"_publication" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>PUBLICATION</b></h5> </a>";
+                            text = text + "<div id=\"publication" + i + "\"  hidden=\"true\"> ";
+                            text = text + "<h5><p align=\"justify\"> Title: " + res.bibliographylist[i].publication.title + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Volume: " + res.bibliographylist[i].publication.volume + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Issue : " + res.bibliographylist[i].publication.issue + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].publication.pages + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Date: " + res.bibliographylist[i].publication.date + "</p></h5>";
+                            text = text + "</div>";
 
-                            text = text + "<a id=\"_authors"+i+"\" href=\"#\"  onclick='show_region(this,i)'> <h5>AUTHORS</h5> </a>";
+
+                            text = text + "<a id=\"_authors" + i +"\" href=\"#\"  onclick='show_region(this,i)'> <h5><b>AUTHORS</b></h5> </a>";
                             text = text + "<div id=\"authors" + i +"\" hidden=\"true\" >";
                             text = text + "<ul>";
                             for (j = 0; j < res.bibliographylist[i].authors.length; j++) {
