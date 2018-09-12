@@ -39,7 +39,7 @@ namespace BExIS.Modules.UDAM.UI.Controllers
 
         private static String username = "hamdihamed";
         private static String password = "hamdi1992";
-        private static string FTPAddress = "ftp://192.168.37.3:21";
+        private static string FTPAddress = "ftp://aquadiva-analysis1.inf-bb.uni-jena.de:21";
 
         static Analysis_Model analysis_scripts = new Analysis_Model();
 
@@ -372,7 +372,7 @@ namespace BExIS.Modules.UDAM.UI.Controllers
 
 
             // run the analysis over server tool
-            string url = "http://192.168.37.3:5000";
+            string url = "http://aquadiva-analysis1.inf-bb.uni-jena.de:5000";
             var request2 = (HttpWebRequest)WebRequest.Create(url);
             request2.Method = "POST";
             request2.ContentType = "application/x-www-form-urlencoded";
