@@ -475,6 +475,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Views\InteractiveSearch\" />
     <Folder Include="Views\Shared\" />
   </ItemGroup>
   <ItemGroup>
