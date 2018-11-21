@@ -235,19 +235,17 @@
 
 
 
-
-<script type="text/javascript">
-
+<script>
     function download() {
 		$.ajax({
-			url: '@Url.Action("Download_Report", "InteractiveSearch")',
+			url: '@Url.Action("Download_Report", "Analytics")',
 			contentType: 'application/json; charset=utf-8',
 			datatype: 'json',
 			type: "GET",
 			success: function (e) {
 
 			    if (e) {
-			        window.location = '@Url.Action("Download_Report", "InteractiveSearch")';
+			        window.location = '@Url.Action("Download_Report", "Analytics")';
 			    }
 			    else {
 			        alert("We can not generate file right now, report the error please");
@@ -256,7 +254,10 @@
 			}
 		})
     }
+</script>
 
+<script type="text/javascript">
+    
     function show_details_(behavior) {
         var data = "";
         switch (behavior) {

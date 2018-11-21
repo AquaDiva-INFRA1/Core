@@ -974,73 +974,73 @@ dataset_id ,Semantic Coverage, variable_id,variable_label,variable_concept_entit
 , ,2434,Site,http://purl.obolibrary.org/obo/BFO_0000029,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,String
 , ,2435,Meas2,No Annotation,No Annotation,none,Number
 , ,2436,Meas1,No Annotation,No Annotation,Meter,Decimal
-192,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+192,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
 195,0/2,2462,Research_question,No Annotation,No Annotation,String,aquadiva
 , ,2463,Keywaord,No Annotation,No Annotation,aquadiva,String
-196,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+196,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-197,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+197,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-198,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+198,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-214,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+214,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-215,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+215,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-216,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+216,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-217,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+217,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-218,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+218,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-219,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+219,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-220,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+220,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-221,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+221,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
-222,0/5,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
-, ,2456,Time,No Annotation,No Annotation,Time_only,Time
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
+222,0/5,2456,Time,No Annotation,No Annotation,Time,Time_only
 , ,2457,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
 , ,2458,Water Level (MAMSL),No Annotation,No Annotation,Meter,Decimal
 , ,2459,Depth to water,No Annotation,No Annotation,Meter,Decimal
+, ,2455,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Unit,Date Data type
 225,0/9,2464,Date (dd.mm.yyyy),No Annotation,No Annotation,Date Data type,Date Unit
 , ,2465,Time,No Annotation,No Annotation,Time_only,Time
 , ,2466,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
@@ -1059,3 +1059,905 @@ dataset_id ,Semantic Coverage, variable_id,variable_label,variable_concept_entit
 , ,2472,Air Pressure,No Annotation,No Annotation,milibar,double
 , ,2467,Solar_Radiation,No Annotation,No Annotation,Watt per meter square,Decimal
 , ,2468,Precipitation,No Annotation,No Annotation,Millimeter,Decimal
+229,0/39,2473,Sample_ID,No Annotation,No Annotation,String,aquadiva
+, ,2474,Well name,No Annotation,No Annotation,none,String
+, ,2475,Date+Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
+, ,2476,Reference Date,No Annotation,No Annotation,none,Date Data type
+, ,2477,Latitude,No Annotation,No Annotation,Decimal Degree,decimal
+, ,2478,Longitude,No Annotation,No Annotation,Decimal Degree,decimal
+, ,2479,UMT East,No Annotation,No Annotation,Meter,Number
+, ,2480,UMT North,No Annotation,No Annotation,Meter,Number
+, ,2481,Elevation,No Annotation,No Annotation,Meter above mean sea level,Decimal
+, ,2482,location,No Annotation,No Annotation,none,String
+, ,2483,Water Temperature,No Annotation,No Annotation,Degree_Celsuis,String
+, ,2484,Electrical  Conductivity,No Annotation,No Annotation,MicroSiemens/cm,String
+, ,2485,Electrical Conductivity (Tref=25),No Annotation,No Annotation,MicroSiemens/cm,String
+, ,2486,pH (PH),No Annotation,No Annotation,none,String
+, ,2487,Oxidation reduction potential,No Annotation,No Annotation,milli Volt,String
+, ,2488,Dissolved Oxygen,No Annotation,No Annotation,milligram/Liter,String
+, ,2489,Iron 2,No Annotation,No Annotation,milligram/Liter,String
+, ,2490,Nitrite [NO2]-,No Annotation,No Annotation,milligram/Liter,String
+, ,2491,Ammonium [NH4],No Annotation,No Annotation,milligram/Liter,String
+, ,2492,Acid Neutralizing Capacity (Alkalinity),No Annotation,No Annotation,milliequivalents per Liter,String
+, ,2493,Base Neutralizing Capacity (Acidity),No Annotation,No Annotation,milliequivalents per Liter,String
+, ,2494,Dissolved  Organic  Carbon,No Annotation,No Annotation,milligram/Liter,String
+, ,2495,Total  Organic  Carbon,No Annotation,No Annotation,milligram/Liter,String
+, ,2496,Total  Inorganic  Carbon,No Annotation,No Annotation,milligram/Liter,String
+, ,2497,Nitrite [NO2]- (1),No Annotation,No Annotation,milligram/Liter,String
+, ,2498,Nitrate [NO3]-,No Annotation,No Annotation,milligram/Liter,String
+, ,2499,Orthophosphate,No Annotation,No Annotation,milligram/Liter,String
+, ,2500,Sulphate,No Annotation,No Annotation,milligram/Liter,String
+, ,2501,Chloride [CL-],No Annotation,No Annotation,milligram/Liter,String
+, ,2502,Calcium [CA],No Annotation,No Annotation,milligram/Liter,String
+, ,2503,Iron [FE],No Annotation,No Annotation,milligram/Liter,String
+, ,2504,Potassium [K],No Annotation,No Annotation,milligram/Liter,String
+, ,2505,Magnesium [MG],No Annotation,No Annotation,milligram/Liter,String
+, ,2506,Manganese [MN],No Annotation,No Annotation,milligram/Liter,String
+, ,2507,Natrium,No Annotation,No Annotation,milligram/Liter,String
+, ,2508,Phosphorus [P],No Annotation,No Annotation,milligram/Liter,String
+, ,2509,Sulfur [S],No Annotation,No Annotation,milligram/Liter,String
+, ,2510,Iron (FE),No Annotation,No Annotation,microgram per Liter,String
+, ,2511,Manganese (MN),No Annotation,No Annotation,microgram per Liter,String
+231,0/2,2519,Research_question,No Annotation,No Annotation,String,none
+, ,2520,Keywaord,No Annotation,No Annotation,none,String
+239,0/16,2537,PointNumber,No Annotation,No Annotation,String,none
+, ,2538,PersonMeas,No Annotation,No Annotation,none,String
+, ,2539,where,No Annotation,No Annotation,none,String
+, ,2540,what,No Annotation,No Annotation,none,String
+, ,2541,date,No Annotation,No Annotation,none,String
+, ,2542,Point,No Annotation,No Annotation,none,String
+, ,2543,x,No Annotation,No Annotation,Meter,Decimal
+, ,2544,y,No Annotation,No Annotation,Meter,Decimal
+, ,2545,Typ,No Annotation,No Annotation,none,String
+, ,2546,located,No Annotation,No Annotation,none,String
+, ,2547,LAI,No Annotation,No Annotation,none,String
+, ,2548,SEL,No Annotation,No Annotation,none,String
+, ,2549,DIFN,No Annotation,No Annotation,none,String
+, ,2550,MTA,No Annotation,No Annotation,degrees,Text
+, ,2551,SEM,No Annotation,No Annotation,degrees,Text
+, ,2552,SMP,No Annotation,No Annotation,none,String
+240,0/16,2553,PointNumber,No Annotation,No Annotation,String,none
+, ,2554,PersonMeas,No Annotation,No Annotation,none,String
+, ,2555,where,No Annotation,No Annotation,none,String
+, ,2556,what,No Annotation,No Annotation,none,String
+, ,2557,date,No Annotation,No Annotation,none,String
+, ,2558,Point,No Annotation,No Annotation,none,String
+, ,2559,x,No Annotation,No Annotation,Meter,Decimal
+, ,2560,y,No Annotation,No Annotation,Meter,Decimal
+, ,2561,Typ,No Annotation,No Annotation,none,String
+, ,2562,located,No Annotation,No Annotation,none,String
+, ,2563,LAI,No Annotation,No Annotation,none,String
+, ,2564,SEL,No Annotation,No Annotation,none,String
+, ,2565,DIFN,No Annotation,No Annotation,none,String
+, ,2566,MTA,No Annotation,No Annotation,degrees,Text
+, ,2567,SEM,No Annotation,No Annotation,degrees,Text
+, ,2568,SMP,No Annotation,No Annotation,none,String
+245,38/50,2670,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Data type,Date Unit
+, ,2671,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,2672,Date and Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,2673,Solar Radiation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-spatial.owl#SpatialEntity ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C44445 ,Watt per meter square,Decimal
+, ,2674,Precipitation,http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,2675,Wind Speed_mean,http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,2676,Wind Speed_max,http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,2677,Battery voltage,http://purl.obolibrary.org/obo/NCIT_C50346, http://purl.obolibrary.org/obo/NCIT_C70813 ,milli Volt,integer
+, ,2678,Air temperature_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2679,Air temperature_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2680,Air temperature_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2681,Relative humidity_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2682,Relative humidity_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2683,Relative humidity_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2684,Dew point_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2685,Dew point_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2686,Air Pressure_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2687,Air Pressure_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2688,Air Pressure_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2689,Soil Temperature_mean (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2690,Soil Temperature_max (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2691,Soil Temperature_min (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2692,Dielectric permittivity (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://semanticscience.org/resource/CHEMINF_000248,none,decimal
+, ,2693,Volumentric water content (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2694,Soil Temperature_mean (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2695,Soil Temperature_max (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2696,Soil Temperature_min (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2697,Dielectric permittivity (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2698,Volumentric water content (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2699,Soil Temperature_mean (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2700,Soil Temperature_max (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2701,Soil Temperature_min (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2702,Dielectric permittivity (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2703,Volumentric water content (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+, ,2719,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+, ,2704,Soil Temperature_mean (Depth: 45cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2705,Soil Temperature_max (Depth: 45cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2706,Soil Temperature_min (Depth: 45cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2707,Dielectric permittivity (Depth: 45cm, rep.#: 1),No Annotation,No Annotation,none,decimal
+, ,2708,Volumentric water content (Depth: 45cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2709,Soil Temperature_mean (Depth: 45cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2710,Soil Temperature_max (Depth: 45cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2711,Soil Temperature_min (Depth: 45cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2712,Dielectric permittivity (Depth: 45cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2713,Volumentric water content (Depth: 45cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2714,Soil Temperature_mean (Depth: 45cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2715,Soil Temperature_max (Depth: 45cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2716,Soil Temperature_min (Depth: 45cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2717,Dielectric permittivity (Depth: 45cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2718,Volumentric water content (Depth: 45cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+246,8/8,2727,Protein_group_ID,http://purl.obolibrary.org/obo/PR_000000001,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,Number,none
+, ,2728,Phylum,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C45277 ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,Text
+, ,2729,Class,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C45280 ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,Text
+, ,2730,Order,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C45287 ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,Text
+, ,2731,F1C1_4,No Annotation ,No Annotation ,none,double
+, ,2732,F1m3_4,No Annotation ,No Annotation ,none,double
+, ,2733,F1C1_16,No Annotation ,No Annotation ,none,double
+, ,2734,F1C2_16,No Annotation ,No Annotation ,none,double
+247,9/9,2743,Protein_group_ID,http://purl.obolibrary.org/obo/PR_000000001,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,Number,none
+, ,2744,KEGG-number,http://purl.obolibrary.org/obo/MI_0470 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25337 ,none,string
+, ,2745,Metabolism,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C19536,No Annotation,none,string
+, ,2746,Pathway,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C54214,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,string
+, ,2747,Enzyme,http://purl.obolibrary.org/obo/NCIT_C16554,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,string
+, ,2748,F1C1_4,No Annotation ,No Annotation ,none,double
+, ,2749,F1m3_4,No Annotation ,No Annotation ,none,double
+, ,2750,F1C1_16,No Annotation ,No Annotation ,none,double
+, ,2751,F1C2_16,No Annotation ,No Annotation ,none,double
+251,18/18,2829,DateTime,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,date,none
+, ,2830,Event_ID,http://purl.obolibrary.org/obo/NCIT_C25499,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,String
+, ,2831,delta_T,http://purl.obolibrary.org/obo/PATO_0000165 ,http://purl.obolibrary.org/obo/NCIT_C54126 ,none,Number
+, ,2832,Tree_ID,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2833,X,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2834,Y,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2835,Tree_species,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C45293 ,none,String
+, ,2836,tree_dbh,http://purl.dataone.org/odo/ECSO_00000501,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C25285,Meter,Decimal
+, ,2837,P_SF_W_l,http://purl.dataone.org/odo/ECSO_00000501,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,Liter,Decimal
+, ,2838,P_SF_W_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2839,Conc_SF_W_NO2-N,http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,Decimal
+, ,2840,Conc_SF_W_NO2-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2841,Conc_SF_W_NO3-N,http://purl.obolibrary.org/obo/CHEBI_17632 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,Decimal
+, ,2842,Conc_SF_W_NO3-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2843,Conc_SF_W_NH4-N,http://purl.obolibrary.org/obo/CHEBI_28938 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,Decimal
+, ,2844,Conc_SF_W_NH4-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2845,Conc_SF_W_Nmin,http://purl.obolibrary.org/obo/NCIT_C61863,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,Decimal
+, ,2846,Conc_SF_W_Nmin_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+252,18/18,2829,DateTime,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,date,none
+, ,2830,Event_ID,http://purl.obolibrary.org/obo/NCIT_C25499,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,String
+, ,2831,delta_T,http://purl.obolibrary.org/obo/PATO_0000165 ,http://purl.obolibrary.org/obo/NCIT_C54126 ,none,Number
+, ,2832,Tree_ID,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2833,X,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2834,Y,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2835,Tree_species,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C45293 ,none,String
+, ,2836,tree_dbh,http://purl.dataone.org/odo/ECSO_00000501,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C25285,Meter,Decimal
+, ,2837,P_SF_W_l,http://purl.dataone.org/odo/ECSO_00000501,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,Liter,Decimal
+, ,2838,P_SF_W_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2839,Conc_SF_W_NO2-N,http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,Decimal
+, ,2840,Conc_SF_W_NO2-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2841,Conc_SF_W_NO3-N,http://purl.obolibrary.org/obo/CHEBI_17632 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,Decimal
+, ,2842,Conc_SF_W_NO3-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2843,Conc_SF_W_NH4-N,http://purl.obolibrary.org/obo/CHEBI_28938 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,Decimal
+, ,2844,Conc_SF_W_NH4-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2845,Conc_SF_W_Nmin,http://purl.obolibrary.org/obo/NCIT_C61863,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,Decimal
+, ,2846,Conc_SF_W_Nmin_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+253,41/41,2847,DateTime,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,date,none
+, ,2848,Event_ID,http://purl.obolibrary.org/obo/NCIT_C25499,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,String
+, ,2849,delta_T,http://purl.obolibrary.org/obo/PATO_0000165 ,http://purl.obolibrary.org/obo/NCIT_C54126 ,none,Number
+, ,2850,Location_ID,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,Number
+, ,2851,X,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2852,Y,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2853,TF_Treatment,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,String
+, ,2854,SF_Treatment,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,String
+, ,2855,Vegetation,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C45293 ,none,string
+, ,2856,Q_lys30_W_L,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,No Annotation,Liter,Decimal
+, ,2857,Qmin_lys30_W_L,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,No Annotation,Liter,Decimal
+, ,2858,Q_lys30_W_mm,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,No Annotation,Millimeter,Decimal
+, ,2859,Q_lys30_W_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,number
+, ,2860,Conc_lys30_W_NO2-N,http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2862,Conc_lys30_W_NO3-N,http://purl.obolibrary.org/obo/CHEBI_17632 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2863,Conc_lys30_W_NO3-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2864,Conc_lys30_W_NH4-N,http://purl.obolibrary.org/obo/CHEBI_28938 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2865,Conc_lys30_W_NH4-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2866,Conc_lys30_W_Nmin,http://purl.obolibrary.org/obo/NCIT_C61863,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2867,Conc_lys30_W_Nmin_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2868,P_g_W_mm,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/OBI_0600034 ,Millimeter,Decimal
+, ,2869,P_g_W_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2870,Conc_g_W_NO2-N,http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2871,Conc_g_W_NO2-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2872,Conc_g_W_NO3-N,http://purl.obolibrary.org/obo/CHEBI_17632 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2873,Conc_g_W_NO3-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2874,Conc_g_W_NH4-N,http://purl.obolibrary.org/obo/CHEBI_28938 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2875,Conc_g_W_NH4-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2876,Conc_g_W_Nmin,http://purl.obolibrary.org/obo/NCIT_C61863,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2877,Conc_g_W_N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2878,P_TF_W_mm,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/OBI_0600034 ,Millimeter,Decimal
+, ,2879,P_TF_W_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2880,Conc_TF_W_NO2-N,http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2881,Conc_TF_W_NO2-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2882,Conc_TF_W_NO3-N,http://purl.obolibrary.org/obo/CHEBI_17632 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2883,Conc_TF_W_NO3-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2884,Conc_TF_W_NH4-N,http://purl.obolibrary.org/obo/CHEBI_28938 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2885,Conc_TF_W_NH4-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2886,Conc_TF_W_Nmin,http://purl.obolibrary.org/obo/NCIT_C61863,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2887,Conc_TF_W_N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2861,Conc_lys30_W_NO2-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+255,0/8,2888,Order File ID,No Annotation,No Annotation,Number,none
+, ,2889,Sample Year,No Annotation,No Annotation,Year,Number
+, ,2890,Sample Year No.,No Annotation,No Annotation,none,Number
+, ,2891,Sample Name,No Annotation,No Annotation,none,String
+, ,2892,Parameter Name,No Annotation,No Annotation,none,String
+, ,2893,Result,No Annotation,No Annotation,none,String
+, ,2894,Unit,No Annotation,No Annotation,none,String
+, ,2895,Sample Comment,No Annotation,No Annotation,none,String
+256,41/41,2847,DateTime,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,date,none
+, ,2848,Event_ID,http://purl.obolibrary.org/obo/NCIT_C25499,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,String
+, ,2849,delta_T,http://purl.obolibrary.org/obo/PATO_0000165 ,http://purl.obolibrary.org/obo/NCIT_C54126 ,none,Number
+, ,2850,Location_ID,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,Number
+, ,2851,X,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2852,Y,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2853,TF_Treatment,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,String
+, ,2854,SF_Treatment,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,String
+, ,2855,Vegetation,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C45293 ,none,string
+, ,2856,Q_lys30_W_L,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,No Annotation,Liter,Decimal
+, ,2857,Qmin_lys30_W_L,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,No Annotation,Liter,Decimal
+, ,2858,Q_lys30_W_mm,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,No Annotation,Millimeter,Decimal
+, ,2859,Q_lys30_W_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,number
+, ,2860,Conc_lys30_W_NO2-N,http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2862,Conc_lys30_W_NO3-N,http://purl.obolibrary.org/obo/CHEBI_17632 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2863,Conc_lys30_W_NO3-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2864,Conc_lys30_W_NH4-N,http://purl.obolibrary.org/obo/CHEBI_28938 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2865,Conc_lys30_W_NH4-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2866,Conc_lys30_W_Nmin,http://purl.obolibrary.org/obo/NCIT_C61863,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2867,Conc_lys30_W_Nmin_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2868,P_g_W_mm,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/OBI_0600034 ,Millimeter,Decimal
+, ,2869,P_g_W_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2870,Conc_g_W_NO2-N,http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2871,Conc_g_W_NO2-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2872,Conc_g_W_NO3-N,http://purl.obolibrary.org/obo/CHEBI_17632 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2873,Conc_g_W_NO3-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2874,Conc_g_W_NH4-N,http://purl.obolibrary.org/obo/CHEBI_28938 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2875,Conc_g_W_NH4-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2876,Conc_g_W_Nmin,http://purl.obolibrary.org/obo/NCIT_C61863,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2877,Conc_g_W_N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2878,P_TF_W_mm,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/OBI_0600034 ,Millimeter,Decimal
+, ,2879,P_TF_W_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2880,Conc_TF_W_NO2-N,http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2881,Conc_TF_W_NO2-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2882,Conc_TF_W_NO3-N,http://purl.obolibrary.org/obo/CHEBI_17632 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2883,Conc_TF_W_NO3-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2884,Conc_TF_W_NH4-N,http://purl.obolibrary.org/obo/CHEBI_28938 ,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2885,Conc_TF_W_NH4-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2886,Conc_TF_W_Nmin,http://purl.obolibrary.org/obo/NCIT_C61863,http://purl.obolibrary.org/obo/PATO_0000033 ,miligram Nitrogen per Liter,Decimal
+, ,2887,Conc_TF_W_N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+, ,2861,Conc_lys30_W_NO2-N_flag,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/NCIT_C43578,none,Number
+257,6/6,2896,Sample Year,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Number,Year
+, ,2897,Sample Name,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,String
+, ,2898,Parameter Name,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,String
+, ,2899,Result,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000033 ,none,String
+, ,2900,Unit,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C68553,none,String
+, ,2901,Sample Comment,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C25393,none,String
+258,0/50,2641,Soil Temperature_min (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Decimal,Celsius
+, ,2642,Dielectric permittivity (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,none,decimal
+, ,2643,Volumentric water content (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2644,Soil Temperature_mean (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2645,Soil Temperature_max (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2646,Soil Temperature_min (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2647,Dielectric permittivity (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2648,Volumentric water content (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2649,Soil Temperature_mean (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2650,Soil Temperature_max (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2651,Soil Temperature_min (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2652,Dielectric permittivity (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2653,Volumentric water content (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+, ,2654,Soil Temperature_mean (Depth: 60cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2621,Time,No Annotation,No Annotation,Time_only,Time
+, ,2624,Precipitation,No Annotation,No Annotation,Millimeter,Decimal
+, ,2632,Relative humidity_max,No Annotation,No Annotation,Percent,Decimal
+, ,2633,Relative humidity_min,No Annotation,No Annotation,Percent,Decimal
+, ,2634,Dew point_mean,No Annotation,No Annotation,Celsius,Decimal
+, ,2635,Dew point_min,No Annotation,No Annotation,Celsius,Decimal
+, ,2636,Air Pressure_mean,No Annotation,No Annotation,milibar,double
+, ,2637,Air Pressure_max,No Annotation,No Annotation,milibar,double
+, ,2638,Air Pressure_min,No Annotation,No Annotation,milibar,double
+, ,2629,Battery voltage,No Annotation,No Annotation,milli Volt,integer
+, ,2630,Air temperature_max,No Annotation,No Annotation,Celsius,Decimal
+, ,2631,Air temperature_min,No Annotation,No Annotation,Celsius,Decimal
+, ,2639,Soil Temperature_mean (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2640,Soil Temperature_max (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2623,Solar Radiation,No Annotation,No Annotation,Watt per meter square,Decimal
+, ,2625,Wind Speed_mean,No Annotation,No Annotation,Meter per second,Decimal
+, ,2620,Date,No Annotation,No Annotation,Date Unit,Date Data type
+, ,2622,Date and Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
+, ,2669,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+, ,2626,Air temperature_mean,No Annotation,No Annotation,Celsius,Decimal
+, ,2627,Relative humidity_mean,No Annotation,No Annotation,Percent,Decimal
+, ,2655,Soil Temperature_max (Depth: 60cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2656,Soil Temperature_min (Depth: 60cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2657,Dielectric permittivity (Depth: 60cm, rep.#: 1),No Annotation,No Annotation,none,decimal
+, ,2658,Volumentric water content (Depth: 60cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2659,Soil Temperature_mean (Depth: 60cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2660,Soil Temperature_max (Depth: 60cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2661,Soil Temperature_min (Depth: 60cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2662,Dielectric permittivity (Depth: 60cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2663,Volumentric water content (Depth: 60cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2664,Soil Temperature_mean (Depth: 60cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2665,Soil Temperature_max (Depth: 60cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2666,Soil Temperature_min (Depth: 60cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2667,Dielectric permittivity (Depth: 60cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2668,Volumentric water content (Depth: 60cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+, ,2628,Wind Speed_max,No Annotation,No Annotation,Meter per second,Decimal
+259,0/50,2670,Date,No Annotation,No Annotation,Date Data type,Date Unit
+, ,2671,Time,No Annotation,No Annotation,Time_only,Time
+, ,2672,Date and Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
+, ,2673,Solar Radiation,No Annotation,No Annotation,Watt per meter square,Decimal
+, ,2674,Precipitation,No Annotation,No Annotation,Millimeter,Decimal
+, ,2675,Wind Speed_mean,No Annotation,No Annotation,Meter per second,Decimal
+, ,2676,Wind Speed_max,No Annotation,No Annotation,Meter per second,Decimal
+, ,2677,Battery voltage,No Annotation,No Annotation,milli Volt,integer
+, ,2678,Air temperature_mean,No Annotation,No Annotation,Celsius,Decimal
+, ,2679,Air temperature_max,No Annotation,No Annotation,Celsius,Decimal
+, ,2680,Air temperature_min,No Annotation,No Annotation,Celsius,Decimal
+, ,2681,Relative humidity_mean,No Annotation,No Annotation,Percent,Decimal
+, ,2682,Relative humidity_max,No Annotation,No Annotation,Percent,Decimal
+, ,2683,Relative humidity_min,No Annotation,No Annotation,Percent,Decimal
+, ,2684,Dew point_mean,No Annotation,No Annotation,Celsius,Decimal
+, ,2685,Dew point_min,No Annotation,No Annotation,Celsius,Decimal
+, ,2686,Air Pressure_mean,No Annotation,No Annotation,milibar,double
+, ,2687,Air Pressure_max,No Annotation,No Annotation,milibar,double
+, ,2688,Air Pressure_min,No Annotation,No Annotation,milibar,double
+, ,2689,Soil Temperature_mean (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2690,Soil Temperature_max (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2691,Soil Temperature_min (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2692,Dielectric permittivity (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,none,decimal
+, ,2693,Volumentric water content (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2694,Soil Temperature_mean (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2695,Soil Temperature_max (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2696,Soil Temperature_min (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2697,Dielectric permittivity (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2698,Volumentric water content (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2699,Soil Temperature_mean (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2700,Soil Temperature_max (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2701,Soil Temperature_min (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2702,Dielectric permittivity (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2703,Volumentric water content (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+, ,2719,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+, ,2704,Soil Temperature_mean (Depth: 45cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2705,Soil Temperature_max (Depth: 45cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2706,Soil Temperature_min (Depth: 45cm, rep.#: 1),No Annotation,No Annotation,Celsius,Decimal
+, ,2707,Dielectric permittivity (Depth: 45cm, rep.#: 1),No Annotation,No Annotation,none,decimal
+, ,2708,Volumentric water content (Depth: 45cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2709,Soil Temperature_mean (Depth: 45cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2710,Soil Temperature_max (Depth: 45cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2711,Soil Temperature_min (Depth: 45cm, rep.#: 2),No Annotation,No Annotation,Celsius,Decimal
+, ,2712,Dielectric permittivity (Depth: 45cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2713,Volumentric water content (Depth: 45cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2714,Soil Temperature_mean (Depth: 45cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2715,Soil Temperature_max (Depth: 45cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2716,Soil Temperature_min (Depth: 45cm, rep.#: 3),No Annotation,No Annotation,Celsius,Decimal
+, ,2717,Dielectric permittivity (Depth: 45cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2718,Volumentric water content (Depth: 45cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+260,12/12,2902,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,String,none
+, ,2903,Air temperature (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2904,Air temperature (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2905,Air temperature (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2906,Sunshine duration,http://purl.obolibrary.org/obo/NCIT_C25499,http://purl.obolibrary.org/obo/NCIT_C25330,Hour,double
+, ,2907,Precipitation,http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,2908,Soil Temperature (min),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2909,Relative humidity (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2910,Relative humidity (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2911,Relative humidity (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2912,Wind Speed (Mean),http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,kilometer per hour,double
+, ,2913,Gust Speed (Max),http://sweet.jpl.nasa.gov/2.3/phenAtmoWind.owl#Gust ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,kilometer per hour,double
+263,4/13,2914,Sample name,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,String,none
+, ,2915,Sample type,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#Type ,none,String
+, ,2916,Location,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/GAZ_00000448 ,none,String
+, ,2917,Sampling depth,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0001595 ,none,String
+, ,2918,Lithostratigraphic unit,No Annotation,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C68553,none,string
+, ,2919,Length,No Annotation,http://purl.obolibrary.org/obo/PATO_0000122 ,milimeter,double
+, ,2920,Diameter,No Annotation,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C25285,milimeter,double
+, ,2921,Density,No Annotation,http://purl.obolibrary.org/obo/NCIT_C45781 ,gram per cubic centimeter,double
+, ,2922,Density SD,No Annotation,http://purl.obolibrary.org/obo/NCIT_C45781 ,none,Decimal
+, ,2923,Permeability,No Annotation,http://purl.obolibrary.org/obo/NCIT_C71611,milidarcy,Decimal
+, ,2924,Permeability (m^2),No Annotation,http://purl.obolibrary.org/obo/NCIT_C71611,square meter,double
+, ,2925,Porosity,No Annotation,http://purl.bioontology.org/ontology/MESH/D016062,percentage,double
+, ,2926,Porosity SD,No Annotation,http://purl.bioontology.org/ontology/MESH/D016062,none,decimal
+264,6/8,2927,Sample Name,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,String,none
+, ,2928,Parameter,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,String
+, ,2929,Categorization of parameter,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/OBI_0000963 ,none,string
+, ,2930,Measurement value,No Annotation,No Annotation,none,string
+, ,2931,Measurement value unit,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C68553,none,string
+, ,2932,Limit of quantification,http://purl.bioontology.org/ontology/MESH/D057230,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25712 ,none,decimal
+, ,2933,Reference of the method,No Annotation,No Annotation,none,string
+, ,2934,Laboratory,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,string
+265,6/8,2927,Sample Name,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,String,none
+, ,2928,Parameter,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,String
+, ,2929,Categorization of parameter,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/OBI_0000963 ,none,string
+, ,2930,Measurement value,No Annotation,No Annotation,none,string
+, ,2931,Measurement value unit,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C68553,none,string
+, ,2932,Limit of quantification,http://purl.bioontology.org/ontology/MESH/D057230,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25712 ,none,decimal
+, ,2933,Reference of the method,No Annotation,No Annotation,none,string
+, ,2934,Laboratory,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,string
+266,17/18,2947,SMMP_ID,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,number,none
+, ,2948,X_SMMP,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2949,Y_SMMP,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2950,POS_Depth,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0001595 ,none,Char
+, ,2951,Subplot_ID,http://purl.obolibrary.org/obo/GAZ_00000448 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,String
+, ,2952,Node_ID,http://purl.obolibrary.org/obo/BTO_0001156 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2953,Sensor_ID,http://purl.obolibrary.org/obo/CHMO_0002793 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2954,SMMP_Type,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#Type ,none,string
+, ,2955,Kernel_transect_ID,http://purl.obolibrary.org/obo/BTO_0000668 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2956,Kernel_transect_dist,http://purl.obolibrary.org/obo/BTO_0000668 ,http://purl.obolibrary.org/obo/NCIT_C25167,Meter,Decimal
+, ,2957,Tree_transect_ID,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2958,Tree_transect_dist,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/NCIT_C25167,Meter,Decimal
+, ,2959,Next_tree_ID,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2960,X_Tree,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2961,Y_Tree,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2962,Next_tree_dist,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/NCIT_C25167,Meter,Decimal
+, ,2963,Lysimeter_ID,http://purl.obolibrary.org/obo/OBI_0000968 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2964,Logger,No Annotation,No Annotation,none,string
+271,20/20,2965,Tree_ID,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,number,none
+, ,2966,Plot_ID,http://purl.obolibrary.org/obo/GAZ_00000448 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2967,X_Tree,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2968,Y_Tree,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2969,Z_Tree,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2970,Tree_spec_Ger,http://purl.dataone.org/odo/ECSO_00000501,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,string
+, ,2971,Tree_spec_sci,http://purl.dataone.org/odo/ECSO_00000501,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,string
+, ,2972,Tree_circ_2014,http://purl.dataone.org/odo/ECSO_00000501,http://purl.bioontology.org/ontology/SNOMEDCT/74551000,Centimeter,Number
+, ,2973,tree_circ_2016,http://purl.dataone.org/odo/ECSO_00000501,http://purl.bioontology.org/ontology/SNOMEDCT/74551000,Centimeter,Number
+, ,2974,Tree_circ_2017,http://purl.dataone.org/odo/ECSO_00000501,http://purl.bioontology.org/ontology/SNOMEDCT/74551000,Centimeter,Number
+, ,2975,Tree_circ_2018,http://purl.dataone.org/odo/ECSO_00000501,http://purl.bioontology.org/ontology/SNOMEDCT/74551000,Centimeter,Number
+, ,2976,Tree_dbh_2014,http://purl.dataone.org/odo/ECSO_00000501,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C25285,Meter,Decimal
+, ,2977,Tree_dbh_2016,http://purl.dataone.org/odo/ECSO_00000501,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C25285,Meter,Decimal
+, ,2978,Tree_dbh_2017,http://purl.dataone.org/odo/ECSO_00000501,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C25285,Meter,Decimal
+, ,2979,Tree_dbh_2018,http://purl.dataone.org/odo/ECSO_00000501,http://www.ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C25285,Meter,Decimal
+, ,2980,h_tree_crown_top_2013,http://purl.jp/bio/4/id/200906001188100689 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25347,Meter,Decimal
+, ,2981,h_tree_crown_base_2013,http://purl.jp/bio/4/id/200906001188100689 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25347,Meter,Decimal
+, ,2982,Tree_crown_storey,http://purl.jp/bio/4/id/200906001188100689 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25347,none,number
+, ,2983,Tree_crown_form,http://purl.jp/bio/4/id/200906001188100689 ,http://purl.bioontology.org/ontology/HL7/C0678257 ,none,string
+, ,2984,Note,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+273,32/32,3021,CanLay_count_dead,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,number,none
+, ,3022,CanLay_count_total,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,2991,tfmp_ID,http://purl.obolibrary.org/obo/OBI_0000968 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2992,x_tfmp,http://purl.obolibrary.org/obo/OBI_0000968 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2993,y_tfmp,http://purl.obolibrary.org/obo/OBI_0000968 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2994,subplot_ID,http://purl.obolibrary.org/obo/GAZ_00000448 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,String
+, ,2995,tfmp_type,http://purl.obolibrary.org/obo/OBI_0000968 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#Type ,none,string
+, ,2996,next_tree_ID,http://purl.dataone.org/odo/ECSO_00000501,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,2997,x_tree,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2998,y_tree,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,2999,next_tree_dist,http://purl.dataone.org/odo/ECSO_00000501,http://purl.obolibrary.org/obo/NCIT_C25167,Meter,Decimal
+, ,3000,lysimeter_ID,http://purl.obolibrary.org/obo/OBI_0000968 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,3001,tree_count_FS,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3002,tree_count_A,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3003,tree_count_Aps,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3004,tree_count_Apl,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3005,tree_count_Tp,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3006,tree_count_FE,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3007,tree_count_CB,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3008,tree_count_U,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3009,tree_count_NA,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3010,tree_count_dead,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3011,tree_count_total,http://purl.dataone.org/odo/ECSO_00000501,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3012,CanLay_count_FS,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3013,CanLay_count_A,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3014,CanLay_count_Aps,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3015,CanLay_count_Apl,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3016,CanLay_count_Tp,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3017,CanLay_count_FE,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3018,CanLay_count_CB,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3019,CanLay_count_U,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+, ,3020,CanLay_count_NA,http://purl.obolibrary.org/obo/ENVO_01001242,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Count ,none,number
+274,0/8,2888,Order File ID,No Annotation,No Annotation,Number,none
+, ,2889,Sample Year,No Annotation,No Annotation,Year,Number
+, ,2890,Sample Year No.,No Annotation,No Annotation,none,Number
+, ,2891,Sample Name,No Annotation,No Annotation,none,String
+, ,2892,Parameter Name,No Annotation,No Annotation,none,String
+, ,2893,Result,No Annotation,No Annotation,none,String
+, ,2894,Unit,No Annotation,No Annotation,none,String
+, ,2895,Sample Comment,No Annotation,No Annotation,none,String
+275,0/20,3045,Date,No Annotation,No Annotation,Date Data type,Date Unit
+, ,3046,Time,No Annotation,No Annotation,Time_only,Time
+, ,3047,Date and Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
+, ,3048,Solar Radiation,No Annotation,No Annotation,Watt per meter square,Decimal
+, ,3049,Precipitation,No Annotation,No Annotation,Millimeter,Decimal
+, ,3050,Wind Speed (mean),No Annotation,No Annotation,Meter per second,Decimal
+, ,3051,Wind Speed (max),No Annotation,No Annotation,Meter per second,Decimal
+, ,3052,Battery voltage,No Annotation,No Annotation,milli Volt,integer
+, ,3053,Air temperature (mean),No Annotation,No Annotation,Celsius,Decimal
+, ,3054,Air temperature (max),No Annotation,No Annotation,Celsius,Decimal
+, ,3055,Relative humidity (mean),No Annotation,No Annotation,Percent,Decimal
+, ,3056,Relative humidity (max),No Annotation,No Annotation,Percent,Decimal
+, ,3057,Relative humidity (min),No Annotation,No Annotation,Percent,Decimal
+, ,3058,Dew point (mean),No Annotation,No Annotation,Celsius,Decimal
+, ,3059,Dew point (min),No Annotation,No Annotation,Celsius,Decimal
+, ,3060,Air Pressure (mean),No Annotation,No Annotation,milibar,double
+, ,3061,Air Pressure (max),No Annotation,No Annotation,milibar,double
+, ,3062,Air Pressure (min),No Annotation,No Annotation,milibar,double
+, ,3063,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+, ,3064,Air temperature (min),No Annotation,No Annotation,Celsius,Decimal
+276,0/20,3045,Date,No Annotation,No Annotation,Date Data type,Date Unit
+, ,3046,Time,No Annotation,No Annotation,Time_only,Time
+, ,3047,Date and Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
+, ,3048,Solar Radiation,No Annotation,No Annotation,Watt per meter square,Decimal
+, ,3049,Precipitation,No Annotation,No Annotation,Millimeter,Decimal
+, ,3050,Wind Speed (mean),No Annotation,No Annotation,Meter per second,Decimal
+, ,3051,Wind Speed (max),No Annotation,No Annotation,Meter per second,Decimal
+, ,3052,Battery voltage,No Annotation,No Annotation,milli Volt,integer
+, ,3053,Air temperature (mean),No Annotation,No Annotation,Celsius,Decimal
+, ,3054,Air temperature (max),No Annotation,No Annotation,Celsius,Decimal
+, ,3055,Relative humidity (mean),No Annotation,No Annotation,Percent,Decimal
+, ,3056,Relative humidity (max),No Annotation,No Annotation,Percent,Decimal
+, ,3057,Relative humidity (min),No Annotation,No Annotation,Percent,Decimal
+, ,3058,Dew point (mean),No Annotation,No Annotation,Celsius,Decimal
+, ,3059,Dew point (min),No Annotation,No Annotation,Celsius,Decimal
+, ,3060,Air Pressure (mean),No Annotation,No Annotation,milibar,double
+, ,3061,Air Pressure (max),No Annotation,No Annotation,milibar,double
+, ,3062,Air Pressure (min),No Annotation,No Annotation,milibar,double
+, ,3063,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+, ,3064,Air temperature (min),No Annotation,No Annotation,Celsius,Decimal
+277,0/20,3045,Date,No Annotation,No Annotation,Date Data type,Date Unit
+, ,3046,Time,No Annotation,No Annotation,Time_only,Time
+, ,3047,Date and Time,No Annotation,No Annotation,DateTime Unit,DateTime Data Type
+, ,3048,Solar Radiation,No Annotation,No Annotation,Watt per meter square,Decimal
+, ,3049,Precipitation,No Annotation,No Annotation,Millimeter,Decimal
+, ,3050,Wind Speed (mean),No Annotation,No Annotation,Meter per second,Decimal
+, ,3051,Wind Speed (max),No Annotation,No Annotation,Meter per second,Decimal
+, ,3052,Battery voltage,No Annotation,No Annotation,milli Volt,integer
+, ,3053,Air temperature (mean),No Annotation,No Annotation,Celsius,Decimal
+, ,3054,Air temperature (max),No Annotation,No Annotation,Celsius,Decimal
+, ,3055,Relative humidity (mean),No Annotation,No Annotation,Percent,Decimal
+, ,3056,Relative humidity (max),No Annotation,No Annotation,Percent,Decimal
+, ,3057,Relative humidity (min),No Annotation,No Annotation,Percent,Decimal
+, ,3058,Dew point (mean),No Annotation,No Annotation,Celsius,Decimal
+, ,3059,Dew point (min),No Annotation,No Annotation,Celsius,Decimal
+, ,3060,Air Pressure (mean),No Annotation,No Annotation,milibar,double
+, ,3061,Air Pressure (max),No Annotation,No Annotation,milibar,double
+, ,3062,Air Pressure (min),No Annotation,No Annotation,milibar,double
+, ,3063,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+, ,3064,Air temperature (min),No Annotation,No Annotation,Celsius,Decimal
+278,19/20,3045,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Data type,Date Unit
+, ,3046,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,3047,Date and Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,3048,Solar Radiation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-spatial.owl#SpatialEntity ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C44445 ,Watt per meter square,Decimal
+, ,3049,Precipitation,http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,3050,Wind Speed (mean),http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,3051,Wind Speed (max),http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,3052,Battery voltage,http://purl.obolibrary.org/obo/NCIT_C50346, http://purl.obolibrary.org/obo/NCIT_C70813 ,milli Volt,integer
+, ,3053,Air temperature (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3054,Air temperature (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3055,Relative humidity (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3056,Relative humidity (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3057,Relative humidity (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3058,Dew point (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3059,Dew point (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3060,Air Pressure (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3061,Air Pressure (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3062,Air Pressure (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3063,Reference Evapotranspiration,No Annotation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,3064,Air temperature (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+279,19/20,3045,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Data type,Date Unit
+, ,3046,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,3047,Date and Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,3048,Solar Radiation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-spatial.owl#SpatialEntity ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C44445 ,Watt per meter square,Decimal
+, ,3049,Precipitation,http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,3050,Wind Speed (mean),http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,3051,Wind Speed (max),http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,3052,Battery voltage,http://purl.obolibrary.org/obo/NCIT_C50346, http://purl.obolibrary.org/obo/NCIT_C70813 ,milli Volt,integer
+, ,3053,Air temperature (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3054,Air temperature (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3055,Relative humidity (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3056,Relative humidity (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3057,Relative humidity (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3058,Dew point (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3059,Dew point (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3060,Air Pressure (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3061,Air Pressure (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3062,Air Pressure (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3063,Reference Evapotranspiration,No Annotation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,3064,Air temperature (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+280,38/50,2641,Soil Temperature_min (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Decimal,Celsius
+, ,2642,Dielectric permittivity (Depth: 30cm, rep.#: 1),can‘t find,can‘t find,none,decimal
+, ,2643,Volumentric water content (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2644,Soil Temperature_mean (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2645,Soil Temperature_max (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2646,Soil Temperature_min (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2647,Dielectric permittivity (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2648,Volumentric water content (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2649,Soil Temperature_mean (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2650,Soil Temperature_max (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2651,Soil Temperature_min (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2652,Dielectric permittivity (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2653,Volumentric water content (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+, ,2654,Soil Temperature_mean (Depth: 60cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2621,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,2624,Precipitation,http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,2632,Relative humidity_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2633,Relative humidity_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2634,Dew point_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2635,Dew point_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2636,Air Pressure_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2637,Air Pressure_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2638,Air Pressure_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2629,Battery voltage,http://purl.obolibrary.org/obo/NCIT_C50346, http://purl.obolibrary.org/obo/NCIT_C70813 ,milli Volt,integer
+, ,2630,Air temperature_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2631,Air temperature_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2639,Soil Temperature_mean (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2640,Soil Temperature_max (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2623,Solar Radiation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-spatial.owl#SpatialEntity ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C44445 ,Watt per meter square,Decimal
+, ,2625,Wind Speed_mean,http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,2620,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Unit,Date Data type
+, ,2622,Date and Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,2669,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+, ,2626,Air temperature_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2627,Relative humidity_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2655,Soil Temperature_max (Depth: 60cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2656,Soil Temperature_min (Depth: 60cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2657,Dielectric permittivity (Depth: 60cm, rep.#: 1),No Annotation,No Annotation,none,decimal
+, ,2658,Volumentric water content (Depth: 60cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2659,Soil Temperature_mean (Depth: 60cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2660,Soil Temperature_max (Depth: 60cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2661,Soil Temperature_min (Depth: 60cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2662,Dielectric permittivity (Depth: 60cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2663,Volumentric water content (Depth: 60cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2664,Soil Temperature_mean (Depth: 60cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2665,Soil Temperature_max (Depth: 60cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2666,Soil Temperature_min (Depth: 60cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2667,Dielectric permittivity (Depth: 60cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2668,Volumentric water content (Depth: 60cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+, ,2628,Wind Speed_max,http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+283,12/12,3112,Station ID,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C67102 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,number,none
+, ,3113,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Unit,Date Data type
+, ,3114,Precipitation (sum),http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,3115,Precipitation form,http://purl.obolibrary.org/obo/ENVO_01000406,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,string
+, ,3116,Snow depth,http://purl.obolibrary.org/obo/ENVO_01000406,http://purl.obolibrary.org/obo/PATO_0001595 ,Centimeter,double
+, ,3117,Cloud cover (mean),http://purl.obolibrary.org/obo/ENVO_01000760 ,http://purl.obolibrary.org/obo/CHMO_0002822 ,Okta unit,double
+, ,3118,Vapor Pressure (mean),http://www.ontobee.org/ontology/ENVO?iri=http://purl.obolibrary.org/obo/ENVO_01000266,http://purl.obolibrary.org/obo/NCIT_C25195 ,hPa,decimal
+, ,3119,Air temperature (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3120,Relative humidity (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3121,Air temperature max (2 m above ground level),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3122,Air temperature min (2 m above ground level),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3123,Air temperature min (5 cm above ground level),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+284,38/50,2641,Soil Temperature_min (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Decimal,Celsius
+, ,2642,Dielectric permittivity (Depth: 30cm, rep.#: 1),can‘t find,can‘t find,none,decimal
+, ,2643,Volumentric water content (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2644,Soil Temperature_mean (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2645,Soil Temperature_max (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2646,Soil Temperature_min (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2647,Dielectric permittivity (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2648,Volumentric water content (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2649,Soil Temperature_mean (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2650,Soil Temperature_max (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2651,Soil Temperature_min (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2652,Dielectric permittivity (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2653,Volumentric water content (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+, ,2654,Soil Temperature_mean (Depth: 60cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2621,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,2624,Precipitation,http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,2632,Relative humidity_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2633,Relative humidity_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2634,Dew point_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2635,Dew point_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2636,Air Pressure_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2637,Air Pressure_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2638,Air Pressure_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2629,Battery voltage,http://purl.obolibrary.org/obo/NCIT_C50346, http://purl.obolibrary.org/obo/NCIT_C70813 ,milli Volt,integer
+, ,2630,Air temperature_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2631,Air temperature_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2639,Soil Temperature_mean (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2640,Soil Temperature_max (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2623,Solar Radiation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-spatial.owl#SpatialEntity ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C44445 ,Watt per meter square,Decimal
+, ,2625,Wind Speed_mean,http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,2620,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Unit,Date Data type
+, ,2622,Date and Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,2669,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+, ,2626,Air temperature_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2627,Relative humidity_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2655,Soil Temperature_max (Depth: 60cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2656,Soil Temperature_min (Depth: 60cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2657,Dielectric permittivity (Depth: 60cm, rep.#: 1),No Annotation,No Annotation,none,decimal
+, ,2658,Volumentric water content (Depth: 60cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2659,Soil Temperature_mean (Depth: 60cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2660,Soil Temperature_max (Depth: 60cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2661,Soil Temperature_min (Depth: 60cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2662,Dielectric permittivity (Depth: 60cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2663,Volumentric water content (Depth: 60cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2664,Soil Temperature_mean (Depth: 60cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2665,Soil Temperature_max (Depth: 60cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2666,Soil Temperature_min (Depth: 60cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2667,Dielectric permittivity (Depth: 60cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2668,Volumentric water content (Depth: 60cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+, ,2628,Wind Speed_max,http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+285,19/20,3124,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Data type,Date Unit
+, ,3125,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,3126,DateTime,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,3127,Solar radiation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-spatial.owl#SpatialEntity ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C44445 ,Watt per meter square,Number
+, ,3128,Precipitation,http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,3129,Wind speed (mean),http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,3130,Wind speed (max),http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,3131,Battery voltage,http://purl.obolibrary.org/obo/NCIT_C50346, http://purl.obolibrary.org/obo/NCIT_C70813 ,milli Volt,integer
+, ,3132,Air temperature (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3133,Air temperature (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3134,Air temperature (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3135,Relative humidity (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3136,Relative humidity (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3137,Relative humidity (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3138,Dew point (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3139,Dew point (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3140,Air Pressure (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3141,Air Pressure (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3142,Air Pressure (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3143,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+287,19/20,3124,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Data type,Date Unit
+, ,3125,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,3126,DateTime,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,3127,Solar radiation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-spatial.owl#SpatialEntity ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C44445 ,Watt per meter square,Number
+, ,3128,Precipitation,http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,3129,Wind speed (mean),http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,3130,Wind speed (max),http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,3131,Battery voltage,http://purl.obolibrary.org/obo/NCIT_C50346, http://purl.obolibrary.org/obo/NCIT_C70813 ,milli Volt,integer
+, ,3132,Air temperature (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3133,Air temperature (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3134,Air temperature (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3135,Relative humidity (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3136,Relative humidity (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3137,Relative humidity (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,3138,Dew point (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3139,Dew point (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3140,Air Pressure (mean),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3141,Air Pressure (max),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3142,Air Pressure (min),http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,3143,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+288,38/39,2473,Sample_ID,http://purl.obolibrary.org/obo/OBI_0000747 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364 ,String,aquadiva
+, ,2474,Well name, http://purl.obolibrary.org/obo/ENVO_01000002 , http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Name ,none,String
+, ,2475,Date+Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,2476,Reference Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,none,Date Data type
+, ,2477,Latitude,http://purl.obolibrary.org/obo/OBI_0000747 ,http://purl.obolibrary.org/obo/NCIT_C68642 ,Decimal Degree,decimal
+, ,2478,Longitude,http://purl.obolibrary.org/obo/OBI_0000747 ,http://semanticscience.org/resource/SIO_000318.rdf,Decimal Degree,decimal
+, ,2479,UMT East,http://purl.obolibrary.org/obo/OBI_0000747 ,No Annotation,Meter,Number
+, ,2480,UMT North,http://purl.obolibrary.org/obo/OBI_0000747 ,No Annotation,Meter,Number
+, ,2481,Elevation,http://purl.obolibrary.org/obo/OBI_0000747 ,No Annotation,Meter above mean sea level,Decimal
+, ,2482,location,No Annotation,http://purl.obolibrary.org/obo/GAZ_00000448 ,none,String
+, ,2483,Water Temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Degree_Celsuis,String
+, ,2484,Electrical  Conductivity,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0001757 ,MicroSiemens/cm,String
+, ,2485,Electrical Conductivity (Tref=25),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0001757 ,MicroSiemens/cm,String
+, ,2486,pH (PH),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C45997 ,none,String
+, ,2487,Oxidation reduction potential,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater , http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C45998 ,milli Volt,String
+, ,2488,Dissolved Oxygen, http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#''dissolved_oxygen_atom_in_environmental_material'' ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2489,Iron 2,http://purl.obolibrary.org/obo/CHEBI_29033 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2490,Nitrite [NO2]-,http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2491,Ammonium [NH4],http://purl.obolibrary.org/obo/CHEBI_28938 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2492,Acid Neutralizing Capacity (Alkalinity),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#AcidCapacity ,milliequivalents per Liter,String
+, ,2493,Base Neutralizing Capacity (Acidity),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#BaseCapacity ,milliequivalents per Liter,String
+, ,2494,Dissolved  Organic  Carbon,http://purl.obolibrary.org/obo/CHEBI_27594 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2495,Total  Organic  Carbon,http://purl.obolibrary.org/obo/CHEBI_27594 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2496,Total  Inorganic  Carbon,http://purl.obolibrary.org/obo/CHEBI_27594 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2497,Nitrite [NO2]- (1),http://purl.obolibrary.org/obo/CHEBI_16301 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2498,Nitrate [NO3]-,http://purl.obolibrary.org/obo/CHEBI_17632 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2499,Orthophosphate,http://purl.jp/bio/4/id/201406098427281805 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2500,Sulphate,http://purl.bioontology.org/ontology/RCD/X8076 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2501,Chloride [CL-],http://purl.obolibrary.org/obo/CHEBI_17996 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2502,Calcium [CA],http://purl.obolibrary.org/obo/CHEBI_22984 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2503,Iron [FE],http://purl.obolibrary.org/obo/CHEBI_18248 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2504,Potassium [K],http://purl.obolibrary.org/obo/CHEBI_26216 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2505,Magnesium [MG],http://purl.obolibrary.org/obo/CHEBI_25107 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2506,Manganese [MN],http://purl.obolibrary.org/obo/CHEBI_18291 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2507,Natrium,http://d-nb.info/gnd/4171239-0 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2508,Phosphorus [P],http://purl.obolibrary.org/obo/CHEBI_28659 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2509,Sulfur [S],http://purl.obolibrary.org/obo/CHEBI_26833 ,http://purl.obolibrary.org/obo/PATO_0000033 ,milligram/Liter,String
+, ,2510,Iron (FE),http://purl.obolibrary.org/obo/CHEBI_18248 ,http://purl.obolibrary.org/obo/PATO_0000033 ,microgram per Liter,String
+, ,2511,Manganese (MN),http://purl.obolibrary.org/obo/CHEBI_18291 ,http://purl.obolibrary.org/obo/PATO_0000033 ,microgram per Liter,String
+289,27/27,3144,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Data type,Date Unit
+, ,3145,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,3146,DateTime,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,3147,H13 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3151,H21 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3152,H21 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3150,H14 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3153,H23 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3154,H23 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3155,H31 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3156,H31 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3157,H32 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3158,H32 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3159,H41 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3160,H41 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3161,H42 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3162,H42 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3163,H43 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3164,H43 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3165,H51 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3166,H51 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3167,H52 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3168,H52 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3169,H53 (Depth to water),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.dataone.org/odo/ECSO_00001203,Meter,Decimal
+, ,3170,H53 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3148,H13 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+, ,3149,H14 (Water level),http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.jp/bio/4/id/200906082898779672 ,Meter,Decimal
+290,15/15,3171,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Data type,Date Unit
+, ,3172,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,3173,DateTime,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,3174,H13 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3175,H14 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3177,H23 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3178,H31 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3179,H32 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3180,H41 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3181,H42 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3182,H43 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3183,H51 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3184,H52 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3185,H53 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,3176,H22 temperature,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#GroundWater ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+291,38/50,2670,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Data type,Date Unit
+, ,2671,Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://purl.obolibrary.org/obo/PATO_0000165 ,Time_only,Time
+, ,2672,Date and Time,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,DateTime Unit,DateTime Data Type
+, ,2673,Solar Radiation,http://ecoinformatics.org/oboe/oboe.1.0/oboe-spatial.owl#SpatialEntity ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C44445 ,Watt per meter square,Decimal
+, ,2674,Precipitation,http://purl.obolibrary.org/obo/ENVO_01000830 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Length ,Millimeter,Decimal
+, ,2675,Wind Speed_mean,http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,2676,Wind Speed_max,http://purl.obolibrary.org/obo/ENVO_01000793 ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-characteristics.owl#Speed ,Meter per second,Decimal
+, ,2677,Battery voltage,http://purl.obolibrary.org/obo/NCIT_C50346, http://purl.obolibrary.org/obo/NCIT_C70813 ,milli Volt,integer
+, ,2678,Air temperature_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2679,Air temperature_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2680,Air temperature_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2681,Relative humidity_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2682,Relative humidity_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2683,Relative humidity_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C88206 ,Percent,Decimal
+, ,2684,Dew point_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2685,Dew point_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2686,Air Pressure_mean,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2687,Air Pressure_max,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2688,Air Pressure_min,http://purl.obolibrary.org/obo/ENVO_00002005 ,http://purl.obolibrary.org/obo/NCIT_C25195 ,milibar,double
+, ,2689,Soil Temperature_mean (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2690,Soil Temperature_max (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2691,Soil Temperature_min (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2692,Dielectric permittivity (Depth: 30cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://semanticscience.org/resource/CHEMINF_000248,none,decimal
+, ,2693,Volumentric water content (Depth: 30cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2694,Soil Temperature_mean (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2695,Soil Temperature_max (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2696,Soil Temperature_min (Depth: 30cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2697,Dielectric permittivity (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2698,Volumentric water content (Depth: 30cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2699,Soil Temperature_mean (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2700,Soil Temperature_max (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2701,Soil Temperature_min (Depth: 30cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2702,Dielectric permittivity (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2703,Volumentric water content (Depth: 30cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+, ,2719,Reference Evapotranspiration,No Annotation,No Annotation,Millimeter,Decimal
+, ,2704,Soil Temperature_mean (Depth: 45cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2705,Soil Temperature_max (Depth: 45cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2706,Soil Temperature_min (Depth: 45cm, rep.#: 1),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2707,Dielectric permittivity (Depth: 45cm, rep.#: 1),No Annotation,No Annotation,none,decimal
+, ,2708,Volumentric water content (Depth: 45cm, rep.#: 1),No Annotation,No Annotation,Percent,Decimal
+, ,2709,Soil Temperature_mean (Depth: 45cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2710,Soil Temperature_max (Depth: 45cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2711,Soil Temperature_min (Depth: 45cm, rep.#: 2),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2712,Dielectric permittivity (Depth: 45cm, rep.#: 2),No Annotation,No Annotation,none,decimal
+, ,2713,Volumentric water content (Depth: 45cm, rep.#: 2),No Annotation,No Annotation,Percent,Decimal
+, ,2714,Soil Temperature_mean (Depth: 45cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2715,Soil Temperature_max (Depth: 45cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2716,Soil Temperature_min (Depth: 45cm, rep.#: 3),http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/PATO_0000146 ,Celsius,Decimal
+, ,2717,Dielectric permittivity (Depth: 45cm, rep.#: 3),No Annotation,No Annotation,none,decimal
+, ,2718,Volumentric water content (Depth: 45cm, rep.#: 3),No Annotation,No Annotation,Percent,Decimal
+292,13/14,3186,LAIMP_ID,http://purl.obolibrary.org/obo/ENVO_01001242,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,number,none
+, ,3187,plot_ID,http://purl.obolibrary.org/obo/GAZ_00000448 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,String
+, ,3188,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Unit,Date Data type
+, ,3189,col_type,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#Type ,none,string
+, ,3190,MP_ID,http://purl.obolibrary.org/obo/OBI_0000968 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,3191,loc_type,http://purl.obolibrary.org/obo/GAZ_00000448 ,No Annotation,none,String
+, ,3192,x_LAIMP,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,3193,y_LAIMP,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,3194,LAI,http://purl.obolibrary.org/obo/ENVO_01001242,http://purl.dataone.org/odo/ECSO_#Leaf_Area_Index ,none,decimal
+, ,3195,SEL,http://purl.dataone.org/odo/ECSO_#Leaf_Area_Index ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C53323 ,none,decimal
+, ,3196,DIFN,http://purl.obolibrary.org/obo/ENVO_01001242,No Annotation,none,decimal
+, ,3197,MTA,http://purl.obolibrary.org/obo/ENVO_01001242,http://purl.bioontology.org/ontology/SNOMEDCT/228830002,none,decimal
+, ,3198,SEM,http://purl.bioontology.org/ontology/SNOMEDCT/228830002,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C53323 ,none,decimal
+, ,3199,SMP,No Annotation,No Annotation,none,decimal
+293,13/14,3186,LAIMP_ID,http://purl.obolibrary.org/obo/ENVO_01001242,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,number,none
+, ,3187,plot_ID,http://purl.obolibrary.org/obo/GAZ_00000448 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,String
+, ,3188,Date,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-characteristics.owl#Date ,Date Unit,Date Data type
+, ,3189,col_type,http://www.aquadiva.uni-jena.de/ad-ontology/ad-ontology.0.0/ad-ontology-entities.owl#TemporalEntity ,http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#Type ,none,string
+, ,3190,MP_ID,http://purl.obolibrary.org/obo/OBI_0000968 ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C25364,none,number
+, ,3191,loc_type,http://purl.obolibrary.org/obo/GAZ_00000448 ,No Annotation,none,String
+, ,3192,x_LAIMP,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,3193,y_LAIMP,http://purl.obolibrary.org/obo/ENVO_00001998 ,http://purl.obolibrary.org/obo/GAZ_00000448 ,Meter,Decimal
+, ,3194,LAI,http://purl.obolibrary.org/obo/ENVO_01001242,http://purl.dataone.org/odo/ECSO_#Leaf_Area_Index ,none,decimal
+, ,3195,SEL,http://purl.dataone.org/odo/ECSO_#Leaf_Area_Index ,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C53323 ,none,decimal
+, ,3196,DIFN,http://purl.obolibrary.org/obo/ENVO_01001242,No Annotation,none,decimal
+, ,3197,MTA,http://purl.obolibrary.org/obo/ENVO_01001242,http://purl.bioontology.org/ontology/SNOMEDCT/228830002,none,decimal
+, ,3198,SEM,http://purl.bioontology.org/ontology/SNOMEDCT/228830002,http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C53323 ,none,decimal
+, ,3199,SMP,No Annotation,No Annotation,none,decimal

@@ -13,10 +13,18 @@
   
   
   <Exports>
+    
+    <!--
     <Export tag="menubar" id="analyses" order="1"
         title="Unstructred Datasets" description="Quick Access to Sequence Data for Analysisa" icon=""
         controller="Home" action="Index"
         extends="./menubarRoot" />
+    -->
+    
+    <Export tag="menubar" id="analyses" order="1"
+            title="Unstructred Datasets" description="Quick Access to Sequence Data for Analysis" icon=""
+            controller="Home" action="Index"
+            extends="./menubarRoot/search" />
 
   </Exports>
 </Manifest>

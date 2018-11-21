@@ -9,7 +9,6 @@ using System.IO;
 using System.Diagnostics;
 using BExIS.Dlm.Services.Data;
 using Vaiona.IoC;
-using BExIS.Dlm.Entities.Data;
 using BExIS.Ddm.Api;
 using BExIS.Utils.Models;
 using BExIS.Modules.Ddm.UI.Models;
@@ -17,7 +16,6 @@ using System.Text;
 using Newtonsoft.Json;
 using Telerik.Web.Mvc;
 using System.Data;
-using BExIS.Dlm.Services.MetadataStructure;
 using BExIS.Xml.Helpers;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -27,9 +25,14 @@ using BExIS.Modules.Ddm.UI.Helpers;
 using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
 using Npgsql;
-using System.Xml;
 using System.Web.Configuration;
 using System.Configuration;
+using BExIS.UI.Helpers;
+using Newtonsoft.Json.Linq;
+using BExIS.Aam.Services;
+using BExIS.Dlm.Services.DataStructure;
+using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.DataStructure;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -185,7 +188,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             * to the given data table
             * if parameter ignoreEmptySearchTerms is false, this results in a table with all datasets due to the bexis search provider
             * */
-        private DataTable searchAndMerge(DataTable semanticResultTable, String searchTerm, Boolean ignoreEmptySearchTerms = true)
+        private System.Data.DataTable searchAndMerge(System.Data.DataTable semanticResultTable, String searchTerm, Boolean ignoreEmptySearchTerms = true)
         {
             //Split searchTerm into Tokens
             List<String> tokens = searchTerm.Split(',').ToList();
@@ -221,7 +224,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 #endregion
 
                 //Get Result-Table
-                DataTable bexisResult = provider.WorkingSearchModel.ResultComponent.ConvertToDataTable();
+                System.Data.DataTable bexisResult = provider.WorkingSearchModel.ResultComponent.ConvertToDataTable();
 
                 //Add primary key to eliminate duplicates
                 bexisResult.PrimaryKey = new DataColumn[] { bexisResult.Columns["ID"] };
@@ -611,9 +614,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         /*
             * Creates a DataTable for given HeaderItems
             * */
-        private DataTable CreateDataTable(List<HeaderItem> items)
+        private System.Data.DataTable CreateDataTable(List<HeaderItem> items)
         {
-            DataTable table = new DataTable();
+            System.Data.DataTable table = new System.Data.DataTable();
 
             foreach (HeaderItem item in items)
             {
@@ -682,7 +685,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         /* Calls the search-Server which returns DatasetIDs and VersionIDs
             * Then looks for the specified DatasetVersion and displays it
             * */
-        private DataTable semanticSearch(String searchTerm)
+        private System.Data.DataTable semanticSearch(String searchTerm)
         {   
             #region Load mapping dictionary from file
             string[] lines = global::System.IO.File.ReadAllLines(mappingDictionaryFilePath);
@@ -784,7 +787,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             #endregion
 
-            DataTable m;
+            System.Data.DataTable m;
             m = CreateDataTable(headerItems);
 
             #region find metadata and fill DataTable
@@ -1170,7 +1173,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         public string clean_entity_URI_for_insert(string uri)
         {
-            return uri.Replace("'", "''");
+            return uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", "");
         }
 
         public String Get_Label_from_entity_rdf(String entity, IGraph g, SparqlParameterizedString queryString)
@@ -1186,8 +1189,115 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             return res;
         }
         #endregion
-        
-    
+
+
+        #region fill the annotation from csv file
+        public void Fill_annotations_from_csv_file()
+        {
+            //var lines = System.IO.File.ReadLines("C:/Users/admin/Desktop/AnnotationFile(4740).csv");
+            //
+            //foreach (string line in lines)
+            //{
+            //    Debug.WriteLine("This is the line : ====>   " + line);
+            //}
+            //
+
+            string filePath = "C:/Users/admin/Desktop/CopyofAnnotationFile.xlsx";
+            //FileStream for the users file
+            FileStream fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            //Grab the sheet format from the bus
+            string sheetFormatString = Convert.ToString("TopDown");
+            SheetFormat CurrentSheetFormat = 0;
+            Enum.TryParse<SheetFormat>(sheetFormatString, true, out CurrentSheetFormat);
+
+            //Transforms the content of the file into a 2d-json-array
+            JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
+            //If the active worksheet was never changed, we default to the first one
+            string activeWorksheet = EUEReader.GetFirstWorksheetUri().ToString(); 
+            //Generate the table for the active worksheet
+            string jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
+            JArray textArray = JArray.Parse(jsonTable);
+
+            int index = 0;
+
+            string[] ds_id = new string[2];
+
+            for (int k = 1; k< textArray.Count; k++)
+            {
+                if (textArray[k].ToString().Length > 1)
+                {
+                    var excelline = textArray[k];
+                    JArray excellineJson = JArray.Parse(excelline.ToString());
+
+                    if (excellineJson[0].ToString().Length > 1)
+                    {
+                        ds_id = excellineJson[0].ToString().Split('.');
+                    }
+
+                    string attribute_name = excellineJson[1].ToString();
+                    string var_id = excellineJson[2].ToString();
+                    string entity_uri = clean_entity_URI_for_insert(excellineJson[3].ToString());
+                    string entity_label = clean_entity_URI_for_insert(excellineJson[4].ToString());
+                    string charac_uri = clean_entity_URI_for_insert(excellineJson[5].ToString());
+                    string charac_label = clean_entity_URI_for_insert(excellineJson[6].ToString());
+
+                    AnnotationManager AM = new AnnotationManager();
+                    Variable variable = new Variable();
+
+                    //try
+                    //{
+                    DataStructureManager dataStructureManager = new DataStructureManager();
+                    var structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
+                    StructuredDataStructure dataStructure = structureRepo.Get(new DatasetManager().GetDataset(Int64.Parse(ds_id[0])).DataStructure.Id);
+
+                    if (var_id != "")
+                    {
+                        foreach (Variable var in dataStructure.Variables)
+                        {
+                            if (var.Id == Int64.Parse(var_id)) variable = var;
+                        }
+                    }
+
+                    if (variable != null)
+                    {
+                        AM.CreateAnnotation(
+                        new DatasetManager().GetDataset(Int64.Parse(ds_id[0])), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(ds_id[0])),
+                        variable,
+                        entity_uri, entity_label,
+                        charac_uri, charac_label,
+                        "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
+
+                        index++;
+
+                        if (ds_id.Length > 1)
+                        {
+                            //for (int i = Int32.Parse(ds_id[0].ToString())+1 ; i <= (Int32.Parse(ds_id[ds_id.Length - 1].ToString())); i++ )
+                            for (int i = 1; i < ds_id.Count(); i++)
+                            {
+                                string dataset_id = ds_id[i].ToString();
+
+                                AM.CreateAnnotation(new DatasetManager().GetDataset(Int64.Parse(dataset_id)), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(dataset_id)), variable,
+                                entity_uri, entity_label,
+                                charac_uri, charac_label,
+                                "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
+                                index++;
+
+                            }
+                        }
+                    }
+
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Debug.WriteLine(ex.ToString());
+                    //}
+
+                }
+            }
+        }
+
+        #endregion
+
 
         //Takes a JSON-Serialization of a List<String> of URIs and find the labels of these URIs in the AD-ontology
         //Result contains null entries for whitespace or null string inputs
