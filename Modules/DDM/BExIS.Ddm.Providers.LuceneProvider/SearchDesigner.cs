@@ -195,6 +195,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider
 
                 foreach (SearchAttribute sa in this._searchAttributeList)
                 {
+
                     XmlElement xe = this._configXML.CreateElement("field");
                     xe = SetAttributesToNode(xe, sa);
                     root.AppendChild(xe);
@@ -217,7 +218,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider
 
 
         }
-
+        
         public void Reset()
         {
             this._configXML = new XmlDocument();

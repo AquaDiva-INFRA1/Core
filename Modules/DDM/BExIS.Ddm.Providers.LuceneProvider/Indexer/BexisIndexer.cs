@@ -14,6 +14,7 @@ using Lucene.Net.Store;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -360,6 +361,65 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
                 foreach (string metadataElementName in metadataElementNames)
                 {
+                    //check if the element name is mapped to a group of nodes depending on the datastructure
+                    List<string> metadataElementName_group = metadataElementName.Split(';').ToList();
+                    //concat all the values in one single variable to be written by the indexer
+                    //each metadataElementName can provide more than one value for that node in the XML file
+                    //the idea is to concat the val 1 of the xpath 1 with the val 1 of the xpath 2 and so on...
+                    foreach(string s in metadataElementName_group)
+                    {
+                        string concatenated_values = "";
+                        try
+                        {
+                            XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
+                            for (int i = 0; i < elemList_.Count; i++)
+                            {
+                                concatenated_values = concatenated_values + " " + elemList_[i].InnerText;
+                            }
+                            if (!concatenated_values.Trim().Equals(""))
+                            {
+                                dataset.Add(new Field("facet_" + lucene_name, concatenated_values,
+                                    Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                                dataset.Add(new Field("ng_all", concatenated_values,
+                                    Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
+                                writeAutoCompleteIndex(docId, lucene_name, concatenated_values);
+                                writeAutoCompleteIndex(docId, "ng_all", concatenated_values);
+                            }
+                        }
+                        catch ( Exception exc)
+                        {
+                            Debug.WriteLine(exc.ToString()+" ==> "+id+" ==> node ==> " + s);
+                        }
+                        
+                    }
+
+
+                    /*
+                    XmlNodeList elemList = metadataDoc.SelectNodes(metadataElementName_group[0]);
+                    if (elemList != null)
+                    {
+                        for (int i = 0; i < elemList.Count; i++)
+                        {
+                            string concatenated_values = elemList[i].InnerText;
+
+                            for (int k = 0; k< metadataElementName_group.Count; k++)
+                            {
+                                XmlNodeList elemList_ = metadataDoc.SelectNodes(metadataElementName_group[k]);
+                                concatenated_values = concatenated_values +" "+ elemList_[i].InnerText;
+                            }
+                            if (!concatenated_values.Trim().Equals(""))
+                            {
+                                dataset.Add(new Field("facet_" + lucene_name, concatenated_values,
+                                    Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                                dataset.Add(new Field("ng_all", concatenated_values,
+                                    Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
+                                writeAutoCompleteIndex(docId, lucene_name, concatenated_values);
+                                writeAutoCompleteIndex(docId, "ng_all", concatenated_values);
+                            }
+
+                        }
+                    }
+                    
                     XmlNodeList elemList = metadataDoc.SelectNodes(metadataElementName);
                     if (elemList != null)
                     {
@@ -377,6 +437,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                             }
                         }
                     }
+                    */
                 }
             }
 

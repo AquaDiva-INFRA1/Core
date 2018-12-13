@@ -4,36 +4,46 @@
 
 @{
     List<SearchMetadataNode> metadataNodes = new List<SearchMetadataNode>();
-    if (Session["metadatNodes"]!=null)
+    if (Session["metadatNodes"] != null)
     {
         metadataNodes = (List<SearchMetadataNode>)Session["metadatNodes"];
     }
 
- }
-<div class="metadataNode row">
-@using (Html.BeginCollectionItem("metadataNames"))
-{ 
-    <div class="col-lg-10 vcenter">
-         @Html.DropDownListFor(m => m, new SelectList(metadataNodes.OrderBy(s=>s.DisplayNameLong), "XPath", "DisplayNameLong", Model), "Select, please", new { title="Corresponding metadata node to be used for the Lucene index."})
-    </div>
-    <div class="col-lg-1 text-left vcenter">
-         <a href="#" class="removeMetadataNode bx-trash bx-function" ></a>
-    </div>
-    @*@Html.TextBoxFor(m => m);*@
-    
 }
+
+<div class="metadataNode row">
+    @using (Html.BeginCollectionItem("metadataNames"))
+    {
+        <div class="col-lg-10 vcenter">
+            @Html.DropDownListFor(m => m, new SelectList(metadataNodes.OrderBy(s => s.DisplayNameLong), "XPath", "DisplayNameLong", Model), "Select, please", new { title = "Corresponding metadata node to be used for the Lucene index." })
+        </div>
+        <div class="col-lg-1 text-left vcenter">
+            <a href="#" class="removeMetadataNode bx-trash bx-function"></a>
+        </div>
+        @*@Html.TextBoxFor(m => m);*@
+    }
 </div>
 <style type="text/css">
 
-    .metadataNode select
-    {
-        width:100%;
+    .metadataNode select {
+        width: 100%;
     }
 
-    .metadataNode
-    {
-        width:95%;
-        margin:0;
+    .metadataNode {
+        width: 95%;
+        margin: 0;
     }
-
 </style>
+
+<script type="text/javascript">
+    $("#addPartialNode").unbind().click(function () {
+        $.ajax({
+            url: this.href,
+            cache: false,
+            success: function (html) { $("#partialNodes").append(html); }
+        });
+        return false;
+    });
+    
+</script>
+    
