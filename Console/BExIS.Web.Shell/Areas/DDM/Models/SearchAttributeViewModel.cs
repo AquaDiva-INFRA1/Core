@@ -1,8 +1,12 @@
-﻿using BExIS.Utils.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
+using BExIS.Ddm.Api;
+using BExIS.Ddm.Providers.LuceneProvider;
+using BExIS.Utils;
+using BExIS.Utils.Models;
 
 namespace BExIS.Modules.Ddm.UI.Models
 {
@@ -85,7 +89,48 @@ namespace BExIS.Modules.Ddm.UI.Models
             sa.displayName = searchAttributeViewModel.displayName;
             sa.sourceName = Regex.Replace(searchAttributeViewModel.displayName, "[^0-9a-zA-Z]+", "");
 
-            sa.metadataName = String.Join(",", searchAttributeViewModel.metadataNames.ToArray());
+            //metadatanames
+            string metadata_ = "";
+            ISearchDesigner sd = new SearchDesigner();
+            List < SearchMetadataNode > allMetadataNodes = sd.GetMetadataNodes();
+            foreach (string metadataName in searchAttributeViewModel.metadataNames)
+            {
+                if (metadataName != "")
+                {
+                    if (!(metadata_.Contains(metadataName)))
+                    {
+                        metadata_ = metadata_ + metadataName;
+                    
+                        SearchMetadataNode metadataStructureName = allMetadataNodes.Find(x => x.XPath.Equals(metadataName));
+
+                        foreach (string metadataName_ in searchAttributeViewModel.metadataNames)
+                        {
+                            if (!(metadata_.Contains(metadataName_)))
+                            {
+                                SearchMetadataNode metadataStructureName_ = allMetadataNodes.Find(x => x.XPath.Equals(metadataName_));
+                                if (metadataStructureName_ != null)
+                                {
+                                    try
+                                    {
+                                        if (metadataStructureName.MetadataStructureName.Equals(metadataStructureName_.MetadataStructureName))
+                                        {
+                                            metadata_ = metadata_ + ";" + metadataName_;
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine(ex.ToString() + " " + metadataStructureName_.DisplayName);
+                                    }
+                                }
+                            }
+                        }
+                        metadata_ = metadata_ + ",";
+                    }
+                }
+            }
+            metadata_ = metadata_.Substring(0, metadata_.Length - 1);
+            //sa.metadataName = String.Join(",", searchAttributeViewModel.metadataNames.ToArray());
+            sa.metadataName = metadata_;
 
             //types
             sa.dataType = SearchAttribute.GetDataType(searchAttributeViewModel.dataType);
