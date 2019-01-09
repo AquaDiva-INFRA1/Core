@@ -2,8 +2,10 @@
 using BExIS.Ddm.Providers.LuceneProvider;
 using BExIS.Modules.Ddm.UI.Models;
 using BExIS.Utils.Models;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -123,10 +125,19 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         public ActionResult Save(SearchAttributeViewModel model)
         {
+            if (ModelState.IsValid)
+            {
+                return Json(true);
+            }
+            else
+            {
+                ViewData["windowVisible"] = true;
+                return Json(false);
+            }
 
             //setluceneName
 
-
+            /*
             if (ModelState.IsValid)
             {
                 //if (submit != null)
@@ -163,6 +174,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return Json(false);
             //return View("SearchDesigner", (List<SearchAttributeViewModel>)Session["searchAttributeList"]);
+            */
         }
 
         #endregion
@@ -360,9 +372,123 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             Session["SearchDesigner"] = searchDesigner;
         }
 
+        [HttpPost]
         public ActionResult AddMetadataNode()
         {
+            var count = Session["count"];
             return PartialView("_metadataNode", "");
+        }
+
+        [HttpPost]
+        public ActionResult AddMetadataPartialNode()
+        {
+            return PartialView("_metadataNode_partial", "");
+        }
+
+        [HttpPost]
+        public ActionResult AddNewMetadataNode(string count)
+        {
+            if (count == null)
+            {
+                return PartialView("_metadataNode" +
+                    "", "0");
+            }
+            return PartialView("_metadataNode", (Int64.Parse(count.ToString())+1).ToString());
+        }
+
+        
+        public ActionResult save_new(String form, String inputs)
+        {
+            try
+            {
+                if ((form.Length == 0) || (inputs.Length == 0))
+                    return Json(false);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("exception : " + e.ToString());
+                return Json(false);
+            }
+            
+            Dictionary<string, string> form_name_value = new Dictionary<string, string>();
+            string[] form_data = inputs.Split('&');
+            foreach(string s in form_data)
+            {
+                string name = s.Split('=')[0];
+                string value = s.Split('=')[1];
+                if (!(form_name_value.ContainsKey(name)))
+                {
+                    form_name_value.Add(name, value);
+                }
+            }
+
+            if ((form_name_value.Count > 0)&&(ModelState.IsValid))
+            {
+                SearchAttributeViewModel sa = new SearchAttributeViewModel();
+                string out_var;
+                form_name_value.TryGetValue("analysed", out out_var); sa.analysed = bool.Parse(out_var);
+                form_name_value.TryGetValue("id", out out_var); sa.id = int.Parse(out_var);
+                form_name_value.TryGetValue("displayName", out out_var); sa.displayName = out_var;
+                form_name_value.TryGetValue("searchType", out out_var); sa.searchType = out_var;
+                form_name_value.TryGetValue("dataType", out out_var); sa.dataType = out_var;
+                form_name_value.TryGetValue("store", out out_var); sa.store = bool.Parse(out_var);
+                form_name_value.TryGetValue("multiValue", out out_var); sa.multiValue = bool.Parse(out_var);
+                form_name_value.TryGetValue("analysed", out out_var); sa.analysed = bool.Parse(out_var);
+                form_name_value.TryGetValue("norm", out out_var); sa.norm = bool.Parse(out_var);
+                form_name_value.TryGetValue("boost", out out_var); sa.boost = Double.Parse(out_var);
+                form_name_value.TryGetValue("headerItem", out out_var); sa.headerItem = bool.Parse(out_var);
+                form_name_value.TryGetValue("defaultHeaderItem", out out_var); sa.defaultHeaderItem = bool.Parse(out_var);
+                form_name_value.TryGetValue("direction", out out_var); sa.direction = out_var;
+                form_name_value.TryGetValue("uiComponent", out out_var); sa.uiComponent = out_var;
+                form_name_value.TryGetValue("aggregationType", out out_var); sa.aggregationType = out_var;
+
+                string metadatanodes = "";
+                var objects = JArray.Parse(form); // parse as array  
+                foreach (JArray root in objects)
+                {
+                    if (root.Count > 1)
+                    {
+                        string composed_node = "";
+                        foreach(JValue elem in root)
+                        {
+                            composed_node = composed_node + elem.Value.ToString() +";";
+                        }
+                        composed_node = composed_node.Substring(0, composed_node.Length - 1);
+                        sa.metadataNames.Add(composed_node);
+                    }
+                    else
+                    {
+                        sa.metadataNames.Add(root[0].ToString());
+                    }
+                }
+
+                List<SearchAttributeViewModel> searchAttributeList = (List<SearchAttributeViewModel>)Session["searchAttributeList"];
+
+                if (searchAttributeList.Where(p => p.id.Equals(sa.id)).Count() > 0)
+                {
+                    SearchAttributeViewModel temp = searchAttributeList.Where(p => p.id.Equals(sa.id)).First();
+                    searchAttributeList[searchAttributeList.IndexOf(temp)] = sa;
+                }
+                else
+                {
+                    searchAttributeList.Add(sa);
+                }
+
+                ISearchDesigner sd = GetSearchDesigner();
+
+                //sd.Set(searchAttributeList);
+
+                Session["searchAttributeList"] = searchAttributeList;
+                ViewData["windowVisible"] = false;
+
+                //create new config FileStream
+                SaveConfig();
+                //}
+
+                //return Json(true);
+                return Json(true);
+            }
+            return Json(false);
         }
 
         #endregion

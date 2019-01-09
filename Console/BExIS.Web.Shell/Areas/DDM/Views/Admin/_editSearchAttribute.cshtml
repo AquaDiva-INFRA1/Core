@@ -92,6 +92,7 @@
                         @Html.ValidationMessageFor(m => m.displayName)
                     </td>
                 </tr>
+
                 @*<tr>
                         <td>
                              @(Html.LabelFor(m => m.sourceName))<span class="bx bx-required" title="Required">
@@ -101,7 +102,11 @@
 
                              @Html.ValidationMessageFor(m => m.sourceName)
                         </td>
-                    </tr>*@
+                    </tr>
+                *@
+
+
+                    // this is the nodes display
                 <tr>
                     <td style="vertical-align:top;">
                         @(Html.LabelFor(m => m.metadataNames))<span class="bx bx-required" title="Required">
@@ -111,24 +116,24 @@
                         <div id="metadataNodes">
                             @if (Model.metadataNames != null && Model.metadataNames.Count > 0)
                             {
-                                foreach (var xpath in Model.metadataNames)
-                                {
-                                    if (xpath.Contains(";"))
+                                    foreach(string xpath in Model.metadataNames)
                                     {
-                                        string[] list_composed_xpath = xpath.Split(';');
-                                        foreach(var s in list_composed_xpath)
+                                        if (xpath.Contains(";"))
                                         {
-                                            Html.RenderPartial("_metadataNode", s);
+                                            string[] list_composed_xpath = xpath.Split(';');
+                                            foreach (var s in list_composed_xpath)
+                                            {
+                                                Html.RenderPartial("_metadataNode", s);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Html.RenderPartial("_metadataNode", xpath);
+                                            //@Html.ActionLink(" ", "AddMetadataNode", null, new { id = "addNode", @class = "bx-add bx-function", title="Corresponding metadata node to be used for the Lucene index." })
+
                                         }
                                     }
-                                    else
-                                    {
-                                        Html.RenderPartial("_metadataNode", xpath);
-                                        //@Html.ActionLink(" ", "AddMetadataNode", null, new { id = "addNode", @class = "bx-add bx-function", title="Corresponding metadata node to be used for the Lucene index." })
-
-                                    }
-
-                                }
+                                
                             }
                         </div>
                     </td>
@@ -140,6 +145,7 @@
                         </div>
                     </td>
                 </tr>
+                
                 <tr>
                     <td>
                         @(Html.LabelFor(m => m.headerItem))

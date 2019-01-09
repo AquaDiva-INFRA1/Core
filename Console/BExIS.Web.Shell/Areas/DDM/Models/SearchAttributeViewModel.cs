@@ -17,7 +17,7 @@ namespace BExIS.Modules.Ddm.UI.Models
         //names
         [Display(Name = "Display Name")]
         [Required(ErrorMessage = "Please enter a Display Name.")]
-        public String displayName { get; set; }
+        public String displayName { get; set; } 
 
         [Display(Name = "Metadata Node")]
         [Required(ErrorMessage = "Please select a Metadata link.")]
@@ -81,6 +81,7 @@ namespace BExIS.Modules.Ddm.UI.Models
             this.metadataNames = new List<string>();
         }
 
+        /*
         public static SearchAttribute GetSearchAttribute(SearchAttributeViewModel searchAttributeViewModel)
         {
             SearchAttribute sa = new SearchAttribute();
@@ -155,6 +156,46 @@ namespace BExIS.Modules.Ddm.UI.Models
 
             return sa;
         }
+        */
+        
+        public static SearchAttribute GetSearchAttribute(SearchAttributeViewModel searchAttributeViewModel)
+        {
+            SearchAttribute sa = new SearchAttribute();
+
+            //names
+            sa.displayName = searchAttributeViewModel.displayName;
+            sa.sourceName = Regex.Replace(searchAttributeViewModel.displayName, "[^0-9a-zA-Z]+", "");
+
+            //foreach(MetadataNameGroup metadatanames in searchAttributeViewModel.metadataNames)
+            //{
+            //    sa.metadataName.Add(metadatanames);
+            //}
+            sa.metadataName = String.Join(",", searchAttributeViewModel.metadataNames.ToArray());
+
+            //types
+            sa.dataType = SearchAttribute.GetDataType(searchAttributeViewModel.dataType);
+            sa.searchType = SearchAttribute.GetSearchType(searchAttributeViewModel.searchType);
+
+            // parameter for index
+            sa.store = searchAttributeViewModel.store;
+            sa.multiValue = searchAttributeViewModel.multiValue;
+            sa.analysed = searchAttributeViewModel.analysed;
+            sa.norm = searchAttributeViewModel.norm;
+            sa.boost = searchAttributeViewModel.boost;
+
+            // resultview
+            sa.headerItem = searchAttributeViewModel.headerItem;
+            sa.defaultHeaderItem = searchAttributeViewModel.defaultHeaderItem;
+
+            // properties
+            sa.direction = SearchAttribute.GetDirection(searchAttributeViewModel.direction);
+            sa.uiComponent = SearchAttribute.GetUIComponent(searchAttributeViewModel.uiComponent);
+            sa.aggregationType = SearchAttribute.GetAggregationType(searchAttributeViewModel.aggregationType);
+            //sa.dateFormat = searchAttributeViewModel.dateFormat;
+
+            return sa;
+        }
+        
 
         public static SearchAttributeViewModel GetSearchAttributeViewModel(SearchAttribute searchAttribute)
         {
@@ -163,6 +204,11 @@ namespace BExIS.Modules.Ddm.UI.Models
             sa.id = searchAttribute.id;
             //names
             sa.displayName = searchAttribute.displayName;
+
+            //foreach(MetadataNameGroup metadatanameGroup in searchAttribute.metadataName)
+            //{
+            //    sa.metadataNames.Add(metadatanameGroup);
+            //}
             sa.metadataNames.AddRange(searchAttribute.metadataName.Split(','));
 
             //types
@@ -188,8 +234,7 @@ namespace BExIS.Modules.Ddm.UI.Models
 
             return sa;
         }
-
-
-
+        
     }
+    
 }

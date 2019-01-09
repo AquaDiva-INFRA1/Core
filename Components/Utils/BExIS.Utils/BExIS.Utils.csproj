@@ -109,6 +109,7 @@
     <Compile Include="Filters\MustBeTrueAttribute.cs" />
     <Compile Include="Filters\QueryAttribute.cs" />
     <Compile Include="Helpers\RegExHelper.cs" />
+    <Compile Include="Models\MetadataNameGroup.cs" />
     <Compile Include="Models\SearchAttribute.cs" />
     <Compile Include="Models\SearchComponent.cs" />
     <Compile Include="Models\SearchCriteria.cs" />
@@ -411,6 +412,10 @@
     <ProjectReference Include="..\..\IO\BExIS.IO.Transform.Validation\BExIS.IO.Transform.Validation.csproj">
       <Project>{c8a05313-b960-406e-92ec-c1e5b3f47fcd}</Project>
       <Name>BExIS.IO.Transform.Validation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BExIS.Utils.Data\BExIS.Utils.Data.csproj">
+      <Project>{a7fbcc13-7e29-4710-82a1-bd6d6f811fda}</Project>
+      <Name>BExIS.Utils.Data</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

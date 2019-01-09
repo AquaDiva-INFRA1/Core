@@ -468,6 +468,8 @@
     <Content Include="Views\interactiveSearch\Index.cshtml" />
     <Content Include="Views\interactiveSearch\table_result.cshtml" />
     <Content Include="Views\Admin\_metadataPartialNode.cshtml" />
+    <Content Include="Views\Admin\__editSearchAttribute.cshtml" />
+    <Content Include="Views\Admin\_metadataNode_partial.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -524,12 +526,8 @@
       <Project>{de0ad99c-c559-422f-8132-cc4d7c46ff83}</Project>
       <Name>BExIS.UI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Components\Utils\BExIS.Utils.Data\BExIS.Utils.Data.csproj">
-      <Project>{a7fbcc13-7e29-4710-82a1-bd6d6f811fda}</Project>
-      <Name>BExIS.Utils.Data</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\Utils\BExIS.Utils\BExIS.Utils.csproj">
-      <Project>{782b71c1-707f-4ab1-80e9-90d2880635b4}</Project>
+      <Project>{782B71C1-707F-4AB1-80E9-90D2880635B4}</Project>
       <Name>BExIS.Utils</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\XML\BExIS.Xml.Helpers\BExIS.Xml.Helpers.csproj">
