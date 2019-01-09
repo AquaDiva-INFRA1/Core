@@ -1202,7 +1202,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             //}
             //
 
-            string filePath = "C:/Users/admin/Desktop/CopyofAnnotationFile.xlsx";
+            string filePath = Request["filePath"];// "C:/Users/admin/Desktop/CopyofAnnotationFile.xlsx";
             //FileStream for the users file
             FileStream fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             //Grab the sheet format from the bus
@@ -1260,14 +1260,21 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                     if (variable != null)
                     {
-                        AM.CreateAnnotation(
-                        new DatasetManager().GetDataset(Int64.Parse(ds_id[0])), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(ds_id[0])),
-                        variable,
-                        entity_uri, entity_label,
-                        charac_uri, charac_label,
-                        "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
+                        try
+                        {
+                            AM.CreateAnnotation(
+                                new DatasetManager().GetDataset(Int64.Parse(ds_id[0])), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(ds_id[0])),
+                                variable,
+                                entity_uri, entity_label,
+                                charac_uri, charac_label,
+                                "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
 
-                        index++;
+                            index++;
+                        }
+                        catch (Exception exc)
+                        {
+                            Debug.WriteLine(exc.Message);
+                        }
 
                         if (ds_id.Length > 1)
                         {
@@ -1276,11 +1283,19 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                             {
                                 string dataset_id = ds_id[i].ToString();
 
-                                AM.CreateAnnotation(new DatasetManager().GetDataset(Int64.Parse(dataset_id)), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(dataset_id)), variable,
-                                entity_uri, entity_label,
-                                charac_uri, charac_label,
-                                "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
-                                index++;
+                                try
+                                {
+                                    AM.CreateAnnotation(new DatasetManager().GetDataset(Int64.Parse(dataset_id)), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(dataset_id)), variable,
+                                        entity_uri, entity_label,
+                                        charac_uri, charac_label,
+                                        "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
+                                    index++;
+                                }
+                                catch (Exception exc)
+                                {
+                                    Debug.WriteLine(exc.Message);
+                                }
+                                
 
                             }
                         }
@@ -1359,5 +1374,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             result.Content = JsonConvert.SerializeObject(labelList);
             return result;
         }
+
+        
     }
 }

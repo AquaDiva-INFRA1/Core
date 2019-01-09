@@ -88,11 +88,18 @@
             title="Calendar" description="RBM desc" icon=""
             controller="Calendar" action="Calendar"
             extends="./menubarRoot" />
-
+    <!--
     <Export tag="menubar" id="rbmMenu_Cal" order="17"
           title="Calendar" description="Cal" icon=""
           controller="Calendar" action="Calendar"
           extends="./menubarRoot/rbmMenu" />
+-->
+
+    <Export tag="lunchbar" id="RBMhelp" order="1"
+              title="RBM Help" description="" icon=""
+              controller="Help" action="Index"
+              extends="./lunchbarRoot/help"
+            />
 
     <!-- Settings Example-->
     <!--<Export tag="settings" id="manageMetadata" order="1"
