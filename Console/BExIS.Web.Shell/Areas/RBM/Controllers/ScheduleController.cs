@@ -304,7 +304,16 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //ToDo: User or Default
                     long createdByUserId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
 
-                    cartItem.ByPersonName = UserHelper.GetPartyByUserId(createdByUserId).Name;
+                    //cartItem.ByPersonName = UserHelper.GetPartyByUserId(createdByUserId).Name;
+                    // AquaDiva doesnt use the User-Party Concept. 11-01-2019 - Hamdi
+                    if (UserHelper.GetPartyByUserId(createdByUserId) == null)
+                    {
+                        cartItem.ByPersonName = "User not assigned to any party";
+                    }
+                    else
+                    {
+                        cartItem.ByPersonName = UserHelper.GetPartyByUserId(createdByUserId).Name;
+                    }
                     cartItem.ByPersonUserId = createdByUserId;
 
                     cartItem.Name = resource.Name;
@@ -822,7 +831,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             BookingEvent eEvent = new BookingEvent();
                             if (model.Id == 0)
                             {
-                                eEvent = eventManager.CreateBookingEvent(model.Name, model.Description, null, minDate, maxDate);
+                                eEvent = eventManager.CreateBookingEvent(model.Name, model.Description, null, minDate, maxDate, 0);
                                 bookingAction = SendNotificationHelper.BookingAction.created;
                             }
                             else
@@ -1100,9 +1109,22 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     a.EditAccess = tempSchedule.EditAccess;
                     a.EditMode = tempSchedule.EditMode;
                     Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
-                    a.UserFullName = partyPerson.Name;
+                    //a.UserFullName = partyPerson.Name;
+                    //a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
+                    // AquaDiva doesnt use the User-Party Concept. 11-01-2019 - Hamdi
+                    if ( partyPerson  == null)
+                    {
+                        a.UserFullName = "User not assigned to any party";
+                        a.MobileNumber = "No phone number for the user";
+                    }
+                    else
+                    {
+                        a.UserFullName = partyPerson.Name;
+                        a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
+                    }
+                    
                     //get party type attribute value
-                    a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
+                    
 
                 });
                 return PartialView("_scheduleUsers", tempSchedule.ForPersons);

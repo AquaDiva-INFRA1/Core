@@ -467,7 +467,6 @@
     <Content Include="Views\SemanticSearch\_mapview.cshtml" />
     <Content Include="Views\interactiveSearch\Index.cshtml" />
     <Content Include="Views\interactiveSearch\table_result.cshtml" />
-    <Content Include="Views\Admin\_metadataPartialNode.cshtml" />
     <Content Include="Views\Admin\__editSearchAttribute.cshtml" />
     <Content Include="Views\Admin\_metadataNode_partial.cshtml" />
     <None Include="Web.Debug.config">

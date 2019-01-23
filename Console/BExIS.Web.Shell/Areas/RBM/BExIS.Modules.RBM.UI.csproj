@@ -180,6 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ActivityController.cs" />
+    <Compile Include="Controllers\AdminBookingEventController.cs" />
     <Compile Include="Controllers\CalendarController.cs" />
     <Compile Include="Controllers\HelpController.cs" />
     <Compile Include="Controllers\NotificationController.cs" />
@@ -695,6 +696,7 @@
     <Content Include="Scripts\fullcalendar\readme.md" />
     <Content Include="Scripts\fullcalendar\tests\lib\themeswitcher\README.md" />
     <Content Include="Scripts\fullcalendar\tests\slot_event_overlap.json" />
+    <Content Include="Views\AdminBookingEvent\Index.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>

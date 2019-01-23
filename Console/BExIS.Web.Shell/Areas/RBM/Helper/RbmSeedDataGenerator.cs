@@ -199,6 +199,15 @@ namespace BExIS.Modules.RBM.UI.Helper
             {
                 List<Feature> features = featureManager.FeatureRepository.Get().ToList();
 
+                // added by hamdi hamed 17-01-2019
+                // reflecting the feature security to validate the booking
+                Feature AdminBookingEvents = features.FirstOrDefault(f => f.Name.Equals("Admin Booking Event"));
+                if (AdminBookingEvents == null)
+                    AdminBookingEvents = featureManager.Create("Admin Booking Event", "Admin Booking Event");
+                operationManager.Create("RBM", "AdminBookingEvent", "*", AdminBookingEvents);
+                // end of it...
+
+
                 Feature ResourceBooking = features.FirstOrDefault(f => f.Name.Equals("Resource Booking"));
                 if (ResourceBooking == null)
                     ResourceBooking = featureManager.Create("Resource Booking", "Resource Booking");

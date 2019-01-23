@@ -18,9 +18,17 @@
     {
         DatasetIds = ViewData["DatasetIds"] as List<long>;
     }
+
+    Int64 somme = 0;
+    if (ViewData["somme"] != null)
+    {
+        somme = (Int64) ViewData["somme"] ;
+    }
+
 }
 <h2>The dataset management functions accessible from here may have unrecoverable effets! Use them with care.</h2>
 <h3>Datasets</h3>
+<h3>Data Points : @somme.ToString()</h3>
 <table>
     <tr>
         <td>ID</td>

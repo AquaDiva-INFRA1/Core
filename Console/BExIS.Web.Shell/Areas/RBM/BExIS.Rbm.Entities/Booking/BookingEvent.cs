@@ -27,7 +27,7 @@ namespace BExIS.Rbm.Entities.Booking
         //max date from schedules
         public virtual DateTime MaxDate { get; set; }
 
-
+        public virtual int Status { get; set; }
         #endregion
 
         #region Associations
