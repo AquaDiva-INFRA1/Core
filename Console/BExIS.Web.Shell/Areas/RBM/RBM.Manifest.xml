@@ -12,6 +12,14 @@
   </Dependencies>
   <Exports>
     <!--add proper menu items-->
+	  
+	<!-- added by Hamdi 17.01.2019 -->
+	<Export tag="settings" id="rbmAdminBookingEvents" order="1"
+			title="Validate Booking Requests" description="Validate Booking Request" icon=""
+			controller="AdminBookingEvent" action="Index" argument=""
+			extends="./settingsRoot" />
+	<!-- end of it -->
+	  
     <Export tag="settings" id="rbmAdminMenu" order="1"
               title="Resource Admin" description="RBM desc" icon=""
               controller="Resource" action="Resource" argument=""

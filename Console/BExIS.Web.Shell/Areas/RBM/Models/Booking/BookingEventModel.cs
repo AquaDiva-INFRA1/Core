@@ -120,6 +120,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         public DateTime end { get; set; }
         public string color { get; set; }
         public bool allDay { get; set; }
+        public int status { get; set; }
 
         public CalendarItemsModel()
         {
@@ -141,7 +142,12 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 title = e.Name;
                 start = (from d in schedules select d.StartDate).Min();
                 end = (from d in schedules select d.EndDate).Max();
-                color = "#3868c8"; // fix color, maybe later a other solution for the event color
+                //color = "#3868c8"; // fix color, maybe later a other solution for the event color
+                status = e.Status;
+                if (status == 0)
+                    color = "#C83873";
+                else
+                    color = "#3868c8";
             }
         }
 

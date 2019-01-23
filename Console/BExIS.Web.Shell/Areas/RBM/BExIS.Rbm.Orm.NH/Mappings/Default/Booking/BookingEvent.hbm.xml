@@ -26,6 +26,8 @@
 
     <property name="MaxDate" type="DateTime" />
 
+	<property name="Status" type="Int32" />
+
     <set name="Schedules" inverse="true" cascade="all-delete-orphan" lazy="false">
       <key column="BookingEventRef"/>
       <one-to-many class="BExIS.Rbm.Entities.Booking.Schedule, BExIS.Rbm.Entities.Booking" />

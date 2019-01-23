@@ -400,7 +400,15 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             {
                 IndividualPerson iPerson = (IndividualPerson)schedule.ForPerson.Self;
                 Contact = new PersonInSchedule(iPerson.Id, iPerson.Contact, true);
-                ContactName = UserHelper.GetPartyByUserId(iPerson.Contact.Id).Name;
+                //ContactName = UserHelper.GetPartyByUserId(iPerson.Contact.Id).Name;
+                if (UserHelper.GetPartyByUserId(iPerson.Contact.Id) == null)
+                {
+                    ContactName = "No contact name found";
+                }
+                else
+                {
+                    ContactName = UserHelper.GetPartyByUserId(iPerson.Contact.Id).Name;
+                }
 
                 ForPersons.Add(new PersonInSchedule(iPerson.Id,iPerson.Person, true));
             }

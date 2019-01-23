@@ -54,7 +54,7 @@ namespace BExIS.Rbm.Services.Booking
 
         #region Methods
 
-        public E.BookingEvent CreateBookingEvent(string name, string description, List<Activity> activities, DateTime minDate, DateTime maxDate)
+        public E.BookingEvent CreateBookingEvent(string name, string description, List<Activity> activities, DateTime minDate, DateTime maxDate, int Status)
         {
             BookingEvent newEvent = new BookingEvent()
             {
@@ -62,8 +62,9 @@ namespace BExIS.Rbm.Services.Booking
                 Description = description,
                 //Activities = activities,
                 MinDate = minDate,
-                MaxDate = maxDate
+                MaxDate = maxDate,
             };
+            newEvent.Status = Status;
 
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
