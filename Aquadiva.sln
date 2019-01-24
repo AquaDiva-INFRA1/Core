@@ -149,6 +149,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Rbm.Orm.NH", "Console
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Rbm.Services", "Console\BExIS.Web.Shell\Areas\RBM\BExIS.Rbm.Services\BExIS.Rbm.Services.csproj", "{5A05B5D3-A342-4234-9AD0-A46EAFD521A9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Modules.Asm.UI", "Console\BExIS.Web.Shell\Areas\SDUM\BExIS.Modules.Asm.UI.csproj", "{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDUM", "SDUM", "{812DC114-7B87-43D5-A4C7-4B51D9D68A45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -727,6 +731,18 @@ Global
 		{5A05B5D3-A342-4234-9AD0-A46EAFD521A9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{5A05B5D3-A342-4234-9AD0-A46EAFD521A9}.Release|x86.ActiveCfg = Release|Any CPU
 		{5A05B5D3-A342-4234-9AD0-A46EAFD521A9}.Release|x86.Build.0 = Release|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Debug|x86.Build.0 = Debug|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Release|x86.ActiveCfg = Release|Any CPU
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -799,10 +815,12 @@ Global
 		{C9F05C1A-C8A0-47B1-A0DA-50AF41992767} = {E46D9EC9-D662-4012-946E-FA1DB1E9799B}
 		{9C1990BA-2E9C-49CC-B4A1-7E40056BB661} = {E46D9EC9-D662-4012-946E-FA1DB1E9799B}
 		{5A05B5D3-A342-4234-9AD0-A46EAFD521A9} = {E46D9EC9-D662-4012-946E-FA1DB1E9799B}
+		{F1358FA8-BBE0-43B6-9813-A2093F5ADE41} = {812DC114-7B87-43D5-A4C7-4B51D9D68A45}
+		{812DC114-7B87-43D5-A4C7-4B51D9D68A45} = {692AFF14-3A57-47D8-912F-093EC8F561C4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.0\lib\NET35;packages\Unity.2.1.505.2\lib\NET35
 		SolutionGuid = {E189371C-381B-4FE5-A432-53E3EF8E0581}
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.0\lib\NET35;packages\Unity.2.1.505.2\lib\NET35
 	EndGlobalSection
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
