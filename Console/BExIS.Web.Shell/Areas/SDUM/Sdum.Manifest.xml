@@ -19,7 +19,7 @@
     -->    
     <Export tag="lunchbar" id="helpSdum" order="1"
             title="Sequence Data Upload Module" description="Sequence Data Upload Module" icon=""
-            controller="Analytics" action="index"
+            controller="SequenceDataUpload" action="index"
             extends="./lunchbarRoot/help"
             />  
    
