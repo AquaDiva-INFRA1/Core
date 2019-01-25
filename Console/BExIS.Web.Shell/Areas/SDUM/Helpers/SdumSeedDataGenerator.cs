@@ -26,13 +26,11 @@ namespace BExIS.Modules.Sdum.UI.Helpers
 
                 ////////////////
 
-                Feature SDUM = features.FirstOrDefault(f => f.Name.Equals("analytics and statistics"));
-                if (SDUM == null) SDUM = featureManager.Create("analytics and statistics", "analytics and statistics");
+                Feature SDUM = features.FirstOrDefault(f => f.Name.Equals("Sequence Data Upload"));
+                if (SDUM == null) SDUM = featureManager.Create("Sequence Data Upload", "Sequence Data Upload");
+                
 
-                Feature statistics = features.FirstOrDefault(f => f.Name.Equals("Portal Statistics"));
-                if (statistics == null) statistics = featureManager.Create("Portal Statistics", "Portal Statistics", SDUM);
-
-                operationManager.Create("SDUM", "SequenceDataUpload", "*", statistics);
+                operationManager.Create("SDUM", "SequenceDataUpload", "*", SDUM);
 
                 #endregion
 
