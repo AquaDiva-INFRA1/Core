@@ -288,3 +288,32 @@
     </dl>
 </div>
 
+<div class="bx-footer right">
+    <button value="Import to the Portal" name="Import" id="Import" class="bx-button action" onclick="Import()">Import to the Portal</button>
+</div>
+
+
+<script type="text/javascript">
+    
+    function Import() {
+
+        $.ajax({
+            url: '/SDUM/SequenceDataUpload/importMetadataFromSample',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            error: function (xhr) {
+                alert('Error: ' + xhr.statusText);
+
+            },
+            success: function (result) {
+                if (result) {
+                    window.top.location = "/DDM/Data/ShowData/" + result;
+                } else {
+                    alert("Dataset can not be uploaded ... please contact the portal administration");
+                    window.top.location = "/";
+                }
+            }
+        });
+    }
+</script>
