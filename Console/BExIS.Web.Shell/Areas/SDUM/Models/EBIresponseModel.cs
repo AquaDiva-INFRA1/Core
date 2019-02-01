@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Web;
+using System.Xml;
+using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace BExIS.Modules.SDUM.UI.Models
@@ -65,7 +69,8 @@ namespace BExIS.Modules.SDUM.UI.Models
             foreach (var x in json["characteristics"]["organism"])
             {
                 organismtext.Add(x["text"].ToString());
-                organismontologyTerms.Add(x["ontologyTerms"].ToString());
+                foreach (var y in x["ontologyTerms"])
+                    organismontologyTerms.Add(y.ToString());
             }
 
             this.environmentMaterial = new List<string>();
@@ -124,8 +129,9 @@ namespace BExIS.Modules.SDUM.UI.Models
             this.waterEnvironmentalPackageontologyTerms = new List<string>();
             foreach (var x in json["characteristics"]["waterEnvironmentalPackage"])
             {
-                insdcLastUpdate.Add(x["text"].ToString());
-                waterEnvironmentalPackageontologyTerms.Add(x["ontologyTerms"].ToString());
+                waterEnvironmentalPackage.Add(x["text"].ToString());
+                foreach (var y in x["ontologyTerms"])
+                    waterEnvironmentalPackageontologyTerms.Add(y.ToString());
             }
 
 
@@ -139,7 +145,7 @@ namespace BExIS.Modules.SDUM.UI.Models
             this.synonym = new List<string>();
             foreach (var x in json["characteristics"]["synonym"])
             {
-                investigationType.Add(x["text"].ToString());
+                synonym.Add(x["text"].ToString());
             }
 
             this.insdcStatus = new List<string>();
@@ -211,6 +217,14 @@ namespace BExIS.Modules.SDUM.UI.Models
             this._linksselfhref = json["_links"]["self"]["href"].ToString();
             this._linkssamplehref = json["_links"]["sample"]["href"].ToString();
             this._linksrelationshref = json["_links"]["relations"]["href"].ToString();
+        }
+
+        public XmlDocument ConvertToXML(string jsonString)
+        {
+            XmlDocument xml = new XmlDocument();
+            xml.Load(JsonReaderWriterFactory.CreateJsonReader(
+                Encoding.ASCII.GetBytes(jsonString), new XmlDictionaryReaderQuotas()));
+            return xml;
         }
 
     }
