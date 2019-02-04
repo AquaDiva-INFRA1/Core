@@ -41,6 +41,7 @@ using BExIS.Security.Services.Utilities;
 using XmlWriter = System.Xml.XmlWriter;
 using Vaiona.Utils.Cfg;
 using BExIS.Xml.Helpers.Mapping;
+using BExIS.Xml.Helpers;
 
 namespace BExIS.Modules.Sdum.UI.Controllers
 {
@@ -89,96 +90,122 @@ namespace BExIS.Modules.Sdum.UI.Controllers
         public string importMetadataFromSample()
         {
             DataStructureManager dsm = new DataStructureManager();
-            //UnStructuredDataStructure ds_struct = (UnStructuredDataStructure) dsm.UnStructuredDataStructureRepo.Get().FirstOrDefault(x => x.Name == "none");
-            DataStructure dataStruct = ( DataStructure )dsm.AllTypesDataStructureRepo.Get().FirstOrDefault(x=>x.Name == "none");
-            
-            ResearchPlanManager rpm = new ResearchPlanManager();
-            ResearchPlan rp = rpm.Repo.Get().First();
-
-            
-            XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
-            MetadataStructureManager msm = new MetadataStructureManager();
-            MetadataStructure metadataStructure = msm.Repo.Get().FirstOrDefault(x => x.Name.ToLower() == "ebi");
-
-            //XmlDocument doc = new XmlDocument();
-            //XmlNode Node = doc.CreateElement("root");
-            //XmlNode Node_ = doc.CreateElement("accession");
-            //Node_.InnerText = EBIresponseModel.accession;
-            //Node.AppendChild(Node_);
-            //doc.AppendChild(Node);
-            //XmlDocument MetadataDoc = LoadFromXml_external(doc, metadataStructure);
-            XmlDocument MetadataDoc = LoadFromXml_external(EBIresponseModel.ConvertToXML(JsonResult), metadataStructure);
-            //XmlDocument MetadataDoc = EBIresponseModel.ConvertToXML(JsonResult);
-
             DatasetManager dm = new DatasetManager();
-            Dataset ds = dm.CreateEmptyDataset(dataStruct, rp, metadataStructure);
+            XmlDocument MetadataDoc = new XmlDocument();
+            Dataset ds = new Dataset() ;
+            XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper() ;
 
-            if (GetUsernameOrDefault() != "DEFAULT")
+            try
             {
-                EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-                //Full permissions for the user
-                entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                //UnStructuredDataStructure ds_struct = (UnStructuredDataStructure) dsm.UnStructuredDataStructureRepo.Get().FirstOrDefault(x => x.Name == "none");
+                DataStructure dataStruct = (DataStructure)dsm.AllTypesDataStructureRepo.Get().FirstOrDefault(x => x.Name == "none");
 
-                #region Aquadiva: permissions for PIs
-                UserPiManager upm = new UserPiManager();
+                ResearchPlanManager rpm = new ResearchPlanManager();
+                ResearchPlan rp = rpm.Repo.Get().First();
 
-                //Get PIs of the current user
-                List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
-                foreach (User pi in piList)
+
+                xmlDatasetHelper = new XmlDatasetHelper();
+                MetadataStructureManager msm = new MetadataStructureManager();
+                MetadataStructure metadataStructure = msm.Repo.Get().FirstOrDefault(x => x.Name.ToLower() == "ebi");
+
+                //XmlDocument doc = new XmlDocument();
+                //XmlNode Node = doc.CreateElement("root");
+                //XmlNode Node_ = doc.CreateElement("accession");
+                //Node_.InnerText = EBIresponseModel.accession;
+                //Node.AppendChild(Node_);
+                //doc.AppendChild(Node);
+                //XmlDocument MetadataDoc = LoadFromXml_external(doc, metadataStructure);
+                MetadataDoc = LoadFromXml_external(EBIresponseModel.ConvertToXML(JsonResult), metadataStructure);
+                //XmlDocument MetadataDoc = EBIresponseModel.ConvertToXML(JsonResult);
+                
+                ds = dm.CreateEmptyDataset(dataStruct, rp, metadataStructure);
+            }
+            catch (Exception ex)
+            {
+                return ("error in metadata structure : " + ex.ToString());
+            }
+
+            try
+            {
+                if (GetUsernameOrDefault() != "DEFAULT")
                 {
-                    //Full permissions for the pis
-                    entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                    EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+                    //Full permissions for the user
+                    entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
 
-                    //Get all users with the same pi
-                    List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
-                    //Give view and download rights to the members
-                    foreach (User piMember in piMembers)
+                    #region Aquadiva: permissions for PIs
+                    UserPiManager upm = new UserPiManager();
+
+                    //Get PIs of the current user
+                    List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
+                    foreach (User pi in piList)
                     {
-                        entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
+                        //Full permissions for the pis
+                        entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                        //Get all users with the same pi
+                        List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                        //Give view and download rights to the members
+                        foreach (User piMember in piMembers)
+                        {
+                            entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
                                         RightType.Read,
                                         RightType.Download
                                     });
+                        }
                     }
+                    #endregion
                 }
-                #endregion
             }
-
-            if (dm.IsDatasetCheckedOutFor(ds.Id, GetUsernameOrDefault()) || dm.CheckOutDataset(ds.Id, GetUsernameOrDefault()))
+            catch(Exception ex)
             {
-                DatasetVersion workingCopy = dm.GetDatasetWorkingCopy(ds.Id);
-
-                if (MetadataDoc.OuterXml != null)
-                {
-                    XDocument xMetadata = XDocument.Parse(MetadataDoc.OuterXml);
-                    workingCopy.Metadata = Xml.Helpers.XmlWriter.ToXmlDocument(xMetadata);
-                }
-
-                //set status
-
-                if (workingCopy.StateInfo == null) workingCopy.StateInfo = new Vaiona.Entities.Common.EntityStateInfo();
-
-                workingCopy.StateInfo.State = DatasetStateInfo.Valid.ToString();
-
-                string title = xmlDatasetHelper.GetInformationFromVersion(workingCopy.Id, NameAttributeValues.title);
-                if (string.IsNullOrEmpty(title)) title = "No Title available.";
-
-                dm.EditDatasetVersion(workingCopy, null, null, null);
-                dm.CheckInDataset(ds.Id, "Metadata was submited.", GetUsernameOrDefault(), ViewCreationBehavior.None);
-
-                // reindexing
-                if (this.IsAccessibale("DDM", "SearchIndex", "ReIndexSingle"))
-                {
-                    var x = this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", ds.Id } });
-                }
-                LoggerFactory.LogData(ds.Id.ToString(), typeof(Dataset).Name, Vaiona.Entities.Logging.CrudState.Created);
-
-                var es = new EmailService();
-                es.Send(MessageHelper.GetCreateDatasetHeader(),
-                    MessageHelper.GetCreateDatasetMessage(ds.Id, title, GetUsernameOrDefault()),
-                    ConfigurationManager.AppSettings["SystemEmail"]
-                    );
+                return ("error in Entity Permission Manager structure : " + ex.ToString());
             }
-            return ds.Id.ToString();
+            try { 
+
+                if (dm.IsDatasetCheckedOutFor(ds.Id, GetUsernameOrDefault()) || dm.CheckOutDataset(ds.Id, GetUsernameOrDefault()))
+                {
+                    DatasetVersion workingCopy = dm.GetDatasetWorkingCopy(ds.Id);
+
+                    if (MetadataDoc.OuterXml != null)
+                    {
+                        XDocument xMetadata = XDocument.Parse(MetadataDoc.OuterXml);
+                        workingCopy.Metadata = Xml.Helpers.XmlWriter.ToXmlDocument(xMetadata);
+                    }
+
+                    //set status
+
+                    if (workingCopy.StateInfo == null) workingCopy.StateInfo = new Vaiona.Entities.Common.EntityStateInfo();
+
+                    workingCopy.StateInfo.State = DatasetStateInfo.Valid.ToString();
+
+                    string title = xmlDatasetHelper.GetInformationFromVersion(workingCopy.Id, NameAttributeValues.title);
+                    if (string.IsNullOrEmpty(title)) title = "No Title available.";
+
+                    dm.EditDatasetVersion(workingCopy, null, null, null);
+                    dm.CheckInDataset(ds.Id, "Metadata was submited.", GetUsernameOrDefault(), ViewCreationBehavior.None);
+
+                    // reindexing
+                    if (this.IsAccessibale("DDM", "SearchIndex", "ReIndexSingle"))
+                    {
+                        var x = this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", ds.Id } });
+                    }
+                    LoggerFactory.LogData(ds.Id.ToString(), typeof(Dataset).Name, Vaiona.Entities.Logging.CrudState.Created);
+
+                    var es = new EmailService();
+                    es.Send(MessageHelper.GetCreateDatasetHeader(),
+                        MessageHelper.GetCreateDatasetMessage(ds.Id, title, GetUsernameOrDefault()),
+                        ConfigurationManager.AppSettings["SystemEmail"]
+                        );
+                }
+                return ds.Id.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                return ("error in re indexing : " + ex.ToString());
+            }
+            
         }
 
         public string GetUsernameOrDefault()

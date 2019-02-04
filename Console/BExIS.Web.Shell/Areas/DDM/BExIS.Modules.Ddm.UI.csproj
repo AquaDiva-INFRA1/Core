@@ -469,6 +469,7 @@
     <Content Include="Views\interactiveSearch\table_result.cshtml" />
     <Content Include="Views\Admin\__editSearchAttribute.cshtml" />
     <Content Include="Views\Admin\_metadataNode_partial.cshtml" />
+    <Content Include="Views\interactiveSearch\index_.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
