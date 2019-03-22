@@ -48,6 +48,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
         static String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
         static String WellsImagePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "Wells.png");
+        static String DebugFilePath = System.IO.Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Debug.txt");
 
         // start page - wellcome page for the interactive search 
         // checks if the request is coming from a refresh page or from another feature controller to reset the data table or keep the old search
@@ -251,6 +252,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         //[HttpPost] ActionResult
         public Boolean fill_data_table_for_binding_from_Image(String well_name)
         {
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : fill_data_table_for_binding_from_Image called with well name  : " + well_name);
+            }
+
             well_name = well_name.ToLower();
             List<String> dataset_Ids_results_for_data_table = new List<string>();
 
@@ -287,6 +294,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 NpgsqlCommand MyCmd = null;
                 NpgsqlConnection MyCnx = null;
 
+                //debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : fill_data_table_for_binding_from_Image : the Entities that are extracted from the ontology which are a child " +
+                        "of the entity labelled site entity :  http://purl.obolibrary.org/obo/BFO_0000029");
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : fill_data_table_for_binding_from_Image : Uri results: " + String.Join(" ", URI_classes.ToArray()));
+                }
 
                 foreach (String uri in URI_classes)
                 {
@@ -348,6 +362,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                 catch (Exception ex)
                                 {
                                     //throw ex;
+                                    //debugging file
+                                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                                    {
+                                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : fill_data_table_for_binding_from_Image : Exception : "+ex.Message);
+                                    }
                                 }
                             }
                         }
@@ -355,6 +374,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     MyCnx.Close();
                 }
             }
+            
+
             Debug.WriteLine("results after search : " + results_);
 
             //fill the results including the title of the datasets which can cover more results
@@ -378,6 +399,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     Debug.WriteLine(ex_.ToString());
                 }
+            }
+
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : fill_data_table_for_binding_from_Image : results of datasets ids for the well name : " + String.Join(" ", dataset_Ids_results_for_data_table.ToArray()));
             }
 
             //DataTable m;

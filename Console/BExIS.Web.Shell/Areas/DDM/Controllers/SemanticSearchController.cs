@@ -53,6 +53,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
         static String extendedautocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "extendedAutocompletion.txt");
         static String standardsFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "standards.txt");
+        static String DebugFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Debug.txt");
         static String informationSeparator = "+=+=+=+";
 
         static string userName = WebConfigurationManager.AppSettings["connectionStrings"];
@@ -89,6 +90,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         [HttpPost]
         public ActionResult Index(String searchTerm)
         {
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") +" : Search Terms passed : " + searchTerm);
+            }
+
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Semantic Search", this.Session.GetTenant());
             Session["Window"] = false;
             model = null;
@@ -131,9 +138,15 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             int currentSubsetSize = model.resultListComponent.subsetsize;
             int currentSubsetStart = model.resultListComponent.subsetstart;
             string searchTermString = model.resultListComponent.searchTermString;
-
+            
             int newSubsetStart = currentSubsetStart + currentSubsetSize;
             int newSubsetSize = currentSubsetSize;
+
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Next Page is pressed for semedico search results : from - " + newSubsetStart + "-->" + newSubsetSize);
+            }
 
             string result = consumeSemedicoREST(searchTermString, newSubsetStart, newSubsetSize);
 
@@ -158,9 +171,15 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             int currentSubsetSize = model.resultListComponent.subsetsize;
             int currentSubsetStart = model.resultListComponent.subsetstart;
             string searchTermString = model.resultListComponent.searchTermString;
-
+            
             int newSubsetStart = currentSubsetStart - currentSubsetSize;
             int newSubsetSize = currentSubsetSize;
+
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Previous Page is pressed for semedico search results : from - " + newSubsetStart + "-->" + newSubsetSize);
+            }
 
             string result = consumeSemedicoREST(searchTermString, newSubsetStart, newSubsetSize);
             if (result == null)
@@ -686,10 +705,22 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             * Then looks for the specified DatasetVersion and displays it
             * */
         private System.Data.DataTable semanticSearch(String searchTerm)
-        {   
+        {
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " semanticSearch is called ");
+            }
+
             #region Load mapping dictionary from file
             string[] lines = global::System.IO.File.ReadAllLines(mappingDictionaryFilePath);
             string json = String.Join("", lines);
+
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Read All Lines from  : " + mappingDictionaryFilePath);
+            }
 
             mappingDic = JsonConvert.DeserializeObject<Dictionary<String, List<OntologyMapping>>>(json, new JsonSerializerSettings
             {
@@ -707,6 +738,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             trimmedTokens = trimmedTokens.Where(x => x != "").ToList<String>();
             //Lower case for all tokens
             trimmedTokens = trimmedTokens.Select(x => x.ToLower()).ToList<String>();
+
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Trimmed tokens : " + String.Join(String.Empty, trimmedTokens.ToArray()));
+            }
 
             //Search for each Token in the dictionary and build API parameters
             StringBuilder paramBuilder = new StringBuilder();
@@ -748,6 +785,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             //Set the searchTerm as query-String
             String param = HttpUtility.UrlEncode(paramBuilder.ToString().Replace(" ", ""));
 
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Parameters passed to the semantic Search API : " + param);
+            }
             string output = "";
 
             try
@@ -761,15 +803,31 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                     model.semanticComponent = CreateDataTable(headerItems);
 
+                    //debugging file
+                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                    {
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : REsponse Correct from Semantic search with results: " + output);
+                    }
+
                 }
             }
             catch (SocketException e)
             {
                 model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
+                //debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Socket exception in Semantic Search: " + e.Message);
+                }
             }
             catch (AggregateException e)
             {
                 model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
+                //debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Aggregate Exception in Semantic Search: " + e.Message);
+                }
             }
 
             //Parse the search-output
@@ -895,6 +953,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             * */
         private String consumeSemedicoREST(String searchTerm, int subsetStart = 1, int subsetSize = 10)
         {
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " consumeSemedicoREST is called ");
+            }
             #region Http-Request
             //Construct a HttpClient for the search-Server
             HttpClient client = new HttpClient();
@@ -902,6 +965,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             client.Timeout = TimeSpan.FromSeconds(30);
             //Set the searchTerm as query-String
             String param = ("?inputstring=" + searchTerm.Replace(", ", "+") + "&subsetstart=" + subsetStart + "&subsetsize=" + subsetSize);
+
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " parameters for the Semedico API : "+param);
+            }
             String output = null;
 
             try
@@ -911,15 +980,31 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     // Get the response body. Blocking!
                     output = response.Content.ReadAsStringAsync().Result;
+                    //debugging file
+                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                    {
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " Response success from Semedico : "+output);
+                    }
                 }
             }
             catch (SocketException e)
             {
+                //debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " Semedico Socket Exception  "+e.Message);
+                }
             }
             catch (AggregateException e)
             {
+                //debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " Semedico Aggregate Exception   " + e.Message);
+                }
                 //Returning null if the timeout triggers
                 return null;
+                
             }
 
             #endregion
@@ -952,6 +1037,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
          * */
         private String consumeSemedicoREST_v2(String query_String, int subsetStart = 1, int subsetSize = 10)
         {
+
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : consumeSemedicoREST_v2 is called " );
+            }
+
             #region Http-Request
             //Construct a HttpClient for the search-Server
             HttpClient client = new HttpClient();
@@ -961,6 +1053,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             String param = ("?inputstring=" + query_String + "&subsetstart=" + subsetStart + "&subsetsize=" + subsetSize);
             String output = null;
 
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : consumeSemedicoREST_v2 params : "+param);
+            }
+
             try
             {
                 HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
@@ -968,11 +1066,21 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     // Get the response body. Blocking!
                     output = response.Content.ReadAsStringAsync().Result;
+                    //debugging file
+                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                    {
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : consumeSemedicoREST_v2 is successful with results : "+output);
+                    }
                 }
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.ToString());
+                //debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : consumeSemedicoREST_v2 threw an exception : "+e.Message);
+                }
                 return null;
             }
             #endregion
@@ -982,6 +1090,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         
         private String get_observations_contextualized_contextualizing(String id)
         {
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_observations_contextualized_contextualizing is called ");
+            }
+
             String request_string = "";
             
             NpgsqlCommand MyCmd = null;
@@ -989,7 +1103,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             MyCnx = new NpgsqlConnection(Conx);
             MyCnx.Open();
-            string select = "SELECT * FROM \"observation_contexts_uri_label\" WHERE datasets_id=" + id;
+            string select = "SELECT * FROM \"dataset_column_annotation\" WHERE datasets_id=" + id;
             MyCmd = new NpgsqlCommand(select, MyCnx);
 
             NpgsqlDataReader dr = MyCmd.ExecuteReader();
@@ -998,16 +1112,23 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 while (dr.Read())
                 {
-                    if (dr["contextualized_entity"] != System.DBNull.Value)
+                    if (dr["variable_id"] != System.DBNull.Value)
                     {
                         var Datasetref = dr["datasets_id"].ToSafeString();
-                        var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
-                        var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
-                        var contextualized_entity_label = (String)dr["contextualized_entity_label"].ToSafeString();
-                        var contextualizing_entity_label = (String)dr["contextualizing_entity_label"].ToSafeString();
-                        request_string = request_string + contextualizing_entity_label + " of " + contextualized_entity_label + ",";
+                        //var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
+                        //var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
+                        //var contextualized_entity_label = (String)dr["contextualized_entity_label"].ToSafeString();
+                        //var contextualizing_entity_label = (String)dr["contextualizing_entity_label"].ToSafeString();
+                        var entity_label = (String)dr["entity_label"].ToSafeString();
+                        var characteristic_label = (String)dr["characteristic_label"].ToSafeString();
+                        request_string = request_string + clean_labels(characteristic_label) + " of " + clean_labels(entity_label) + ",";
                         Debug.WriteLine("Row processed  number : " + line); line++;
                         Debug.WriteLine(request_string);
+                        //debugging file
+                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                        {
+                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_observations_contextualized_contextualizing request_string to get the annotations : "+request_string);
+                        }
                     }
                 }
             }
@@ -1028,6 +1149,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 return JsonConvert.SerializeObject(null, Newtonsoft.Json.Formatting.Indented);
             }
             */
+
+            // debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_dataset_related_papers_by_ID is called ");
+            }
+
+
             String Semedico_Result ="";
             String Query_4_API;
 
@@ -1035,6 +1164,15 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 Query_4_API = get_observations_contextualized_contextualizing(id);
                 Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
+
+                // debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_dataset_related_papers_by_ID query for Semedico api : " + Query_4_API);
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_dataset_related_papers_by_ID calling for Semedico api : ");
+                }
+
+
                 Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
                 // to resolve the semedico API "session" problem
                 Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
@@ -1069,6 +1207,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Debug.WriteLine("Execution time (millisecondes) for DDM/get_dataset_related_papers_by_ID ==> " +elapsedMs);
+
+            // debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Execution time (millisecondes) for DDM/get_dataset_related_papers_by_ID ==> : " + elapsedMs);
+            }
+
             Debug.WriteLine("====> Semedico result " + Semedico_Result);
             return Semedico_Result;
 
@@ -1173,6 +1318,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         public string clean_entity_URI_for_insert(string uri)
         {
+            // debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_entity_URI_for_insert called : "+uri+" ==> " + uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", ""));
+            }
             return uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", "");
         }
 
@@ -1187,6 +1337,42 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             if (res.Contains("@"))
                 return res.Substring(0, res.IndexOf("@"));
             return res;
+        }
+
+        public String clean_labels(String label)
+        {
+            string k = label;
+
+            if (label.Contains("@"))
+            {
+                // debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_labels called : " + k + " ==> "+ label.Substring(0, label.IndexOf("@")));
+                }
+                return label.Substring(0, label.IndexOf("@"));
+            }
+
+            else if (label.ToLower().IndexOf("no label found") > -1)
+            {
+                // debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_labels called : " + k + " ==> " + " (empty string)");
+                }
+                return "";
+            }
+            else
+            {
+                // debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_labels called : " + k + " ==> " +label);
+                }
+                return label;
+            }
+
+                
         }
         #endregion
 
@@ -1203,6 +1389,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             //
 
             string filePath = Request["filePath"];// "C:/Users/admin/Desktop/CopyofAnnotationFile.xlsx";
+
+            // debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Fill_annotations_from_csv_file called : import from " + filePath);
+            }
+
             //FileStream for the users file
             FileStream fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             //Grab the sheet format from the bus
@@ -1274,6 +1467,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         catch (Exception exc)
                         {
                             Debug.WriteLine(exc.Message);
+                            // debugging file
+                            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                            {
+                                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Fill_annotations_from_csv_file  : Exception occured : " + exc.Message);
+                            }
                         }
 
                         if (ds_id.Length > 1)
@@ -1294,6 +1492,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                 catch (Exception exc)
                                 {
                                     Debug.WriteLine(exc.Message);
+                                    // debugging file
+                                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                                    {
+                                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Fill_annotations_from_csv_file  : Exception occured : " +exc.Message);
+                                    }
                                 }
                                 
 
@@ -1318,6 +1521,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         //Result contains null entries for whitespace or null string inputs
         public ContentResult FindOntologyLabels(string serializedURIList)
         {
+            // debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : FindOntologyLabels called : with parameter : "+serializedURIList );
+            }
+
             List<String> uriList = JsonConvert.DeserializeObject<List<String>>(serializedURIList);
             List<String> labelList = new List<string>();
             //Load the ontology as a graph
@@ -1366,12 +1575,16 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     }
                     if (labelOutput.Equals(""))
                         labelOutput = "No label found!";
-
+                    
                     labelList.Add(labelOutput);
                 }
             }
             ContentResult result = new ContentResult();
             result.Content = JsonConvert.SerializeObject(labelList);
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : FindOntologyLabels label outputs : " + String.Join(" ", labelList.ToArray()));
+            }
             return result;
         }
 

@@ -1,20 +1,35 @@
 ﻿
 using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Objects;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.Ddm.UI.Helpers
 {
     public class DdmSeedDataGenerator
     {
+        static String DebugFilePath = System.IO.Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Debug.txt");
+
         public static void GenerateSeedData()
         {
             FeatureManager featureManager = new FeatureManager();
             OperationManager operationManager = new OperationManager();
-
+            
             try
             {
+                #region debug for semantic search and Semedico
+                //debugging file
+                if (!System.IO.File.Exists(DebugFilePath))
+                {
+                    // Create a file to write to.
+                    using (StreamWriter sw = System.IO.File.CreateText(DebugFilePath))
+                    {
+                    }
+                }
+                #endregion
 
                 #region SECURITY
                 //workflows = größere sachen, vielen operation

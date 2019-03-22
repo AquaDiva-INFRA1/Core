@@ -1,4 +1,5 @@
-﻿using BExIS.Dcm.UploadWizard;
+﻿using BExIS.Aam.Services;
+using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.DataStructure;
@@ -24,6 +25,7 @@ using Vaiona.Persistence.Api;
 using Vaiona.Utils.Cfg;
 using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Modularity;
+using BExIS.Aam.Entities.Mapping;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
 {
@@ -360,19 +362,20 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveUnitSelection()
+        public string SaveUnitSelection()
         {
 
             int? selectFieldId = null;
             int? selectOptionId = null;
+            Int32 headerfield = -1;
 
             //Keys submitted by Javascript in Verification.cshtml
             foreach (string key in Request.Form.AllKeys)
             {
                 if ("selectFieldId" == key)
                 {
-
                     selectFieldId = Convert.ToInt32(Request.Form[key]);
+                    headerfield = Convert.ToInt32(Request.Form[key]);
                 }
                 if ("selectOptionId" == key)
                 {
@@ -469,8 +472,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             currentUnitInfo.SelectedDataTypeId = dtinfo.DataTypeId;
             ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
             ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
+            ViewData["dataheaderid"] = selectFieldId;
 
-            return PartialView("Verification", model);
+            //return PartialView("Verification", model);
+            List<DataTypeInfo> list = model.HeaderVariableInformation.FirstOrDefault(x => x.headerId == headerfield).unitInfo.DataTypeInfos;
+            return JsonConvert.SerializeObject(list);
 
         }
 
@@ -543,19 +549,21 @@ namespace BExIS.Modules.Dcm.UI.Controllers
          * Saves the selected datatype in the MappedheaderUnits and saves them on the bus
          * */
         [HttpPost]
-        public ActionResult SaveDataTypeSelection()
+        public string SaveDataTypeSelection()
         {
 
             int? selectFieldId = null;
             int? selectedDataTypeId = null;
+            
+            Int32 headerfield = -1;
 
             //Keys submitted by Javascript in Verification.cshtml
             foreach (string key in Request.Form.AllKeys)
             {
                 if ("headerfieldId" == key)
                 {
-
                     selectFieldId = Convert.ToInt32(Request.Form[key]);
+                    headerfield = Convert.ToInt32(Request.Form[key]);
                 }
                 if ("selectedDataTypeId" == key)
                 {
@@ -632,7 +640,153 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
             ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
 
-            return PartialView("Verification", model);
+            //return PartialView("Verification", model);
+            List<UnitInfo> list_ = new List<UnitInfo>();
+            foreach(UnitInfo unit in model.AvailableUnits)
+            {
+                foreach (DataTypeInfo datatype in unit.DataTypeInfos)
+                {
+                    if (datatype.DataTypeId == selectedDataTypeId)
+                        if (!list_.Contains(unit))
+                            list_.Add(unit);
+                }
+            }
+
+            return JsonConvert.SerializeObject(list_);
+        }
+
+        /*
+         * Saves the name of the selected suggestion into the mapped-header-units
+         * */
+        [HttpPost]
+        public string Set_Unit_Datatype_Mappings()
+        {
+            SelectVerificationModel model = new SelectVerificationModel();
+
+            int? selectFieldId = null;
+            int? selectedUnitId = null;
+            int? selectedDatatypeId = null;
+            string selectedVariableName = null;
+
+            //Keys submitted by Javascript in Verification.cshtml
+            foreach (string key in Request.Form.AllKeys)
+            {
+                if ("headerfieldId" == key)
+                {
+                    selectFieldId = Convert.ToInt32(Request.Form[key]);
+                }
+                if ("selectedVariableName" == key)
+                {
+                    selectedVariableName = Convert.ToString(Request.Form[key]);
+                }
+                if ("selectedUnitId" == key)
+                {
+                    selectedUnitId = Convert.ToInt32(Request.Form[key]);
+                }
+                if ("selectedDataTypeId" == key)
+                {
+                    var test = Request.Form[key];
+                    selectedDatatypeId = Convert.ToInt32(Request.Form[key]);
+                }
+            }
+
+            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
+            {
+                model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+            }
+
+            /*
+             * Copy the assignedHeaderUnits, change the entry for which the suggestion was selected
+             * */
+            if (selectFieldId != null)
+            {
+                //Find the position of the Tuple that is about to be changed
+                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == selectFieldId).FirstOrDefault();
+                int i = model.HeaderVariableInformation.FindIndex(t => t.Equals(existingInformation));
+                //Insert a new Tuple at this position
+                model.HeaderVariableInformation[i] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, existingInformation.unitInfo);
+            }
+
+            UnitInfo currentUnit_ = new UnitInfo() ; // it is used to be loaded in the mapping suggestion later //hamdi
+            //Save unit and datatype
+            if (selectFieldId != null && selectedUnitId != null)
+            {
+                //Get all units
+                List<UnitInfo> availableUnits = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
+
+                //Get the current unit and clone it
+                UnitInfo currentUnit = (UnitInfo)availableUnits.Where(u => u.UnitId == selectedUnitId).FirstOrDefault().Clone();
+                currentUnit.SelectedDataTypeId = Convert.ToInt32(selectedDatatypeId);
+                currentUnit_ = currentUnit;
+
+                //Find the index of the suggestion that is about to be changed
+                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
+                int j = model.HeaderVariableInformation.FindIndex(t => t.Equals(existingInformation));
+                //Save the new unit with the new datatype
+                model.HeaderVariableInformation[j] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, currentUnit);
+            }
+
+            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
+
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
+            {
+                model.HeaderFields = (string[])TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_HEADERFIELDS];
+            }
+
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS))
+            {
+                model.AvailableUnits = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
+            }
+
+            model.Suggestions = (Dictionary<int, List<EasyUploadSuggestion>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS];
+
+            Session["TaskManager"] = TaskManager;
+
+            //create Model
+            model.StepInfo = TaskManager.Current();
+
+            //Submit default datatype id
+            //Default unit should be "none" if it exists, otherwise just take the first unit
+            UnitInfo currentUnitInfo = model.AvailableUnits.FirstOrDefault(u => u.Name.ToLower() == "none");
+            if (currentUnitInfo != null)
+            {
+                currentUnitInfo = (UnitInfo)currentUnitInfo.Clone();
+            }
+            else
+            {
+                currentUnitInfo = (UnitInfo)model.AvailableUnits.FirstOrDefault().Clone();
+            }
+
+            DataTypeInfo dtinfo = currentUnitInfo.DataTypeInfos.FirstOrDefault();
+            currentUnitInfo.SelectedDataTypeId = dtinfo.DataTypeId;
+            ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
+            ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
+
+            List<EasyUploadSuggestion> suggestionList = model.Suggestions[Int32.Parse(selectFieldId.ToString())];
+            EasyUploadSuggestion suggestionMatch = suggestionList.FirstOrDefault(x => x.attributeName == selectedVariableName);
+            if ((suggestionMatch == null) && (currentUnit_!=null))
+            {
+                suggestionMatch = new EasyUploadSuggestion(selectedVariableName, dtinfo.UnitId, dtinfo.DataTypeId, currentUnit_.Name, dtinfo.Name, true);
+                suggestionMatch.attributeName = selectedVariableName;
+                suggestionMatch.dataTypeID = dtinfo.DataTypeId;
+                suggestionMatch.datatypeName = dtinfo.Name;
+            }
+
+            AnnotationManager am = new AnnotationManager();
+            Annotation existing_annotation = am.GetAnnotationsByVariableLabel(selectedVariableName).FirstOrDefault();
+            if (existing_annotation != null)
+            {
+                suggestionMatch.finish_suggestion_block(dtinfo.Description, existing_annotation.Entity, existing_annotation.Characteristic);
+            }
+            else
+            {
+                suggestionMatch.finish_suggestion_block(dtinfo.Description, "" , "");
+            }
+            
+            string json = JsonConvert.SerializeObject(suggestionMatch);
+            return json;
         }
 
         /*
@@ -1038,22 +1192,27 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// </summary>
         private double Similarity(string a, string b)
         {
-            List<double> similarities = new List<double>();
-            double output = 0.0;
-
-            var l = new NormalizedLevenshtein();
-            similarities.Add(l.Similarity(a, b));
-            var jw = new JaroWinkler();
-            similarities.Add(jw.Similarity(a, b));
-            var jac = new Jaccard();
-            similarities.Add(jac.Similarity(a, b));
-
-            foreach (double sim in similarities)
+            if ((a != null) && (b != null))
             {
-                output += sim;
-            }
+                List<double> similarities = new List<double>();
+                double output = 0.0;
 
-            return output / similarities.Count;
+                var l = new NormalizedLevenshtein();
+                similarities.Add(l.Similarity(a, b));
+                var jw = new JaroWinkler();
+                similarities.Add(jw.Similarity(a, b));
+                var jac = new Jaccard();
+                similarities.Add(jac.Similarity(a, b));
+
+                foreach (double sim in similarities)
+                {
+                    output += sim;
+                }
+
+                return output / similarities.Count;
+            }
+            else return Int64.Parse("0");
+            
         }
 
         /// <summary>
@@ -1068,50 +1227,85 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// <returns>Dictionary with the category (Entity/Characteristic) as key and a (sorted) list of possible annotations as value</returns>
         private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(int headerIndex, string variableName, long datatypeID, long unitID, Dictionary<String, Tuple<String, Boolean>> selectedAnnotations = null)
         {
-            //Order entire lists of entitites and characteristics according to a mapping metric
-            //For now: Just use a string similarity
-            List<String> ontologyTerms = global::System.IO.File.ReadAllLines(autocompletionFilePath).ToList<String>();
+            AnnotationManager am = new AnnotationManager();
+            List<Annotation> list_existing_annotation = am.GetAnnotationsByVariableLabel(variableName);
             Dictionary<string, List<OntologyMappingSuggestionModel>> output = new Dictionary<string, List<OntologyMappingSuggestionModel>>();
-            string informationSeparator = "";
-            for (int i = 0; i < ontologyTerms.Count; i++)
+
+            //check if the variable is already annotated.
+            if (list_existing_annotation.Count > 0)
             {
-                if (i == 0)
+                foreach(Annotation annot in list_existing_annotation)
                 {
-                    //First line, read the separator
-                    informationSeparator = ontologyTerms.ElementAt(i);
-                }
-                if (i >= 1)
-                {
-                    string entry = ontologyTerms.ElementAt(i);
-                    //Split entry into display name, uri and concept group
-                    string[] splitEntry = entry.Split(new string[] { informationSeparator }, StringSplitOptions.RemoveEmptyEntries);
-                    if(splitEntry.Length == 3)
+                    if (!output.ContainsKey("Characteristic"))
                     {
-                        string label = splitEntry[0];
-                        string uri = splitEntry[1];
-                        string category = splitEntry[2];
-
-                        if (!output.ContainsKey(category))
-                        {
-                            output.Add(category, new List<OntologyMappingSuggestionModel>());
-                        }
-
-                        //Calculate the similarity
-                        output[category].Add(new OntologyMappingSuggestionModel(uri, label, Similarity(variableName, label)));
+                        output.Add("Characteristic", new List<OntologyMappingSuggestionModel>());
                     }
-                    else
+                    if (output["Characteristic"].Find(x => x.conceptURI == annot.Characteristic) == null )
                     {
-                        throw new Exception("Invalid entry in autocomplete file!");
+                        output["Characteristic"].Add(new OntologyMappingSuggestionModel(annot.Characteristic, annot.Characteristic_Label, Similarity(variableName, annot.Characteristic_Label)));
+                    }
+                    if (!output.ContainsKey("Entity"))
+                    {
+                        output.Add("Entity", new List<OntologyMappingSuggestionModel>());
+                    }
+                    if (output["Entity"].Find(x => x.conceptURI == annot.Entity) == null)
+                    {
+                        output["Entity"].Add(new OntologyMappingSuggestionModel(annot.Entity, annot.Entity_Label, Similarity(variableName, annot.Entity_Label)));
+                    }
+                    
+                }
+            }
+            else
+            {
+                //get the suggestions based on the Extendedautocompletition file
+                //Order entire lists of entitites and characteristics according to a mapping metric
+                //For now: Just use a string similarity
+                List<String> ontologyTerms = global::System.IO.File.ReadAllLines(autocompletionFilePath).ToList<String>();
+
+
+                string informationSeparator = "";
+                for (int i = 0; i < ontologyTerms.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        //First line, read the separator
+                        informationSeparator = ontologyTerms.ElementAt(i);
+                    }
+                    if (i >= 1)
+                    {
+                        string entry = ontologyTerms.ElementAt(i);
+                        //Split entry into display name, uri and concept group
+                        string[] splitEntry = entry.Split(new string[] { informationSeparator }, StringSplitOptions.RemoveEmptyEntries);
+                        if (splitEntry.Length == 3)
+                        {
+                            string label = splitEntry[0];
+                            string uri = splitEntry[1];
+                            string category = splitEntry[2];
+
+                            if (!output.ContainsKey(category))
+                            {
+                                output.Add(category, new List<OntologyMappingSuggestionModel>());
+                            }
+
+                            //Calculate the similarity
+                            output[category].Add(new OntologyMappingSuggestionModel(uri, label, Similarity(variableName, label)));
+                        }
+                        else
+                        {
+                            throw new Exception("Invalid entry in autocomplete file!");
+                        }
                     }
                 }
             }
+            
+
             //Order suggested mappings according to their similarity
             List<String> keys = new List<String>(output.Keys);
             foreach(string key in keys)
             {
                 List<OntologyMappingSuggestionModel> tmp = output[key];
                 Tuple<String, Boolean> alreadySelected;
-                if(selectedAnnotations != null && selectedAnnotations.TryGetValue(key, out alreadySelected))
+                if(selectedAnnotations != null && tmp.Find(x=> x.conceptURI == null) != null && selectedAnnotations.TryGetValue(key, out alreadySelected))
                 {
                     //We have a selected annotation that we have to take care of - put it at the beginning of the list by tweaking its similarity
                     var unicorn = tmp.OrderByDescending(el => el.conceptURI.Equals(alreadySelected.Item1) ? double.MaxValue : el.similarity).Take(50).ToList();
@@ -1123,6 +1317,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     var unicorn = tmp.OrderByDescending(el => el.similarity).Take(50).ToList();
                     output[key] = unicorn;
                 }                               
+            }
+
+            // test to see if the annotation is filled from an existing one so we dont need to add more annotation from the database 
+            if (list_existing_annotation != null)
+            {
+                return output;
             }
 
             //Now add the annotations that we already have in the database to the start of the list (and remove duplicates)
@@ -1191,5 +1391,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             return output;
         }
         #endregion
+
+
+
+        
     }
 }
