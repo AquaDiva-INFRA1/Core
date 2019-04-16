@@ -13,6 +13,13 @@ using Newtonsoft.Json.Linq;
 using BExIS.Modules.Asm.UI.Models;
 using BExIS.Modules.Rpm.UI.Models;
 using System.Linq;
+using BExIS.Dlm.Entities.Data;
+using System.Web.Configuration;
+using System.IO;
+using Microsoft.Scripting.Hosting;
+using IronPython.Hosting;
+using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 
 namespace BExIS.Modules.Asm.UI.Controllers
 {
@@ -22,7 +29,10 @@ namespace BExIS.Modules.Asm.UI.Controllers
         static List<Variable_analytics> VA_list;
         
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
-        
+
+        private static string datasets_root_folder = WebConfigurationManager.AppSettings["DataPath"];
+        string[] allowed_extention = new string[] { "csv", "xlsx" ,"xls" };
+
         /* this action reveals a semantic coverage for our data portal and needs to be accessed via URL ... no button for it ...
         */
         public ActionResult Index()
@@ -186,6 +196,107 @@ namespace BExIS.Modules.Asm.UI.Controllers
             
             return File(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "REPORT.csv"), "text/csv", "REPORT.csv");
         }
+
+        public ActionResult showDataSetAnalysis(long id)
+        {
+            //string absolute_file_path = Path.Combine(datasets_root_folder, c_d.URI.ToString());
+
+            //DatasetManager dsm = new DatasetManager();
+            //DatasetVersion dsv = dsm.GetDatasetVersion(dsm.GetDatasetLatestVersionId(id));
+            //string absolute_file_path = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
+            //
+            //var d = new Dictionary<string, object>
+            //{
+            //    { "", absolute_file_path}
+            //};
+            //
+            //var engine = Python.CreateEngine(); // Extract Python language engine from their grasp
+            //ScriptSource source = engine.CreateScriptSourceFromFile("C:/Users/admin/Desktop/CatAlgorithm.py"); // Load the script
+            //var searchPaths = engine.GetSearchPaths();
+            //searchPaths.Clear();
+            //searchPaths.Add(@"C:\Users\admin\AppData\Local\Programs\Python\Python36\Lib");
+            //searchPaths.Add(@"C:\Users\admin\AppData\Local\Programs\Python\Python36\Scripts");
+            //searchPaths.Add(@"C:\Users\admin\AppData\Local\Programs\Python\Python36");
+            //searchPaths.Add(@"C:\Users\admin\AppData\Local\Programs\Python\Python36\Lib\site-packages");
+            //searchPaths.Add(@"C:\Users\admin\AppData\Local\Programs\Python\Python36\Lib\site-packages\IPython");
+            //engine.SetSearchPaths(searchPaths);
+            //
+            //var scope = engine.CreateScope(); 
+            //scope.SetVariable("params", d); 
+            //
+            //object result = source.Execute(scope);
+            //string parameter = scope.GetVariable<string>("parameter");
+
+            string progToRun = "C:/Users/admin/Desktop/CatAlgorithm.py";
+            string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
+            char[] spliter = { '\r' };
+
+            Process proc = new Process();
+            proc.StartInfo.FileName = @"C:\Users\admin\AppData\Local\Programs\Python\Python36\python.exe";
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.StartInfo.RedirectStandardError = true;
+            proc.StartInfo.UseShellExecute = false;
+
+            // call hello.py to concatenate passed parameters
+            proc.StartInfo.Arguments = string.Concat(progToRun, " ", file);
+            proc.Start();
+
+            //* Read the output (or the error)
+            string output = proc.StandardOutput.ReadToEnd();
+            string err = proc.StandardError.ReadToEnd();
+            
+            proc.WaitForExit();
+
+            List<string> lines = output.Split(Environment.NewLine.ToCharArray()).ToList();
+            lines = lines.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+
+            List<List<string>> values = new List<List<string>>();
+            List<List<string>> labels = new List<List<string>>();
+
+            for (int k= 0; k<lines.Count; k++)
+            {
+                string x_label = lines[k];
+                string x_values = lines[k + 1];
+                string y_label = lines[k + 2];
+                string y_values = lines[k + 3];
+                k = k + 3;
+                List<string> bocket = new List<string>();
+                bocket.Add(x_label); bocket.Add(y_label);
+                labels.Add(bocket); bocket = new List<string>();
+                bocket.Add(x_values); bocket.Add(y_values);
+                values.Add(bocket); bocket = new List<string>();
+            }
+
+            var jsonSerialiser = new JavaScriptSerializer();
+            var json = jsonSerialiser.Serialize(lines);
+
+            var json_ = JsonConvert.SerializeObject(lines);
+
+            ViewData["values"] = values;
+            ViewData["labels"] = labels;
+            return View();
+
+            //string cmd = "python";
+            //string args = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
+            //ProcessStartInfo start = new ProcessStartInfo();
+            //start.FileName =  Path.Combine("C:/Users/admin/Desktop/CatAlgorithm.py");
+            //start.Arguments = string.Format(" \"{0}\" \"{1}\" ", cmd, args);
+            //start.UseShellExecute = false;// Do not use OS shell
+            //start.CreateNoWindow = true; // We don't need new window
+            //start.RedirectStandardOutput = true;// Any output, generated by application will be redirected back
+            //start.RedirectStandardError = true; // Any error in standard output will be redirected back (for example exceptions)
+            //using (Process process = Process.Start(start))
+            //{
+            //    using (StreamReader reader = process.StandardOutput)
+            //    {
+            //        string stderr = process.StandardError.ReadToEnd(); // Here are the exceptions from our Python script
+            //        string result = reader.ReadToEnd(); // Here is the result of StdOut(for example: print "test")
+            //    }
+            //}
+
+            //return View();
+        }
+        
 
         public ActionResult DataAttributeStruct_list(List<DataAttributeStruct> DataAttributeStruct_)
         {
