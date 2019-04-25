@@ -38,7 +38,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         /* this action reveals a semantic coverage for our data portal and needs to be accessed via URL ... no button for it ...
         */
         public ActionResult Index()
-    {
+        {
             DatasetManager DM = new DatasetManager();
             List <long> ds_ids = DM.GetDatasetLatestIds();
             DataStructureManager DStructM = new DataStructureManager();
