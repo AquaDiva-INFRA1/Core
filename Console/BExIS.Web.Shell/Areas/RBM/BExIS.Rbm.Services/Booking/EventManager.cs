@@ -1,9 +1,13 @@
 ﻿using BExIS.Rbm.Entities.Booking;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web.Configuration;
 using Vaiona.Persistence.Api;
 using E = BExIS.Rbm.Entities.Booking;
 using R = BExIS.Rbm.Entities.Resource;
@@ -54,7 +58,7 @@ namespace BExIS.Rbm.Services.Booking
 
         #region Methods
 
-        public E.BookingEvent CreateBookingEvent(string name, string description, List<Activity> activities, DateTime minDate, DateTime maxDate, int Status)
+        public E.BookingEvent CreateBookingEvent(string name, string description, List<Activity> activities, DateTime minDate, DateTime maxDate)
         {
             BookingEvent newEvent = new BookingEvent()
             {
@@ -64,7 +68,10 @@ namespace BExIS.Rbm.Services.Booking
                 MinDate = minDate,
                 MaxDate = maxDate,
             };
-            newEvent.Status = Status;
+            Boolean BookingValidation = Convert.ToBoolean(ConfigurationManager.AppSettings["BookingValidation"]);
+            if (BookingValidation)
+                newEvent.Status = 0;
+            else newEvent.Status = 1;
 
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
@@ -80,6 +87,18 @@ namespace BExIS.Rbm.Services.Booking
         {
             Contract.Requires(deleteEvent != null);
             Contract.Requires(deleteEvent.Id >= 0);
+            
+            Configuration conf = WebConfigurationManager.OpenMappedMachineConfiguration(
+                new ConfigurationFileMap(
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Areas\\RBM\\web.config")
+                    )
+                );
+            
+
+            string x = WebConfigurationManager.AppSettings["BookingValidation"];
+            Contract.Requires(Convert.ToBoolean(System.Configuration.ConfigurationManager.AppSettings["BookingValidation"]) == false);
+            Contract.Requires(Convert.ToBoolean(ConfigurationManager.AppSettings["BookingValidation"]) == false);
+
 
             ScheduleManager sManager = new ScheduleManager();
             bool deleteSchedules = sManager.RemoveAllSchedulesByEvent(deleteEvent.Id);

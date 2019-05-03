@@ -13,6 +13,7 @@ using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
 using BExIS.Rbm.Services.ResourceStructure;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Entities.DataStructure;
+using System.Configuration;
 
 namespace BExIS.Modules.RBM.UI.Helper
 {
@@ -201,10 +202,21 @@ namespace BExIS.Modules.RBM.UI.Helper
 
                 // added by hamdi hamed 17-01-2019
                 // reflecting the feature security to validate the booking
-                Feature AdminBookingEvents = features.FirstOrDefault(f => f.Name.Equals("Admin Booking Event"));
-                if (AdminBookingEvents == null)
-                    AdminBookingEvents = featureManager.Create("Admin Booking Event", "Admin Booking Event");
-                operationManager.Create("RBM", "AdminBookingEvent", "*", AdminBookingEvents);
+                Boolean BookingValidation = Convert.ToBoolean(ConfigurationManager.AppSettings["BookingValidation"]);
+                if (BookingValidation)
+                {
+                    Feature AdminBookingEvents = features.FirstOrDefault(f => f.Name.Equals("Admin Booking Event"));
+                    if (AdminBookingEvents == null)
+                        AdminBookingEvents = featureManager.Create("Admin Booking Event", "Admin Booking Event");
+                    operationManager.Create("RBM", "AdminBookingEvent", "*", AdminBookingEvents);
+                }
+                else
+                {
+                    Feature AdminBookingEvents = features.FirstOrDefault(f => f.Name.Equals("Admin Booking Event"));
+                    if (AdminBookingEvents != null)
+                        featureManager.Delete(AdminBookingEvents);
+                    
+                }
                 // end of it...
 
 
