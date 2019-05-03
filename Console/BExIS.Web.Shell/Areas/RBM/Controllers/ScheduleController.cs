@@ -38,6 +38,7 @@ using BExIS.Dlm.Entities.Party;
 using BExIS.Dlm.Services.Party;
 using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Security.Services.Objects;
+using System.Configuration;
 
 namespace BExIS.Modules.RBM.UI.Controllers
 {
@@ -831,7 +832,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             BookingEvent eEvent = new BookingEvent();
                             if (model.Id == 0)
                             {
-                                eEvent = eventManager.CreateBookingEvent(model.Name, model.Description, null, minDate, maxDate, 0);
+                                eEvent = eventManager.CreateBookingEvent(model.Name, model.Description, null, minDate, maxDate);
                                 bookingAction = SendNotificationHelper.BookingAction.created;
                             }
                             else
