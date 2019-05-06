@@ -20,6 +20,10 @@ using Microsoft.Scripting.Hosting;
 using IronPython.Hosting;
 using System.Web.Script.Serialization;
 using Newtonsoft.Json;
+using BExIS.Modules.Ddm.UI.Controllers;
+using BExIS.IO.Transform.Output;
+using BExIS.IO;
+using Vaiona.Logging;
 
 namespace BExIS.Modules.Asm.UI.Controllers
 {
@@ -225,18 +229,27 @@ namespace BExIS.Modules.Asm.UI.Controllers
         }
         public ActionResult showDataSetAnalysis(long id)
         {
-            DatasetManager dsm = new DatasetManager();
-            DatasetVersion dsv = dsm.GetDatasetVersion(dsm.GetDatasetLatestVersionId(id));
-            string absolute_file_path = "";
-            ICollection<ContentDescriptor> cont_desc = dsv.ContentDescriptors;
-            foreach (ContentDescriptor c_d in cont_desc)
+            DatasetManager datasetManager = new DatasetManager();
+            try
             {
-                absolute_file_path = Path.Combine(datasets_root_folder, c_d.URI.ToString());
+                DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
+                AsciiWriter writer = new AsciiWriter(TextSeperator.comma);
+                OutputDataManager ioOutputDataManager = new OutputDataManager();
+                string title = id.ToString();
+                string path = "";
+
+                string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
+                                                datasetVersion.Id);
+                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv");
+
+                LoggerFactory.LogCustom(message);
+
+                string absolute_file_path = File(path, "text/csv", title + ".csv").FileName.ToString();
 
                 Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
                 string extension = Path.GetExtension(absolute_file_path);
 
-                if (allowed_extention.Contains(Path.GetExtension(c_d.URI)))
+                if (allowed_extention.Contains(Path.GetExtension(absolute_file_path)))
                 {
                     string progToRun = "C:/Users/admin/Desktop/CatAlgorithm.py";
                     string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
@@ -249,7 +262,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     proc.StartInfo.UseShellExecute = false;
 
                     // call hello.py to concatenate passed parameters
-                    proc.StartInfo.Arguments = string.Concat(progToRun, " ", absolute_file_path," ", extension);
+                    proc.StartInfo.Arguments = string.Concat(progToRun, " ", absolute_file_path, " ", extension);
                     proc.Start();
 
                     //* Read the output (or the error)
@@ -283,10 +296,20 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                     var json_ = JsonConvert.SerializeObject(lines);
 
+                    datasetManager.Dispose();
+                    FileInfo myfileinf = new FileInfo(absolute_file_path);
+                    myfileinf.Delete();
+
                     ViewData["values"] = values;
                     ViewData["labels"] = labels;
                     return PartialView();
                 }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw ex;
             }
             return PartialView();
         }
