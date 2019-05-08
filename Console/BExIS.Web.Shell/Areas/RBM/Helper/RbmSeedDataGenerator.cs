@@ -202,7 +202,7 @@ namespace BExIS.Modules.RBM.UI.Helper
 
                 // added by hamdi hamed 17-01-2019
                 // reflecting the feature security to validate the booking
-                Boolean BookingValidation = Convert.ToBoolean(ConfigurationManager.AppSettings["BookingValidation"]);
+                Boolean BookingValidation = Convert.ToBoolean(ConfigurationManager.AppSettings["validation_booking"]);
                 if (BookingValidation)
                 {
                     Feature AdminBookingEvents = features.FirstOrDefault(f => f.Name.Equals("Admin Booking Event"));
