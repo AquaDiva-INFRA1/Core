@@ -68,7 +68,7 @@ namespace BExIS.Rbm.Services.Booking
                 MinDate = minDate,
                 MaxDate = maxDate,
             };
-            Boolean BookingValidation = Convert.ToBoolean(ConfigurationManager.AppSettings["BookingValidation"]);
+            Boolean BookingValidation = Convert.ToBoolean(ConfigurationManager.AppSettings["validation_booking"]);
             if (BookingValidation)
                 newEvent.Status = 0;
             else newEvent.Status = 1;
@@ -87,19 +87,8 @@ namespace BExIS.Rbm.Services.Booking
         {
             Contract.Requires(deleteEvent != null);
             Contract.Requires(deleteEvent.Id >= 0);
+            Contract.Requires(Convert.ToBoolean(ConfigurationManager.AppSettings["validation_booking"]) != true);
             
-            Configuration conf = WebConfigurationManager.OpenMappedMachineConfiguration(
-                new ConfigurationFileMap(
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Areas\\RBM\\web.config")
-                    )
-                );
-            
-
-            string x = WebConfigurationManager.AppSettings["BookingValidation"];
-            Contract.Requires(Convert.ToBoolean(System.Configuration.ConfigurationManager.AppSettings["BookingValidation"]) == false);
-            Contract.Requires(Convert.ToBoolean(ConfigurationManager.AppSettings["BookingValidation"]) == false);
-
-
             ScheduleManager sManager = new ScheduleManager();
             bool deleteSchedules = sManager.RemoveAllSchedulesByEvent(deleteEvent.Id);
 
