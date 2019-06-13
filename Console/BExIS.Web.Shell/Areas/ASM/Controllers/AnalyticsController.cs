@@ -13,6 +13,17 @@ using Newtonsoft.Json.Linq;
 using BExIS.Modules.Asm.UI.Models;
 using BExIS.Modules.Rpm.UI.Models;
 using System.Linq;
+using BExIS.Dlm.Entities.Data;
+using System.Web.Configuration;
+using System.IO;
+using Microsoft.Scripting.Hosting;
+using IronPython.Hosting;
+using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+using BExIS.Modules.Ddm.UI.Controllers;
+using BExIS.IO.Transform.Output;
+using BExIS.IO;
+using Vaiona.Logging;
 
 namespace BExIS.Modules.Asm.UI.Controllers
 {
@@ -22,11 +33,16 @@ namespace BExIS.Modules.Asm.UI.Controllers
         static List<Variable_analytics> VA_list;
         
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
-        
+
+        private static string datasets_root_folder = WebConfigurationManager.AppSettings["DataPath"];
+        string[] allowed_extention = new string[] { ".csv", ".xlsx" ,".xls" };
+
+        static List<string> lines = new List<string>();
+
         /* this action reveals a semantic coverage for our data portal and needs to be accessed via URL ... no button for it ...
         */
         public ActionResult Index()
-    {
+        {
             DatasetManager DM = new DatasetManager();
             List <long> ds_ids = DM.GetDatasetLatestIds();
             DataStructureManager DStructM = new DataStructureManager();
@@ -186,6 +202,118 @@ namespace BExIS.Modules.Asm.UI.Controllers
             
             return File(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "REPORT.csv"), "text/csv", "REPORT.csv");
         }
+
+
+        public JObject getGraphData()
+        {
+            JObject jObject = new JObject();
+            int k = 0;
+            for (int i = 0; i< lines.Count; i++)
+            {
+                JArray Xarray = new JArray();
+                Xarray.Add(lines[i]);
+                Xarray.Add(lines[i+1]);
+
+                JArray Yarray = new JArray();
+                Yarray.Add(lines[i+2]);
+                Yarray.Add(lines[i+3]);
+
+                JArray jArray = new JArray();
+                jArray.Add(Xarray);
+                jArray.Add(Yarray);
+                jObject[k.ToString()] = jArray;
+                k = k + 1;
+                i = i + 3;
+            }
+            return jObject;
+        }
+        public ActionResult showDataSetAnalysis(long id)
+        {
+            DatasetManager datasetManager = new DatasetManager();
+            try
+            {
+                DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
+                AsciiWriter writer = new AsciiWriter(TextSeperator.comma);
+                OutputDataManager ioOutputDataManager = new OutputDataManager();
+                string title = id.ToString();
+                string path = "";
+
+                string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
+                                                datasetVersion.Id);
+                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv");
+
+                LoggerFactory.LogCustom(message);
+
+                string absolute_file_path = File(path, "text/csv", title + ".csv").FileName.ToString();
+
+                Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
+                string extension = Path.GetExtension(absolute_file_path);
+
+                if (allowed_extention.Contains(Path.GetExtension(absolute_file_path)))
+                {
+                    string progToRun = "C:/Users/admin/Desktop/CatAlgorithm.py";
+                    string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
+                    char[] spliter = { '\r' };
+
+                    Process proc = new Process();
+                    proc.StartInfo.FileName = @"C:\Users\admin\AppData\Local\Programs\Python\Python36\python.exe";
+                    proc.StartInfo.RedirectStandardOutput = true;
+                    proc.StartInfo.RedirectStandardError = true;
+                    proc.StartInfo.UseShellExecute = false;
+
+                    // call hello.py to concatenate passed parameters
+                    proc.StartInfo.Arguments = string.Concat(progToRun, " ", absolute_file_path, " ", extension);
+                    proc.Start();
+
+                    //* Read the output (or the error)
+                    string output = proc.StandardOutput.ReadToEnd();
+                    string err = proc.StandardError.ReadToEnd();
+
+                    proc.WaitForExit();
+
+                    lines = output.Split(Environment.NewLine.ToCharArray()).ToList();
+                    lines = lines.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+
+                    List<List<string>> values = new List<List<string>>();
+                    List<List<string>> labels = new List<List<string>>();
+
+                    for (int k = 0; k < lines.Count; k++)
+                    {
+                        string x_label = lines[k];
+                        string x_values = lines[k + 1];
+                        string y_label = lines[k + 2];
+                        string y_values = lines[k + 3];
+                        k = k + 3;
+                        List<string> bocket = new List<string>();
+                        bocket.Add(x_label); bocket.Add(y_label);
+                        labels.Add(bocket); bocket = new List<string>();
+                        bocket.Add(x_values); bocket.Add(y_values);
+                        values.Add(bocket); bocket = new List<string>();
+                    }
+
+                    var jsonSerialiser = new JavaScriptSerializer();
+                    var json = jsonSerialiser.Serialize(lines);
+
+                    var json_ = JsonConvert.SerializeObject(lines);
+
+                    datasetManager.Dispose();
+                    FileInfo myfileinf = new FileInfo(absolute_file_path);
+                    myfileinf.Delete();
+
+                    ViewData["values"] = values;
+                    ViewData["labels"] = labels;
+                    return PartialView();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw ex;
+            }
+            return PartialView();
+        }
+        
 
         public ActionResult DataAttributeStruct_list(List<DataAttributeStruct> DataAttributeStruct_)
         {
