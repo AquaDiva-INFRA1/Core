@@ -16,8 +16,6 @@ using System.Linq;
 using BExIS.Dlm.Entities.Data;
 using System.Web.Configuration;
 using System.IO;
-using Microsoft.Scripting.Hosting;
-using IronPython.Hosting;
 using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using BExIS.Modules.Ddm.UI.Controllers;
