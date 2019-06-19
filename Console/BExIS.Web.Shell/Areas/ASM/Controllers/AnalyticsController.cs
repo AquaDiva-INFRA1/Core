@@ -249,12 +249,12 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                 if (allowed_extention.Contains(Path.GetExtension(absolute_file_path)))
                 {
-                    string progToRun = "C:/Users/admin/Desktop/CatAlgorithm.py";
-                    string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
+                    string progToRun = @"D:/Hamdi/python_data_summary_scripts/CatAlgorithm.py";
+                    //string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
                     char[] spliter = { '\r' };
 
                     Process proc = new Process();
-                    proc.StartInfo.FileName = @"C:\Users\admin\AppData\Local\Programs\Python\Python36\python.exe";
+                    proc.StartInfo.FileName = @"C:\Users\Markus\AppData\Local\Programs\Python\Python37\python.exe";
                     proc.StartInfo.RedirectStandardOutput = true;
                     proc.StartInfo.RedirectStandardError = true;
                     proc.StartInfo.UseShellExecute = false;

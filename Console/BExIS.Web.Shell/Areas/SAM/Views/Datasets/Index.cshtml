@@ -18,9 +18,12 @@
     {
         DatasetIds = ViewData["DatasetIds"] as List<long>;
     }
+
+    var Data_points = ViewData["Data_points"];
 }
 <h2>The dataset management functions accessible from here may have unrecoverable effets! Use them with care.</h2>
-<h3>Datasets</h3>
+<h3>Datasets </h3>
+<h4>Data Points : @Data_points</h4>
 <table>
     <tr>
         <td>ID</td>
