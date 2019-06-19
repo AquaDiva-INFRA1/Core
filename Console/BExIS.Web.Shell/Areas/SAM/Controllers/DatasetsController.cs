@@ -141,11 +141,11 @@ namespace BExIS.Modules.Sam.UI.Controllers
                 datasetStat.Add(new DatasetStatModel { Id = ds.Id, Status = ds.Status, NoOfRows = noRows, NoOfCols = noColumns, IsSynced = synced });
                 if (ds.Status == DatasetStatus.CheckedIn)
                 {
-                    somme = somme + (noRows * noRows);
+                    somme = somme + (noRows * noColumns);
                 }
             }
             Debug.WriteLine(" Number of Data Points ==> " + somme);
-
+            ViewData["Data_points"] = somme;
             ViewData["DatasetIds"] = datasetIds;
             return View(datasetStat);
         }

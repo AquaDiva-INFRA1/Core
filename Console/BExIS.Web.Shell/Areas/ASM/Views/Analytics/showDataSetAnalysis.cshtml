@@ -10,7 +10,8 @@
 
 
 @{
-    <script src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js" ></ script >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js">
+</ script >
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
@@ -18,9 +19,9 @@
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.0"></script>
 
-    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
-    
+
 }
 
 
@@ -28,7 +29,16 @@
     <table>
         <tr>
             <td>
-                <h2>Statistical Overview</h2>
+                <h2>
+                    Statistical Overview
+                </h2>
+                <!--
+                <div id="spinner">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                 -->
             </td>
             <td>
                 <div id="preloaderContainer" />
@@ -37,101 +47,123 @@
     </table>
 </div>
 
+<button onclick="myFunction()">Hide / View Graphs</button>
+<!-- Create a div where the graph will take place style="display:none" -->
+<div id="table">
+    <table>
+        @while (index <= number_of_graphs)
+        {
+            <tr>
+                @for (int k = 0; k < 3; k++)
+                {
+                    <td>
+                        <canvas id="myChart_@index"></canvas>
+                    </td>
+                    index = index + 1;
+                }
+            </tr>
+        }
 
 
-<!-- Create a div where the graph will take place -->
-<table >
-    @while (index <= number_of_graphs)
-    {
-        <tr>
-            @for (int k = 0; k < 3; k++)
-            {
-            <td>
-                <canvas id="myChart_@index"></canvas>
-            </td>
-                index = index + 1;
-            }
-        </tr>
-    }
-
-
-</table>
-
+    </table>
+</div>
 
 
 <script type="text/javascript">
 
-    $.ajax({
-        url: '/asm/analytics/getGraphData',
-        type: 'POST',
-        success: function (resp) {
-            var myJSON = JSON.parse(resp);
+        //  spinner show / hide
+        //var spinner = document.getElementById("spinner");
+        //if (spinner.style.display === "none") {
+        //    spinner.style.display = "block";
+        //}
+        //  end of spinner show / hide
 
-            Object.keys(myJSON).forEach(function (entry) {
+        //  numerical distribution show / hide
+        function myFunction() {
+          var x = document.getElementById("table");
+          if (x.style.display === "none") {
+                x.style.display = "block";
+             }
+          else {
+                x.style.display = "none";
+            }
+          };
+        //  end of numerical distribution show / hide
 
-                var element = myJSON[entry];
 
-                var xdata = element[0];
-                var xlabel = xdata[0];
-                var xvalues = xdata[1].replace('[', '').replace(']', '').split(",");
+        $.ajax({
+            url: '/asm/analytics/getGraphData',
+            type: 'POST',
+            success: function (resp) {
+                //spinner = document.getElementById("spinner");
+                //spinner.style.display = "none";
+                var myJSON = JSON.parse(resp);
 
-                var ydata = element[1];
-                var ylabel = ydata[0];
-                var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
-                
-                //if (xlabel != ylabel){
-                    var data_ = [];
-                    for (var z = 0; z < yvalues.length; z++) {
-                        data_.push ({x: xvalues[z] , y: yvalues[z]});
-                    }
-                    var id = "myChart_" + entry;
-    
-                    var scatterChartData = {
-                        datasets: 
-                        [{
-                                data: data_
-			            }]
-                    };
-    
-                    var ctxSc = document.getElementById(id).getContext('2d');
-                    var config1 = new Chart.Scatter(ctxSc, {
-                        type: 'Line',
-                        data: scatterChartData,
-                        options: {
-                            title: {
-                                display: true,
-                                text: 'distribution of ' + xlabel + ' towards ' + ylabel,
-                            },
-                            scales: {
-                                xAxes: [{
-                                    position: 'bottom',
-                                    title : xlabel
-                                }],
-                                yAxes: [{
-                                    stacked: true,
-                                    title : ylabel
-                                }]
-                            },
-                            pan: {
-			                        enabled: true,
-			                        mode: 'xy',
-                                    speed: 0.1
-		                        },
-		                        zoom: {
-			                        enabled: true,
-			                        mode: 'xy',
-			                        speed: 0.1
-		                        }
+                Object.keys(myJSON).forEach(function (entry) {
+
+                    var element = myJSON[entry];
+
+                    var xdata = element[0];
+                    var xlabel = xdata[0];
+                    var xvalues = xdata[1].replace('[', '').replace(']', '').split(",");
+
+                    var ydata = element[1];
+                    var ylabel = ydata[0];
+                    var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
+
+                    //if (xlabel != ylabel){
+                        var data_ = [];
+                        for (var z = 0; z < yvalues.length; z++) {
+                            data_.push ({x: xvalues[z] , y: yvalues[z]});
                         }
-                    });
-    
-                //}
-            });
-        },
-        error: function (e) {
-            alert('Error: ' + e);
-        }
-    });
+                        var id = "myChart_" + entry;
+
+                        var scatterChartData = {
+                            datasets:
+                            [{
+                                    data: data_
+                            }]
+                        };
+
+                        var ctxSc = document.getElementById(id).getContext('2d');
+                        var config1 = new Chart.Scatter(ctxSc, {
+                            type: 'Line',
+                            data: scatterChartData,
+                            options: {
+                                title: {
+                                    display: true,
+                                    text: 'distribution of ' + xlabel + ' towards ' + ylabel,
+                                },
+                                scales: {
+                                    xAxes: [{
+                                        position: 'bottom',
+                                        title : xlabel
+                                    }],
+                                    yAxes: [{
+                                        stacked: true,
+                                        title : ylabel
+                                    }]
+                                },
+                                pan: {
+                                        enabled: true,
+                                        mode: 'xy',
+                                        speed: 0.1
+                                    },
+                                    zoom: {
+                                        enabled: true,
+                                        mode: 'xy',
+                                        speed: 0.1
+                                    }
+                            }
+                        });
+
+                    //}
+                });
+            },
+            error: function (e) {
+                alert('Error: ' + e);
+            }
+        });
 
 </script>
 
