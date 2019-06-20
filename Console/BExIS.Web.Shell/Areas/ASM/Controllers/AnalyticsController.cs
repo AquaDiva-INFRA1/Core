@@ -22,6 +22,8 @@ using BExIS.Modules.Ddm.UI.Controllers;
 using BExIS.IO.Transform.Output;
 using BExIS.IO;
 using Vaiona.Logging;
+using BExIS.UI.Helpers;
+using BExIS.Utils.Models;
 
 namespace BExIS.Modules.Asm.UI.Controllers
 {
@@ -225,7 +227,217 @@ namespace BExIS.Modules.Asm.UI.Controllers
             }
             return jObject;
         }
-        public ActionResult showDataSetAnalysis(long id)
+
+        public ActionResult NumericalAnalysis(long id)
+        {
+            DatasetManager datasetManager = new DatasetManager();
+            try
+            {
+                DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
+                AsciiWriter writer = new AsciiWriter(TextSeperator.comma);
+                OutputDataManager ioOutputDataManager = new OutputDataManager();
+                string title = id.ToString();
+                string path = "";
+
+                string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
+                                                datasetVersion.Id);
+                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv");
+
+                LoggerFactory.LogCustom(message);
+
+                string absolute_file_path = File(path, "text/csv", title + ".csv").FileName.ToString();
+
+                Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
+                string extension = Path.GetExtension(absolute_file_path);
+
+                if (allowed_extention.Contains(Path.GetExtension(absolute_file_path)))
+                {
+                    string progToRun = @"D:/Hamdi/python_data_summary_scripts/numericalstatistics.py";
+                    //string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
+                    char[] spliter = { '\r' };
+
+                    Process proc = new Process();
+                    proc.StartInfo.FileName = @"C:\Users\Markus\AppData\Local\Programs\Python\Python37\python.exe";
+                    proc.StartInfo.RedirectStandardOutput = true;
+                    proc.StartInfo.RedirectStandardError = true;
+                    proc.StartInfo.UseShellExecute = false;
+
+                    // call hello.py to concatenate passed parameters
+                    proc.StartInfo.Arguments = string.Concat(progToRun, " ", absolute_file_path, " ", extension);
+                    proc.Start();
+
+                    //* Read the output (or the error)
+                    string output = proc.StandardOutput.ReadToEnd();
+                    string err = proc.StandardError.ReadToEnd();
+
+                    proc.WaitForExit();
+
+                    lines = output.Split(Environment.NewLine.ToCharArray()).ToList();
+                    int index = lines.IndexOf("Numerical");
+                    lines = lines.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+
+                    List<List<string>> values = new List<List<string>>();
+                    List<List<string>> labels = new List<List<string>>();
+
+                    for (int k = 0; k < lines.Count; k++)
+                    {
+                        string x_label = lines[k];
+                        string x_values = lines[k + 1];
+                        string y_label = lines[k + 2];
+                        string y_values = lines[k + 3];
+                        k = k + 3;
+                        List<string> bocket = new List<string>();
+                        bocket.Add(x_label);
+                        bocket.Add(y_label);
+                        labels.Add(bocket);
+                        bocket = new List<string>();
+                        bocket.Add(x_values);
+                        bocket.Add(y_values);
+                        values.Add(bocket);
+                        bocket = new List<string>();
+                    }
+
+                    var jsonSerialiser = new JavaScriptSerializer();
+                    var json = jsonSerialiser.Serialize(lines);
+
+                    var json_ = JsonConvert.SerializeObject(lines);
+
+                    datasetManager.Dispose();
+                    FileInfo myfileinf = new FileInfo(absolute_file_path);
+                    myfileinf.Delete();
+
+                    ViewData["values"] = values;
+                    ViewData["labels"] = labels;
+                    return PartialView("showDataSetAnalysis");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw ex;
+            }
+            return PartialView("showDataSetAnalysis");
+
+        }
+
+        public ActionResult CategoralAnalysis(long id)
+        {
+            DatasetManager datasetManager = new DatasetManager();
+            try
+            {
+                DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
+                AsciiWriter writer = new AsciiWriter(TextSeperator.comma);
+                OutputDataManager ioOutputDataManager = new OutputDataManager();
+                string title = id.ToString();
+                string path = "";
+
+                string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
+                                                datasetVersion.Id);
+                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv");
+
+                LoggerFactory.LogCustom(message);
+
+                string absolute_file_path = File(path, "text/csv", title + ".csv").FileName.ToString();
+
+                Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
+                string extension = Path.GetExtension(absolute_file_path);
+
+                if (allowed_extention.Contains(Path.GetExtension(absolute_file_path)))
+                {
+                    string progToRun = @"D:/Hamdi/python_data_summary_scripts/categoralanalysis.py";
+                    string outputFolder = @"D:/Hamdi/Tmp/";
+
+                    //string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
+                    char[] spliter = { '\r' };
+
+                    Process proc = new Process();
+                    proc.StartInfo.FileName = @"C:\Users\Markus\AppData\Local\Programs\Python\Python37\python.exe";
+                    proc.StartInfo.RedirectStandardOutput = true;
+                    proc.StartInfo.RedirectStandardError = true;
+                    proc.StartInfo.UseShellExecute = false;
+
+                    // call hello.py to concatenate passed parameters
+                    proc.StartInfo.Arguments = string.Concat(progToRun, " ", absolute_file_path, " ", extension, " ", outputFolder);
+                    proc.Start();
+
+                    //* Read the output (or the error)
+                    string output = proc.StandardOutput.ReadToEnd();
+                    string err = proc.StandardError.ReadToEnd();
+
+                    proc.WaitForExit();
+
+                    lines = output.Split(Environment.NewLine.ToCharArray()).ToList();
+                    int index = lines.IndexOf("Numerical");
+                    lines = lines.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+
+                    List<List<string>> values = new List<List<string>>();
+                    List<List<string>> labels = new List<List<string>>();
+
+                    for (int k = 0; k < lines.Count; k++)
+                    {
+                        string x_label = lines[k];
+                        string x_values = lines[k + 1];
+                        string y_label = lines[k + 2];
+                        string y_values = lines[k + 3];
+                        k = k + 3;
+                        List<string> bocket = new List<string>();
+                        bocket.Add(x_label);
+                        bocket.Add(y_label);
+                        labels.Add(bocket);
+                        bocket = new List<string>();
+                        bocket.Add(x_values);
+                        bocket.Add(y_values);
+                        values.Add(bocket);
+                        bocket = new List<string>();
+                    }
+
+                    var jsonSerialiser = new JavaScriptSerializer();
+                    var json = jsonSerialiser.Serialize(lines);
+
+                    var json_ = JsonConvert.SerializeObject(lines);
+
+                    string filename = Path.GetFileNameWithoutExtension(absolute_file_path);
+                    //read the results of the analysis // python script generates an excel table for that
+                    List<string> header = new List<string>();
+                    List<List<string>> data_lines = new List<List<string>>();
+                    using (var reader = new StreamReader(outputFolder + filename + ".csv"))
+                    {
+                        string line ;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            List<string> tmp = line.Split(';').ToList<string>();
+                            if (tmp.Count > 1)
+                                data_lines.Add(tmp);
+                        }
+                    }
+                    
+                    header = data_lines[data_lines.Count - 1];
+                    data_lines.RemoveAt(data_lines.Count - 1);
+                    // end of reading the results
+
+                    datasetManager.Dispose();
+                    FileInfo myfileinf = new FileInfo(absolute_file_path);
+                    myfileinf.Delete();
+
+                    ViewData["values"] = values;
+                    ViewData["labels"] = labels;
+                    ViewData["header"] = header;
+                    ViewData["data_lines"] = data_lines;
+                    return PartialView("showDataSetAnalysis");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw ex;
+            }
+            return PartialView("showDataSetAnalysis");
+
+        }
+
+        public ActionResult DistributionAnalysis(long id)
         {
             DatasetManager datasetManager = new DatasetManager();
             try
@@ -300,7 +512,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                     ViewData["values"] = values;
                     ViewData["labels"] = labels;
-                    return PartialView();
+                    return PartialView("showDataSetAnalysis");
                 }
 
             }
@@ -309,7 +521,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 Debug.WriteLine(ex.Message);
                 throw ex;
             }
-            return PartialView();
+            return PartialView("showDataSetAnalysis");
         }
         
 
