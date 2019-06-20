@@ -1,6 +1,9 @@
-﻿
+﻿@using Telerik.Web.Mvc.UI
 
 @{
+    List<string> header = (List<string>)ViewData["header"];
+    List<List<string>> data_lines = (List<List<string>>)ViewData["data_lines"];
+
     List<List<string>> values = (List<List<string>>)ViewData["values"];
     List<List<string>> labels = (List<List<string>>)ViewData["labels"];
     int number_of_graphs = labels.Count();
@@ -10,14 +13,16 @@
 
 
 @{
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js">
-</ script >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+    <!--
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.0"></script>
+    -->
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
@@ -43,6 +48,28 @@
             <td>
                 <div id="preloaderContainer" />
             </td>
+        </tr>
+        <tr>
+            <table class="table">
+                <thead>
+                    <tr>
+                        @foreach (string h in header)
+                        {
+                            <th>@h</th>
+                        }
+                    </tr>
+                </thead>
+                @foreach (List<string> data_line in data_lines)
+                {
+                    <tbody>
+                        @foreach (string s in data_line)
+                        {
+                            <td>@s</td>
+                        }
+                    </tbody>
+                 }
+
+            </table>
         </tr>
     </table>
 </div>
@@ -71,26 +98,112 @@
 
 <script type="text/javascript">
 
-        //  spinner show / hide
-        //var spinner = document.getElementById("spinner");
-        //if (spinner.style.display === "none") {
-        //    spinner.style.display = "block";
-        //}
-        //  end of spinner show / hide
+    //  spinner show / hide
+    //var spinner = document.getElementById("spinner");
+    //if (spinner.style.display === "none") {
+    //    spinner.style.display = "block";
+    //}
+    //  end of spinner show / hide
 
-        //  numerical distribution show / hide
-        function myFunction() {
-          var x = document.getElementById("table");
-          if (x.style.display === "none") {
-                x.style.display = "block";
-             }
-          else {
-                x.style.display = "none";
-            }
-          };
-        //  end of numerical distribution show / hide
+    //  numerical distribution show / hide
+    function myFunction() {
+        var x = document.getElementById("table");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        }
+        else {
+            x.style.display = "none";
+        }
+    };
+    //  end of numerical distribution show / hide
 
 
+    $.ajax({
+        url: '/asm/analytics/getGraphData',
+        type: 'POST',
+        success: function (resp) {
+            //spinner = document.getElementById("spinner");
+            //spinner.style.display = "none";
+            var myJSON = JSON.parse(resp);
+
+            Object.keys(myJSON).forEach(function (entry) {
+
+                var element = myJSON[entry];
+
+                var xdata = element[0];
+                var xlabel = xdata[0];
+                var xvalues = xdata[1].replace('[', '').replace(']', '').split(",");
+
+                var ydata = element[1];
+                var ylabel = ydata[0];
+                var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
+
+                //if (xlabel != ylabel){
+                var data_ = [];
+                for (var z = 0; z < yvalues.length; z++) {
+                    data_.push({ x: xvalues[z], y: yvalues[z] });
+                }
+                var id = "myChart_" + entry;
+
+                var colors = [];
+                for (var i = 0; i < xvalues.length; i++) {
+                    colors.push(getRandomColor());
+                }
+
+                var scatterChartData = {
+                    datasets:
+                        [{
+                            data: data_
+                        }]
+                };
+                //check which type of data chart to use :
+                var ctxSc = document.getElementById(id).getContext('2d');
+                var myChart = new Chart(ctxSc, {
+                    type: 'bar',
+                    data: {
+                        labels: xvalues, // ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], // x data here
+                        datasets: [{
+                            data: yvalues, // [12, 19, 3, 5, 2, 3] // Y data here
+                            backgroundColor: colors
+                        }]
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: ylabel + " || " + xlabel,
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                });
+
+                //}
+            });
+        },
+        error: function (e) {
+            alert('Error: ' + e);
+        }
+    });
+
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+
+    function Show_numerical_distribution() {
         $.ajax({
             url: '/asm/analytics/getGraphData',
             type: 'POST',
@@ -112,50 +225,53 @@
                     var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
 
                     //if (xlabel != ylabel){
-                        var data_ = [];
-                        for (var z = 0; z < yvalues.length; z++) {
-                            data_.push ({x: xvalues[z] , y: yvalues[z]});
-                        }
-                        var id = "myChart_" + entry;
+                    var data_ = [];
+                    for (var z = 0; z < yvalues.length; z++) {
+                        data_.push({ x: xvalues[z], y: yvalues[z] });
+                    }
+                    var id = "myChart_" + entry;
 
-                        var scatterChartData = {
-                            datasets:
+                    var scatterChartData = {
+                        datasets:
                             [{
-                                    data: data_
+                                data: data_
                             }]
-                        };
+                    };
 
-                        var ctxSc = document.getElementById(id).getContext('2d');
-                        var config1 = new Chart.Scatter(ctxSc, {
-                            type: 'Line',
-                            data: scatterChartData,
-                            options: {
-                                title: {
-                                    display: true,
-                                    text: 'distribution of ' + xlabel + ' towards ' + ylabel,
-                                },
-                                scales: {
-                                    xAxes: [{
-                                        position: 'bottom',
-                                        title : xlabel
-                                    }],
-                                    yAxes: [{
-                                        stacked: true,
-                                        title : ylabel
-                                    }]
-                                },
-                                pan: {
-                                        enabled: true,
-                                        mode: 'xy',
-                                        speed: 0.1
-                                    },
-                                    zoom: {
-                                        enabled: true,
-                                        mode: 'xy',
-                                        speed: 0.1
-                                    }
+                    var ctxSc = document.getElementById(id).getContext('2d');
+                    var config1 = new Chart.Scatter(ctxSc, {
+                        type: 'Line',
+                        data: scatterChartData,
+                        options: {
+                            title: {
+                                display: true,
+                                text: ylabel + " || " + xlabel,
+                            },
+                            scales: {
+                                xAxes: [{
+                                    position: 'bottom',
+                                    title: xlabel
+                                }],
+                                yAxes: [{
+                                    stacked: true,
+                                    title: ylabel
+                                }]
+                            },
+                            legend: {
+                                display: false
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                                speed: 0.5
+                            },
+                            zoom: {
+                                enabled: true,
+                                mode: 'xy',
+                                speed: 0.5
                             }
-                        });
+                        }
+                    });
 
                     //}
                 });
@@ -164,7 +280,7 @@
                 alert('Error: ' + e);
             }
         });
-
+    }
 </script>
 
 
