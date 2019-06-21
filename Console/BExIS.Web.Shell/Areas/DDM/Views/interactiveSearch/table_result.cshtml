@@ -269,10 +269,13 @@
 
                             text = text + "<a id=\"_publication" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>PUBLICATION</b></h5> </a>";
                             text = text + "<div id=\"publication" + i + "\"  hidden=\"true\"> ";
-                            text = text + "<h5><p align=\"justify\"> Title: " + res.bibliographylist[i].publication.title + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Volume: " + res.bibliographylist[i].publication.volume + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Issue : " + res.bibliographylist[i].publication.issue + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].publication.pages + "</p></h5>";
+                            //text = text + "<h5><p align=\"justify\"> Title: " + res.bibliographylist[i].publication.title + "</p></h5>";
+                            //text = text + "<h5><p align=\"justify\"> Volume: " + res.bibliographylist[i].publication.volume + "</p></h5>";
+                            //text = text + "<h5><p align=\"justify\"> Issue : " + res.bibliographylist[i].publication.issue + "</p></h5>";
+                            //text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].publication.pages + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].docId + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].pmid + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].pmcid + "</p></h5>";
                             text = text + "<h5><p align=\"justify\"> Date: " + res.bibliographylist[i].publication.date + "</p></h5>";
                             text = text + "</div>";
 

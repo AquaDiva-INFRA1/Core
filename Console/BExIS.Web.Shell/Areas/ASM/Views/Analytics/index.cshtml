@@ -145,6 +145,8 @@
         <thead class="thead-dark">
             <tr>
                 <th scope="col">Dataset id</th>
+                <th scope="col">Dataset Owner</th>
+                <th scope="col">Project</th>
                 <th scope="col">Semantic Coverage</th>
                 <th scope="col">Variables id</th>
                 <th scope="col">Variables label</th>
@@ -183,6 +185,8 @@
 
                         <tr>
                             <td rowspan="@va.variable_id.Count">@va.dataset_id</td>
+                            <td rowspan="@va.variable_id.Count">@va.owner</td>
+                            <td rowspan="@va.variable_id.Count">@va.project</td>
                             <td rowspan="@va.variable_id.Count">Concept Coverage : @Concepts_count/@va.variable_id.Count <br /> Characteristics Coverage : @Caracteristics_count/@va.variable_id.Count</td>
                             <td>@va.variable_id[0] </td>
                             <td>@va.variable_label[0] </td>
@@ -235,19 +239,17 @@
 
 
 
-
-<script type="text/javascript">
-
+<script>
     function download() {
 		$.ajax({
-			url: '@Url.Action("Download_Report", "InteractiveSearch")',
+			url: '@Url.Action("Download_Report", "Analytics")',
 			contentType: 'application/json; charset=utf-8',
 			datatype: 'json',
 			type: "GET",
 			success: function (e) {
 
 			    if (e) {
-			        window.location = '@Url.Action("Download_Report", "InteractiveSearch")';
+			        window.location = '@Url.Action("Download_Report", "Analytics")';
 			    }
 			    else {
 			        alert("We can not generate file right now, report the error please");
@@ -256,7 +258,10 @@
 			}
 		})
     }
+</script>
 
+<script type="text/javascript">
+    
     function show_details_(behavior) {
         var data = "";
         switch (behavior) {
