@@ -50,6 +50,16 @@ namespace BExIS.Ddm.Providers.LuceneProvider
                     if (fieldProperty.Attributes.GetNamedItem("lucene_name") != null)
                         sa.sourceName = fieldProperty.Attributes.GetNamedItem("lucene_name").Value;
 
+                    //if (fieldProperty.Attributes.GetNamedItem("metadata_name") != null)
+                    //{
+                    //    string nodes = fieldProperty.Attributes.GetNamedItem("metadata_name").Value;
+                    //    foreach(string nodeGroup in nodes.Split(';'))
+                    //    {
+                    //        MetadataNameGroup metadataNameGroup = new MetadataNameGroup(nodeGroup.Split(',').ToList());
+                    //        sa.metadataName.Add(metadataNameGroup);
+                    //    }
+                    //    
+                    //}
                     if (fieldProperty.Attributes.GetNamedItem("metadata_name") != null)
                         sa.metadataName = fieldProperty.Attributes.GetNamedItem("metadata_name").Value;
 
@@ -195,6 +205,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider
 
                 foreach (SearchAttribute sa in this._searchAttributeList)
                 {
+
                     XmlElement xe = this._configXML.CreateElement("field");
                     xe = SetAttributesToNode(xe, sa);
                     root.AppendChild(xe);
@@ -217,7 +228,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider
 
 
         }
-
+        
         public void Reset()
         {
             this._configXML = new XmlDocument();
@@ -253,6 +264,14 @@ namespace BExIS.Ddm.Providers.LuceneProvider
             xmlElement.Attributes.Append(xa);
 
             xa = this._configXML.CreateAttribute("metadata_name");
+            //string nodes = "";
+            //foreach(MetadataNameGroup metadataNameGroup in sa.metadataName)
+            //{
+            //    string s = string.Join(",", metadataNameGroup.metadataNames);
+            //    nodes = nodes + ";";
+            //}
+            //xa.Value = nodes.Substring(0,nodes.Length-1);
+
             xa.Value = sa.metadataName;
             xmlElement.Attributes.Append(xa);
 

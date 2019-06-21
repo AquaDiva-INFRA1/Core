@@ -1,5 +1,7 @@
 ﻿@using Telerik.Web.Mvc.UI;
 @using BExIS.Modules.Ddm.UI.Models;
+@using BExIS.Utils;
+@using BExIS.Utils.Models;
 
 @model List<SearchAttributeViewModel>
 
@@ -101,7 +103,7 @@
                             @{
                                 foreach (string dt in item.metadataNames)
                                 {
-                                  <span>@dt <br/></span>
+                                    <span>@dt <br /></span>
                                 }
                               }
                         </text>
@@ -128,7 +130,7 @@
 
                 )
 
-
+  
 
 
 @(Html.Telerik().Window()
@@ -147,7 +149,7 @@
     .Buttons(buttons => buttons.Close())
     .Content(@<text>
         <div id="showSearchAttribute-resultGrid" class="showSearchAttribute"  >
-             @Html.Partial("_editSearchAttribute", selectedSA)
+             @Html.Partial("__editSearchAttribute", selectedSA)
         </div>
     </text>
     )
@@ -197,7 +199,9 @@
     }
 
 <style type="text/css">
-
+    #metadataNodes {
+        max-width : 350px;
+    }
     #SearchDesignerGrid .t-grid-content
     {
         height:auto !important;
