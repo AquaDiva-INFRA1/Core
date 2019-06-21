@@ -6,19 +6,24 @@
 {
     //For each category, create a separate dropdown
     <div class="suggestionContainer">
+        <hr>
+        
         <label for="@category annotation">@category</label>
-        <select data-headerid="@Model.Item1" name="@category annotation" onchange="mappingSelected(this)" onfocus="deselect(this)" onblur="reselect(this)">
-            @foreach(BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel suggestion in suggestionDictionary[category])
+        <select id="@(category+"_"+Model.Item1)" data-headerid="@Model.Item1" name="@category annotation" onchange="mappingSelected(this)" onfocus="deselect(this)" onblur="reselect(this)">
+            @foreach (BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel suggestion in suggestionDictionary[category])
             {
                 //For each suggestion create an option
-                <option title="@suggestion.conceptURI" data-category="@category" @if (suggestion.selected) {<text>selected</text> }>@suggestion.displayName</option>
+                <option value="@suggestion.conceptURI" title="@suggestion.conceptURI" data-category="@category" @if (suggestion.selected) { <text> selected</text> }>@suggestion.displayName</option>
             }
-        </select>
+        </select><br />
+
         <label>
-            <input type="checkbox" onclick="noConceptFound(this, '@category');"/>
-            No suitable @category found.
+            <input id="@(category+"_"+Model.Item1+"_checkbox")" type="checkbox" onclick="noConceptFound(this, '@category');" />
+            Not found.
             <div class="feedbackContainer text-success">Thank you for your feedback!</div>
         </label>
+        
+        
     </div>
 }
 

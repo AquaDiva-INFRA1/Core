@@ -13,7 +13,11 @@ namespace BExIS.Web.Shell.Areas.DCM.Helpers
         public string unitName;
         public string datatypeName;
         public Boolean show;
-        
+
+        public string datatypeDescription;
+        public string conceptAnnotation;
+        public string characteristicAnnotation;
+
         public EasyUploadSuggestion(string attributeName, long unitID, long dataTypeID, string unitName, string datatypeName, Boolean show)
         {
             this.attributeName = attributeName;
@@ -22,6 +26,13 @@ namespace BExIS.Web.Shell.Areas.DCM.Helpers
             this.unitName = unitName;
             this.datatypeName = datatypeName;
             this.show = show;
+        }
+        
+        public void finish_suggestion_block (string desc, string concept, string charac)
+        {
+            this.conceptAnnotation = concept;
+            this.characteristicAnnotation = charac;
+            this.datatypeDescription = desc;
         }
     }
 }
