@@ -100,12 +100,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     {
                         activeWorksheet = TaskManager.Bus[EasyUploadTaskManager.ACTIVE_WOKSHEET_URI].ToString();
                     }
-                    //Generate the table for the active worksheet
-                    string jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
 
                     //Save the worksheet uris to the model
                     model.SheetUriDictionary = EUEReader.GetWorksheetUris();
-                
+
+                    //Generate the table for the active worksheet
+                    string jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
+                    
                     if (!String.IsNullOrEmpty(jsonTable))
                     {
                         TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, jsonTable);
