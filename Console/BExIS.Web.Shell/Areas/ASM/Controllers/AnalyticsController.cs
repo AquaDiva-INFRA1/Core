@@ -345,16 +345,16 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
                 string extension = Path.GetExtension(absolute_file_path);
 
-                if (allowed_extention.Contains(Path.GetExtension(absolute_file_path)))
+                if (allowed_extention.Contains(extension))
                 {
-                    string progToRun = @"D:/Hamdi/python_data_summary_scripts/categoralanalysis.py";
-                    string outputFolder = @"D:/Hamdi/Tmp/";
+                    string progToRun = @"C:/Users/Hamdi/Desktop/work/python_data_summary_scripts/categoralanalysis.py";
+                    string outputFolder = @"C:/Users/Hamdi/Desktop/";
 
                     //string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
                     char[] spliter = { '\r' };
 
                     Process proc = new Process();
-                    proc.StartInfo.FileName = @"C:\Users\Markus\AppData\Local\Programs\Python\Python37\python.exe";
+                    proc.StartInfo.FileName = @"C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python37_64/python.exe";
                     proc.StartInfo.RedirectStandardOutput = true;
                     proc.StartInfo.RedirectStandardError = true;
                     proc.StartInfo.UseShellExecute = false;
@@ -366,7 +366,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     //* Read the output (or the error)
                     string output = proc.StandardOutput.ReadToEnd();
                     string err = proc.StandardError.ReadToEnd();
-                    if ( err != null )
+                    if ( err.Length > 0 )
                         return PartialView("showDataSetAnalysis");
 
 
@@ -436,7 +436,6 @@ namespace BExIS.Modules.Asm.UI.Controllers
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                throw ex;
             }
             return PartialView("showDataSetAnalysis");
 
