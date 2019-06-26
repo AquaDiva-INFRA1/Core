@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -736,6 +737,57 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             Session["DownloadFullDataset"] = subset;
 
             return Content("changed");
+        }
+
+        public ActionResult Batchdownload()
+        {
+            DatasetManager dm = new DatasetManager();
+            List<long> ids = dm.GetDatasetLatestIds();
+            foreach (int id in ids)
+            {
+                if (hasUserRights(id, RightType.Read))
+                {
+                    string ext = ".xlsm";
+                    DatasetManager datasetManager = new DatasetManager();
+
+                    try
+                    {
+                        DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
+                        ExcelWriter writer = new ExcelWriter();
+
+                        string title = getTitle(writer.GetTitle(id));
+
+                        string path = "";
+
+                        string message = string.Format("dataset {0} version {1} was downloaded as excel.", id,
+                            datasetVersion.Id);
+                        #region generate a subset of a dataset
+
+                            //ToDo filter datatuples
+
+                            OutputDataManager ioOutputDataManager = new OutputDataManager();
+                            path = ioOutputDataManager.GenerateExcelFile(id, title);
+                            LoggerFactory.LogCustom(message);
+
+                            return File(path, "application/xlsm", title + ext);
+
+                            #endregion generate a subset of a dataset
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.ToString());
+                        return Content("Error");
+                    }
+                    finally
+                    {
+                        datasetManager.Dispose();
+                    }
+                }
+
+                return Content("User has no rights.");
+            }
+            return Content("No process done");
         }
 
         #region helper
