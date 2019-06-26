@@ -364,6 +364,9 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     //* Read the output (or the error)
                     string output = proc.StandardOutput.ReadToEnd();
                     string err = proc.StandardError.ReadToEnd();
+                    if ( err != null )
+                        return PartialView("showDataSetAnalysis");
+
 
                     proc.WaitForExit();
 
