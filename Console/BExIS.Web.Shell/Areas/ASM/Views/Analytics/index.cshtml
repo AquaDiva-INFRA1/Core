@@ -240,14 +240,14 @@
 
     function download() {
 		$.ajax({
-			url: '@Url.Action("Download_Report", "InteractiveSearch")',
+			url: '@Url.Action("Download_Report", "AnalyticsController", "ASM")',
 			contentType: 'application/json; charset=utf-8',
 			datatype: 'json',
 			type: "GET",
 			success: function (e) {
 
 			    if (e) {
-			        window.location = '@Url.Action("Download_Report", "InteractiveSearch")';
+			        window.location = '@Url.Action("Download_Report", "AnalyticsController", "ASM")';
 			    }
 			    else {
 			        alert("We can not generate file right now, report the error please");

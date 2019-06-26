@@ -63,7 +63,7 @@
 
                           tabs.Add()
                               .Text("Summary")
-                              .LoadContentFrom("showDataSetAnalysis", "Analytics", new { area = "asm", id = @Model.Id })
+                              .LoadContentFrom("CategoralAnalysis", "Analytics", new { area = "asm", id = @Model.Id })
                               .HtmlAttributes(new { id = "analysis" })
                               .Enabled(true);
 
