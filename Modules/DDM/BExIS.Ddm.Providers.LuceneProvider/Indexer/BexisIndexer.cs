@@ -360,24 +360,32 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 string[] metadataElementNames = facet.Attributes.GetNamedItem("metadata_name").Value.Split(',');
                 String lucene_name = facet.Attributes.GetNamedItem("lucene_name").Value;
 
+                Debug.WriteLine(" ********** debug check : Bexis Indexer ********** ");
+                Debug.WriteLine("All nodes " + metadataElementNames.ToString());
                 foreach (string metadataElementName in metadataElementNames)
                 {
                     //check if the element name is mapped to a group of nodes depending on the datastructure
                     List<string> metadataElementName_group = metadataElementName.Split(';').ToList();
+                    Debug.WriteLine("Node size: " + metadataElementName_group.Where(x => x != "").ToList<string>().Count());
                     //concat all the values in one single variable to be written by the indexer
                     //each metadataElementName can provide more than one value for that node in the XML file
                     //the idea is to concat the val 1 of the xpath 1 with the val 1 of the xpath 2 and so on...
                     string concatenated_values = "";
+                    List<string> list = new List<string>();
                     foreach (string s in metadataElementName_group)
                     {
+                        Debug.WriteLine("partial node : " + s);
                         try
                         {
                             XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
+                            Debug.WriteLine(" Number of nodes matching the XPath expression.  ");
                             for (int i = 0; i < elemList_.Count; i++)
                             {
+                                Debug.WriteLine("Value node : " + elemList_[i].InnerText);
                                 concatenated_values = concatenated_values + " " + elemList_[i].InnerText;
+                                list.Add(elemList_[i].InnerText);
                             }
-                            
+                            list.Add(Environment.NewLine + Environment.NewLine );
                         }
                         catch ( Exception exc)
                         {
@@ -388,12 +396,28 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     {
                         if (!concatenated_values.Trim().Equals(""))
                         {
-                            dataset.Add(new Field("facet_" + lucene_name, concatenated_values,
-                                Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
-                            dataset.Add(new Field("ng_all", concatenated_values,
-                                Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
-                            writeAutoCompleteIndex(docId, lucene_name, concatenated_values);
-                            writeAutoCompleteIndex(docId, "ng_all", concatenated_values);
+                            if (list.Count > 0)
+                            {
+                                int idx = list.IndexOf(Environment.NewLine + Environment.NewLine);
+                                int k = 0;
+                                while (k < idx)
+                                {
+                                    string res = "";
+                                    int i = k;
+                                    while (i< list.Count())
+                                    {
+                                        res = res + " " + list[i];
+                                        i = i + idx + 1;
+                                    }
+                                    k++;
+                                    dataset.Add(new Field("facet_" + lucene_name, res,
+                                        Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                                    dataset.Add(new Field("ng_all", res,
+                                        Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
+                                    writeAutoCompleteIndex(docId, lucene_name, res);
+                                    writeAutoCompleteIndex(docId, "ng_all", res);
+                                }
+                            }
                         }
                     }
                     catch (Exception exc)
