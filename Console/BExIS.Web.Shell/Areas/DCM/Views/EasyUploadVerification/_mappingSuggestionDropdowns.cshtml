@@ -1,0 +1,56 @@
+﻿@model Tuple<int, Dictionary<string, List<BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel>>>
+@{ 
+    Dictionary<string, List<BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel>> suggestionDictionary = Model.Item2;
+}
+@foreach(string category in suggestionDictionary.Keys)
+{
+    //For each category, create a separate dropdown
+    <div class="suggestionContainer">
+        <hr>
+        
+        <label for="@category annotation">@category</label>
+        <select id="@(category+"_"+Model.Item1)" data-headerid="@Model.Item1" name="@category annotation" onchange="mappingSelected(this)" onfocus="deselect(this)" onblur="reselect(this)">
+            @foreach (BExIS.Modules.Dcm.UI.Models.OntologyMappingSuggestionModel suggestion in suggestionDictionary[category])
+            {
+                //For each suggestion create an option
+                <option value="@suggestion.conceptURI" title="@suggestion.conceptURI" data-category="@category" @if (suggestion.selected) { <text> selected</text> }>@suggestion.displayName</option>
+            }
+        </select><br />
+
+        <label>
+            <input id="@(category+"_"+Model.Item1+"_checkbox")" type="checkbox" onclick="noConceptFound(this, '@category');" />
+            Not found.
+            <div class="feedbackContainer text-success">Thank you for your feedback!</div>
+        </label>
+        
+        
+    </div>
+}
+
+<script>
+    function mappingSelected(selectObject, userSelected) {
+        userSelected = (typeof userSelected === 'undefined') ? true : userSelected;
+        var select = $(selectObject);
+        //Find the header ID
+        var headerID = select.data('headerid');
+        //Find the category of the selected element
+        var category = select.find("option:selected").data("category");
+        //Get the selected URI
+        var uri = select.find("option:selected").attr("title");
+
+        //console.log("Selected " + headerID + " - " + uri + " from category " + category);
+
+        //Send to bus
+        $.post('@Url.Action("SaveAnnotationSelection", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })',
+            {
+                headerID: headerID,
+                category: category,
+                uri: uri,
+                userSelected: userSelected
+        });
+    }
+
+    $('.suggestionContainer select[data-headerid="@Model.Item1"]').each(function () {
+        mappingSelected(this, false);
+    });
+</script>
