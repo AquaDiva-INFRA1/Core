@@ -1,0 +1,97 @@
+﻿@model BExIS.Modules.Dcm.UI.Models.ChooseDatasetViewModel
+@using Telerik.Web.Mvc.UI;
+@using Telerik.Web.Mvc.Resources;
+@using BExIS.Modules.Dcm.UI.Models;
+
+@{
+    if (this.ViewContext.FormContext == null)
+    {
+        this.ViewContext.FormContext = new FormContext();
+    }
+
+    ListViewItem selectedListeViewitem = new ListViewItem();
+    if (@Model.SelectedDatasetId > 0)
+    {
+        selectedListeViewitem.Id = Model.SelectedDatasetId;
+        selectedListeViewitem.Title = Model.DatasetTitle;
+    }
+}
+
+
+<div id="Step3" class="uploadWizardStep">
+
+    <div class="uploadWizardStep_Main">
+        <div class="uploadWizardStep_Header stepper">
+            <h3>@Model.StepInfo.title</h3>
+        </div>
+
+        <div class="uploadWizardStep_Description stepper">
+            <p>Your data is stored and managed as part of a dataset.<br />A dataset may contain one or more of your data files. But all data files within one dataset must be of the same data structure, i.e. in structured datasets the number of variables and their properties must be identical in each file.
+            </p>
+        </div>
+
+        <div class="uploadWizardStep_Content stepper">
+
+            <table>
+
+                <tr><td>
+                    @Html.DropDownListFor(m => m.SelectedDatasetId, new SelectList(Model.DatasetsViewList,"Id","DisplayName",selectedListeViewitem),"Select")
+                
+    
+                </td><td>Select an existing dataset to attach your file with.</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="uploadWizardStep_Success stepper">
+         <div id="selectedValue2">@if (Model.DatasetTitle != "")
+                                    { <span>You have selected Dataset : @Model.DatasetTitle</span>}</div>
+    </div> 
+
+    <div class="uploadWizardStep_Error stepper">
+        @if (Model != null)
+        {
+            if (Model.ErrorList != null)
+            {
+                if (Model.ErrorList.Count == 0)
+                {
+
+
+                }
+                else
+                { 
+                   <ul>
+                        @foreach (BExIS.IO.Transform.Validation.Exceptions.Error s in @Model.ErrorList)
+                        { 
+                            <li>@s.ToString()</li>
+                        }
+                   </ul>
+
+                }
+            }
+
+        }
+    </div>   
+</div>
+
+
+<script type="text/javascript">
+
+    $("#SelectedDatasetId").change(function () {
+
+        if ($(this).val() > 0) {
+           
+            SelectedDatasetId = $(this).val();
+            SelectedDatasetTitle = "test";
+            //Parameters.push("DatasetId:" + SelectedDatasetId);
+            //Parameters.push("DatasetTitle:" + SelectedDatasetTitle);
+
+            // send to bus
+            $.post('@Url.Action("AddSelectedDatasetToBus", "SubmitSpecifyDataset", new RouteValueDictionary { { "area", "DCM" } })', { id: SelectedDatasetId }, function (response) {
+                $("#Step3").html(response);
+            })
+        }
+
+    })
+
+</script>

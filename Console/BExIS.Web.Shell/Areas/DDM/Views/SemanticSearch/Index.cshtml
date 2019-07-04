@@ -1,0 +1,57 @@
+﻿@model BExIS.Modules.Ddm.UI.Models.ShowSemanticResultModel
+
+<header>
+    <script type="text/javascript" src="/Scripts/trunk8.js"></script>
+    <script type="text/javascript" src="/Scripts/jquery.ba-resize.min.js"></script>
+</header>
+
+@section Information
+{
+    <p>Enter a phrase or keyword (different keywords should be separated by comma) and press <b>Search</b>.</p>
+    <p>Results from <b>semedico PubMed</b> are displayed on the left side. For more details, click on one of the results.</p>
+    <p>
+        Datasets from <b>Aquadiva</b> that are semantically connected to the search terms are displayed in a table on the right side.<br />
+        To view the details of a dataset, click the <b>View Details</b> button available at the end of each row.
+    </p>
+}
+
+<!--Search bar and search results-->
+<div class="searchContainer">
+    @Html.Partial("_searchBar")
+    <div id="searchContent">
+        @{
+            //Error when connecting to the server
+            if (Model != null && Model.semanticSearchServerError != null)
+            {
+                <div id="errorWrapper">
+                    <div id="semanticSearchErrorMessage">@Model.semanticSearchServerError</div>
+                </div>
+            }
+            //Everything went well, display the result if there is one
+            else
+            {
+                if (Model != null && Model.semanticComponent != null)
+                {
+                    @Html.Partial("_metaDataResultGridViewSemantic", Model.semanticComponent)
+                    
+                }
+
+            }
+        }
+    </div>
+</div>
+
+
+
+<style>
+    #errorWrapper {
+        text-align: center;
+        margin-top: 20px;
+        background-color: #ef5c2f;
+    }
+
+        #errorWrapper div {
+            display: inline-block;
+            background-color: #ff8560;
+        }
+</style>
