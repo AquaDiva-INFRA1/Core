@@ -1,0 +1,35 @@
+﻿@model String
+@using BExIS.Modules.Ddm.UI.Helpers;
+@using BExIS.Utils.Models;
+
+@{
+    List<SearchMetadataNode> metadataNodes = new List<SearchMetadataNode>();
+    if (Session["metadatNodes"] != null)
+    {
+        metadataNodes = (List<SearchMetadataNode>)Session["metadatNodes"];
+    }
+
+}
+
+    @using (Html.BeginCollectionItem("metadataNames"))
+    {
+        <div class="col-lg-10 vcenter">
+            @Html.DropDownListFor(m => m, new SelectList(metadataNodes.OrderBy(s => s.DisplayNameLong), "XPath", "DisplayNameLong"), "Select, please", new { title = "Corresponding metadata node to be used for the Lucene index.", style = "width: 350px;" })
+        </div>
+    }
+
+
+<style type="text/css">
+
+    .metadataNode select {
+        width: 100%;
+    }
+
+    .metadataNode {
+        width: 95%;
+        margin: 0;
+    }
+</style>
+
+
+

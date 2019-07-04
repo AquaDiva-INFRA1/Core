@@ -1,0 +1,302 @@
+﻿@model System.Data.DataTable
+@using BExIS.Utils.Models;
+@using System.Data;
+@using BExIS.Dlm.Entities.DataStructure;
+@using Telerik.Web.Mvc.UI;
+@using BExIS.Modules.UDAM.UI.Models;
+
+
+<header>
+    <script type="text/javascript" src="/Scripts/trunk8.js"></script>
+    <script type="text/javascript" src="/Scripts/jquery.ba-resize.min.js"></script>
+
+    <!--
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    -->
+</header>
+
+@section Information
+{
+    <p>Choose the dataset to process <b>Analysis</b> over by selecting it throught the radio button</p>
+    <p>Choose the <b>script - tool</b> that you desire to process <b>Analysis</b> with.</p>
+    <p>Results from <b>Analysis</b> will be sent via Email.</p>
+}
+
+@{
+    List<HeaderItem> DefaultHeaderList = (List<HeaderItem>)ViewData["DefaultHeaderList"];
+    HeaderItem Id = (HeaderItem)ViewData["ID"];
+
+
+    StructuredDataStructure sds = new StructuredDataStructure();
+    Tuple<StructuredDataStructure, long> defaultModel = new Tuple<StructuredDataStructure, long>(sds, 0);
+
+
+    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
+    pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
+    pagerStyles |= GridPagerStyles.Numeric;
+
+    Dictionary<AnalysisTool, string> tools_list = (Dictionary<AnalysisTool, string>)ViewData["tools_list"];
+    Dictionary<Scripts, string> R_script_paths = (Dictionary<Scripts, string>)ViewData["R_script_paths"];
+    Dictionary<Scripts, string> Python_script_paths = (Dictionary<Scripts, string>)ViewData["Python_script_paths"];
+
+
+}
+
+@{
+    if (tools_list.Count > 0)
+    {
+        <div class="row">
+            @{ int i = -1; }
+            @foreach (KeyValuePair<AnalysisTool, string> kvp in tools_list)
+            {
+                i = i + 1; 
+                <div class="col-sm-2">
+                    <div class="card" style="width: 18rem;">
+                        <!--<img class="card-img-top" src="~/Images/Home/ad.jpg" alt="VrAP Analysis Tool">-->
+                        <div class="card-body">
+                            <center>
+                                <h5 class="card-title">@kvp.Value.ToUpper()</h5>
+                                <div class="searchResultFunctionDiv">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="uploadfile(this, @i ,'tool')" id="@kvp">
+                                        <span class="glyphicon glyphicon-equalizer"></span>
+                                    </button>
+                                    <!--<a class="bx bx-grid-function bx-show" title="Analyse DataSet" onclick="uploadfile(this)"></a>-->
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+
+        <div class="row">
+            @{ i = -1; }
+            @foreach (KeyValuePair<Scripts, string> kvp in R_script_paths)
+            {
+                i = i + 1;
+                <div class="col-sm-2">
+                    <div class="card" style="width: 18rem;">
+                        <!--<img class="card-img-top" src="~/Images/Home/ad.jpg" alt="VrAP Analysis Tool">-->
+                        <div class="card-body">
+                            <center>
+                                <h5 class="card-title">@kvp.Value.ToUpper()</h5>
+                                <div class="searchResultFunctionDiv">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="uploadfile(this,@i,'Rscript')" id="@kvp">
+                                        <span class="glyphicon glyphicon-equalizer"></span>
+                                    </button>
+                                    <!--<a class="bx bx-grid-function bx-show" title="Analyse DataSet" onclick="uploadfile(this)"></a>-->
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="row">
+            @{ i = -1; }
+            @foreach (KeyValuePair<Scripts, string> kvp in Python_script_paths)
+            {
+                i = i + 1;
+                <div class="col-sm-2">
+                    <div class="card" style="width: 18rem;">
+                        <!--<img class="card-img-top" src="~/Images/Home/ad.jpg" alt="VrAP Analysis Tool">-->
+                        <div class="card-body">
+                            <center>
+                                <h5 class="card-title">@kvp.Value.ToUpper()</h5>
+                                <div class="searchResultFunctionDiv">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="uploadfile(this,@i,'Pythonscripts')" id="@kvp">
+                                        <span class="glyphicon glyphicon-equalizer"></span>
+                                    </button>
+                                    <!--<a class="bx bx-grid-function bx-show" title="Analyse DataSet" onclick="uploadfile(this)"></a>-->
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+
+<div class="searchContainer">
+
+    <br />
+    <div class="alert alert-danger" role="alert" id="alerts" hidden="true">
+        <div id="content_alert"></div>
+    </div>
+
+    <div id="searchContent">
+        @(Html.Telerik().Grid<System.Data.DataRow>()
+                        .Name("resultGrid")
+
+                         .DataBinding(dataBinding => dataBinding
+                         .Ajax()
+                         .Select("_CustomBinding", "Home", new { area = "UDAM" })
+                         )
+
+                         .EnableCustomBinding(true)
+                         .HtmlAttributes(new { @class = "result-grid" })
+                         .Columns(columns =>
+                         {
+
+                             if (Model != null)
+                             {
+                                 if (@Model.Columns.Count > 0)
+                                 {
+                             //Additional column with the "View Details"-Button
+                             columns.Bound("").Width(50).ClientTemplate(
+                                                     "<center>" +
+                                                     "<input id='checkbox_for_analysis' type='radio'  name='checkbox_for_analysis' " +
+                                                     "value= '<#= " + @Model.Columns[Id.Name].ColumnName + "#>' class='chk' />" +
+                                                     "</center>"
+                                                     ).Groupable(false)
+                                                         .Sortable(false)
+                                                         .Filterable(false);
+
+                                 }
+                             }
+
+                             if (Model != null)
+                             {
+                                 for (int i = 0; i < Model.Columns.Count; i++)
+                                 {
+                                     DataColumn column = Model.Columns[i];
+                                     if (DefaultHeaderList.Any(p => p.Name.Equals(column.ColumnName)))
+                                     {
+                                         string title;
+                                         if (column.Caption == "")
+                                         {
+                                             title = column.ColumnName;
+                                         }
+                                         else
+                                         {
+                                             title = column.Caption;
+                                         }
+
+                                         columns.Bound(column.DataType, column.ColumnName)
+                                             .Title(title);
+                                     }
+                                     else
+                                     {
+                                         columns.Bound(column.DataType, column.ColumnName).Hidden()
+                                                .Title(column.Caption);
+
+                                     }
+                                 }
+                             }
+
+                         })
+
+                         .ClientEvents(events => events
+                                     .OnRowDataBound("resultGrid_OnRowDataBound")
+                                     .OnDataBound("onDataBound")
+                                     .OnColumnShow("resultGrid_OnColumnChanged")
+                                     .OnColumnHide("resultGrid_OnColumnChanged")
+
+                                     )
+                         .Sortable()
+                         .Pageable(paging => paging.Style(pagerStyles))
+                         .ColumnContextMenu()
+
+        )
+    </div>
+</div>
+
+
+
+
+<div id="spinner_loader" hidden="true">
+    <center><i class="fa fa-spinner fa-spin" style="font-size:100px" id="spinner"></i></center>
+</div>
+
+
+<style>
+    #errorWrapper {
+        text-align: center;
+        margin-top: 20px;
+        background-color: #ef5c2f;
+    }
+
+        #errorWrapper div {
+            display: inline-block;
+            background-color: #ff8560;
+        }
+</style>
+
+
+<script type="text/javascript">
+
+    $('document').ready(function () {
+
+        $('.t-filter').attr("title", "Filter");
+
+    })
+
+    function resultGrid_OnColumnChanged(e) {
+    }
+
+
+    function resultGrid_OnRowDataBound(e) {
+
+    }
+
+    function uploadfile(e, id, flag) {
+        
+        var val = [];
+        $('.chk:checked').each(function (i) {
+            val[i] = $(this).val();
+        });
+
+        if (val.length == 0) {
+            alert("please check a dataset first");
+        }
+        else {
+            document.getElementById("spinner_loader").removeAttribute("hidden");
+            document.getElementById("alerts").removeAttribute("style");
+            document.getElementById("alerts").removeAttribute("hidden");
+            document.getElementById("content_alert").innerHTML = "processing your request ... please wait depending on the size of the file !";
+
+            var id_tool = e.getAttribute("id");
+
+            var data = {
+                ids: JSON.stringify(val),
+                index: id,
+                flag: flag
+            }
+
+            $.ajax({
+                url: '/UDAM/Home/check_file_extension_to_analyse',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                complete: function (res_check_file_extension_to_analyse) {
+                    document.getElementById("spinner_loader").setAttribute("hidden", true);
+                    document.getElementById("content_alert").innerHTML = res_check_file_extension_to_analyse.responseText;
+                    $("#alerts").delay(3500).hide(500);
+
+                    $('.chk:checked').each(function (i, item) {
+                        $(item).attr('checked', !$(item).is(':checked'));
+                    });
+                }
+            });
+
+        }
+
+    }
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+
+</script>

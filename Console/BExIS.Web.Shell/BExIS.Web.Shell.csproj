@@ -1,0 +1,1205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E5128814-4541-45C8-A9E6-6C91A7E3D1E2}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BExIS.Web.Shell</RootNamespace>
+    <AssemblyName>BExIS.Web.Shell</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <IISExpressSSLPort>44345</IISExpressSSLPort>
+    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>disabled</IISExpressWindowsAuthentication>
+    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
+    <TargetFrameworkProfile />
+    <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <Use64BitIISExpress />
+    <DontImportPostSharp>True</DontImportPostSharp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DataAnnotationsExtensions">
+      <HintPath>..\..\packages\DataAnnotationsExtensions.1.1.0.0\lib\NETFramework40\DataAnnotationsExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="DataAnnotationsExtensions.ClientValidation">
+      <HintPath>..\..\packages\DataAnnotationsExtensions.MVC3.1.1.0.0\lib\NETFramework40\DataAnnotationsExtensions.ClientValidation.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml">
+      <HintPath>..\..\Libraries\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentBootstrap, Version=3.3.5.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FluentBootstrap.3.3.5.1\lib\net40\FluentBootstrap.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FluentBootstrap.Mvc, Version=3.3.5.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FluentBootstrap.Mvc.3.3.5.1\lib\net40\FluentBootstrap.Mvc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Glimpse.AspNet, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Glimpse.AspNet.1.8.0\lib\net45\Glimpse.AspNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Glimpse.Core, Version=1.8.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Glimpse.1.8.2\lib\net45\Glimpse.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Glimpse.Mvc5, Version=1.5.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Glimpse.Mvc5.1.5.3\lib\net45\Glimpse.Mvc5.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.6.0.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\HtmlAgilityPack.1.6.0\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Iesi.Collections, Version=4.0.0.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Iesi.Collections.4.0.1.4000\lib\net40\Iesi.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\..\Libraries\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Owin, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Identity.Owin.2.2.1\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.IdentityModel, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.IdentityModel.6.1.7600.16394\lib\net35\Microsoft.IdentityModel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Owin.3.1.0\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Owin.Host.SystemWeb.3.1.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Owin.Security.3.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Cookies, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Owin.Security.Cookies.3.1.0\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OAuth, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Owin.Security.OAuth.3.1.0\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.RegistrationByConvention, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebHelpers.3.2.3\lib\net45\Microsoft.Web.Helpers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NHibernate, Version=4.1.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NHibernate.4.1.1.4000\lib\net40\NHibernate.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Npgsql, Version=3.2.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Npgsql.3.2.5\lib\net451\Npgsql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PostSharp, Version=4.3.19.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\PostSharp.4.3.19\lib\net35-client\PostSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Linq.Dynamic, Version=1.0.6132.35681, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Linq.Dynamic.1.0.7\lib\net40\System.Linq.Dynamic.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Threading.Tasks.Extensions.4.3.0\lib\portable-net45+win8+wp8+wpa81\System.Threading.Tasks.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Telerik.Web.Mvc">
+      <HintPath>..\..\packages\TelerikMvcExtensions.2013.2.611\lib\net40\Telerik.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Entities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Entities.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Entities.Orm.NH, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Entities.Orm.NH.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.IoC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.IoC.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Logging">
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Model, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.MultiTenancy.Api, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.MultiTenancy.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.MultiTenancy.Services, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.MultiTenancy.Services.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Persistence.Api, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Persistence.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.PersistenceProviders.NH, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.PersistenceProviders.NH.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Utils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Web, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Web.Mvc, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="Vaiona.Web.Mvc.Modularity">
+      <HintPath>..\..\Libraries\Vaiona\Vaiona.Web.Mvc.Modularity.dll</HintPath>
+    </Reference>
+    <Reference Include="WebActivator">
+      <HintPath>..\..\packages\WebActivator.1.2.0.0\lib\NETFramework40\WebActivator.dll</HintPath>
+    </Reference>
+    <Reference Include="WebGrease, Version=1.6.5135.21930, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
+    </Reference>
+    <Reference Include="WebMatrix.Data, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.Data.3.2.3\lib\net45\WebMatrix.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WebMatrix.WebData, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.WebData.3.2.3\lib\net45\WebMatrix.WebData.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_GlobalResources\EditorLocalization.de-DE.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EditorLocalization.de-DE.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\EditorLocalization.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EditorLocalization.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\EditorLocalization.en-US.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EditorLocalization.en-US.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\GridLocalization.de-DE.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GridLocalization.de-DE.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\GridLocalization.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GridLocalization.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\GridLocalization.en-US.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GridLocalization.en-US.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\UploadLocalization.en-US.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UploadLocalization.en-US.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\UploadLocalization.fr-FR.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UploadLocalization.fr-FR.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\UploadLocalization.nl-NL.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UploadLocalization.nl-NL.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\UploadLocalization.pl-PL.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UploadLocalization.pl-PL.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\UploadLocalization.pt-BR.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UploadLocalization.pt-BR.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\UploadLocalization.pt-PT.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UploadLocalization.pt-PT.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\UploadLocalization.ru-RU.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UploadLocalization.ru-RU.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_GlobalResources\UploadLocalization.zh-CN.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UploadLocalization.zh-CN.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Attributes\BExISAuthorizeAttribute.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\FooterController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\LdapController.cs" />
+    <Compile Include="Controllers\TermsController.cs" />
+    <Compile Include="Controllers\TestController.cs" />
+    <Compile Include="Controllers\UiTestController.cs" />
+    <Compile Include="GlimpseSecurityPolicy.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\BExISDataHelper.cs" />
+    <Compile Include="Helpers\BexisModelManager.cs" />
+    <Compile Include="Helpers\SeedDataGenerator.cs" />
+    <Compile Include="Models\AccountModels.cs" />
+    <Compile Include="Models\EntitySelectorModel.cs" />
+    <Compile Include="Models\ManageModels.cs" />
+    <Compile Include="Models\UiTestModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Startup.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <DesignData Include="Db\Settings\DB2Dialect.hibernate.cfg.xml">
+      <SubType>Designer</SubType>
+    </DesignData>
+    <DesignData Include="Db\Settings\MsSql2008Dialect.hibernate.cfg.xml" />
+    <DesignData Include="Db\Settings\PostgreSQL82Dialect.hibernate.cfg.xml">
+      <SubType>Designer</SubType>
+    </DesignData>
+    <Content Include="Content\handsontable\handsontable.css" />
+    <Content Include="Content\handsontable\handsontable.full.css" />
+    <Content Include="Content\handsontable\handsontable.full.min.css" />
+    <Content Include="Content\handsontable\handsontable.min.css" />
+    <Content Include="Content\Images\aquadiva-favicon.ico" />
+    <Content Include="Content\Images\aquadiva-logo.png" />
+    <Content Include="Content\Images\dfg_logo.gif" />
+    <Content Include="Content\bootstrap-combobox.css" />
+    <Content Include="Content\bootstrap-theme.css" />
+    <Content Include="Content\bootstrap-theme.min.css" />
+    <Content Include="Content\bootstrap.css" />
+    <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\Images\Bildmarke_BEXIS_cmyk.svg" />
+    <Content Include="Content\Images\Bildmarke_BEXIS_rgb_830x830.jpg" />
+    <Content Include="Content\Images\Bildmarke_BEXIS_rgb_830x830.png" />
+    <Content Include="Content\Images\Bildmarke_BEXIS_rgb_94x94.jpg" />
+    <Content Include="Content\Images\Bildmarke_BEXIS_rgb_94x94.png" />
+    <Content Include="Content\Images\2.svg" />
+    <Content Include="Content\Images\favicon.ico" />
+    <Content Include="Content\Images\info.png" />
+    <Content Include="Content\Images\Logo_BEXIS_cmyk.svg" />
+    <Content Include="Content\Images\Logo_BEXIS_rgb_113x28.jpg" />
+    <Content Include="Content\Images\Logo_BEXIS_rgb_2600x830.jpg" />
+    <Content Include="Content\Images\Logo_BEXIS_rgb_2600x830.png" />
+    <Content Include="Content\Images\Logo_BEXIS_rgb_377x94.jpg" />
+    <Content Include="Content\Images\Logo_BEXIS_rgb_377x94.png" />
+    <Content Include="Content\Images\Bad.png" />
+    <Content Include="Content\Site.css" />
+    <Content Include="Content\bootstrap-slider.min.css" />
+    <Content Include="css\font-awesome.css" />
+    <Content Include="css\font-awesome.min.css" />
+    <Content Include="fonts\fontawesome-webfont.svg" />
+    <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Scripts\2013.2.611\telerik.all.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.backup.js" />
+    <Content Include="Scripts\autosize\autosize.js" />
+    <Content Include="Scripts\autosize\autosize.min.js" />
+    <Content Include="Scripts\bexis-jquery-ui.js" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Content\bootstrap-theme.css.map" />
+    <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Scripts\bootstrap-slider.min.js" />
+    <Content Include="Scripts\bexis-metadata.js" />
+    <Content Include="Scripts\bootstrap.js" />
+    <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Content\Images\Bildmarke_BEXIS_cmyk.ai" />
+    <Content Include="Content\Images\Logo_BEXIS_cmyk.ai" />
+    <Content Include="fonts\FontAwesome.otf" />
+    <Content Include="fonts\fontawesome-webfont.woff2" />
+    <Content Include="fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\fontawesome-webfont.eot" />
+    <None Include="Properties\PublishProfiles\BEXIS 2.10.pubxml" />
+    <None Include="Properties\PublishProfiles\bexis2 Release2.10.pubxml" />
+    <None Include="Properties\PublishProfiles\BEXIS2.pubxml" />
+    <None Include="Properties\PublishProfiles\bexisconf.pubxml" />
+    <None Include="Properties\PublishProfiles\BPP 210.pubxml" />
+    <None Include="Properties\PublishProfiles\BPP Publish.pubxml" />
+    <None Include="Properties\PublishProfiles\BPP211.pubxml" />
+    <None Include="Properties\PublishProfiles\BPP21105.pubxml" />
+    <None Include="Properties\PublishProfiles\BPP21108.pubxml" />
+    <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
+    <None Include="Properties\PublishProfiles\FileSystem.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+    <None Include="Properties\PublishProfiles\SITE.pubxml" />
+    <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\handsontable\handsontable.full.js" />
+    <Content Include="Scripts\handsontable\handsontable.full.min.js" />
+    <Content Include="Scripts\handsontable\handsontable.js" />
+    <Content Include="Scripts\handsontable\handsontable.min.js" />
+    <Content Include="Scripts\jquery-1.10.2.js" />
+    <Content Include="Scripts\jquery-1.10.2.min.js" />
+    <Content Include="Scripts\jquery-1.10.2.min.map" />
+    <None Include="Properties\PublishProfiles\T1.pubxml" />
+    <None Include="Scripts\jquery-2.1.4.intellisense.js" />
+    <Content Include="Scripts\jquery-2.1.4.js" />
+    <Content Include="Scripts\jquery-2.1.4.min.js" />
+    <Content Include="Scripts\jquery-migrate-1.2.1.js" />
+    <Content Include="Scripts\jquery-migrate-1.2.1.min.js" />
+    <Content Include="Scripts\minimap\minimap.js" />
+    <Content Include="Scripts\minimap\minimap.min.css" />
+    <Content Include="Scripts\minimap\minimap.min.js" />
+    <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\respond.js" />
+    <Content Include="Scripts\respond.matchmedia.addListener.js" />
+    <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
+    <Content Include="Scripts\respond.min.js" />
+    <Content Include="Shell.Manifest.xml" />
+    <Content Include="Themes\Aquadiva\Layouts\_Layout.xml" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.css" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-elements.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-font-awesome-extension.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-jquery-ui.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-metadata.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-telerik.css" />
+    <Content Include="Themes\Aquadiva\Styles\Copy of telerik.default.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\Default\editor.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\imagebrowser.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\infoicon.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\loading.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\preloader.GIF" />
+    <Content Include="Themes\Aquadiva\Styles\Default\slider-h.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\slider-v.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\sprite-vertical.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\sprite.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-line.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-nodes.png" />
+    <Content Include="Themes\Aquadiva\Styles\emptyPng.png" />
+    <Content Include="Themes\Aquadiva\Styles\images.css" />
+    <Content Include="Themes\Aquadiva\Styles\search.css" />
+    <Content Include="Themes\Aquadiva\Styles\telerik.default.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\wizard.css" />
+    <Content Include="Themes\Black\Styles\awesome\css\font-awesome.css" />
+    <Content Include="Themes\Black\Styles\awesome\css\font-awesome.min.css" />
+    <Content Include="Themes\Black\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\Black\Styles\bexis-elements.css" />
+    <Content Include="Themes\Black\Styles\bexis-font-awesome-extension.css" />
+    <Content Include="Themes\Black\Styles\bexis-telerik.css" />
+    <Content Include="Themes\Default\Styles\awesome\css\font-awesome.css" />
+    <Content Include="Themes\Default\Styles\awesome\css\font-awesome.min.css" />
+    <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Scripts\2012.3.1018\telerik.extensions.js" />
+    <Content Include="Scripts\2013.2.611\jquery-1.7.1.min.js" />
+    <Content Include="Scripts\2013.2.611\jquery.validate.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.autocomplete.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.calendar.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.chart.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.combobox.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.common.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.datepicker.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.datetimepicker.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.draganddrop.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.editor.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.editing.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.filtering.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.grouping.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.reordering.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.resizing.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.imagebrowser.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.list.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.menu.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.panelbar.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.slider.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.splitter.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.tabstrip.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.textbox.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.timepicker.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.treeview.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.upload.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.window.min.js" />
+    <Content Include="Scripts\bexis_default.js" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\animated-overlay.gif" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-bg_flat_75_ffffff_40x100.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-icons_222222_256x240.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-icons_454545_256x240.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-icons_888888_256x240.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\jquery-ui-1.10.3.custom.css" />
+    <Content Include="Scripts\jQueryUI\1.10.3\css\smoothness\jquery-ui-1.10.3.custom.min.css" />
+    <Content Include="Scripts\jQueryUI\1.10.3\js\jquery-1.9.1.js" />
+    <Content Include="Scripts\jQueryUI\1.10.3\js\jquery-ui-1.10.3.custom.js" />
+    <Content Include="Scripts\jQueryUI\1.10.3\js\jquery-ui-1.10.3.custom.min.js" />
+    <Content Include="Scripts\jquery-1.7.1.min.js" />
+    <Content Include="Scripts\jquery-2.0.3.js" />
+    <Content Include="Scripts\jquery-2.0.3.min.js" />
+    <Content Include="Scripts\jquery.ba-resize.min.js" />
+    <Content Include="Scripts\Search\search.js" />
+    <Content Include="Scripts\switchery\switchery.css" />
+    <Content Include="Scripts\switchery\switchery.js" />
+    <Content Include="Scripts\switchery\switchery.min.css" />
+    <Content Include="Scripts\switchery\switchery.min.js" />
+    <Content Include="Scripts\trunk8.js" />
+    <Content Include="Themes\Black\Styles\Black\editor.png" />
+    <Content Include="Themes\Black\Styles\Black\imagebrowser.png" />
+    <Content Include="Themes\Black\Styles\Black\loading.gif" />
+    <Content Include="Themes\Black\Styles\Black\slider-h.gif" />
+    <Content Include="Themes\Black\Styles\Black\slider-v.gif" />
+    <Content Include="Themes\Black\Styles\Black\sprite-vertical.png" />
+    <Content Include="Themes\Black\Styles\Black\sprite.png" />
+    <Content Include="Themes\Black\Styles\Black\treeview-line.png" />
+    <Content Include="Themes\Black\Styles\Black\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Black\Styles\Black\treeview-nodes.png" />
+    <Content Include="Themes\Default\Layouts\_Layout.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Themes\Default\Styles\bexis-jquery-ui.css" />
+    <Content Include="Themes\Default\Styles\bexis-metadata.css" />
+    <Content Include="Themes\Default\Styles\bexis-telerik.css" />
+    <Content Include="Themes\Default\Styles\bexis-elements.css" />
+    <Content Include="Themes\Default\Styles\Copy of telerik.default.min.css" />
+    <Content Include="Themes\Default\Styles\Default\editor.png" />
+    <Content Include="Themes\Default\Styles\emptyPng.png" />
+    <Content Include="Themes\Default\Styles\Default\imagebrowser.png" />
+    <Content Include="Themes\Default\Styles\Default\infoicon.png" />
+    <Content Include="Themes\Default\Styles\Default\loading.gif" />
+    <Content Include="Themes\Default\Styles\Default\preloader.GIF" />
+    <Content Include="Themes\Default\Styles\Default\slider-h.gif" />
+    <Content Include="Themes\Default\Styles\Default\slider-v.gif" />
+    <Content Include="Themes\Default\Styles\Default\sprite-vertical.png" />
+    <Content Include="Themes\Default\Styles\Default\sprite.png" />
+    <Content Include="Themes\Default\Styles\Default\treeview-line.png" />
+    <Content Include="Themes\Default\Styles\Default\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Default\Styles\Default\treeview-nodes.png" />
+    <Content Include="Themes\Default\Styles\bexis-font-awesome-extension.css" />
+    <Content Include="Themes\Default\Styles\images.css" />
+    <Content Include="Themes\Default\Styles\search.css" />
+    <Content Include="Themes\Default\Styles\telerik.default.min.css" />
+    <Content Include="Themes\Default\Styles\wizard.css" />
+    <Content Include="Themes\Forest\Styles\Forest\editor.png" />
+    <Content Include="Themes\Forest\Styles\Forest\imagebrowser.png" />
+    <Content Include="Themes\Forest\Styles\Forest\loading.gif" />
+    <Content Include="Themes\Forest\Styles\Forest\slider-h.gif" />
+    <Content Include="Themes\Forest\Styles\Forest\slider-v.gif" />
+    <Content Include="Themes\Forest\Styles\Forest\sprite-vertical.png" />
+    <Content Include="Themes\Forest\Styles\Forest\sprite.png" />
+    <Content Include="Themes\Forest\Styles\Forest\treeview-line.png" />
+    <Content Include="Themes\Forest\Styles\Forest\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Forest\Styles\Forest\treeview-nodes.png" />
+    <Content Include="Themes\Hay\Styles\Hay\editor.png" />
+    <Content Include="Themes\Hay\Styles\Hay\imagebrowser.png" />
+    <Content Include="Themes\Hay\Styles\Hay\loading.gif" />
+    <Content Include="Themes\Hay\Styles\Hay\slider-h.gif" />
+    <Content Include="Themes\Hay\Styles\Hay\slider-v.gif" />
+    <Content Include="Themes\Hay\Styles\Hay\sprite-vertical.png" />
+    <Content Include="Themes\Hay\Styles\Hay\sprite.png" />
+    <Content Include="Themes\Hay\Styles\Hay\treeview-line.png" />
+    <Content Include="Themes\Hay\Styles\Hay\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Hay\Styles\Hay\treeview-nodes.png" />
+    <Content Include="Themes\Metro\Styles\Metro\editor.png" />
+    <Content Include="Themes\Metro\Styles\Metro\imagebrowser.png" />
+    <Content Include="Themes\Metro\Styles\Metro\loading.gif" />
+    <Content Include="Themes\Metro\Styles\Metro\slider-h.gif" />
+    <Content Include="Themes\Metro\Styles\Metro\slider-v.gif" />
+    <Content Include="Themes\Metro\Styles\Metro\sprite.png" />
+    <Content Include="Themes\Office2007\Styles\Office2007\editor.png" />
+    <Content Include="Themes\Office2007\Styles\Office2007\imagebrowser.png" />
+    <Content Include="Themes\Office2007\Styles\Office2007\loading.gif" />
+    <Content Include="Themes\Office2007\Styles\Office2007\slider-h.gif" />
+    <Content Include="Themes\Office2007\Styles\Office2007\slider-v.gif" />
+    <Content Include="Themes\Office2007\Styles\Office2007\sprite-vertical.png" />
+    <Content Include="Themes\Office2007\Styles\Office2007\sprite.png" />
+    <Content Include="Themes\Office2007\Styles\Office2007\treeview-line.png" />
+    <Content Include="Themes\Office2007\Styles\Office2007\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Office2007\Styles\Office2007\treeview-nodes.png" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\editor.png" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\imagebrowser.png" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\loading.gif" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\slider-h.gif" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\slider-v.gif" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\sprite-vertical.png" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\sprite.png" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\treeview-line.png" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Office2010Black\Styles\Office2010Black\treeview-nodes.png" />
+    <Content Include="Themes\Office2010Blue\Styles\Office2010Blue\editor.png" />
+    <Content Include="Themes\Office2010Blue\Styles\Office2010Blue\gradient.png" />
+    <Content Include="Themes\Office2010Blue\Styles\Office2010Blue\imagebrowser.png" />
+    <Content Include="Themes\Office2010Blue\Styles\Office2010Blue\loading.gif" />
+    <Content Include="Themes\Office2010Blue\Styles\Office2010Blue\slider-h.gif" />
+    <Content Include="Themes\Office2010Blue\Styles\Office2010Blue\slider-v.gif" />
+    <Content Include="Themes\Office2010Blue\Styles\Office2010Blue\sprite-vertical.png" />
+    <Content Include="Themes\Office2010Blue\Styles\Office2010Blue\sprite.png" />
+    <Content Include="Themes\Office2010Silver\Styles\Office2010Silver\editor.png" />
+    <Content Include="Themes\Office2010Silver\Styles\Office2010Silver\gradient.png" />
+    <Content Include="Themes\Office2010Silver\Styles\Office2010Silver\imagebrowser.png" />
+    <Content Include="Themes\Office2010Silver\Styles\Office2010Silver\loading.gif" />
+    <Content Include="Themes\Office2010Silver\Styles\Office2010Silver\slider-h.gif" />
+    <Content Include="Themes\Office2010Silver\Styles\Office2010Silver\slider-v.gif" />
+    <Content Include="Themes\Office2010Silver\Styles\Office2010Silver\sprite-vertical.png" />
+    <Content Include="Themes\Office2010Silver\Styles\Office2010Silver\sprite.png" />
+    <Content Include="Themes\Outlook\Styles\Outlook\editor.png" />
+    <Content Include="Themes\Outlook\Styles\Outlook\imagebrowser.png" />
+    <Content Include="Themes\Outlook\Styles\Outlook\loading.gif" />
+    <Content Include="Themes\Outlook\Styles\Outlook\slider-h.gif" />
+    <Content Include="Themes\Outlook\Styles\Outlook\slider-v.gif" />
+    <Content Include="Themes\Outlook\Styles\Outlook\sprite-vertical.png" />
+    <Content Include="Themes\Outlook\Styles\Outlook\sprite.png" />
+    <Content Include="Themes\Outlook\Styles\Outlook\treeview-line.png" />
+    <Content Include="Themes\Outlook\Styles\Outlook\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Outlook\Styles\Outlook\treeview-nodes.png" />
+    <Content Include="Themes\Simple\Styles\Simple\editor.png" />
+    <Content Include="Themes\Simple\Styles\Simple\imagebrowser.png" />
+    <Content Include="Themes\Simple\Styles\Simple\loading.gif" />
+    <Content Include="Themes\Simple\Styles\Simple\slider-h.gif" />
+    <Content Include="Themes\Simple\Styles\Simple\slider-v.gif" />
+    <Content Include="Themes\Simple\Styles\Simple\sprite.png" />
+    <Content Include="Themes\Simple\Styles\Simple\treeview-line.png" />
+    <Content Include="Themes\Simple\Styles\Simple\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Simple\Styles\Simple\treeview-nodes.png" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\editor.png" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\imagebrowser.png" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\loading.gif" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\slider-h.gif" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\slider-v.gif" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\sprite-vertical.png" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\sprite.png" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\treeview-line.png" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Sitefinity\Styles\Sitefinity\treeview-nodes.png" />
+    <Content Include="Themes\Sunset\Styles\Sunset\editor.png" />
+    <Content Include="Themes\Sunset\Styles\Sunset\imagebrowser.png" />
+    <Content Include="Themes\Sunset\Styles\Sunset\loading.gif" />
+    <Content Include="Themes\Sunset\Styles\Sunset\slider-h.gif" />
+    <Content Include="Themes\Sunset\Styles\Sunset\slider-v.gif" />
+    <Content Include="Themes\Sunset\Styles\Sunset\sprite-vertical.png" />
+    <Content Include="Themes\Sunset\Styles\Sunset\sprite.png" />
+    <Content Include="Themes\Sunset\Styles\Sunset\treeview-line.png" />
+    <Content Include="Themes\Sunset\Styles\Sunset\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Sunset\Styles\Sunset\treeview-nodes.png" />
+    <Content Include="Themes\Black\Styles\telerik.black.min.css" />
+    <Content Include="Themes\telerik.common.min.css" />
+    <Content Include="Themes\Forest\Styles\telerik.forest.min.css" />
+    <Content Include="Themes\Hay\Styles\telerik.hay.min.css" />
+    <Content Include="Themes\Metro\Styles\telerik.metro.min.css" />
+    <Content Include="Themes\Office2007\Styles\telerik.office2007.min.css" />
+    <Content Include="Themes\Office2010Black\Styles\telerik.office2010black.min.css" />
+    <Content Include="Themes\Office2010Blue\Styles\telerik.office2010blue.min.css" />
+    <Content Include="Themes\Office2010Silver\Styles\telerik.office2010silver.min.css" />
+    <Content Include="Themes\Outlook\Styles\telerik.outlook.min.css" />
+    <Content Include="Themes\telerik.rtl.min.css" />
+    <Content Include="Themes\Simple\Styles\telerik.simple.min.css" />
+    <Content Include="Themes\Sitefinity\Styles\telerik.sitefinity.min.css" />
+    <Content Include="Themes\Sunset\Styles\telerik.sunset.min.css" />
+    <Content Include="Themes\Telerik\Styles\telerik.telerik.min.css" />
+    <Content Include="Themes\Transparent\Styles\telerik.transparent.min.css" />
+    <Content Include="Themes\Vista\Styles\telerik.vista.min.css" />
+    <Content Include="Themes\Web20\Styles\telerik.web20.min.css" />
+    <Content Include="Themes\WebBlue\Styles\telerik.webblue.min.css" />
+    <Content Include="Themes\Windows7\Styles\telerik.windows7.min.css" />
+    <Content Include="Themes\Telerik\Styles\Telerik\editor.png" />
+    <Content Include="Themes\Telerik\Styles\Telerik\imagebrowser.png" />
+    <Content Include="Themes\Telerik\Styles\Telerik\loading.gif" />
+    <Content Include="Themes\Telerik\Styles\Telerik\slider-h.gif" />
+    <Content Include="Themes\Telerik\Styles\Telerik\slider-v.gif" />
+    <Content Include="Themes\Telerik\Styles\Telerik\sprite-vertical.png" />
+    <Content Include="Themes\Telerik\Styles\Telerik\sprite.png" />
+    <Content Include="Themes\Telerik\Styles\Telerik\treeview-line.png" />
+    <Content Include="Themes\Telerik\Styles\Telerik\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Telerik\Styles\Telerik\treeview-nodes.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\active.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\editor.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\gradient.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\group.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\hover.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\imagebrowser.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\loading.gif" />
+    <Content Include="Themes\Transparent\Styles\Transparent\selected.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\slider-h.gif" />
+    <Content Include="Themes\Transparent\Styles\Transparent\slider-v.gif" />
+    <Content Include="Themes\Transparent\Styles\Transparent\sprite-vertical.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\sprite.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\toolbar.png" />
+    <Content Include="Themes\Transparent\Styles\Transparent\widget.png" />
+    <Content Include="Themes\Vista\Styles\Vista\editor.png" />
+    <Content Include="Themes\Vista\Styles\Vista\imagebrowser.png" />
+    <Content Include="Themes\Vista\Styles\Vista\loading.gif" />
+    <Content Include="Themes\Vista\Styles\Vista\slider-h.gif" />
+    <Content Include="Themes\Vista\Styles\Vista\slider-v.gif" />
+    <Content Include="Themes\Vista\Styles\Vista\sprite-vertical.png" />
+    <Content Include="Themes\Vista\Styles\Vista\sprite.png" />
+    <Content Include="Themes\Web20\Styles\Web20\editor.png" />
+    <Content Include="Themes\Web20\Styles\Web20\imagebrowser.png" />
+    <Content Include="Themes\Web20\Styles\Web20\loading.gif" />
+    <Content Include="Themes\Web20\Styles\Web20\slider-h.gif" />
+    <Content Include="Themes\Web20\Styles\Web20\slider-v.gif" />
+    <Content Include="Themes\Web20\Styles\Web20\sprite-vertical.png" />
+    <Content Include="Themes\Web20\Styles\Web20\sprite.png" />
+    <Content Include="Themes\Web20\Styles\Web20\treeview-line.png" />
+    <Content Include="Themes\Web20\Styles\Web20\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Web20\Styles\Web20\treeview-nodes.png" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\editor.png" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\imagebrowser.png" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\loading.gif" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\slider-h.gif" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\slider-v.gif" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\sprite-vertical.png" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\sprite.png" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\treeview-line.png" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\treeview-nodes-rtl.png" />
+    <Content Include="Themes\WebBlue\Styles\WebBlue\treeview-nodes.png" />
+    <Content Include="Themes\Windows7\Styles\Windows7\editor.png" />
+    <Content Include="Themes\Windows7\Styles\Windows7\imagebrowser.png" />
+    <Content Include="Themes\Windows7\Styles\Windows7\loading.gif" />
+    <Content Include="Themes\Windows7\Styles\Windows7\slider-h.gif" />
+    <Content Include="Themes\Windows7\Styles\Windows7\slider-v.gif" />
+    <Content Include="Themes\Windows7\Styles\Windows7\sprite-vertical.png" />
+    <Content Include="Themes\Windows7\Styles\Windows7\sprite.png" />
+    <Content Include="Global.asax" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Content\Site_old.css" />
+    <Content Include="Scripts\jquery-1.4.4.js" />
+    <Content Include="Scripts\jquery-1.4.4.min.js" />
+    <Content Include="Scripts\jquery-1.4.4-vsdoc.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery-ui.js" />
+    <Content Include="Scripts\jquery-ui.min.js" />
+    <Content Include="Scripts\MicrosoftAjax.js" />
+    <Content Include="Scripts\MicrosoftAjax.debug.js" />
+    <Content Include="Scripts\MicrosoftMvcAjax.js" />
+    <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Scripts\jquery-2.1.4.min.map" />
+    <Content Include="Themes\Default\Partials\_Breadcrumb.cshtml" />
+    <Content Include="Themes\Default\Partials\_Information.cshtml" />
+    <Content Include="Views\Test\Index.cshtml" />
+    <Content Include="Views\Shared\EditorTemplates\DropDown.cshtml" />
+    <Content Include="Views\Shared\EditorTemplates\TreeViewItem.cshtml" />
+    <Content Include="Themes\Default\Partials\_Menu.cshtml" />
+    <Content Include="Views\Terms\Index.cshtml" />
+    <Content Include="Views\Footer\Content.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\Lockout.cshtml" />
+    <Content Include="Views\Account\ConfirmEmail.cshtml" />
+    <Content Include="Views\Account\ExternalLoginConfirmation.cshtml" />
+    <Content Include="Views\Account\ExternalLoginFailure.cshtml" />
+    <Content Include="Views\Account\ForgotPassword.cshtml" />
+    <Content Include="Views\Account\ForgotPasswordConfirmation.cshtml" />
+    <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\Account\Register.cshtml" />
+    <Content Include="Views\Account\ResetPassword.cshtml" />
+    <Content Include="Views\Account\ResetPasswordConfirmation.cshtml" />
+    <Content Include="Views\Account\_ExternalLoginsList.cshtml" />
+    <Content Include="Views\Account\_ChangePassword.cshtml" />
+    <Content Include="Views\Account\Manage.cshtml" />
+    <Content Include="Views\Account\_SetPassword.cshtml" />
+    <Content Include="Views\Account\_RemoveAccount.cshtml" />
+    <Content Include="Views\Shared\Info.cshtml" />
+    <Content Include="Views\Shared\NotAuthorized.cshtml" />
+    <Content Include="Views\Error\AccessDenied.cshtml" />
+    <Content Include="Themes\Aquadiva\Layouts\_Layout.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Breadcrumb.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Footer.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Header.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Information.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_LogOnStatus.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_ThemeSelector.cshtml" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="Themes\Aquadiva\Partials\_Menu.cshtml" />
+    <Content Include="Views\Ldap\Login.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+    <Folder Include="Areas\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Home\About.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Home\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\_ViewStart.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\EditorTemplates\Currency.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\EditorTemplates\Date.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\EditorTemplates\DateTime.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\EditorTemplates\GridForeignKey.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\EditorTemplates\Integer.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\EditorTemplates\Number.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\EditorTemplates\Time.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="IoC.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Default\Layouts\_Layout.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Default\Partials\_ThemeSelector.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Default\Partials\_Footer.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Default\Partials\_LogOnStatus.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Default\Partials\_Header.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Test\XmlShow.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Test\XmlEdit.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Components\AAA\BExIS.Security.Entities\BExIS.Security.Entities.csproj">
+      <Project>{c230693b-d780-438b-b26c-82257642dd5c}</Project>
+      <Name>BExIS.Security.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\AAA\BExIS.Security.Entities\BExIS.Security.Entities.csproj">
+      <Project>{c230693b-d780-438b-b26c-82257642dd5c}</Project>
+      <Name>BExIS.Security.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\AAA\BExIS.Security.Services\BExIS.Security.Services.csproj">
+      <Project>{681c8bc4-55f0-4f43-a685-90e246a88cb1}</Project>
+      <Name>BExIS.Security.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\AAA\BExIS.Security.Services\BExIS.Security.Services.csproj">
+      <Project>{681c8bc4-55f0-4f43-a685-90e246a88cb1}</Project>
+      <Name>BExIS.Security.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\DLM\BExIS.Dlm.Entities\BExIS.Dlm.Entities.csproj">
+      <Project>{b4e7b1bf-01b4-40af-8d19-b8f362167261}</Project>
+      <Name>BExIS.Dlm.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\DLM\BExIS.Dlm.Entities\BExIS.Dlm.Entities.csproj">
+      <Project>{b4e7b1bf-01b4-40af-8d19-b8f362167261}</Project>
+      <Name>BExIS.Dlm.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\DLM\BExIS.Dlm.Services\BExIS.Dlm.Services.csproj">
+      <Project>{c4ca0a99-0af3-4372-a9b7-b9073599bd8b}</Project>
+      <Name>BExIS.Dlm.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\DLM\BExIS.Dlm.Services\BExIS.Dlm.Services.csproj">
+      <Project>{c4ca0a99-0af3-4372-a9b7-b9073599bd8b}</Project>
+      <Name>BExIS.Dlm.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\EXT\BExIS.Ext.Services\BExIS.Ext.Services.csproj">
+      <Project>{B906A66A-4A09-4207-B590-655EE111CCF1}</Project>
+      <Name>BExIS.Ext.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\IO\BExIS.IO.DataType.DisplayPattern\BExIS.IO.DataType.DisplayPattern.csproj">
+      <Project>{8b2ec2b0-6870-456b-be2d-b0fb4ea68d83}</Project>
+      <Name>BExIS.IO.DataType.DisplayPattern</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\IO\BExIS.IO.Transform.Input\BExIS.IO.Transform.Input.csproj">
+      <Project>{5c4c8570-a53b-4191-a414-de028aaaf36a}</Project>
+      <Name>BExIS.IO.Transform.Input</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\IO\BExIS.IO.Transform.Output\BExIS.IO.Transform.Output.csproj">
+      <Project>{455ec826-9a92-40ff-bd3b-388c288955ce}</Project>
+      <Name>BExIS.IO.Transform.Output</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\IO\BExIS.IO.Transform.Validation\BExIS.IO.Transform.Validation.csproj">
+      <Project>{c8a05313-b960-406e-92ec-c1e5b3f47fcd}</Project>
+      <Name>BExIS.IO.Transform.Validation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\IO\BExIS.IO.Transform.Validation\BExIS.IO.Transform.Validation.csproj">
+      <Project>{c8a05313-b960-406e-92ec-c1e5b3f47fcd}</Project>
+      <Name>BExIS.IO.Transform.Validation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\IO\BExIS.IO\BExIS.IO.csproj">
+      <Project>{e4795f06-20c2-4c4c-a720-9a79896384df}</Project>
+      <Name>BExIS.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\UI\BExIS.UI\BExIS.UI.csproj">
+      <Project>{de0ad99c-c559-422f-8132-cc4d7c46ff83}</Project>
+      <Name>BExIS.UI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\Utils\BExIS.Utils.Data\BExIS.Utils.Data.csproj">
+      <Project>{a7fbcc13-7e29-4710-82a1-bd6d6f811fda}</Project>
+      <Name>BExIS.Utils.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\Utils\BExIS.Utils\BExIS.Utils.csproj">
+      <Project>{782b71c1-707f-4ab1-80e9-90d2880635b4}</Project>
+      <Name>BExIS.Utils</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\XML\BExIS.Xml.Helpers\BExIS.Xml.Helpers.csproj">
+      <Project>{252f7872-a69c-43a6-84b4-4d2abdbdd9ab}</Project>
+      <Name>BExIS.Xml.Helpers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Components\XML\BExIS.Xml.Models\BExIS.Xml.Models.csproj">
+      <Project>{c0c9f0f2-9e65-448d-8000-d311db326460}</Project>
+      <Name>BExIS.Xml.Models</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\Default\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="_AppStart.cshtml" />
+    <Content Include="Views\Home\SessionTimeout.cshtml" />
+    <Content Include="Views\UiTest\Index.cshtml" />
+    <Content Include="Themes\Black\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\Black\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\Black\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\Black\Styles\awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Themes\Black\Styles\awesome\fonts\FontAwesome.otf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.zh-CN.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.zh-CN.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.ru-RU.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.ru-RU.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.pt-PT.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.pt-PT.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.pt-BR.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.pt-BR.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.pl-PL.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.pl-PL.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.nl-NL.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.nl-NL.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.fr-FR.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.fr-FR.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.en-US.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.en-US.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\GridLocalization.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>GridLocalization.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\GridLocalization.en-US.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>GridLocalization.en-US.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\GridLocalization.de-DE.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>GridLocalization.de-DE.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\EditorLocalization.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>EditorLocalization.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\EditorLocalization.en-US.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>EditorLocalization.en-US.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\EditorLocalization.de-DE.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>EditorLocalization.de-DE.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>5412</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:63530/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <PostBuildEvent>:: rmdir /S /Q  "$(SolutionDir)Console\Workspace\General\Db\Settings"
+:: C:\Windows\System32\xcopy "$(ProjectDir)Db\Settings" "$(SolutionDir)Console\Workspace\General\Db\Settings" /E /C /Y /I
+:: rmdir /S /Q  "$(SolutionDir)Console\Workspace\Components\Vaiona"
+:: C:\Windows\System32\xcopy "$(SolutionDir)Libraries\Vaiona\Workspace\Components\Vaiona" "$(SolutionDir)Console\Workspace\Components\Vaiona\" /E /C /Y /I</PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
+  </Target>
+  <Import Project="..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets" Condition="Exists('..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" />
+  <Target Name="EnsurePostSharpImported" BeforeTargets="BeforeBuild" Condition="'$(PostSharp30Imported)' == ''">
+    <Error Condition="!Exists('..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://www.postsharp.net/links/nuget-restore." />
+    <Error Condition="Exists('..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://www.postsharp.net/links/nuget-restore." />
+  </Target>
+</Project>
