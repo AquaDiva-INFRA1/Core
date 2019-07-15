@@ -38,7 +38,7 @@ namespace BExIS.Dlm.Services.Data
     /// </remarks>
     public class DatasetManager : IDisposable, IEntityStore
     {
-        public const long BIG_DATASET_SIZE_THRESHOLD = 5000 * 10; // 5k tuples and 10 variables, hence 50k cells. It takes up to 5 minutes.
+        public const long BIG_DATASET_SIZE_THRESHOLD = 200000 * 51; // 5k tuples and 10 variables, hence 50k cells. It takes up to 5 minutes.
         public int PreferedBatchSize { get; set; }
         private IUnitOfWork guow = null;
         public DatasetManager()
@@ -730,7 +730,7 @@ namespace BExIS.Dlm.Services.Data
                 throw new Exception(string.Join("\n\r", exs.Select(p => p.Message).ToList()));
             }
         }
-        
+
         #endregion
 
         #region DatasetVersion
@@ -790,8 +790,8 @@ namespace BExIS.Dlm.Services.Data
             }
             catch (Exception ex) // If fallback is not requested, thow the caught exception and done! otherwise try to fallback to the tuple processing method.
             {
-                
-                if(!useFallback)
+
+                if (!useFallback)
                 {
                     throw ex;
                 }
@@ -1782,7 +1782,7 @@ namespace BExIS.Dlm.Services.Data
             DatasetVersion editedVersion = workingCopyDatasetVersion;
 
             if (createdTuples != null && createdTuples.Count > 0)
-            {                
+            {
                 long iterations = getNoOfIterations(createdTuples.Count);
                 for (int round = 0; round < iterations; round++)
                 {
@@ -1878,7 +1878,7 @@ namespace BExIS.Dlm.Services.Data
 
         private long getNoOfIterations(int count)
         {
-            long iterations = count  / this.PreferedBatchSize;
+            long iterations = count / this.PreferedBatchSize;
             if (iterations * this.PreferedBatchSize < count)
                 iterations++;
             return iterations;
@@ -2449,16 +2449,16 @@ namespace BExIS.Dlm.Services.Data
                 throw new Exception($"Dataset '{datasetId}' must be in the checked-in status.");
 
             if (!(dataset.DataStructure.Self is StructuredDataStructure))
-                    throw new Exception($"Dataset '{datasetId}' is not structured.");
+                throw new Exception($"Dataset '{datasetId}' is not structured.");
 
-                // check the size and threshold            
-                long numberOfTuples = GetDatasetLatestVersionEffectiveTupleCount(datasetId); // this.getDatasetVersionEffectiveTupleCount(latestVersion);
-                int numberOfVariables = ((StructuredDataStructure)dataset.DataStructure.Self).Variables.Count();
-                long size = numberOfTuples * numberOfVariables;
-                if (enforceSizeCheck && size > BIG_DATASET_SIZE_THRESHOLD)
-                    return;
+            // check the size and threshold            
+            long numberOfTuples = GetDatasetLatestVersionEffectiveTupleCount(datasetId); // this.getDatasetVersionEffectiveTupleCount(latestVersion);
+            int numberOfVariables = ((StructuredDataStructure)dataset.DataStructure.Self).Variables.Count();
+            long size = numberOfTuples * numberOfVariables;
+            if (enforceSizeCheck && size > BIG_DATASET_SIZE_THRESHOLD)
+                return;
             //}
-            
+
             if (behavior.HasFlag(ViewCreationBehavior.Create)) // create MV
             {
                 if (!existsMaterializedView(datasetId)) // check if the MV does not exist
@@ -2474,7 +2474,7 @@ namespace BExIS.Dlm.Services.Data
                     // check if the view is actually refreshed, by comparing the records in the view to the records in tuples.
                     long noOfViewRecords = countRowsOfMaterializedView(datasetId);
 
-                    if(noOfViewRecords < numberOfTuples)
+                    if (noOfViewRecords < numberOfTuples)
                     {
                         throw new Exception($"Could not refresh view for dataset '{datasetId}'. It is possible that the original data is not valid.");
                     }
@@ -2494,7 +2494,7 @@ namespace BExIS.Dlm.Services.Data
 
                 }
             }
-            
+
         }
 
         private void createMaterializedView(long datasetId)
