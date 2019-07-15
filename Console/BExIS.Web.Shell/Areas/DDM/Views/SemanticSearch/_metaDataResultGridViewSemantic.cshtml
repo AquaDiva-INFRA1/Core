@@ -281,6 +281,12 @@
             type: 'POST',
             data: { 'id': id, 'flag': behaviour },
             success: function (result) {
+                if (result=="") {
+                    var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
+                    $('#results').html(text);
+                    console.log("check the labes or annotations table that are sent to the semedico server !!");
+                    return true;
+                }
                 try {
                     res = JSON.parse(result);
                     if (result.length == 0) {
@@ -299,10 +305,13 @@
 
                             text = text + "<a id=\"_publication" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>PUBLICATION</b></h5> </a>";
                             text = text + "<div id=\"publication" + i + "\"  hidden=\"true\"> ";
-                            text = text + "<h5><p align=\"justify\"> Title: " + res.bibliographylist[i].publication.title + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Volume: " + res.bibliographylist[i].publication.volume + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Issue : " + res.bibliographylist[i].publication.issue + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].publication.pages + "</p></h5>";
+                            //text = text + "<h5><p align=\"justify\"> Title: " + res.bibliographylist[i].publication.title + "</p></h5>";
+                            //text = text + "<h5><p align=\"justify\"> Volume: " + res.bibliographylist[i].publication.volume + "</p></h5>";
+                            //text = text + "<h5><p align=\"justify\"> Issue : " + res.bibliographylist[i].publication.issue + "</p></h5>";
+                            //text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].publication.pages + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].docId + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].pmid + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].pmcid + "</p></h5>";
                             text = text + "<h5><p align=\"justify\"> Date: " + res.bibliographylist[i].publication.date + "</p></h5>";
                             text = text + "</div>";
 
@@ -324,7 +333,7 @@
                 }
                 catch (er) {
                     console.log("ERROR => " + er);
-                    var text = "<h3> Error </h3> <h4>Please a report the error</h4>";
+                    var text = "<h3> Dataset might not be semantically covered for this search </h3> <h4>Please a report to the Admin</h4>";
                     $('#results').html(text);
                 }
             },
