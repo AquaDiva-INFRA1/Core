@@ -1096,7 +1096,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_observations_contextualized_contextualizing is called ");
             }
 
-            String request_string = "";
+            String request_string = " ";
             
             NpgsqlCommand MyCmd = null;
             NpgsqlConnection MyCnx = null;
@@ -1121,7 +1121,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         //var contextualizing_entity_label = (String)dr["contextualizing_entity_label"].ToSafeString();
                         var entity_label = (String)dr["entity_label"].ToSafeString();
                         var characteristic_label = (String)dr["characteristic_label"].ToSafeString();
-                        request_string = request_string + clean_labels(characteristic_label) + " of " + clean_labels(entity_label) + ",";
+                        if ((entity_label) != "" )
+                            request_string = request_string + clean_labels(characteristic_label) + clean_labels(entity_label) + ",";
                         Debug.WriteLine("Row processed  number : " + line); line++;
                         Debug.WriteLine(request_string);
                         //debugging file
@@ -1163,6 +1164,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             if (id != "")
             {
                 Query_4_API = get_observations_contextualized_contextualizing(id);
+                if (Query_4_API.Length < 3)
+                {
+                    return "";
+                }
                 Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
 
                 // debugging file
