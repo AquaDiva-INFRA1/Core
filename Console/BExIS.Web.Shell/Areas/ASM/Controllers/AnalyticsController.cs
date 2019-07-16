@@ -226,14 +226,24 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                     for (int kk = 1; kk < va.variable_id.Count; kk++)
                     {
-                        sb.AppendLine( 
-                            ", , , ,"+
-                            va.variable_id[kk].ToString() + "," +
-                            va.variable_label[kk].ToString() + "," +
-                            va.variable_concept_entity[kk].ToString() + "," +
-                            va.variable_concept_caracteristic[kk].ToString() + "," +
-                            va.unit[kk].ToString() + "," +
-                            va.dataType[kk].ToString());
+                        if ((va.variable_concept_entity[kk] != null) || (va.variable_concept_caracteristic[kk] != null))
+                            sb.AppendLine(
+                                ", , , ," +
+                                va.variable_id[kk].ToString() + "," +
+                                va.variable_label[kk].ToString() + "," +
+                                va.variable_concept_entity[kk].ToString() + "," +
+                                va.variable_concept_caracteristic[kk].ToString() + "," +
+                                va.unit[kk].ToString() + "," +
+                                va.dataType[kk].ToString());
+                        else
+                            sb.AppendLine(
+                                ", , , ," +
+                                va.variable_id[kk].ToString() + "," +
+                                va.variable_label[kk].ToString() + "," +
+                                " " + "," +
+                                " " + "," +
+                                va.unit[kk].ToString() + "," +
+                                va.dataType[kk].ToString());
                     }
                 }
             }
