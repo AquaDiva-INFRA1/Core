@@ -40,8 +40,8 @@
         </thead>
         <tbody>
             <tr>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(0)">@datacontaineranalytics.DataAttributeStruct_list_in_use.Count </a></td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(1)">@datacontaineranalytics.DataAttributeStruct_list_non_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataAttributeStruct_list_in_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataAttributeStruct_list_non_use.Count </a></td>
             </tr>
         </tbody>
     </table>
@@ -56,8 +56,8 @@
         </thead>
         <tbody>
             <tr>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(2)">@datacontaineranalytics.EditUnitModel_list_in_use.Count </a></td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(3)">@datacontaineranalytics.EditUnitModel_list_non_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.EditUnitModel_list_in_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.EditUnitModel_list_non_use.Count </a></td>
 
             </tr>
 
@@ -75,8 +75,8 @@
         <tbody>
             <tr>
                 
-                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(4)">@datacontaineranalytics.DataType_in_use.Count</td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" onclick="show_details_(5)">@datacontaineranalytics.DataType_non_use.Count</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataType_in_use.Count</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataType_non_use.Count</td>
                 
             </tr>
 
@@ -242,14 +242,14 @@
 <script>
     function download() {
 		$.ajax({
-			url: '@Url.Action("Download_Report", "Analytics")',
+			url: '@Url.Action("Download_Report", "Analytics", "ASM")',
 			contentType: 'application/json; charset=utf-8',
 			datatype: 'json',
 			type: "GET",
 			success: function (e) {
 
 			    if (e) {
-			        window.location = '@Url.Action("Download_Report", "Analytics")';
+			        window.location = '@Url.Action("Download_Report", "Analytics", "ASM")';
 			    }
 			    else {
 			        alert("We can not generate file right now, report the error please");
@@ -260,113 +260,3 @@
     }
 </script>
 
-<script type="text/javascript">
-    
-    function show_details_(behavior) {
-        var data = "";
-        switch (behavior) {
-            case 0:
-                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.DataAttributeStruct_list_in_use.OrderBy(o => o.Id))
-                      .Name("bx-rpm-attributeGrid")
-                      .Columns(columns =>
-                      {
-                          columns.Bound(c => c.Id)
-                          .Width(100);
-                          columns.Bound(c => c.Name);
-                          columns.Bound(c => c.ShortName);
-                          columns.Bound(c => c.Unit).Title("Unit");
-                          columns.Bound(c => c.DataType).Title("Data Type");
-                          columns.Bound(c => c.Description);
-                      }).ClientEvents(events => events.OnDataBound("onDataBound"))
-                   )';
-                $('#ModalBody').html(x);
-                break;
-             case 1:
-                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.DataAttributeStruct_list_non_use.OrderBy(o => o.Id))
-                      .Name("bx-rpm-attributeGrid")
-                      .Columns(columns =>
-                      {
-                          columns.Bound(c => c.Id)
-                          .Width(100);
-                          columns.Bound(c => c.Name);
-                          columns.Bound(c => c.ShortName);
-                          columns.Bound(c => c.Unit).Title("Unit");
-                          columns.Bound(c => c.DataType).Title("Data Type");
-                          columns.Bound(c => c.Description);
-                      }).ClientEvents(events => events.OnDataBound("onDataBound"))
-                   )';
-                $('#ModalBody').html(x);
-                break;
-             case 2:
-                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.EditUnitModel_list_in_use.OrderBy(o => o.Unit.Id))
-                                    .Name("bx-rpm-unitGrid")
-                                    .Columns(columns =>
-                                    {
-                                        columns.Bound(c => c.Unit.Id)
-                                            .Width(100);
-                                        columns.Bound(c => c.Unit.Name);
-                                        columns.Bound(c => c.Unit.Abbreviation);
-                                        columns.Bound(c => c.Unit.Dimension.Name).Title("Dimension Name");
-                                        columns.Bound(c => c.Unit.MeasurementSystem);
-                                        columns.Bound(c => c.Unit.Description).HtmlAttributes(new { @style = "max-width:500px" });
-
-                                    }).ClientEvents(events => events.OnDataBound("onDataBound"))
-                         )';
-                $('#ModalBody').html(x);
-                break;
-            case 3:
-                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.EditUnitModel_list_non_use.OrderBy(o=>o.Unit.Id))
-                                    .Name("bx-rpm-unitGrid")
-                                    .Columns(columns =>
-                                    {
-                                        columns.Bound(c => c.Unit.Id).Width(100);
-                                        columns.Bound(c => c.Unit.Name);
-                                        columns.Bound(c => c.Unit.Abbreviation);
-                                        columns.Bound(c => c.Unit.Dimension.Name).Title("Dimension Name");
-                                        columns.Bound(c => c.Unit.MeasurementSystem);
-                                        columns.Bound(c => c.Unit.Description).HtmlAttributes(new { @style = "max-width:500px" });
-
-                                    }).ClientEvents(events => events.OnDataBound("onDataBound"))
-                         )';
-                $('#ModalBody').html(x);
-                break;
-            case 4:
-                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.DataType_in_use.OrderBy(o=>o.Id))
-                                    .Name("bx-rpm-unitGrid")
-                                    .Columns(columns =>
-                                    {
-                                        columns.Bound(c => c.Id);
-                                        columns.Bound(c => c.Name);
-                                        columns.Bound(c => c.SystemType);
-                                        columns.Bound(c => c.Description).Width(100);
-
-                                    }).ClientEvents(events => events.OnDataBound("onDataBound"))
-                         )';
-                $('#ModalBody').html(x);
-                break;
-            case 5:
-                var x = '@(Html.Telerik().Grid(@datacontaineranalytics.DataType_non_use.OrderBy(o=>o.Id))
-                                    .Name("bx-rpm-unitGrid")
-                                    .Columns(columns =>
-                                    {
-                                        columns.Bound(c => c.Id);
-                                        columns.Bound(c => c.Name);
-                                        columns.Bound(c => c.SystemType);
-                                        columns.Bound(c => c.Description).Width(100);
-
-                                    }).ClientEvents(events => events.OnDataBound("onDataBound"))
-                         )';
-                $('#ModalBody').html(x);
-                break;
-            default:
-                break;
-        }
-    }
-
-
-    function onDataBound() {
-        resetAllTelerikIconTitles();
-        addTooltips();
-    }
-
-</script>
