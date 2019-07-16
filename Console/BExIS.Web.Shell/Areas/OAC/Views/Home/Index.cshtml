@@ -1,0 +1,104 @@
+@model BExIS.Modules.OAC.UI.Models.SelectedImportOptionsModel
+
+<div id="SetupContainer">
+    @section Information
+    {
+        This module imports metadata from BioGPS, NCBI and EBI. To import metadata from a dataset, enter the accession (dataset identifier) in the accession field.
+        <br />To import the data, you also need to specify the target metadata model, so BExIS knows which fields mean what, and a data model, in case you want to add your own data, later.
+        <br />BExIS itself isn't meant as genome string storage, because it's not build for such large amounts of data, and has no appropriate search / analysis tools for it (yet).
+    }
+    @Html.ValidationSummary(true)
+
+    <h1>Import External Metadata</h1>
+
+    @if (Model.Error == null)
+    {
+        <p>Please provide the following information.</p>
+    }
+    else
+    {
+        // "Please provide the following information." shown too would be distracting
+        @Model.Error;
+    }
+
+    @using (Html.BeginForm("TransformMetadata", "Home", FormMethod.Get))
+    {
+        <table>
+            <tr>
+                <td style="width: 300px;">
+                    @Html.LabelFor(m => m.Identifier) <span class="bx bx-required" title="Required"></span>
+                </td>
+                <td style="width: 400px;">
+                    @Html.TextBoxFor(m => m.Identifier, new { @class = "form-control" })
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(m => m.Identifier)
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 300px;">
+                    @Html.LabelFor(m => m.SelectedDataStructureId) <span class="bx bx-required" title="Required"></span>
+                </td>
+                <td>
+                    @(Html.Telerik().DropDownList()
+                          .Name("SelectedDataStructureId")
+                          .Placeholder("Select")
+                          .HtmlAttributes(new { title = "Select a Data Structure", @class = "bx-dropdown" })
+                          .SelectedIndex(0)
+                          .BindTo(new SelectList(Model.DataStructureViewList, "Id", "Title", Model.SelectedDataStructureId))
+                    )
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(m => m.SelectedDataStructureId)
+                </td>
+
+            </tr>
+            <tr>
+                <td style="width: 300px;">
+                    @Html.LabelFor(m => m.SelectedDataSourceId) <span class="bx bx-required" title="Required"></span>
+                </td>
+                <td>
+                    @(Html.Telerik().DropDownList()
+                          .Name("SelectedDataSourceId")
+                          .Placeholder("Select")
+                          .HtmlAttributes(new { title = "Select the Metadata Source", @class = "bx-dropdown" })
+                          .SelectedIndex(0)
+                          .BindTo(new SelectList(Model.DataSourceViewList, "Id", "Title", Model.SelectedDataSourceId))
+                    )
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(m => m.SelectedDataSourceId)
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 300px;">
+                    @Html.LabelFor(m => m.SelectedMetadataStructureId) <span class="bx bx-required" title="Required"></span>
+                </td>
+                <td>
+                    @(Html.Telerik().DropDownList()
+                              .Name("SelectedMetadataStructureId")
+                              .Placeholder("Select")
+                              .HtmlAttributes(new { title = "Select a Metadata Structure", @class = "bx-dropdown" })
+                              .SelectedIndex(0)
+                              .BindTo(new SelectList(Model.MetadataStructureViewList, "Id", "Title", Model.SelectedMetadataStructureId))
+                    )
+                </td>
+                <td>
+                    @Html.ValidationMessageFor(m => m.SelectedMetadataStructureId)
+                </td>
+
+            </tr>
+        </table>
+
+        <div class="bx-footer right">
+            <button type="submit" class="bx-button action" style="border:0px;">Next</button>
+        </div>
+
+    }
+</div>
+
+<style type="text/css">
+    #SetupContainer .bx-dropdown {
+        width: 100%;
+    }
+</style>

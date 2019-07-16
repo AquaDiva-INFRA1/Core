@@ -48,6 +48,9 @@
       <HintPath>..\..\..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="BExIS.Aam.Services">
+      <HintPath>..\..\..\..\Modules\AAM\BExIS.Aam.Services\bin\Debug\BExIS.Aam.Services.dll</HintPath>
+    </Reference>
     <Reference Include="DocumentFormat.OpenXml, Version=2.8.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\DocumentFormat.OpenXml.2.8.1\lib\net40\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
@@ -643,16 +646,8 @@
       <Name>BExIS.Xml.Models</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
-      <Project>{2b541d06-3259-4aa3-ae6a-452c8f67164d}</Project>
+      <Project>{2B541D06-3259-4AA3-AE6A-452C8F67164D}</Project>
       <Name>BExIS.Aam.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Orm.NH\BExIS.Aam.Orm.NH.csproj">
-      <Project>{867a1e69-2f75-4f4b-a28c-026f0f5654b1}</Project>
-      <Name>BExIS.Aam.Orm.NH</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Services\BExIS.Aam.Services.csproj">
-      <Project>{898568BE-061E-44D2-A94C-04729F07DDCA}</Project>
-      <Name>BExIS.Aam.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\DCM\BExIS.Dcm.CreateDatasetWizard\BExIS.Dcm.CreateDatasetWizard.csproj">
       <Project>{93eeeda5-6d79-41a1-947b-0a3fc9e46abc}</Project>
