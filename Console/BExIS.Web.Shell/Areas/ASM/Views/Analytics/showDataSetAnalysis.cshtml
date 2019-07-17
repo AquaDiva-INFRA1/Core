@@ -6,6 +6,15 @@
 
     List<List<string>> values = (List<List<string>>)ViewData["values"];
     List<List<string>> labels = (List<List<string>>)ViewData["labels"];
+
+    string error = (string)ViewData["error"];
+    if (error.Length > 1)
+    {
+        <script type="text/javascript">
+            alert(@error);
+        </script>
+    }
+
     int number_of_graphs = labels.Count();
     int number_of_rows = (int)Math.Round((float)(1 / 2) + (float)number_of_graphs / (float)5);
     Int32 index = 0;

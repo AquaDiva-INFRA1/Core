@@ -33,8 +33,12 @@ namespace BExIS.Modules.Asm.UI.Controllers
     {
         static string DatastructAPI = "http://localhost:5412/api/structures/";
         static List<Variable_analytics> VA_list;
-        
+
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
+
+        static string python_path = @WebConfigurationManager.AppSettings["python_path"].ToString();
+        static string python_script = @WebConfigurationManager.AppSettings["python_script"].ToString();
+        static string output_Folder = @WebConfigurationManager.AppSettings["output_Folder"].ToString();
 
         private static string datasets_root_folder = WebConfigurationManager.AppSettings["DataPath"];
         string[] allowed_extention = new string[] { ".csv", ".xlsx" ,".xls" };
@@ -254,12 +258,12 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                 if (allowed_extention.Contains(Path.GetExtension(absolute_file_path)))
                 {
-                    string progToRun = @"D:/Hamdi/python_data_summary_scripts/numericalstatistics.py";
+                    string progToRun = python_script;
                     //string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
                     char[] spliter = { '\r' };
 
                     Process proc = new Process();
-                    proc.StartInfo.FileName = @"C:\Users\Markus\AppData\Local\Programs\Python\Python37\python.exe";
+                    proc.StartInfo.FileName = python_path;
                     proc.StartInfo.RedirectStandardOutput = true;
                     proc.StartInfo.RedirectStandardError = true;
                     proc.StartInfo.UseShellExecute = false;
@@ -347,14 +351,14 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                 if (allowed_extention.Contains(extension))
                 {
-                    string progToRun = @"C:/Users/Hamdi/Desktop/work/python_data_summary_scripts/categoralanalysis.py";
-                    string outputFolder = @"C:/Users/Hamdi/Desktop/";
+                    string progToRun = python_script;
+                    string outputFolder = output_Folder;
 
                     //string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
                     char[] spliter = { '\r' };
 
                     Process proc = new Process();
-                    proc.StartInfo.FileName = @"C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python37_64/python.exe";
+                    proc.StartInfo.FileName = python_path;
                     proc.StartInfo.RedirectStandardOutput = true;
                     proc.StartInfo.RedirectStandardError = true;
                     proc.StartInfo.UseShellExecute = false;
@@ -366,9 +370,12 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     //* Read the output (or the error)
                     string output = proc.StandardOutput.ReadToEnd();
                     string err = proc.StandardError.ReadToEnd();
-                    if ( err.Length > 0 )
+                    ViewData["error"] = "";
+                    if (err.Length > 0)
+                    {
+                        ViewData["error"] = err;
                         return PartialView("showDataSetAnalysis");
-
+                    }
 
                     proc.WaitForExit();
 
@@ -465,12 +472,12 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                 if (allowed_extention.Contains(Path.GetExtension(absolute_file_path)))
                 {
-                    string progToRun = @"D:/Hamdi/python_data_summary_scripts/CatAlgorithm.py";
+                    string progToRun = python_script;
                     //string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
                     char[] spliter = { '\r' };
 
                     Process proc = new Process();
-                    proc.StartInfo.FileName = @"C:\Users\Markus\AppData\Local\Programs\Python\Python37\python.exe";
+                    proc.StartInfo.FileName = python_path;
                     proc.StartInfo.RedirectStandardOutput = true;
                     proc.StartInfo.RedirectStandardError = true;
                     proc.StartInfo.UseShellExecute = false;
