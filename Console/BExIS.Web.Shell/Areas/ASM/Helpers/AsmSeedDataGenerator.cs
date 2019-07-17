@@ -9,7 +9,7 @@ namespace BExIS.Modules.Asm.UI.Helpers
 {
     public class AsmSeedDataGenerator : IDisposable
     {
-        public void GenerateSeedData()
+        public static void GenerateSeedData()
         {
             // Javad:
             // 1) all the create operations should check for existence of the record

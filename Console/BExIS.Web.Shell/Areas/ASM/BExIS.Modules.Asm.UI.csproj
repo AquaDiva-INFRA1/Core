@@ -339,6 +339,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Entities.dll</HintPath>
     </Reference>
+    <Reference Include="Vaiona.IoC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.IoC.dll</HintPath>
+    </Reference>
     <Reference Include="Vaiona.Logging, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Logging.dll</HintPath>
@@ -551,7 +555,7 @@
       <DependentUpon>UploadLocalization.zh-CN.resx</DependentUpon>
     </Compile>
     <Compile Include="Controllers\AnalyticsController.cs" />
-    <Compile Include="Helper\AsmSeedDataGenerator.cs" />
+    <Compile Include="Helpers\AsmSeedDataGenerator.cs" />
     <Compile Include="Models\Data_container_analytics.cs" />
     <Compile Include="Models\Variable_analytics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -561,10 +565,10 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Site.css" />
-    <Content Include="Helper\help\help_img1.png" />
-    <Content Include="Helper\help\help_img2.png" />
-    <Content Include="Helper\help\help_img3.png" />
-    <Content Include="Helper\help\help_img4.png" />
+    <Content Include="Helpers\help\help_img1.png" />
+    <Content Include="Helpers\help\help_img2.png" />
+    <Content Include="Helpers\help\help_img3.png" />
+    <Content Include="Helpers\help\help_img4.png" />
     <Content Include="Scripts\2013.2.611\jquery-1.7.1.min.js" />
     <Content Include="Scripts\2013.2.611\jquery.validate.min.js" />
     <Content Include="Scripts\2013.2.611\telerik.all.min.js" />
