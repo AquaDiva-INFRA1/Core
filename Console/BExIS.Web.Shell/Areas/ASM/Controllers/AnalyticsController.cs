@@ -26,6 +26,7 @@ using System.Text;
 using System.Data;
 using BExIS.UI.Helpers;
 using BExIS.Utils.Models;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.Asm.UI.Controllers
 {
@@ -44,6 +45,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         string[] allowed_extention = new string[] { ".csv", ".xlsx" ,".xls" };
 
         static List<string> lines = new List<string>();
+        static String debugFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
 
         /* this action reveals a semantic coverage for our data portal and needs to be accessed via URL ... no button for it ...
         */
@@ -329,6 +331,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
         public ActionResult CategoralAnalysis(long id)
         {
+            ViewData["error"] = "";
             DatasetManager datasetManager = new DatasetManager();
             try
             {

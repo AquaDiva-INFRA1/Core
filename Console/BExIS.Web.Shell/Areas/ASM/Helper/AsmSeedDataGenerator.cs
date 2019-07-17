@@ -1,4 +1,5 @@
 ﻿using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using System;
@@ -22,64 +23,30 @@ namespace BExIS.Modules.Asm.UI.Helpers
 
             //// Tasks
 
-            /*
+            
             OperationManager operationManager = null;
             FeatureManager featureManager = null;
 
             try
             {
-                operationManager = new OperationManager();
-                featureManager = new FeatureManager();
+                Feature ASM = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Statistics and analysis"));
+                if (ASM == null) ASM = featureManager.Create("Statistics and analysis", "Statistics and analysis");
 
-                // find root
-                var root = featureManager.FindRoots().FirstOrDefault();
+                Feature portalstatistics = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Portal Statistics"));
+                if (portalstatistics == null) portalstatistics = featureManager.Create("Portal Statistics", "Portal Statistics", ASM);
+                operationManager.Create("ASM", "Analytics", "Index", portalstatistics);
 
-                // administration node
-                var administrationFeature = featureManager.FindByName("Administration") ?? featureManager.Create("Administration", "node for all administrative features", root);
+                Feature summary = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Dataset Summary"));
+                if (summary == null) summary = featureManager.Create("Dataset Summary", "Dataset Summary", ASM);
+                operationManager.Create("ASM", "Analytics", "CategoralAnalysis", summary);
 
-                // users node
-                var userFeature = featureManager.FindByName("Users") ?? featureManager.Create("Users", "", administrationFeature);
-                var userOperation = operationManager.Find("SAM", "Users", "*") ?? operationManager.Create("SAM", "Users", "*", userFeature);
-
-                // groups node
-                var groupFeature = featureManager.FindByName("Groups") ?? featureManager.Create("Groups", "", administrationFeature);
-                var groupOperation = operationManager.Find("SAM", "Groups", "*") ?? operationManager.Create("SAM", "Groups", "*", groupFeature);
-
-                // feature permissions
-                var featurePermissionFeature = featureManager.FindByName("Feature Permissions") ?? featureManager.Create("Feature Permissions", "", administrationFeature);
-                var featurePermissionOperation = operationManager.Find("SAM", "FeaturePermissions", "*") ?? operationManager.Create("SAM", "FeaturePermissions", "*", featurePermissionFeature);
-
-                // Entity Permissions
-                var entityPermissionFeature = featureManager.FindByName("Entity Permissions") ?? featureManager.Create("Entity Permissions", "", administrationFeature);
-                var entityPermissionOperation = operationManager.Find("SAM", "EntityPermissions", "*") ?? operationManager.Create("SAM", "EntityPermissions", "*", entityPermissionFeature);
-
-                // User Permissions
-                var userPermissionFeature = featureManager.FindByName("User Permissions") ?? featureManager.Create("User Permissions", "", administrationFeature);
-                var userPermissionOperation = operationManager.Find("SAM", "UserPermissions", "*") ?? operationManager.Create("SAM", "UserPermissions", "*", userPermissionFeature);
-
-                //User Pis
-                var userPiFeature = featureManager.FindByName("User Pis") ?? featureManager.Create("User Pis", "", administrationFeature);
-                var userPiOperation = operationManager.Find("SAM", "UserPis", "*") ?? operationManager.Create("SAM", "UserPis", "*", userPiFeature);
-
-
-                // Dataset Management
-                var datasetManagementFeature = featureManager.FindByName("Dataset Management") ?? featureManager.Create("Dataset Management", "", administrationFeature);
-                var datasetManagementOperation = operationManager.Find("SAM", "Datasets", "*") ?? operationManager.Create("SAM", "Datasets", "*", datasetManagementFeature);
-
-                // Help
-                var helpOperation = operationManager.Find("SAM", "Help", "*") ?? operationManager.Create("SAM", "Help", "*");
-
-                var featurePermissionManager = new FeaturePermissionManager();
-
-                if (!featurePermissionManager.Exists(null, featurePermissionFeature.Id, PermissionType.Grant))
-                    featurePermissionManager.Create(null, featurePermissionFeature.Id, PermissionType.Grant);
             }
             finally
             {
                 featureManager?.Dispose();
                 operationManager?.Dispose();
             }
-            */
+            
         }
 
         public void Dispose()
