@@ -3,6 +3,7 @@ using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BExIS.Modules.Asm.UI.Helpers
@@ -24,27 +25,39 @@ namespace BExIS.Modules.Asm.UI.Helpers
             //// Tasks
 
             
-            OperationManager operationManager = null;
-            FeatureManager featureManager = null;
+            OperationManager operationManager = new OperationManager();
+            FeatureManager featureManager = new FeatureManager();
 
             try
             {
-                Feature ASM = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Statistics and analysis"));
+                //features
+                List<Feature> features = featureManager.FeatureRepository.Get().ToList();
+
+                Feature ASM = features.FirstOrDefault(f => f.Name.Equals("Statistics and analysis"));
                 if (ASM == null) ASM = featureManager.Create("Statistics and analysis", "Statistics and analysis");
 
-                Feature portalstatistics = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Portal Statistics"));
-                if (portalstatistics == null) portalstatistics = featureManager.Create("Portal Statistics", "Portal Statistics", ASM);
-                operationManager.Create("ASM", "Analytics", "Index", portalstatistics);
 
-                Feature summary = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Dataset Summary"));
+                Feature portalstatistics = features.FirstOrDefault(f =>
+                    f.Name.Equals("Portal Statistics") &&
+                    f.Parent != null &&
+                    f.Parent.Id.Equals(ASM.Id));
+                if (portalstatistics == null) portalstatistics = featureManager.Create("Portal Statistics", "Portal Statistics", ASM);
+
+                Feature summary = features.FirstOrDefault(f =>
+                    f.Name.Equals("Dataset Summary") &&
+                    f.Parent != null &&
+                    f.Parent.Id.Equals(ASM.Id));
                 if (summary == null) summary = featureManager.Create("Dataset Summary", "Dataset Summary", ASM);
-                operationManager.Create("ASM", "Analytics", "CategoralAnalysis", summary);
+
+                //security
+                operationManager.Create("ASM", "Analytics", "*", portalstatistics);
+                operationManager.Create("ASM", "DataSummary", "*", summary);
 
             }
             finally
             {
-                featureManager?.Dispose();
-                operationManager?.Dispose();
+                featureManager.Dispose();
+                operationManager.Dispose();
             }
             
         }
