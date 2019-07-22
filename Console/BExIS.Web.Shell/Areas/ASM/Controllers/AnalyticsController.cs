@@ -13,13 +13,11 @@ using Newtonsoft.Json.Linq;
 using BExIS.Modules.Asm.UI.Models;
 using BExIS.Modules.Rpm.UI.Models;
 using System.Linq;
-using System.Xml;
-using BExIS.Aam.Services;
-using BExIS.Aam.Entities.Mapping;
-using BExIS.Modules.Rpm.UI.Controllers;
-using BExIS.IO.Transform.Output;
-using BExIS.Utils.Models;
+using System.Web.Configuration;
+using System.IO;
 using System.Data;
+using Vaiona.Utils.Cfg;
+using System.Xml;
 
 namespace BExIS.Modules.Asm.UI.Controllers
 {
@@ -28,10 +26,20 @@ namespace BExIS.Modules.Asm.UI.Controllers
         static string DatastructAPI = "http://localhost/api/structures/";
         static List<Variable_analytics> VA_list;
 
-        static List<string> project_list_names = new List<string> { "A01", "A02", "A03", "A04", "A05", "A06", "B01", "B02", "B03", "B04", "B05", "C03", "C05", "D01", "D02","D03","D04" };
+        static List<string> project_list_names = new List<string> { "A01", "A02", "A03", "A04", "A05", "A06", "B01", "B02", "B03", "B04", "B05", "C03", "C05", "D01", "D02", "D03", "D04" };
 
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
-        
+
+        static string python_path = @WebConfigurationManager.AppSettings["python_path"].ToString();
+        static string python_script = @WebConfigurationManager.AppSettings["python_script"].ToString();
+        static string output_Folder = @WebConfigurationManager.AppSettings["output_Folder"].ToString();
+
+        private static string datasets_root_folder = WebConfigurationManager.AppSettings["DataPath"];
+        string[] allowed_extention = new string[] { ".csv", ".xlsx" ,".xls" };
+
+        static List<string> lines = new List<string>();
+        static String debugFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
+
         /* this action reveals a semantic coverage for our data portal and needs to be accessed via URL ... no button for it ...
         */
         public ActionResult Index_()
@@ -96,7 +104,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText;
                 }
 
-                foreach(string proj in project_list_names)
+                foreach (string proj in project_list_names)
                 {
                     if (project.Contains(proj))
                         project = proj;
@@ -188,7 +196,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         public ActionResult Download_Report()
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            sb.AppendLine("dataset_id ,owner, project, Semantic Coverage, attributes count, variable_id,variable_label,variable_concept_entity,variable_concept_caracteristic,dataType,unit");
+            sb.AppendLine("dataset_id ,owner, project,Semantic Coverage, variable_id,variable_label,variable_concept_entity,variable_concept_caracteristic,dataType,unit");
             foreach (var va in VA_list)
             {
                 if (va.variable_id.Count > 0)
@@ -212,13 +220,13 @@ namespace BExIS.Modules.Asm.UI.Controllers
                         }
                     }
                     sb.AppendLine(
-                        va.dataset_id.ToString() +","+
-                        va.owner.Replace(",","-")+ "," +
-                        va.project.Replace(",","-")+ "," +
-                        Concepts_count.ToString()+","+
+                        va.dataset_id.ToString() + "," +
+                        va.owner.Replace(",", "-") + "," +
+                        va.project.Replace(",", "-") + "," +
+                        Concepts_count.ToString() + "," +
                         va.variable_id.Count.ToString() + "," +
                         va.variable_id[0].ToString() + "," +
-                        va.variable_label[0]+","+
+                        va.variable_label[0] + "," +
                         va.variable_concept_entity[0] + "," +
                         va.variable_concept_caracteristic[0] + "," +
                         va.dataType[0] + "," +
@@ -226,24 +234,14 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                     for (int kk = 1; kk < va.variable_id.Count; kk++)
                     {
-                        if ((va.variable_concept_entity[kk] != null) || (va.variable_concept_caracteristic[kk] != null))
-                            sb.AppendLine(
-                                ", , , ," +
-                                va.variable_id[kk].ToString() + "," +
-                                va.variable_label[kk].ToString() + "," +
-                                va.variable_concept_entity[kk].ToString() + "," +
-                                va.variable_concept_caracteristic[kk].ToString() + "," +
-                                va.unit[kk].ToString() + "," +
-                                va.dataType[kk].ToString());
-                        else
-                            sb.AppendLine(
-                                ", , , ," +
-                                va.variable_id[kk].ToString() + "," +
-                                va.variable_label[kk].ToString() + "," +
-                                " " + "," +
-                                " " + "," +
-                                va.unit[kk].ToString() + "," +
-                                va.dataType[kk].ToString());
+                        sb.AppendLine(
+                            ", , , ," +
+                            va.variable_id[kk].ToString() + "," +
+                            va.variable_label[kk].ToString() + "," +
+                            va.variable_concept_entity[kk].ToString() + "," +
+                            va.variable_concept_caracteristic[kk].ToString() + "," +
+                            va.unit[kk].ToString() + "," +
+                            va.dataType[kk].ToString());
                     }
                 }
             }
@@ -269,90 +267,41 @@ namespace BExIS.Modules.Asm.UI.Controllers
             AnnotationManager annotationManager = new AnnotationManager();
             List<Annotation> annotationList = (List<Annotation>)annotationManager.GetAnnotations();
 
-            foreach (long id in ds_ids)
+                JArray jArray = new JArray();
+                jArray.Add(Xarray);
+                jArray.Add(Yarray);
+                jObject[k.ToString()] = jArray;
+                k = k + 1;
+                i = i + 3;
+            }
+            return jObject;
+        }
+
+        public String getDatasetsByProjects(string Project_id, String dataset_ids)
+        {
+            if ((Project_id == null) || (dataset_ids.Length < 1))
+                return "Parameters are Wrong";
+
+            List<string> headers = new List<string>();
+            List<string> contents = new List<string>();
+
+            foreach (string id in dataset_ids.Split(',').ToList<string>())
             {
-                #region metadata extraction
-                //get the owner of the dataset
-                DatasetManager dm = new DatasetManager();
-                XmlDocument xmlDoc = dm.GetDatasetLatestMetadataVersion(id);
-                XmlNode root = xmlDoc.DocumentElement;
-                string idMetadata = root.Attributes["id"].Value;
+                string header = "";
+                string content = "";
 
-                string owner = "";
-                string project = "";
-
-                if (idMetadata == "1")
+                try
                 {
-                    XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Givenname/Name");
-                    XmlNodeList nodeList_Surname = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Surname/Name");
-                    owner = nodeList_givenName[0].InnerText + " " + nodeList_Surname[0].InnerText;
-                    XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Title/Title");
-                    XmlNodeList nodeList_Personnelgivenname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelgivenname/Name");
-                    XmlNodeList nodeList_Personnelsurname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelsurname/Name");
-                    project = nodeList_Title[0].InnerText + "/" + nodeList_Personnelgivenname[0].InnerText + " " + nodeList_Personnelsurname[0].InnerText;
-                }
-                else if (idMetadata == "2")
-                {
-                    XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Owner/Owner/FullName/Name");
-                    owner = nodeList_givenName[0].InnerText;
-                    XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Owner/Owner/Role/Role");
-                    XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceInstitutionID/Id");
-                    XmlNodeList nodeList_SourceID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceID/Id");
-                    XmlNodeList nodeList_UnitID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/UnitID/Id");
-                    project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText + " - " + nodeList_SourceID[0].InnerText + " - " + nodeList_UnitID[0].InnerText;
-                }
-                else if (idMetadata == "3")
-                {
-                    XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Person/PersonName/FullName/FullNameType");
-                    foreach (XmlElement node in nodeList_givenName)
+                    // call fo the API to get the variables from the data structures using the internal API
+                    HttpClient client = new HttpClient();
+                    client.BaseAddress = new Uri(DatastructAPI);
+                    //Set the searchTerm as query-String
+                    String param = HttpUtility.UrlEncode(id.ToString());
+                    HttpResponseMessage response = client.GetAsync(param).Result;
+                    if (response.IsSuccessStatusCode)
                     {
-                        owner = node.InnerText + " - " + owner;
-                    }
-                    //owner = nodeList_givenName[0].InnerText;
-                    XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/Name/Label/Representation/RepresentationType/Text/TextType");
-                    XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/OrgUnits/OrgUnitsType/OrgUnit/OrgUnitType");
-                    project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText;
-                }
-
-                foreach (string proj in project_list_names)
-                {
-                    if (project.Contains(proj))
-                        project = proj;
-                }
-                #endregion
-
-                #region data types and units and variable and annotation
-                List<string> dataType = new List<string>();
-                List<string> unit = new List<string>();
-                List<string> variable_id = new List<string>();
-                List<string> variable_label = new List<string>();
-                List<string> variable_concept_entity = new List<string>();
-                List<string> variable_concept_caracteristic = new List<string>();
-
-                List<Annotation> dataset_annotations = (List<Annotation>)annotationList.Where(x => x.Dataset.Id == id).ToList();
-                DataStructureDataTable result = new StructuresController().Get(id);
-                DataTable variablesList = result.Variables;
-                DataRowCollection variables_rows = variablesList.Rows;
-                foreach(DataRow dataRow in variables_rows)
-                {
-                    dataType.Add(dataRow["DataType"].ToString());
-                    unit.Add(dataRow["unit"].ToString());
-
-                    variable_id.Add(dataRow["Id"].ToString());
-                    variable_label.Add(dataRow["Label"].ToString());
-                    Annotation annot = dataset_annotations.FirstOrDefault(x => x.Dataset.Id == id && x.Variable.Id == Int64.Parse(dataRow["Id"].ToString()));
-                    if (annot == null)
-                    {
-                        variable_concept_entity.Add("No annotation");
-                        variable_concept_caracteristic.Add("No annotation");
-                    }
-                    else
-                    {
-                        variable_concept_entity.Add(annot.Entity_Label);
-                        variable_concept_caracteristic.Add(annot.Characteristic_Label);
-                    }
-                }
-                #endregion
+                        JObject json_ds_struct = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                        JArray json_variables = JArray.Parse(json_ds_struct["Variables"].ToString());
 
                 // create a new instance of variable analytics
                 Variable_analytics VA = new Variable_analytics(id, owner, project, variable_id, variable_label, variable_concept_entity, variable_concept_caracteristic, dataType, unit);
