@@ -18,12 +18,14 @@ using System.IO;
 using System.Data;
 using Vaiona.Utils.Cfg;
 using System.Xml;
+using BExIS.Aam.Services;
+using BExIS.Aam.Entities.Mapping;
 
 namespace BExIS.Modules.Asm.UI.Controllers
 {
     public class AnalyticsController : Controller
     {
-        static string DatastructAPI = "http://localhost/api/structures/";
+        static string DatastructAPI = "http://localhost:5412/api/structures/";
         static List<Variable_analytics> VA_list;
 
         static List<string> project_list_names = new List<string> { "A01", "A02", "A03", "A04", "A05", "A06", "B01", "B02", "B03", "B04", "B05", "C03", "C05", "D01", "D02", "D03", "D04" };
@@ -42,7 +44,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
         /* this action reveals a semantic coverage for our data portal and needs to be accessed via URL ... no button for it ...
         */
-        public ActionResult Index_()
+        public ActionResult Index()
         {
             DatasetManager DM = new DatasetManager();
             List <long> ds_ids = DM.GetDatasetLatestIds();
@@ -255,68 +257,6 @@ namespace BExIS.Modules.Asm.UI.Controllers
             
             return File(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "REPORT.csv"), "text/csv", "REPORT.csv");
         }
-
-        public ActionResult Index()
-        {
-            DatasetManager DM = new DatasetManager();
-            List<long> ds_ids = DM.GetDatasetLatestIds();
-            DataStructureManager DStructM = new DataStructureManager();
-            List<DataStructure> dataStructs = (List<DataStructure>)DStructM.AllTypesDataStructureRepo.Get();
-
-            VA_list = new List<Variable_analytics>();
-            AnnotationManager annotationManager = new AnnotationManager();
-            List<Annotation> annotationList = (List<Annotation>)annotationManager.GetAnnotations();
-
-                JArray jArray = new JArray();
-                jArray.Add(Xarray);
-                jArray.Add(Yarray);
-                jObject[k.ToString()] = jArray;
-                k = k + 1;
-                i = i + 3;
-            }
-            return jObject;
-        }
-
-        public String getDatasetsByProjects(string Project_id, String dataset_ids)
-        {
-            if ((Project_id == null) || (dataset_ids.Length < 1))
-                return "Parameters are Wrong";
-
-            List<string> headers = new List<string>();
-            List<string> contents = new List<string>();
-
-            foreach (string id in dataset_ids.Split(',').ToList<string>())
-            {
-                string header = "";
-                string content = "";
-
-                try
-                {
-                    // call fo the API to get the variables from the data structures using the internal API
-                    HttpClient client = new HttpClient();
-                    client.BaseAddress = new Uri(DatastructAPI);
-                    //Set the searchTerm as query-String
-                    String param = HttpUtility.UrlEncode(id.ToString());
-                    HttpResponseMessage response = client.GetAsync(param).Result;
-                    if (response.IsSuccessStatusCode)
-                    {
-                        JObject json_ds_struct = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-                        JArray json_variables = JArray.Parse(json_ds_struct["Variables"].ToString());
-
-                // create a new instance of variable analytics
-                Variable_analytics VA = new Variable_analytics(id, owner, project, variable_id, variable_label, variable_concept_entity, variable_concept_caracteristic, dataType, unit);
-                VA_list.Add(VA);
-            }
-
-            Data_container_analytics datacontaineranalytics = new Data_container_analytics();
-            ViewData["datacontaineranalytics"] = datacontaineranalytics;
-            ViewData["VA_list"] = VA_list;
-            return View("Index");
-        }
-
-
-
-
 
         public ActionResult DataAttributeStruct_list(List<DataAttributeStruct> DataAttributeStruct_)
         {
