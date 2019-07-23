@@ -10,13 +10,13 @@
 	<Dependencies>
     <Dependency moduleId="dcm" version="*.*.*" />
 	</Dependencies>
-  
-  <Exports>
+	<Exports>
 
-    <Export tag="menubar" id="ImportSequenceData" order="5"
-            title="Import Sequence Data" description="Import sequence Data from public sequence data reposotories" icon=""
+    <Export tag="settings" id="ImportExtMetadata" order="1"
+            title="Import Ext. Metadata" description="Import Metadata, e.g. from BioGPS or NCBI" icon=""
             controller="Home" action="Index"
-            extends="./menubarRoot/collect" />
+            extends="./settingsRoot"
+            />
     
 	</Exports>
 </Manifest>

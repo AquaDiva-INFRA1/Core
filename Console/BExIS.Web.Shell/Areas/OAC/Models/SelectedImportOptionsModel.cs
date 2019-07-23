@@ -15,8 +15,8 @@ namespace BExIS.Modules.OAC.UI.Models
     {
 
         // for getting input from the user
-        [Display(Name = "Dataset Identifier")]
-        [Required(ErrorMessage = "Please enter the dataset identifier, e.g. SAMEA0123456789.")]
+        [Display(Name = "Sample ID")]
+        [Required(ErrorMessage = "Please enter the sample ID, e.g. SAMEA0123456789.")]
         public string Identifier { get; set; }
 
         [Display(Name = "Metadata Structure")]
@@ -27,8 +27,8 @@ namespace BExIS.Modules.OAC.UI.Models
         [Required(ErrorMessage = "Please select a data structure.")]
         public long SelectedDataStructureId { get; set; }
 
-        [Display(Name = "Metadata Source")]
-        [Required(ErrorMessage = "Please select a metadata source.")]
+        [Display(Name = "Sequence Data Portal")]
+        [Required(ErrorMessage = "Please select a sequence data portal.")]
         public long SelectedDataSourceId { get; set; }
 
         // error in case sth unexpected happened

@@ -13,6 +13,7 @@ namespace BExIS.Modules.OAC.UI
         }
         public override void Install()
         {
+
             LoggerFactory.GetFileLogger().LogCustom("...start install of OAC...");
             try
             {
