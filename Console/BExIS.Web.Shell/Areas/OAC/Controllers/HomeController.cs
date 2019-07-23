@@ -1,24 +1,27 @@
 using System;
+using BExIS.Modules.OAC.UI.Models;
+using System.Collections.Generic;
+using System.IO;
+using BExIS.Xml.Helpers;
+using BExIS.Xml.Helpers.Mapping;
+using System.Xml;
+using BExIS.Modules.Dcm.UI.Controllers;
+using BExIS.Modules.Dcm.UI.Models;
+using BExIS.Web.Shell.Models;
+using BExIS.Web.Shell.Helpers;
+using BExIS.Dcm.CreateDatasetWizard;
+using BExIS.Dcm.Wizard;
+using System.Web.Routing;
+using Vaiona.Utils.Cfg;
 using System.Net;
 using System.Web.Mvc;
-using System.Collections.Generic;
-using Microsoft.AspNet.Identity;
-using System.IO;
-using Vaiona.Utils.Cfg;
-using System.Xml;
 using Newtonsoft.Json;
-using System.Web.Routing;
-using BExIS.Dcm.CreateDatasetWizard;
-using BExIS.Modules.Dcm.UI.Controllers;
-using BExIS.Modules.OAC.UI.Models;
-using BExIS.Modules.Dcm.UI.Models;
-using BExIS.UI.Wizard;
-using BExIS.Xml.Helpers.Mapping;
-using BExIS.Xml.Helpers;
+using System.Xml.Linq;
+using System.Web.Script.Serialization;
 
 namespace BExIS.Modules.OAC.UI.Controllers
 {
-    /// <summary>
+    /// <summary> 
     /// this module and controller allows users to import metadata from APIs, by following the steps:
     /// 1. ask for Metadata Schema + Data Schema + Accession
     /// 2. import data
@@ -34,14 +37,22 @@ namespace BExIS.Modules.OAC.UI.Controllers
         // the explicit link needs to be added further down
         public enum DataSource : long
         {
-            BioGPS,
-            EBI, NCBI // the same in our examples
+            BioGPS = 1,
+            EBI = 2, NCBI = 3 // the same in our examples
         }
 
         #endregion
 
-
         #region main processing
+
+        public long GetDefaultUnstructuredDataStructureId()
+        {
+            var x = new Dlm.Services.DataStructure.DataStructureManager();
+            var y = x.UnStructuredDataStructureRepo.Get();
+            return y[0].Id;
+
+        }
+
         /// <summary>
         ///     processes the request, downloads the data, and then redirects & shows the DIM page for creation of a new dataset
         /// </summary>
@@ -52,7 +63,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
             {
                 string Identifier = Request.Params["Identifier"];
                 long MetadataStructureId = long.Parse(Request.Params["SelectedMetadataStructureId"]);
-                long DataStructureId = long.Parse(Request.Params["SelectedDataStructureId"]);
+                long DataStructureId = Request.Params["SelectedDataStructureId"] == null ? GetDefaultUnstructuredDataStructureId() : long.Parse(Request.Params["SelectedDataStructureId"]);
                 long DataSourceId = long.Parse(Request.Params["SelectedDataSourceId"]);
 
                 #region find out the correct URL for the metadata download
@@ -97,18 +108,44 @@ namespace BExIS.Modules.OAC.UI.Controllers
                     Metadata.LoadXml(DownloadedData);
                 }
                 #endregion
-                
-                // fix some issues with BioGPS, <item key="name">
+
                 ConvertXMLItemKeys(Metadata, Metadata);
 
                 #region map the data
 
-                XmlDocument mapped = ConvertOmicsToBExIS(MetadataStructureId, Metadata, (DataSource)DataSourceId);
+                XmlDocument Mapped = ConvertOmicsToBExIS(MetadataStructureId, Metadata, (DataSource)DataSourceId);
 
                 #endregion
 
-                return LoadMetadataForm(mapped, MetadataStructureId, DataStructureId);
+                return LoadMetadataForm(Mapped, MetadataStructureId, DataStructureId);
 
+            }
+            catch(WebException e)
+            {
+                String msg = "";
+                HttpWebResponse errorResponse = e.Response as HttpWebResponse;
+                if (errorResponse.StatusCode == HttpStatusCode.NotFound)
+                {
+                    msg = "Sample was not found!";
+                } else
+                {
+                    msg = e.Message;
+                }
+
+                #region show the error message
+
+                CreateDatasetController HelperController = new CreateDatasetController();
+                SelectedImportOptionsModel model = new SelectedImportOptionsModel()
+                {
+                    MetadataStructureViewList = HelperController.LoadMetadataStructureViewList(),
+                    DataStructureViewList = HelperController.LoadDataStructureViewList(),
+                    DataSourceViewList = GetDataSourceList(),
+                    Error = "An error occurred: " + msg
+                };
+
+                return View("Index", model);
+
+                #endregion
             }
             catch (Exception e)
             {
@@ -134,36 +171,37 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
             // generate the CreateTaskManager Instance and add all important values for the form
             CreateTaskmanager taskManager = new CreateTaskmanager();
-            
+
             // set all needed informations to the BUS
-            taskManager.AddToBus(CreateTaskmanager.METADATA_XML, metadata);
+            var metadataX = XDocument.Load(new XmlNodeReader(metadata));
+            taskManager.AddToBus(CreateTaskmanager.METADATA_XML, metadataX);
             taskManager.AddToBus(CreateTaskmanager.METADATASTRUCTURE_ID, MetadataStructureId);
             taskManager.AddToBus(CreateTaskmanager.DATASTRUCTURE_ID, DataStructureId);
             taskManager.AddToBus(CreateTaskmanager.RESEARCHPLAN_ID, 1);
 
             #region set function actions of COPY, RESET, CANCEL, SUBMIT
-            BExIS.Dcm.Wizard.ActionInfo copyAction = new BExIS.Dcm.Wizard.ActionInfo()
+            ActionInfo copyAction = new ActionInfo()
             {
                 ActionName = "Copy",
                 ControllerName = "CreateDataset",
                 AreaName = "DCM"
             };
 
-            BExIS.Dcm.Wizard.ActionInfo resetAction = new BExIS.Dcm.Wizard.ActionInfo()
+            ActionInfo resetAction = new ActionInfo()
             {
                 ActionName = "Reset",
                 ControllerName = "Form",
                 AreaName = "DCM"
             };
 
-            BExIS.Dcm.Wizard.ActionInfo cancelAction = new BExIS.Dcm.Wizard.ActionInfo()
+            ActionInfo cancelAction = new ActionInfo()
             {
                 ActionName = "Cancel",
                 ControllerName = "Form",
                 AreaName = "DCM"
             };
 
-            BExIS.Dcm.Wizard.ActionInfo submitAction = new BExIS.Dcm.Wizard.ActionInfo()
+            ActionInfo submitAction = new ActionInfo()
             {
                 ActionName = "Submit",
                 ControllerName = "CreateDataset",
@@ -182,7 +220,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
             Session["CreateDatasetTaskmanager"] = taskManager;
 
             // call the editor
-            return RedirectToAction("StartMetadataEditor", "Form", new RouteValueDictionary { { "area", "DCM"} });
+            return RedirectToAction("StartMetadataEditor", "Form", new RouteValueDictionary { { "area", "DCM" } });
 
         }
 
@@ -200,7 +238,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
         #endregion
 
         #region mapping
-        
+
         /// <summary>
         /// converts &lt;item key="name"&gt;&lt;/item&gt; to &lt;name&gt;&lt;/item&gt;
         /// </summary>
@@ -225,19 +263,42 @@ namespace BExIS.Modules.OAC.UI.Controllers
             }
         }
 
-        public XmlDocument ConvertOmicsToBExIS(long metadataStructureId, XmlDocument metadataForImport, DataSource source)
+        public String GetSourceName(DataSource source)
         {
-
-            string sourceName;
             switch (source)
             {// if a different name is needed, switch it
                 case DataSource.NCBI:
-                    sourceName = "EBI";
-                    break;
+                    return "EBI";
                 default:
-                    sourceName = Enum.GetName(typeof(DataSource), source);
-                    break;
+                    return Enum.GetName(typeof(DataSource), source);
             }
+        }
+
+        public ActionResult QueryAvailableMappings()
+        {
+
+            DataSource source = (DataSource)long.Parse(Request.Params["SelectedDataSourceId"]);
+            string sourceName = GetSourceName(source);
+
+            CreateDatasetController HelperController = new CreateDatasetController();
+            var msList = HelperController.LoadMetadataStructureViewList();
+            var list = new List<object>();
+            foreach (var entry in msList)
+            {
+                var path_mappingFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DIM"), "MappingFile_extern_" + sourceName + "_to_intern_" + entry.Title + ".xml");
+                list.Add(Json(new { title = entry.Title, id = entry.Id, hasFile = System.IO.File.Exists(path_mappingFile) }));
+            }
+
+            JavaScriptSerializer js = new JavaScriptSerializer();
+
+            return Content(js.Serialize(list));
+
+        }
+
+        public XmlDocument ConvertOmicsToBExIS(long metadataStructureId, XmlDocument metadataForImport, DataSource source)
+        {
+
+            string sourceName = GetSourceName(source);
 
             CreateDatasetController HelperController = new CreateDatasetController();
             string metadataStructureName = HelperController.LoadMetadataStructureViewList().Find(x => x.Id == metadataStructureId).Title;
@@ -262,8 +323,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
             // throw new Exception(XmlToString(metadataResult));
 
             // generate internal template metadata xml with needed attribtes
-            var xmlMetadatWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
-            var metadataXml = xmlMetadatWriter.CreateMetadataXml(
+            var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
+            var metadataXml = xmlMetadataWriter.CreateMetadataXml(
                 metadataStructureId,
                 XmlUtility.ToXDocument(metadataResult)
             );
@@ -286,7 +347,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
         /// <returns>the XML created from the JSON string</returns>
         public XmlDocument JsonStringToXML(string json)
         {
-            XmlDocument doc = (XmlDocument)JsonConvert.DeserializeXmlNode(json);
+            XmlDocument doc = (XmlDocument) JsonConvert.DeserializeXmlNode(json);
             return doc;
         }
 
