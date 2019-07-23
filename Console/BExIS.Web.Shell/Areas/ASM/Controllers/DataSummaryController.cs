@@ -30,9 +30,9 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
 
-        static string python_path = WebConfigurationManager.AppSettings["python_path"].ToString();
-        static string python_script = WebConfigurationManager.AppSettings["python_script"].ToString();
-        static string output_Folder = WebConfigurationManager.AppSettings["output_Folder"].ToString();
+        static string python_path = Path.GetFullPath(WebConfigurationManager.AppSettings["python_path"]);
+        static string python_script = Path.GetFullPath(WebConfigurationManager.AppSettings["python_script"]);
+        static string output_Folder = Path.GetFullPath(WebConfigurationManager.AppSettings["output_Folder"]);
 
         private static string datasets_root_folder = WebConfigurationManager.AppSettings["DataPath"];
         string[] allowed_extention = new string[] { ".csv", ".xlsx", ".xls" };
@@ -42,6 +42,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
         public ActionResult CategoralAnalysis(long id)
         {
+            System.IO.File.AppendAllText(@debugFile, "CategoralAnalysis started "+ DateTime.Now + Environment.NewLine);
             ViewData["error"] = "";
             DatasetManager datasetManager = new DatasetManager();
             try
@@ -59,6 +60,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 LoggerFactory.LogCustom(message);
 
                 string absolute_file_path = File(path, "text/csv", title + ".csv").FileName.ToString();
+                System.IO.File.AppendAllText(@debugFile, "absolute_file_path -- " + DateTime.Now + " : -- " + absolute_file_path + Environment.NewLine);
 
                 Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
                 string extension = Path.GetExtension(absolute_file_path);
@@ -71,23 +73,44 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     //string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
                     char[] spliter = { '\r' };
 
+                    System.IO.File.AppendAllText(@debugFile, "progToRun -- " + DateTime.Now + " : -- " + progToRun.ToString() + Environment.NewLine);
+                    System.IO.File.AppendAllText(@debugFile, "outputFolder -- " + DateTime.Now + " : -- " + outputFolder.ToString() + Environment.NewLine);
+
+                    System.IO.File.AppendAllText(@debugFile, "process intialized -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     Process proc = new Process();
+                    System.IO.File.AppendAllText(@debugFile, "proc.StartInfo.FileName ="+ python_path +" -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     proc.StartInfo.FileName = python_path;
+                    System.IO.File.AppendAllText(@debugFile, "proc.StartInfo.RedirectStandardOutput = true  -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     proc.StartInfo.RedirectStandardOutput = true;
+                    System.IO.File.AppendAllText(@debugFile, "proc.StartInfo.RedirectStandardError = true  -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     proc.StartInfo.RedirectStandardError = true;
+                    System.IO.File.AppendAllText(@debugFile, "proc.StartInfo.UseShellExecute = false  -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     proc.StartInfo.UseShellExecute = false;
 
                     // call hello.py to concatenate passed parameters
                     proc.StartInfo.Arguments = string.Concat(progToRun, " ", absolute_file_path, " ", extension, " ", outputFolder);
-                    proc.Start();
-
+                    System.IO.File.AppendAllText(@debugFile, "process going to start-- " + DateTime.Now + " : -- " + outputFolder.ToString() + Environment.NewLine);
+                    try
+                    {
+                        proc.Start();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.IO.File.AppendAllText(@debugFile, "process error -- " + DateTime.Now + " : -- " + ex.InnerException.Message + Environment.NewLine);
+                        ViewData["error"] = ViewData["error"] + Environment.NewLine + ex.InnerException.Message;
+                    }
+                    
+                    System.IO.File.AppendAllText(@debugFile, "process started now -- " + DateTime.Now + " : -- " + outputFolder.ToString() + Environment.NewLine);
                     //* Read the output (or the error)
                     string output = proc.StandardOutput.ReadToEnd();
                     string err = proc.StandardError.ReadToEnd();
-                    ViewData["error"] = "";
+
+                    System.IO.File.AppendAllText(@debugFile, "output -- " + DateTime.Now + " : -- " + output.ToString() + Environment.NewLine);
+                    System.IO.File.AppendAllText(@debugFile, "err -- " + DateTime.Now + " : -- " + err.ToString() + Environment.NewLine);
+
                     if (err.Length > 0)
                     {
-                        ViewData["error"] = err;
+                        ViewData["error"] = ViewData["error"] + Environment.NewLine + err;
                         return PartialView("showDataSetAnalysis");
                     }
 
@@ -96,6 +119,8 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     lines = output.Split(Environment.NewLine.ToCharArray()).ToList();
                     int index = lines.IndexOf("Numerical");
                     lines = lines.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+
+                    System.IO.File.AppendAllText(@debugFile, "lines -- " + DateTime.Now + " : -- " + lines.ToString() + Environment.NewLine);
 
                     List<List<string>> values = new List<List<string>>();
                     List<List<string>> labels = new List<List<string>>();
@@ -142,6 +167,9 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     data_lines.RemoveAt(data_lines.Count - 1);
                     // end of reading the results
 
+                    System.IO.File.AppendAllText(@debugFile, "header -- " + DateTime.Now + " : -- " + header.ToString() + Environment.NewLine);
+                    System.IO.File.AppendAllText(@debugFile, "data_lines -- " + DateTime.Now + " : -- " + data_lines.ToString() + Environment.NewLine);
+
                     datasetManager.Dispose();
                     FileInfo myfileinf = new FileInfo(absolute_file_path);
                     myfileinf.Delete();
@@ -157,6 +185,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
+                System.IO.File.AppendAllText(@debugFile, "Exception -- " + DateTime.Now + " : -- " + ex.InnerException.Message + Environment.NewLine);
             }
             return PartialView("showDataSetAnalysis");
 
