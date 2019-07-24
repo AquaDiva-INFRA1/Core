@@ -12,11 +12,9 @@
 	</Dependencies>
 	<Exports>
 
-    <Export tag="settings" id="ImportExtMetadata" order="1"
-            title="Import Ext. Metadata" description="Import Metadata, e.g. from BioGPS or NCBI" icon=""
-            controller="Home" action="Index"
-            extends="./settingsRoot"
-            />
-    
+    <Export tag="menubar" id="Import OMIC Archives" order="5"
+        title="Import OMIC Archives" description="Import OMIC Archives as samples to be integrated to the portal" icon=""
+        controller="Home" action="Index"
+        extends="./menubarRoot/collect" />
 	</Exports>
 </Manifest>
