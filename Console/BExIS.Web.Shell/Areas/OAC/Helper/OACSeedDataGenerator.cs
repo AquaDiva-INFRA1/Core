@@ -11,14 +11,31 @@ namespace BExIS.Modules.OAC.UI.Helpers
     {
         public void GenerateSeedData()
         {
+            FeatureManager featureManager = new FeatureManager();
+            OperationManager operationManager = new OperationManager();
 
-            // Features
-            var featureManager = new FeatureManager();
-            var bexisFeature = featureManager.FindByName("BExIS") ?? featureManager.Create("BExIS", "This is the root!");
+            try
+            {
+                Feature DataCollectionFeature = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Data Collection"));
+                if (DataCollectionFeature != null)
+                {
+                    Feature OAC = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("OMIC Archives Import"));
+                    if (OAC == null) DataCollectionFeature = featureManager.Create("OMIC Archives Import", "OMIC Archives Import", DataCollectionFeature);
+                    operationManager.Create("OAC", "Home", "*", DataCollectionFeature);
+                }
 
-            // Operations
-            var operationManager = new OperationManager();
-            var o1 = operationManager.Find("OAC", "Home", "*") ?? operationManager.Create("OAC", "Home", "*");
+
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                featureManager.Dispose();
+                operationManager.Dispose();
+            }
+            
 
         }
 
