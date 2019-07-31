@@ -802,7 +802,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     output = response.Content.ReadAsStringAsync().Result;
 
                     model.semanticComponent = CreateDataTable(headerItems);
-
+                    
                     //debugging file
                     using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
                     {
@@ -842,15 +842,30 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 model.semanticSearchServerError = "No results found.";
             }
 
-
             #endregion
-
             System.Data.DataTable m;
             m = CreateDataTable(headerItems);
 
             #region find metadata and fill DataTable
             if (ids != null && ids.result != null)
             {
+                #region cleaning ids of datasets so they can be put in the table as id should be unique
+                List<Result> clean_ids = new List<Result>();
+                foreach (Result res in ids.result)
+                {
+                    Boolean b = false;
+                    foreach (Result r in clean_ids)
+                    {
+                        if (r.dataset_id == res.dataset_id)
+                        {
+                            b = true;
+                            break;
+                        }
+                    }
+                    if (!b) clean_ids.Add(res);
+                }
+                #endregion
+
                 foreach (Result r in ids.result)
                 {
                     DataRow row = m.NewRow();
@@ -870,20 +885,31 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         dataset = datasetRepo.Get(datasetID);
                     }
 
-                    if (dataset != null)
+                    try
                     {
-                        //Grab the Metadata
-                        XmlDatasetHelper helper = new XmlDatasetHelper();
-                        description = helper.GetInformation(datasetID, NameAttributeValues.description);
-                        title = helper.GetInformation(datasetID, NameAttributeValues.title);
-                        owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
+                        if (dataset != null)
+                        {
+                            //Grab the Metadata
+                            XmlDatasetHelper helper = new XmlDatasetHelper();
+                            description = helper.GetInformation(datasetID, NameAttributeValues.description);
+                            title = helper.GetInformation(datasetID, NameAttributeValues.title);
+                            owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
 
-                        row["Title"] = title;
-                        row["Datasetdescription"] = description;
-                        row["Ownername"] = owner;
+                            row["Title"] = title;
+                            row["Datasetdescription"] = description;
+                            row["Ownername"] = owner;
 
-                        m.Rows.Add(row);
+                            m.Rows.Add(row);
+                        }
                     }
+                    catch (Exception exception)
+                    {
+                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                        {
+                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Aggregate Exception in Semantic Search: " + exception.Message);
+                        }
+                    }
+                    
 
                 }
             }
@@ -1544,8 +1570,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
             String commandTextTemplate = "SELECT ?label WHERE {{<{0}> rdfs:label ?label}}";
 
-            foreach (String uri in uriList)
+            foreach (String uri_ in uriList)
             {
+                string uri = clean_entity_URI_for_insert(uri_);
                 if (String.IsNullOrWhiteSpace(uri))
                 {
                     labelList.Add(null);
@@ -1554,14 +1581,27 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     //Add current uri to CommandText
                     queryString.CommandText = String.Format(commandTextTemplate, uri);
-
+                    SparqlResultSet results = new SparqlResultSet();
+                    try
+                    {
+                        results = (SparqlResultSet)g.ExecuteQuery(queryString);
+                    }
+                    catch(Exception ex)
+                    {
+                        // debugging file
+                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                        {
+                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : FindOntologyLabels error :  " + ex.Message);
+                        }
+                        //throw (ex);
+                    }
                     //Execute the query
-                    SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+                    
 
                     string labelOutput = "";
                     foreach (SparqlResult res in results.Results)
                     {
-                        String s = res["label"].ToString();
+                        String s = clean_labels(res["label"].ToString());
 
                         //Remove the ^^xsd:String
                         if (s.Contains("^^"))
