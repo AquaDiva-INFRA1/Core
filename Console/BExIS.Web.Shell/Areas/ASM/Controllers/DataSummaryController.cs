@@ -80,8 +80,8 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                     //string progToRun = python_script;
                     string outputFolder = output_Folder;
-
-                    lines = output.Split(Environment.NewLine.ToCharArray()).ToList();
+                    List <string> lines_ = output.Split('*').ToList();
+                    lines = lines_[0].Split(Environment.NewLine.ToCharArray()).ToList();
                     int index = lines.IndexOf("Numerical");
                     lines = lines.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
 
@@ -111,33 +111,52 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                     var json_ = JsonConvert.SerializeObject(lines);
 
-                    string filename = Path.GetFileNameWithoutExtension(absolute_file_path);
-                    //read the results of the analysis // python script generates an excel table for that
-                    List<string> header = new List<string>();
-                    List<List<string>> data_lines = new List<List<string>>();
-                    using (var reader = new StreamReader(outputFolder + filename + ".csv"))
-                    {
-                        string line;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            List<string> tmp = line.Split(';').ToList<string>();
-                            if (tmp.Count > 1)
-                                data_lines.Add(tmp);
-                        }
-                    }
+                    // remove the array view
+                    //string filename = Path.GetFileNameWithoutExtension(absolute_file_path);
+                    ////read the results of the analysis // python script generates an excel table for that
+                    //List<string> header = new List<string>();
+                    //List<List<string>> data_lines = new List<List<string>>();
+                    //
+                    //List<string> lignes = lines_[1].Substring(2, lines_[1].Length -3 ).Split(',').ToList();
+                    //using (StreamWriter file = new StreamWriter(outputFolder + filename + ".csv"))
+                    //{
+                    //    foreach (string item in lignes)
+                    //    {
+                    //        file.WriteLine(item.Replace("\\r\\n", "") + ",");
+                    //    }
+                    //}
+                    //
+                    //using (var reader = new StreamReader(outputFolder + filename + ".csv"))
+                    //{
+                    //    string line;
+                    //    while ((line = reader.ReadLine()) != null)
+                    //    {
+                    //        List<string> tmp = line.Split(';').ToList<string>();
+                    //        if (tmp.Count > 1)
+                    //            data_lines.Add(tmp);
+                    //    }
+                    //}
 
-                    header = data_lines[data_lines.Count - 1];
-                    data_lines.RemoveAt(data_lines.Count - 1);
+                    //header = data_lines[data_lines.Count - 1];
+                    //data_lines.RemoveAt(data_lines.Count - 1);
                     // end of reading the results
 
                     datasetManager.Dispose();
                     FileInfo myfileinf = new FileInfo(absolute_file_path);
-                    myfileinf.Delete();
+                    try
+                    {
+                        myfileinf.Delete();
+                    }
+                    catch (Exception exec)
+                    {
+                        Debug.WriteLine(exec.Message);
+                    }
+                    
 
                     ViewData["values"] = values;
                     ViewData["labels"] = labels;
-                    ViewData["header"] = header;
-                    ViewData["data_lines"] = data_lines;
+                    //ViewData["header"] = header;
+                    //ViewData["data_lines"] = data_lines;
                     return PartialView("showDataSetAnalysis");
                 }
             }
@@ -145,6 +164,11 @@ namespace BExIS.Modules.Asm.UI.Controllers
             {
                 Debug.WriteLine(ex.Message);
             }
+            ViewData["values"] = new List<List<string>>();
+            ViewData["labels"] = new List<List<string>>();
+            ViewData["header"] = new List<string>();
+            ViewData["data_lines"] = new List<List<string>>();
+            ViewData["error"] = "No categoral information was extracted";
             return PartialView("showDataSetAnalysis");
         }
 
