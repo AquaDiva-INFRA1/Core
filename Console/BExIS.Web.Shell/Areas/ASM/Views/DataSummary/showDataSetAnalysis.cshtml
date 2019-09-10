@@ -1,8 +1,8 @@
 ﻿@using Telerik.Web.Mvc.UI
 
 @{
-    List<string> header = (List<string>)ViewData["header"];
-    List<List<string>> data_lines = (List<List<string>>)ViewData["data_lines"];
+    //List<string> header = (List<string>)ViewData["header"];
+    //List<List<string>> data_lines = (List<List<string>>)ViewData["data_lines"];
 
     List<List<string>> values = (List<List<string>>)ViewData["values"];
     List<List<string>> labels = (List<List<string>>)ViewData["labels"];
@@ -38,71 +38,92 @@
 
 }
 
+<div class="jumbotron" align="left">
+    <h1 class="display-4">Dataset Summary</h1>
+    <p class="lead">This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.</p>
+    <hr class="my-4">
+    <p>It reflects the distribution of the categoral attributes and its values within the dataset.</p>
+</div>
 
+@if (number_of_graphs < 1)
+{
+    <div class="alert alert-warning" role="alert">
+        No Categoral Analyses / Summary was extracted from this dataset.
+    </div>
+}
+else
+{
+    <button onclick="myFunction()">Hide / View Graphs</button>
+    <!-- Create a div where the graph will take place style="display:none" -->
+    <div id="table">
+        <table>
+            @while (index <= number_of_graphs)
+            {
+                <tr>
+                    @for (int k = 0; k < 3; k++)
+                    {
+                        <td>
+
+                            <canvas id="myChart_@index" width="500" height="350" ></canvas>
+
+                        </td>
+                        index = index + 1;
+                    }
+                </tr>
+                <br>
+            }
+
+
+        </table>
+    </div>
+}
 <div>
-    <table>
-        <tr>
-            <td>
-                <h2>
-                    Statistical Overview
-                </h2>
-                <!--
-                <div id="spinner">
-                    <div class="spinner-border" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-                 -->
-            </td>
-            <td>
-                <div id="preloaderContainer" />
-            </td>
-        </tr>
-        <tr>
-            <table class="table">
-                <thead>
-                    <tr>
-                        @foreach (string h in header)
-                        {
-                            <th>@h</th>
-                        }
-                    </tr>
-                </thead>
-                @foreach (List<string> data_line in data_lines)
-                {
-                    <tbody>
-                        @foreach (string s in data_line)
-                        {
-                            <td>@s</td>
-                        }
-                    </tbody>
-                 }
-
-            </table>
-        </tr>
-    </table>
-</div>
-
-<button onclick="myFunction()">Hide / View Graphs</button>
-<!-- Create a div where the graph will take place style="display:none" -->
-<div id="table">
-    <table>
-        @while (index <= number_of_graphs)
-        {
+    @*
+        <table>
             <tr>
-                @for (int k = 0; k < 3; k++)
-                {
-                    <td>
-                        <canvas id="myChart_@index"></canvas>
-                    </td>
-                    index = index + 1;
-                }
+                <td>
+                    <h2>
+                        Statistical Overview
+                    </h2>
+                    <!--
+                    <div id="spinner">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                     -->
+                </td>
+                <td>
+                    <div id="preloaderContainer" />
+                </td>
             </tr>
-        }
+            <tr>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            @foreach (string h in header)
+                            {
+                                <th>@h</th>
+                            }
+                        </tr>
+                    </thead>
+                    @foreach (List<string> data_line in data_lines)
+                    {
+                        <tbody>
+                            @foreach (string s in data_line)
+                            {
+                                <td>@s</td>
+                            }
+                        </tbody>
+                     }
 
-
-    </table>
+                </table>
+            </tr>
+        </table>
+    *@
 </div>
+
+
 
 
 <script type="text/javascript">
@@ -179,12 +200,32 @@
                     options: {
                         title: {
                             display: true,
-                            text: ylabel + " || " + xlabel,
+                            text: "",
+                            fontColor: 'black',
                         },
                         scales: {
                             yAxes: [{
                                 ticks: {
                                     beginAtZero: true
+                                },
+                                stacked: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Count',
+                                    fontColor: 'black'
+                                }
+                            }],
+                            xAxes: [{
+                                maxBarThickness: 25,
+                                gridLines: {
+                                    offsetGridLines: true
+                                },
+                                stacked: true,
+                                fontColor: 'black',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: xlabel,
+                                    fontColor: 'black'
                                 }
                             }]
                         },
