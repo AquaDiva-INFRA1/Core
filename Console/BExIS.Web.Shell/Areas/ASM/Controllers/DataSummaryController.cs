@@ -22,11 +22,19 @@ using System.Text;
 using System.Net.Http;
 using System.Web;
 using System.Net.Sockets;
+using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Services.DataStructure;
+using System.Data;
+using BExIS.Xml.Helpers;
+using Npgsql;
+using System.Xml;
 
 namespace BExIS.Modules.Asm.UI.Controllers
 {
     public class DataSummaryController : Controller
     {
+        private XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+
         // GET: DataSummary
         private static String username = "hamdihamed";
         private static String password = "hamdi1992";
@@ -288,6 +296,149 @@ namespace BExIS.Modules.Asm.UI.Controllers
             return output;
         }
 
+
+        public void prepare_data_mining()
+        {
+            DatasetManager dm = new DatasetManager();
+            DataStructureManager dsm = new DataStructureManager();
+
+            List<Int64> ds_ids = dm.GetDatasetLatestIds();
+
+            string path = output_Folder + "prepare_for_mining.csv";
+
+            foreach (Int64 datasetID in ds_ids)
+            {
+                DatasetVersion dsv = dm.GetDatasetLatestVersion(datasetID);
+                StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
+                DataStructure ds = dsm.AllTypesDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
+
+                string title = xmlDatasetHelper.GetInformationFromVersion(dsv.Id, NameAttributeValues.title);
+
+                if (ds.Self.GetType() == typeof(StructuredDataStructure))
+                {
+                    //ToDO Javad: 18.07.2017 -> replaced to the new API for fast retrieval of the latest version
+                    //
+                    //List<AbstractTuple> dataTuples = dm.GetDatasetVersionEffectiveTuples(dsv, 0, 100);
+                    //DataTable table = SearchUIHelper.ConvertPrimaryDataToDatatable(dsv, dataTuples);
+                    DataTable table = dm.GetLatestDatasetVersionTuples(dsv.Dataset.Id, 0, 100, true);
+
+                    //List<string> var_labels = new List<string>();
+                    //List<string> var_ids = new List<string>();
+                    //List<string> label_values = new List<string>();
+
+                    //writing the values needed for the mining in a csv file
+
+                    DatasetManager dsm_ = new DatasetManager();
+                    XmlDocument xmlDoc = dsm_.GetDatasetLatestMetadataVersion(datasetID);
+                    XmlNode root = xmlDoc.DocumentElement;
+                    string idMetadata = root.Attributes["id"].Value;
+                    string owner = "none";
+                    string project = "none";
+
+                    if (idMetadata == "1")
+                    {
+                        XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Givenname/Name");
+                        XmlNodeList nodeList_Surname = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Surname/Name");
+                        owner = nodeList_givenName[0].InnerText + " " + nodeList_Surname[0].InnerText;
+                        XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Title/Title");
+                        XmlNodeList nodeList_Personnelgivenname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelgivenname/Name");
+                        XmlNodeList nodeList_Personnelsurname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelsurname/Name");
+                        project = nodeList_Title[0].InnerText + "/" + nodeList_Personnelgivenname[0].InnerText + " " + nodeList_Personnelsurname[0].InnerText;
+                    }
+                    else if (idMetadata == "2")
+                    {
+                        XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Owner/Owner/FullName/Name");
+                        owner = nodeList_givenName[0].InnerText;
+                        XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Owner/Owner/Role/Role");
+                        XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceInstitutionID/Id");
+                        XmlNodeList nodeList_SourceID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceID/Id");
+                        XmlNodeList nodeList_UnitID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/UnitID/Id");
+                        project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText + " - " + nodeList_SourceID[0].InnerText + " - " + nodeList_UnitID[0].InnerText;
+                    }
+                    else if (idMetadata == "3")
+                    {
+                        XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Person/PersonName/FullName/FullNameType");
+                        foreach (XmlElement node in nodeList_givenName)
+                        {
+                            owner = node.InnerText + " - " + owner;
+                        }
+                        //owner = nodeList_givenName[0].InnerText;
+                        XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/Name/Label/Representation/RepresentationType/Text/TextType");
+                        XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/OrgUnits/OrgUnitsType/OrgUnit/OrgUnitType");
+                    }
+
+                    for (int i = 0; i < table.Columns.Count; i++)
+                    {
+                        DataColumn column = table.Columns[i];
+                        string caption = column.Caption;
+                        string var_id = column.ColumnName.ToString().Replace("var","");
+                        string ch = "";
+                        ch = ch + caption + " ; " + var_id + " ; " + datasetID.ToString() + " ; " + dsv.Id.ToString() + " ; " + title + " ; " + owner + " ; " + project + " ; ";
+
+                        
+
+                        //var_labels.Add(caption);
+                        //var_ids.Add(var_id.Replace("var",""));
+
+
+                        //get the entity and the characteristic
+                        NpgsqlCommand MyCmd = null;
+                        NpgsqlConnection MyCnx = null;
+                        MyCnx = new NpgsqlConnection(Conx);
+                        MyCnx.Open();
+                        string select = "SELECT * FROM \"dataset_column_annotation\" WHERE (datasets_id=" + datasetID + " and variable_id='" + var_id + "' );";
+                        MyCmd = new NpgsqlCommand(select, MyCnx);
+                        NpgsqlDataReader dr = MyCmd.ExecuteReader();
+                        Boolean b = false;
+                        if (dr != null)
+                        {
+                            while (dr.Read())
+                            {
+                                if (dr["datasets_id"] != System.DBNull.Value)
+                                {
+                                    var entity = (String)dr["entity"].ToString();
+                                    var characteristic = (String)dr["characteristic"].ToString();
+                                    ch = ch + entity + " ; " + characteristic + " ; ";
+                                    b = true;
+                                }
+                            }
+                        }
+                        if (!b)
+                        {
+                            ch = ch + " *** ; *** ;";
+                        }
+                        MyCnx.Close();
+                        // end of getting the entity and charecteristics
+
+                        try
+                        {
+                            foreach (Object obj in table.Rows[i].ItemArray)
+                            {
+                                //label_values.Add(obj.ToString());
+                                string copy = "";
+                                copy = ch + obj.ToString() + " ; " ;
+                                using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
+                                {
+                                    sw.WriteLine(copy);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                            ch = ch + " *** " + " ;";
+                            using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
+                            {
+                                sw.WriteLine(ch);
+                            }
+                        }
+                    }
+                    // end of writing the values into a csv
+                }
+                // end of processing the structred data
+            }
+            // end of looping through the datasets
+        }
 
 
 
