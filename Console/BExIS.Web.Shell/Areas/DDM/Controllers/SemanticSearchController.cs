@@ -755,13 +755,21 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     if (mappingList.Count >= 1)
                     {
+                        //debugging file
+                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                        {
+                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : token : "+ token + " has matched with the mapping file : \n " );
+                        }
 
                         foreach (OntologyMapping mapping in mappingList)
                         {
                             paramBuilder.Append(mapping.getDisplayName() + "+" + mapping.getMappedConceptGroup() + "+"
                         + mapping.getMappedConceptUri() + "+" + mapping.getBaseUri());
                             paramBuilder.Append("--");
-
+                            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                            {
+                                sw.WriteLine(mapping.getDisplayName() + " -> " + mapping.getMappedConceptGroup() + " -> " + mapping.getMappedConceptUri() + " -> " + mapping.getBaseUri() + "\n");
+                            }
                         }
                     }
 
