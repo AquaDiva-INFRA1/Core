@@ -28,6 +28,7 @@ using System.Data;
 using BExIS.Xml.Helpers;
 using Npgsql;
 using System.Xml;
+using BExIS.IO.Transform.Input;
 
 namespace BExIS.Modules.Asm.UI.Controllers
 {
@@ -45,6 +46,24 @@ namespace BExIS.Modules.Asm.UI.Controllers
         static List<Variable_analytics> VA_list;
 
         static List<string> project_list_names = new List<string> { "A01", "A02", "A03", "A04", "A05", "A06", "B01", "B02", "B03", "B04", "B05", "C03", "C05", "D01", "D02", "D03", "D04" };
+        static Dictionary<string, List<string>> project_list_names_ = new Dictionary<string, List<string>> {
+            {"A01", new List<string> { "Wick", "Antonis Chatzinotas" } },
+            {"A02", new List<string> { "Pohnert", "Gleixner" } },
+            {"A03", new List<string> { "Küsel", "Martin Taubert", "Jürgen Popp" , "Petra Rösch" } },
+            {"A04", new List<string> { "Martin von Bergen", "Jehmlich" } },
+            {"A05", new List<string> { "Ulrich Brose", "Björn Rall" } },
+            {"A06", new List<string> { "Manja Marz" } },
+            {"B01", new List<string> { "Beate Michalzik", "Nicole van Dam" } },
+            {"B02", new List<string> { "Anke Hildebrandt " } },
+            {"B03", new List<string> { "Susan Trumbore", "Torsten Frosch" } },
+            {"B04", new List<string> { "Sabine Attinger" } },
+            {"B05", new List<string> { "Martina Herrmann" } },
+            {"C03", new List<string> { "Totsche" } },
+            {"C05", new List<string> { "Totsche", "Ulrich S. Schubert" } },
+            {"D01", new List<string> { "Birgitta König-Ries", "Udo Hahn" } },
+            {"D02", new List<string> { "Anke Hildebrandt", "Küsel" } },
+            {"D03", new List<string> { "Totsche", "Küsel" } }
+        };
 
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
 
@@ -58,9 +77,15 @@ namespace BExIS.Modules.Asm.UI.Controllers
         static List<string> lines = new List<string>();
         static String debugFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
 
+        static String datasetsepcial = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "dataset361.csv");
+        static String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
 
         public ActionResult CategoralAnalysis2(long id)
         {
+            if (id == 361)
+            {
+                return RedirectToAction("Specialdatasetanalysis");
+            }
             ViewData["error"] = "";
             DatasetManager datasetManager = new DatasetManager();
             try
@@ -180,8 +205,97 @@ namespace BExIS.Modules.Asm.UI.Controllers
             return PartialView("showDataSetAnalysis");
         }
 
+        
+        public ActionResult Specialdatasetanalysis()
+        {
+            ViewData["project_list_names"] = project_list_names_;
+            return PartialView("Specialdatasetanalysis");
+        }
 
-        private string UploadFiletoAnalysis(string filePath )
+
+        [HttpPost]
+        public String Filter_Apply(string welllocation = "", string year = "", string filtersize = "", string GroupName = "", string NameFIlter="")
+        {
+            string param ="?year=" + year + "&filtersize=" + filtersize + "&GroupName=" + GroupName;
+            if (welllocation != "")
+                param = param + "&welllocation=" + parse_Json_location(welllocation);
+            if (NameFIlter != "")
+                param = param + "&PIName=" + NameFIlter;
+            string results = UploadFiletoAnalysis(datasetsepcial, "/getvalue"+ param).ToString();
+            try
+            {
+                results = results.Substring(3, results.Length - 8);
+                List<string> results_rows = results.Split(new string[] { "}, {" }, StringSplitOptions.None).ToList<string>();
+
+                Dictionary<string, List<string>> dict_ = new Dictionary<string, List<string>>();
+                foreach (string s in results_rows)
+                {
+                    var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>("{" + s + "}");
+                    foreach (KeyValuePair<string, string> kvp in dict)
+                    {
+                        if (!dict_.ContainsKey(kvp.Key))
+                        {
+                            dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
+                        }
+                        List<string> value = new List<string>();
+                        dict_.TryGetValue(kvp.Key, out value);
+                        value.Add(kvp.Value.Replace(',', ' '));
+                        dict_[kvp.Key] = value;
+                    }
+                }
+                dict_ = dict_.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+                ViewData["project_list_names"] = project_list_names_;
+                return JsonConvert.SerializeObject(dict_); ;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                ViewData["project_list_names"] = project_list_names_;
+                return ("");
+            }
+            
+        }
+
+        // this method parses the JSON file containing the well names and their coordinates to get the well name from the coordinates.
+        // It is made due to the fact that the leaflet.js map view return only the coordinates and a reason to fetch the well name from coordinates is needed
+        public String parse_Json_location(String location_coordinates)
+        {
+            //"LatLng(51.080258, 10.42626)"
+            using (StreamReader r = new StreamReader(Gps_coordinates_for_wells))
+            {
+                string json = r.ReadToEnd();
+                List<coordinates_GPS> items = JsonConvert.DeserializeObject<List<coordinates_GPS>>(json);
+                if (location_coordinates.Length > 0)
+                {
+                    string lon = location_coordinates.Substring(location_coordinates.IndexOf('(') + 1, location_coordinates.IndexOf(',') - location_coordinates.IndexOf('(') - 1);
+                    string lat = location_coordinates.Substring(location_coordinates.IndexOf(", ") + 2, location_coordinates.IndexOf(')') - location_coordinates.IndexOf(',') - 2);
+
+                    foreach (coordinates_GPS item in items)
+                    {
+                        try
+                        {
+                            if ((item.Lat.ToString().IndexOf(lon.Substring(0, lon.Length - 1)) > -1) && (item.Lon.ToString().IndexOf(lat.Substring(0, lat.Length - 1)) > -1))
+                            {
+                                return item.Well_name;
+                            }
+                        }
+                        catch (NullReferenceException e)
+                        {
+                            Debug.WriteLine(e.ToString());
+                        }
+
+                    }
+                }
+                else
+                {
+                    return json;
+                }
+            }
+            return "";
+        }
+
+
+        private string UploadFiletoAnalysis(string filePath , string api_action="/" )
         {
             String filename = Path.GetFileName(filePath);
 
@@ -246,35 +360,36 @@ namespace BExIS.Modules.Asm.UI.Controllers
             }
 
 
-            // run the analysis over server tool
-            string url = "http://aquadiva-analysis1.inf-bb.uni-jena.de:5000";
-            var request2 = (HttpWebRequest)WebRequest.Create(url);
-            request2.Method = "POST";
-            request2.ContentType = "application/x-www-form-urlencoded";
-
-            string params_ = "file_path=" + filename + "&user_home_directory=" + name;
-            byte[] bytes = Encoding.ASCII.GetBytes(params_);
-            request2.ContentLength = bytes.Length;
-            try
-            {
-                using (var reqStream = request2.GetRequestStream())
-                {
-                    reqStream.Write(bytes, 0, bytes.Length);
-                    var response = (HttpWebResponse)request2.GetResponse();
-                    Debug.WriteLine("response ==> " + response.ToString());
-                    reqStream.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message.ToString());
-            }
+            //// run the analysis over server tool
+            //string url = "http://aquadiva-analysis1.inf-bb.uni-jena.de:5000"+ api_action;
+            //var request2 = (HttpWebRequest)WebRequest.Create(url);
+            //request2.Method = "POST";
+            //request2.ContentType = "application/x-www-form-urlencoded";
+            //
+            //string params_ = "file_path=" + filename + "&user_home_directory=" + name;
+            //byte[] bytes = Encoding.ASCII.GetBytes(params_);
+            //request2.ContentLength = bytes.Length;
+            //try
+            //{
+            //    using (var reqStream = request2.GetRequestStream())
+            //    {
+            //        reqStream.Write(bytes, 0, bytes.Length);
+            //        var response = (HttpWebResponse)request2.GetResponse();
+            //        Debug.WriteLine("response ==> " + response.ToString());
+            //        reqStream.Close();
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Debug.WriteLine(ex.Message.ToString());
+            //}
 
 
 
             //Construct a HttpClient for the search-Server
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("http://aquadiva-analysis1.inf-bb.uni-jena.de:5000?file_path=" + filename + "&user_home_directory=" + name);
+            client.BaseAddress = new Uri("http://aquadiva-analysis1.inf-bb.uni-jena.de:5000" +
+                api_action + "&file_path=" + filename + "&user_home_directory=" + name);
             //Set the searchTerm as query-String
             StringBuilder paramBuilder = new StringBuilder();
             paramBuilder.Append(" ");
@@ -780,5 +895,14 @@ namespace BExIS.Modules.Asm.UI.Controllers
         }
 
 
+        // this class is made for the Deserialization of the JSON object of the JSON file containing the coordinates and well names.
+        public class coordinates_GPS
+        {
+            public string Well_name;
+            public string Lat;
+            public string Lon;
+        }
+
     }
+
 }
