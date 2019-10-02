@@ -636,6 +636,7 @@
     <Content Include="Views\Analytics\EditUnitModel_list.cshtml" />
     <Content Include="Views\Analytics\showDataSetAnalysis.cshtml" />
     <Content Include="Views\DataSummary\showDataSetAnalysis.cshtml" />
+    <Content Include="Views\DataSummary\Specialdatasetanalysis.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -666,6 +667,10 @@
     <ProjectReference Include="..\..\..\..\Components\DLM\BExIS.Dlm.Services\BExIS.Dlm.Services.csproj">
       <Project>{c4ca0a99-0af3-4372-a9b7-b9073599bd8b}</Project>
       <Name>BExIS.Dlm.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Components\IO\BExIS.IO.Transform.Input\BExIS.IO.Transform.Input.csproj">
+      <Project>{5C4C8570-A53B-4191-A414-DE028AAAF36A}</Project>
+      <Name>BExIS.IO.Transform.Input</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\IO\BExIS.IO.Transform.Output\BExIS.IO.Transform.Output.csproj">
       <Project>{455ec826-9a92-40ff-bd3b-388c288955ce}</Project>
