@@ -28,11 +28,11 @@ using System.Data;
 using BExIS.Xml.Helpers;
 using Npgsql;
 using System.Xml;
-using BExIS.IO.Transform.Input;
+using Vaiona.Web.Mvc;
 
-namespace BExIS.Modules.Asm.UI.Controllers
+namespace BExIS.Modules.ASM.UI.Controllers
 {
-    public class DataSummaryController : Controller
+    public class DataSetSummaryController : Controller , IController
     {
         private XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
@@ -40,12 +40,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         private static String username = "hamdihamed";
         private static String password = "hamdi1992";
         private static string FTPAddress = "ftp://aquadiva-analysis1.inf-bb.uni-jena.de:21";
-        private static string FlaskServer = "http://aquadiva-analysis1.inf-bb.uni-jena.de:5000";
 
-        static string DatastructAPI = "http://localhost:5412/api/structures/";
-        static List<Variable_analytics> VA_list;
-
-        static List<string> project_list_names = new List<string> { "A01", "A02", "A03", "A04", "A05", "A06", "B01", "B02", "B03", "B04", "B05", "C03", "C05", "D01", "D02", "D03", "D04" };
         static Dictionary<string, List<string>> project_list_names_ = new Dictionary<string, List<string>> {
             {"A01", new List<string> { "Wick", "Antonis Chatzinotas" } },
             {"A02", new List<string> { "Pohnert", "Gleixner" } },
@@ -67,11 +62,10 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
 
-        static string python_path = WebConfigurationManager.AppSettings["python_path"].ToString();
-        static string python_script = WebConfigurationManager.AppSettings["python_script"].ToString();
-        static string output_Folder = WebConfigurationManager.AppSettings["output_Folder"].ToString();
+        static string python_path = Path.GetFullPath(WebConfigurationManager.AppSettings["python_path"]);
+        static string python_script = Path.GetFullPath(WebConfigurationManager.AppSettings["python_script"]);
+        static string output_Folder = Path.GetFullPath(WebConfigurationManager.AppSettings["output_Folder"]);
 
-        private static string datasets_root_folder = WebConfigurationManager.AppSettings["DataPath"];
         string[] allowed_extention = new string[] { ".csv", ".xlsx", ".xls" };
 
         static List<string> lines = new List<string>();
@@ -80,8 +74,14 @@ namespace BExIS.Modules.Asm.UI.Controllers
         static String datasetsepcial = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "dataset361.csv");
         static String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
 
-        public ActionResult CategoralAnalysis2(long id)
+        public ActionResult CategoralAnalysis(long id)
         {
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(debugFile))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Data Summary scalled: CategoralAnalysis2 for dataset id : "+id );
+            }
+
             if (id == 361)
             {
                 return RedirectToAction("Specialdatasetanalysis");
@@ -109,7 +109,13 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
                 if (allowed_extention.Contains(extension))
                 {
-                    String output = UploadFiletoAnalysis(absolute_file_path);
+                    String output_ = UploadFiletoAnalysis(absolute_file_path);
+                    String output = output_.Split(new string[] { "\n\n\n" }, StringSplitOptions.None)[1];
+                    //debugging file
+                    using (StreamWriter sw = System.IO.File.AppendText(debugFile))
+                    {
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Data Summary scalled: results of analysis for dataset id : " + output);
+                    }
 
                     //string progToRun = python_script;
                     string outputFolder = output_Folder;
@@ -184,18 +190,43 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     {
                         Debug.WriteLine(exec.Message);
                     }
-                    
 
+                    String table = output_.Split(new string[] { "\n\n\n" }, StringSplitOptions.None)[0];
+                    List<string> result = table.Split(System.Environment.NewLine.ToCharArray()).ToList<string>();
+                    result = result.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+                    List<List<string>> results = new List<List<string>>();
+                    List<List<string>> headers = new List<List<string>>();
+                    int kk = 0;
+                    foreach (string s in result)
+                    {
+                        if (kk != result.Count - 1)
+                            results.Add(s.Split(';').ToList<string>());
+                        else headers.Add(s.Split(';').ToList<string>());
+                        kk++;
+                    }
+
+                    ViewData["headers"] = headers;
+                    ViewData["table"] = results;
                     ViewData["values"] = values;
                     ViewData["labels"] = labels;
                     //ViewData["header"] = header;
                     //ViewData["data_lines"] = data_lines;
+                    //debugging file
+                    using (StreamWriter sw = System.IO.File.AppendText(debugFile))
+                    {
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Data Summary scalled: results of analysis for dataset id : " + id+ " has finished");
+                    }
                     return PartialView("showDataSetAnalysis");
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
+                //debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(debugFile))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Data Summary scalled: results of analysis for dataset id : " + id + " has an error : "+ex.Message);
+                }
             }
             ViewData["values"] = new List<List<string>>();
             ViewData["labels"] = new List<List<string>>();
@@ -295,7 +326,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         }
 
 
-        private string UploadFiletoAnalysis(string filePath , string api_action="/" )
+        public string UploadFiletoAnalysis(string filePath , string api_action="" )
         {
             String filename = Path.GetFileName(filePath);
 
@@ -388,8 +419,10 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
             //Construct a HttpClient for the search-Server
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("http://aquadiva-analysis1.inf-bb.uni-jena.de:5000" +
-                api_action + "&file_path=" + filename + "&user_home_directory=" + name);
+            if (api_action == "") api_action = "/?";
+            else api_action = api_action + "&";
+                client.BaseAddress = new Uri("http://aquadiva-analysis1.inf-bb.uni-jena.de:5000" +
+                    api_action + "file_path=" + filename + "&user_home_directory=" + name);
             //Set the searchTerm as query-String
             StringBuilder paramBuilder = new StringBuilder();
             paramBuilder.Append(" ");
@@ -562,8 +595,9 @@ namespace BExIS.Modules.Asm.UI.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ActionResult CategoralAnalysis(long id)
+        public ActionResult CategoralAnalysis_(long id)
         {
+            System.IO.File.AppendAllText(debugFile, "CategoralAnalysis started "+ DateTime.Now + Environment.NewLine);
             ViewData["error"] = "";
             DatasetManager datasetManager = new DatasetManager();
             try
@@ -581,6 +615,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 LoggerFactory.LogCustom(message);
 
                 string absolute_file_path = File(path, "text/csv", title + ".csv").FileName.ToString();
+                System.IO.File.AppendAllText(@debugFile, "absolute_file_path -- " + DateTime.Now + " : -- " + absolute_file_path + Environment.NewLine);
 
                 Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
                 string extension = Path.GetExtension(absolute_file_path);
@@ -593,23 +628,44 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     //string file = Path.Combine("C:/Users/admin/Desktop/test.xlsx");
                     char[] spliter = { '\r' };
 
+                    System.IO.File.AppendAllText(@debugFile, "progToRun -- " + DateTime.Now + " : -- " + progToRun.ToString() + Environment.NewLine);
+                    System.IO.File.AppendAllText(@debugFile, "outputFolder -- " + DateTime.Now + " : -- " + outputFolder.ToString() + Environment.NewLine);
+
+                    System.IO.File.AppendAllText(@debugFile, "process intialized -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     Process proc = new Process();
+                    System.IO.File.AppendAllText(@debugFile, "proc.StartInfo.FileName ="+ python_path +" -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     proc.StartInfo.FileName = python_path;
+                    System.IO.File.AppendAllText(@debugFile, "proc.StartInfo.RedirectStandardOutput = true  -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     proc.StartInfo.RedirectStandardOutput = true;
+                    System.IO.File.AppendAllText(@debugFile, "proc.StartInfo.RedirectStandardError = true  -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     proc.StartInfo.RedirectStandardError = true;
+                    System.IO.File.AppendAllText(@debugFile, "proc.StartInfo.UseShellExecute = false  -- " + DateTime.Now + " : -- "  + Environment.NewLine);
                     proc.StartInfo.UseShellExecute = false;
 
                     // call hello.py to concatenate passed parameters
                     proc.StartInfo.Arguments = string.Concat(progToRun, " ", absolute_file_path, " ", extension, " ", outputFolder);
-                    proc.Start();
-
+                    System.IO.File.AppendAllText(@debugFile, "process going to start-- " + DateTime.Now + " : -- " + outputFolder.ToString() + Environment.NewLine);
+                    try
+                    {
+                        proc.Start();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.IO.File.AppendAllText(@debugFile, "process error -- " + DateTime.Now + " : -- " + ex.InnerException.Message + Environment.NewLine);
+                        ViewData["error"] = ViewData["error"] + Environment.NewLine + ex.InnerException.Message;
+                    }
+                    
+                    System.IO.File.AppendAllText(@debugFile, "process started now -- " + DateTime.Now + " : -- " + outputFolder.ToString() + Environment.NewLine);
                     //* Read the output (or the error)
                     string output = proc.StandardOutput.ReadToEnd();
                     string err = proc.StandardError.ReadToEnd();
-                    ViewData["error"] = "";
+
+                    System.IO.File.AppendAllText(@debugFile, "output -- " + DateTime.Now + " : -- " + output.ToString() + Environment.NewLine);
+                    System.IO.File.AppendAllText(@debugFile, "err -- " + DateTime.Now + " : -- " + err.ToString() + Environment.NewLine);
+
                     if (err.Length > 0)
                     {
-                        ViewData["error"] = err;
+                        ViewData["error"] = ViewData["error"] + Environment.NewLine + err;
                         return PartialView("showDataSetAnalysis");
                     }
 
@@ -618,6 +674,8 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     lines = output.Split(Environment.NewLine.ToCharArray()).ToList();
                     int index = lines.IndexOf("Numerical");
                     lines = lines.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+
+                    System.IO.File.AppendAllText(@debugFile, "lines -- " + DateTime.Now + " : -- " + lines.ToString() + Environment.NewLine);
 
                     List<List<string>> values = new List<List<string>>();
                     List<List<string>> labels = new List<List<string>>();
@@ -664,6 +722,9 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     data_lines.RemoveAt(data_lines.Count - 1);
                     // end of reading the results
 
+                    System.IO.File.AppendAllText(@debugFile, "header -- " + DateTime.Now + " : -- " + header.ToString() + Environment.NewLine);
+                    System.IO.File.AppendAllText(@debugFile, "data_lines -- " + DateTime.Now + " : -- " + data_lines.ToString() + Environment.NewLine);
+
                     datasetManager.Dispose();
                     FileInfo myfileinf = new FileInfo(absolute_file_path);
                     myfileinf.Delete();
@@ -679,6 +740,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
+                System.IO.File.AppendAllText(@debugFile, "Exception -- " + DateTime.Now + " : -- " + ex.InnerException.Message + Environment.NewLine);
             }
             return PartialView("showDataSetAnalysis");
 
