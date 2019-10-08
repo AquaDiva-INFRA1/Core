@@ -12,18 +12,15 @@ using System.Web;
 using Newtonsoft.Json.Linq;
 using BExIS.Modules.Asm.UI.Models;
 using BExIS.Modules.Rpm.UI.Models;
-using System.Linq;
 using System.Web.Configuration;
 using System.IO;
-using System.Data;
 using Vaiona.Utils.Cfg;
 using System.Xml;
-using BExIS.Aam.Services;
-using BExIS.Aam.Entities.Mapping;
+using Vaiona.Web.Mvc;
 
-namespace BExIS.Modules.Asm.UI.Controllers
+namespace BExIS.Modules.ASM.UI.Controllers
 {
-    public class AnalyticsController : Controller
+    public class PortalStatisticsController : Controller
     {
         static string DatastructAPI = "http://localhost:5412/api/structures/";
         static List<Variable_analytics> VA_list;
@@ -40,7 +37,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         string[] allowed_extention = new string[] { ".csv", ".xlsx" ,".xls" };
 
         static List<string> lines = new List<string>();
-        static String debugFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
+        static String DebugFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
 
         /* this action reveals a semantic coverage for our data portal and needs to be accessed via URL ... no button for it ...
         */
@@ -192,6 +189,13 @@ namespace BExIS.Modules.Asm.UI.Controllers
             ViewData["datacontaineranalytics"] = datacontaineranalytics;
 
             ViewData["VA_list"] = VA_list;
+
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Analytic scalled: portal statistics - VA_list " + VA_list.ToString());
+            }
+
             return View(VA_list);
         }
         
