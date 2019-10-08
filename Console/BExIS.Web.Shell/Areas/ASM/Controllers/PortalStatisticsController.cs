@@ -12,16 +12,15 @@ using System.Web;
 using Newtonsoft.Json.Linq;
 using BExIS.Modules.Asm.UI.Models;
 using BExIS.Modules.Rpm.UI.Models;
-using System.Linq;
 using System.Web.Configuration;
 using System.IO;
-using System.Data;
 using Vaiona.Utils.Cfg;
 using System.Xml;
+using Vaiona.Web.Mvc;
 
-namespace BExIS.Modules.Asm.UI.Controllers
+namespace BExIS.Modules.ASM.UI.Controllers
 {
-    public class AnalyticsController : Controller
+    public class PortalStatisticsController : Controller
     {
         static string DatastructAPI = "http://localhost:5412/api/structures/";
         static List<Variable_analytics> VA_list;
@@ -38,7 +37,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         string[] allowed_extention = new string[] { ".csv", ".xlsx" ,".xls" };
 
         static List<string> lines = new List<string>();
-        static String debugFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
+        static String DebugFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
 
         /* this action reveals a semantic coverage for our data portal and needs to be accessed via URL ... no button for it ...
         */
@@ -110,7 +109,6 @@ namespace BExIS.Modules.Asm.UI.Controllers
                         project = proj;
                 }
                 #endregion
-
 
                 //Construct a HttpClient for the search-Server
                 HttpClient client = new HttpClient();
@@ -191,6 +189,13 @@ namespace BExIS.Modules.Asm.UI.Controllers
             ViewData["datacontaineranalytics"] = datacontaineranalytics;
 
             ViewData["VA_list"] = VA_list;
+
+            //debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Analytic scalled: portal statistics - VA_list " + VA_list.ToString());
+            }
+
             return View(VA_list);
         }
         
@@ -256,117 +261,6 @@ namespace BExIS.Modules.Asm.UI.Controllers
             
             return File(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "REPORT.csv"), "text/csv", "REPORT.csv");
         }
-
-
-        public JObject getGraphData()
-        {
-            JObject jObject = new JObject();
-            int k = 0;
-            for (int i = 0; i< lines.Count; i++)
-            {
-                JArray Xarray = new JArray();
-                Xarray.Add(lines[i]);
-                Xarray.Add(lines[i+1]);
-
-                JArray Yarray = new JArray();
-                Yarray.Add(lines[i+2]);
-                Yarray.Add(lines[i+3]);
-
-                JArray jArray = new JArray();
-                jArray.Add(Xarray);
-                jArray.Add(Yarray);
-                jObject[k.ToString()] = jArray;
-                k = k + 1;
-                i = i + 3;
-            }
-            return jObject;
-        }
-
-        public String getDatasetsByProjects(string Project_id, String dataset_ids)
-        {
-            if ((Project_id == null) || (dataset_ids.Length < 1))
-                return "Parameters are Wrong";
-
-            List<string> headers = new List<string>();
-            List<string> contents = new List<string>();
-
-            foreach (string id in dataset_ids.Split(',').ToList<string>())
-            {
-                string header = "";
-                string content = "";
-
-                try
-                {
-                    // call fo the API to get the variables from the data structures using the internal API
-                    HttpClient client = new HttpClient();
-                    client.BaseAddress = new Uri(DatastructAPI);
-                    //Set the searchTerm as query-String
-                    String param = HttpUtility.UrlEncode(id.ToString());
-                    HttpResponseMessage response = client.GetAsync(param).Result;
-                    if (response.IsSuccessStatusCode)
-                    {
-                        JObject json_ds_struct = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-                        JArray json_variables = JArray.Parse(json_ds_struct["Variables"].ToString());
-
-                        //get the header in one string
-                        foreach (JObject json_variable in json_variables)
-                        {
-                            string var_id = json_variable["Id"].ToString();
-                            string var_label = json_variable["Label"].ToString();
-                            header = header + "," + var_label;
-                        }
-                        //end of get the header in one string
-
-                        // get the content in one string
-                        DatasetManager dsm = new DatasetManager();
-                        if (dsm.GetDataset(Int64.Parse(id)) != null)
-                        {
-                            DataTable dt = dsm.ConvertToDataTable(dsm.GetDatasetLatestVersion(dsm.GetDataset(Int64.Parse(id))));
-                            DataRowCollection rows = dt.Rows;
-                            for (int i = 0; i<rows.Count; i++)
-                            {
-                                var row = rows[i];
-                                for (int j = 0; j< json_variables.Count; j++)
-                                {
-                                    string ele = row[j].ToString();
-                                    ele = ele.Replace(System.Environment.NewLine, " ");
-                                    ele = ele.Replace(",", " ");
-                                    ele = ele.Replace(";", " ");
-                                    content = content + "," + ele;
-                                }
-                                content = content + Environment.NewLine;
-                            }
-                        }
-
-                        // check if the header is the same or is just another data wiuth the same data structure
-                        // if it exists, the content will be added to the existing content that matches the data et header (data struct)
-                        // else it will be added as another partial header
-                        if (header.Length>0)
-                        {
-                            int index = headers.IndexOf(header);
-                            if (index == -1)
-                            {
-                                headers.Add(header);
-                                contents.Add(content);
-                            }
-                            else
-                            {
-                                contents[index] = contents[index] + Environment.NewLine + content;
-                            }
-                        }
-                        
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine(e.Message.ToString());
-                    return "";
-                }
-            }
-
-            return "";
-        }
-        
 
         public ActionResult DataAttributeStruct_list(List<DataAttributeStruct> DataAttributeStruct_)
         {
