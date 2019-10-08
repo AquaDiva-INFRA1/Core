@@ -7,6 +7,9 @@
     List<List<string>> values = (List<List<string>>)ViewData["values"];
     List<List<string>> labels = (List<List<string>>)ViewData["labels"];
 
+    List<List<string>> table = (List<List<string>>)ViewData["table"];
+    List<List<string>> headers = (List<List<string>>)ViewData["headers"];
+
     string error = (string)ViewData["error"];
     if (error.Length > 1)
     {
@@ -45,10 +48,46 @@
     <p>It reflects the distribution of the categoral attributes and its values within the dataset.</p>
 </div>
 
+
+<br /><br />
+@{
+    if (table.Count>0)
+    {
+    <table class="table">
+        <thead>
+            @foreach (List<string> s in headers)
+            {
+                <tr>
+                    @foreach (string ss in s)
+                    {
+                        <th scope="col">@ss</th>
+                    }
+                </tr>
+            }
+        </thead>
+        <tbody>
+
+            @foreach (List<string> s in table)
+            {
+
+                <tr>
+                    @foreach (string ss in s)
+                    {
+                        <td>@ss</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+    }
+}
+<br /><br />
+
+
 @if (number_of_graphs < 1)
 {
     <div class="alert alert-warning" role="alert">
-        No Categoral Analyses / Summary was extracted from this dataset.
+        No Categoral Analysis / Summary was extracted from this dataset.
     </div>
 }
 else
@@ -64,7 +103,7 @@ else
                     {
                         <td>
 
-                            <canvas id="myChart_@index" width="500" height="350" ></canvas>
+                            <canvas id="myChart_@index" width="500" height="350"></canvas>
 
                         </td>
                         index = index + 1;
@@ -149,7 +188,7 @@ else
 
 
     $.ajax({
-        url: '/asm/DataSummary/getGraphData',
+        url: '/asm/DataSetSummary/getGraphData',
         type: 'POST',
         success: function (resp) {
             //spinner = document.getElementById("spinner");

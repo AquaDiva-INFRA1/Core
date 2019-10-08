@@ -63,12 +63,6 @@
                               .Enabled(false);
 
                           tabs.Add()
-                              .Text("Summary")
-                              .LoadContentFrom("CategoralAnalysis2", "DataSummary", new { area = "asm", id = @Model.Id })
-                              .HtmlAttributes(new { id = "analysis" })
-                              .Enabled(false);
-
-                          tabs.Add()
                               .Text("Primary Data")
                               .LoadContentFrom("ShowPrimaryData", "Data", new { area = "ddm", datasetID = @Model.Id })
                               .Enabled(@Model.ViewAccess)
@@ -79,8 +73,13 @@
                               .Text("Data Structure")
                               .LoadContentFrom("ShowPreviewDataStructure", "Data", new { area = "ddm", datasetID = @Model.Id })
                               .HtmlAttributes(new { id = "datastructure" })
-                              .Enabled(false);
+                              .Enabled(false)
 
+                          tabs.Add()
+                              .Text("Summary")
+                              .LoadContentFrom("CategoralAnalysis", "DataSetSummary", new { area = "asm", id = @Model.Id })
+                              .HtmlAttributes(new { id = "analysis" })
+                              .Enabled(false);
 
                           tabs.Add()
                               .Text("Dataset Permissions")
