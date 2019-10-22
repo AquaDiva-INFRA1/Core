@@ -1,5 +1,12 @@
 ﻿@using Telerik.Web.Mvc.UI
 
+@section Information
+{
+    This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.<br />
+    It reflects the distribution of the categoral attributes and its values within the dataset.
+
+}
+
 @{
     //List<string> header = (List<string>)ViewData["header"];
     //List<List<string>> data_lines = (List<List<string>>)ViewData["data_lines"];
@@ -25,6 +32,8 @@
 
 
 @{
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
@@ -39,50 +48,61 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
 
+
 }
 
-<div class="jumbotron" align="left">
+
+<div>
     <h1 class="display-4">Dataset Summary</h1>
-    <p class="lead">This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.</p>
-    <hr class="my-4">
-    <p>It reflects the distribution of the categoral attributes and its values within the dataset.</p>
+    <h3>
+        This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.<br />
+        <small class="text-muted">It reflects the distribution of the categoral attributes and its values within the dataset.</small>
+    </h3>
 </div>
 
-
-<br /><br />
-@{
-    if (table.Count>0)
-    {
-    <table class="table">
-        <thead>
-            @foreach (List<string> s in headers)
-            {
-                <tr>
-                    @foreach (string ss in s)
+<div class="jumbotron">
+    @{
+        if (table.Count > 0)
+        {
+            <table class="table">
+                <thead>
+                    @foreach (List<string> s in headers)
                     {
-                        <th scope="col">@ss</th>
+                        <tr>
+                            @foreach (string ss in s)
+                            {
+                                <th scope="col">@ss</th>
+                            }
+                        </tr>
                     }
-                </tr>
-            }
-        </thead>
-        <tbody>
+                </thead>
+                <tbody>
 
-            @foreach (List<string> s in table)
-            {
-
-                <tr>
-                    @foreach (string ss in s)
+                    @foreach (List<string> s in table)
                     {
-                        <td>@ss</td>
+
+                        <tr>
+                            @foreach (string ss in s)
+                            {
+                                <td>@ss</td>
+                            }
+                        </tr>
                     }
-                </tr>
-            }
-        </tbody>
-    </table>
+                </tbody>
+            </table>
+        }
     }
-}
-<br /><br />
+</div>
 
+<!--
+<br /><br />
+<div id="spinner">
+    <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+<br /><br />
+-->
 
 @if (number_of_graphs < 1)
 {
@@ -116,57 +136,17 @@ else
         </table>
     </div>
 }
-<div>
-    @*
-        <table>
-            <tr>
-                <td>
-                    <h2>
-                        Statistical Overview
-                    </h2>
-                    <!--
-                    <div id="spinner">
-                        <div class="spinner-border" role="status">
-                            <span class="sr-only">Loading...</span>
-                        </div>
-                    </div>
-                     -->
-                </td>
-                <td>
-                    <div id="preloaderContainer" />
-                </td>
-            </tr>
-            <tr>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            @foreach (string h in header)
-                            {
-                                <th>@h</th>
-                            }
-                        </tr>
-                    </thead>
-                    @foreach (List<string> data_line in data_lines)
-                    {
-                        <tbody>
-                            @foreach (string s in data_line)
-                            {
-                                <td>@s</td>
-                            }
-                        </tbody>
-                     }
-
-                </table>
-            </tr>
-        </table>
-    *@
-</div>
 
 
 
 
 <script type="text/javascript">
 
+    start();
+
+    $(window).resize(function () {
+        //start();
+    });
     //  spinner show / hide
     //var spinner = document.getElementById("spinner");
     //if (spinner.style.display === "none") {
@@ -186,101 +166,103 @@ else
     };
     //  end of numerical distribution show / hide
 
+    function start() {
+        $.ajax({
+            url: '/asm/DataSetSummary/getGraphData',
+            type: 'POST',
+            success: function (resp) {
+                //spinner = document.getElementById("spinner");
+                //spinner.style.display = "none";
+                var myJSON = JSON.parse(resp);
 
-    $.ajax({
-        url: '/asm/DataSetSummary/getGraphData',
-        type: 'POST',
-        success: function (resp) {
-            //spinner = document.getElementById("spinner");
-            //spinner.style.display = "none";
-            var myJSON = JSON.parse(resp);
+                Object.keys(myJSON).forEach(function (entry) {
 
-            Object.keys(myJSON).forEach(function (entry) {
+                    var element = myJSON[entry];
 
-                var element = myJSON[entry];
+                    var xdata = element[0];
+                    var xlabel = xdata[0];
+                    var xvalues = xdata[1].replace('[', '').replace(']', '').split(",");
 
-                var xdata = element[0];
-                var xlabel = xdata[0];
-                var xvalues = xdata[1].replace('[', '').replace(']', '').split(",");
+                    var ydata = element[1];
+                    var ylabel = ydata[0];
+                    var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
 
-                var ydata = element[1];
-                var ylabel = ydata[0];
-                var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
+                    //if (xlabel != ylabel){
+                    var data_ = [];
+                    for (var z = 0; z < yvalues.length; z++) {
+                        data_.push({ x: xvalues[z], y: yvalues[z] });
+                    }
+                    var id = "myChart_" + entry;
 
-                //if (xlabel != ylabel){
-                var data_ = [];
-                for (var z = 0; z < yvalues.length; z++) {
-                    data_.push({ x: xvalues[z], y: yvalues[z] });
-                }
-                var id = "myChart_" + entry;
+                    var colors = [];
+                    for (var i = 0; i < xvalues.length; i++) {
+                        colors.push(getRandomColor());
+                    }
 
-                var colors = [];
-                for (var i = 0; i < xvalues.length; i++) {
-                    colors.push(getRandomColor());
-                }
-
-                var scatterChartData = {
-                    datasets:
-                        [{
-                            data: data_
-                        }]
-                };
-                //check which type of data chart to use :
-                var ctxSc = document.getElementById(id).getContext('2d');
-                var myChart = new Chart(ctxSc, {
-                    type: 'bar',
-                    data: {
-                        labels: xvalues, // ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], // x data here
-                        datasets: [{
-                            data: yvalues, // [12, 19, 3, 5, 2, 3] // Y data here
-                            backgroundColor: colors
-                        }]
-                    },
-                    options: {
-                        title: {
-                            display: true,
-                            text: "",
-                            fontColor: 'black',
-                        },
-                        scales: {
-                            yAxes: [{
-                                ticks: {
-                                    beginAtZero: true
-                                },
-                                stacked: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: 'Count',
-                                    fontColor: 'black'
-                                }
-                            }],
-                            xAxes: [{
-                                maxBarThickness: 25,
-                                gridLines: {
-                                    offsetGridLines: true
-                                },
-                                stacked: true,
-                                fontColor: 'black',
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: xlabel,
-                                    fontColor: 'black'
-                                }
+                    var scatterChartData = {
+                        datasets:
+                            [{
+                                data: data_
+                            }]
+                    };
+                    //check which type of data chart to use :
+                    var ctxSc = document.getElementById(id).getContext('2d');
+                    var myChart = new Chart(ctxSc, {
+                        type: 'bar',
+                        data: {
+                            labels: xvalues, // ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], // x data here
+                            datasets: [{
+                                data: yvalues, // [12, 19, 3, 5, 2, 3] // Y data here
+                                backgroundColor: colors
                             }]
                         },
-                        legend: {
-                            display: false
+                        options: {
+                            title: {
+                                display: true,
+                                text: "",
+                                fontColor: 'black',
+                            },
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                    stacked: true,
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'Count',
+                                        fontColor: 'black'
+                                    }
+                                }],
+                                xAxes: [{
+                                    //maxBarThickness: 25,
+                                    gridLines: {
+                                        offsetGridLines: true
+                                    },
+                                    stacked: true,
+                                    fontColor: 'black',
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: xlabel,
+                                        fontColor: 'black'
+                                    }
+                                }]
+                            },
+                            legend: {
+                                display: false
+                            }
                         }
-                    }
-                });
+                    });
 
-                //}
-            });
-        },
-        error: function (e) {
-            alert('Error: ' + e);
-        }
-    });
+                    //}
+                });
+            },
+            error: function (e) {
+                alert('Error: ' + e);
+            }
+        });
+    }
+
 
     function getRandomColor() {
         var letters = '0123456789ABCDEF';
@@ -294,7 +276,7 @@ else
 
     function Show_numerical_distribution() {
         $.ajax({
-            url: '/asm/analytics/getGraphData',
+            url: '/asm/PortalStatistics/getGraphData',
             type: 'POST',
             success: function (resp) {
                 //spinner = document.getElementById("spinner");
