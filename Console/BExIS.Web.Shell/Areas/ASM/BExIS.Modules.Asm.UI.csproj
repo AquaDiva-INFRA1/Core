@@ -609,6 +609,7 @@
     <None Include="Properties\PublishProfiles\DIM.pubxml" />
     <None Include="Properties\PublishProfiles\DIM21105.pubxml" />
     <None Include="Properties\PublishProfiles\DIM21108.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -631,12 +632,12 @@
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Views\Analytics\index.cshtml" />
-    <Content Include="Views\Analytics\DataAttributeStruct_list.cshtml" />
-    <Content Include="Views\Analytics\EditUnitModel_list.cshtml" />
-    <Content Include="Views\Analytics\showDataSetAnalysis.cshtml" />
-    <Content Include="Views\DataSummary\showDataSetAnalysis.cshtml" />
-    <Content Include="Views\DataSummary\Specialdatasetanalysis.cshtml" />
+    <Content Include="Views\DataSetSummary\showDataSetAnalysis.cshtml" />
+    <Content Include="Views\DataSetSummary\Specialdatasetanalysis.cshtml" />
+    <Content Include="Views\PortalStatistics\DataAttributeStruct_list.cshtml" />
+    <Content Include="Views\PortalStatistics\EditUnitModel_list.cshtml" />
+    <Content Include="Views\PortalStatistics\index.cshtml" />
+    <Content Include="Views\PortalStatistics\showDataSetAnalysis.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

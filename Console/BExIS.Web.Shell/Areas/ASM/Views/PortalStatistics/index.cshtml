@@ -1,5 +1,4 @@
 ﻿
-@using BExIS.Modules.Asm.UI.Controllers;
 @using BExIS.Modules.Asm.UI.Models;
 @using Telerik.Web.Mvc.UI;
 @using BExIS.Modules.Rpm.UI.Models;
@@ -40,8 +39,8 @@
         </thead>
         <tbody>
             <tr>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataAttributeStruct_list_in_use.Count </a></td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataAttributeStruct_list_non_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataAttributeStruct_list_in_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataAttributeStruct_list_non_use.Count </a></td>
             </tr>
         </tbody>
     </table>
@@ -56,8 +55,8 @@
         </thead>
         <tbody>
             <tr>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.EditUnitModel_list_in_use.Count </a></td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.EditUnitModel_list_non_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.EditUnitModel_list_in_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.EditUnitModel_list_non_use.Count </a></td>
 
             </tr>
 
@@ -74,10 +73,10 @@
         </thead>
         <tbody>
             <tr>
-                
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataType_in_use.Count</td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataType_non_use.Count</td>
-                
+
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataType_in_use.Count</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataType_non_use.Count</td>
+
             </tr>
 
         </tbody>
@@ -139,12 +138,14 @@
     <button id="downloadCsvButton" class="bx-button function" title="Csv download" onclick="download()">Download Semantic Coverage Report</button>
     <br />
 
-    
+
     <h3> Detailed Report related to semantic coverage ofthe portal</h3>
     <table>
         <thead class="thead-dark">
             <tr>
                 <th scope="col">Dataset id</th>
+                <th scope="col">Dataset Owner</th>
+                <th scope="col">Project</th>
                 <th scope="col">Semantic Coverage</th>
                 <th scope="col">Variables id</th>
                 <th scope="col">Variables label</th>
@@ -183,6 +184,8 @@
 
                         <tr>
                             <td rowspan="@va.variable_id.Count">@va.dataset_id</td>
+                            <td rowspan="@va.variable_id.Count">@va.owner</td>
+                            <td rowspan="@va.variable_id.Count">@va.project</td>
                             <td rowspan="@va.variable_id.Count">Concept Coverage : @Concepts_count/@va.variable_id.Count <br /> Characteristics Coverage : @Caracteristics_count/@va.variable_id.Count</td>
                             <td>@va.variable_id[0] </td>
                             <td>@va.variable_label[0] </td>
@@ -235,19 +238,17 @@
 
 
 
-
-<script type="text/javascript">
-
+<script>
     function download() {
 		$.ajax({
-			url: '@Url.Action("Download_Report", "Analytics", "ASM")',
+			url: '@Url.Action("Download_Report", "PortalStatistics", "ASM")',
 			contentType: 'application/json; charset=utf-8',
 			datatype: 'json',
 			type: "GET",
 			success: function (e) {
 
 			    if (e) {
-			        window.location = '@Url.Action("Download_Report", "Analytics", "ASM")';
+			        window.location = '@Url.Action("Download_Report", "PortalStatistics", "ASM")';
 			    }
 			    else {
 			        alert("We can not generate file right now, report the error please");
@@ -256,5 +257,4 @@
 			}
 		})
     }
-
 </script>

@@ -233,6 +233,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
             ViewData["header"] = new List<string>();
             ViewData["data_lines"] = new List<List<string>>();
             ViewData["error"] = "No categoral information was extracted";
+            ViewData["table"] = new List<List<string>>() ;
+
             return PartialView("showDataSetAnalysis");
         }
 
@@ -274,7 +276,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                         dict_[kvp.Key] = value;
                     }
                 }
-                dict_ = dict_.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+                dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
                 ViewData["project_list_names"] = project_list_names_;
                 return JsonConvert.SerializeObject(dict_); ;
             }

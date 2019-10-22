@@ -19,7 +19,7 @@
     -->    
     <Export tag="lunchbar" id="helpAsm" order="1"
             title="Portal Statistics" description="Portal Statistics relating data attributes and semantic coverage" icon=""
-            controller="Analytics" action="index"
+            controller="PortalStatistics" action="Index"
             extends="./lunchbarRoot/help"
             />  
    
