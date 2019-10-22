@@ -50,8 +50,8 @@ namespace BExIS.Modules.Asm.UI.Helpers
                 if (summary == null) summary = featureManager.Create("Dataset Summary", "Dataset Summary", ASM);
 
                 //security
-                operationManager.Create("ASM", "Analytics", "*", portalstatistics);
-                operationManager.Create("ASM", "DataSummary", "*", summary);
+                operationManager.Create("ASM", "PortalStatistics", "*", portalstatistics);
+                operationManager.Create("ASM", "DataSetSummary", "*", summary);
 
             }
             finally

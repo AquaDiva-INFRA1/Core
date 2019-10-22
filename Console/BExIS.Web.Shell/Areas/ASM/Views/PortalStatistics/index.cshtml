@@ -1,5 +1,4 @@
 ﻿
-@using BExIS.Modules.Asm.UI.Controllers;
 @using BExIS.Modules.Asm.UI.Models;
 @using Telerik.Web.Mvc.UI;
 @using BExIS.Modules.Rpm.UI.Models;
@@ -40,8 +39,8 @@
         </thead>
         <tbody>
             <tr>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataAttributeStruct_list_in_use.Count </a></td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataAttributeStruct_list_non_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataAttributeStruct_list_in_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataAttributeStruct_list_non_use.Count </a></td>
             </tr>
         </tbody>
     </table>
@@ -56,8 +55,8 @@
         </thead>
         <tbody>
             <tr>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.EditUnitModel_list_in_use.Count </a></td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.EditUnitModel_list_non_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.EditUnitModel_list_in_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.EditUnitModel_list_non_use.Count </a></td>
 
             </tr>
 
@@ -74,10 +73,10 @@
         </thead>
         <tbody>
             <tr>
-                
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataType_in_use.Count</td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong" >@datacontaineranalytics.DataType_non_use.Count</td>
-                
+
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataType_in_use.Count</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataType_non_use.Count</td>
+
             </tr>
 
         </tbody>
@@ -139,7 +138,7 @@
     <button id="downloadCsvButton" class="bx-button function" title="Csv download" onclick="download()">Download Semantic Coverage Report</button>
     <br />
 
-    
+
     <h3> Detailed Report related to semantic coverage ofthe portal</h3>
     <table>
         <thead class="thead-dark">
@@ -242,14 +241,14 @@
 <script>
     function download() {
 		$.ajax({
-			url: '@Url.Action("Download_Report", "Analytics", "ASM")',
+			url: '@Url.Action("Download_Report", "PortalStatistics", "ASM")',
 			contentType: 'application/json; charset=utf-8',
 			datatype: 'json',
 			type: "GET",
 			success: function (e) {
 
 			    if (e) {
-			        window.location = '@Url.Action("Download_Report", "Analytics", "ASM")';
+			        window.location = '@Url.Action("Download_Report", "PortalStatistics", "ASM")';
 			    }
 			    else {
 			        alert("We can not generate file right now, report the error please");
@@ -258,6 +257,4 @@
 			}
 		})
     }
-</script>
-
 </script>
