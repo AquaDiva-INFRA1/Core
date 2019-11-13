@@ -9,6 +9,11 @@ using System.Diagnostics.Contracts;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
+using VDS;
+using VDS.RDF;
+using VDS.RDF.Query;
+using System.IO;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Aam.Services
 {
@@ -16,6 +21,7 @@ namespace BExIS.Aam.Services
     {
         private IUnitOfWork guow = null;
         private IRepository<Annotation> AnnotationRepo;
+        String ADOntologyPath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
 
         public AnnotationManager()
         {
@@ -144,7 +150,7 @@ namespace BExIS.Aam.Services
             IEnumerable<Annotation> allAnnotations = this.GetAnnotations();
 
             //Create the new annotation object
-            Annotation newAnnotation = new Annotation(Dataset, DatasetVersion, Variable, Entity, this.GetLabelForURI(allAnnotations, Entity), 
+            Annotation newAnnotation = new Annotation(Dataset, DatasetVersion, Variable, Entity, this.GetLabelForURI(allAnnotations, Entity),
                 Characteristic, this.GetLabelForURI(allAnnotations, Characteristic), Standard, this.GetLabelForURI(allAnnotations, Standard));
 
             #region Get/Generate the ID's for Entity, Characteristic and Standard
@@ -291,7 +297,39 @@ namespace BExIS.Aam.Services
             IEnumerable<Annotation> allAnnotations = this.GetAnnotations();
 
             //Create the new annotation object
-            return this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, this.GetLabelForURI(allAnnotations, Entity), Characteristic, this.GetLabelForURI(allAnnotations, Characteristic));
+            return this.CreateAnnotation(Dataset, DatasetVersion, Variable, Entity, this.get_label(ADOntologyPath, Entity), Characteristic, this.get_label(ADOntologyPath, Characteristic));
+        }
+
+        public string get_label(string ADOntologyPath, string uri)
+        {
+            //Load the ontology as a graph
+            IGraph g = new Graph();
+            g.LoadFromFile(ADOntologyPath);
+            //Create a new queryString
+            SparqlParameterizedString queryString = new SparqlParameterizedString();
+            //Add some important namespaces
+            queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
+            queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+            String commandTextTemplate = "SELECT ?label WHERE {{<{0}> rdfs:label ?label}}";
+
+            //set the entity to search through the graph
+            queryString.Namespaces.AddNamespace("entity", new Uri(uri.Trim()));
+            queryString.CommandText = "SELECT ?label WHERE" +
+                " { " +
+                "<" + uri.Trim() + "> rdfs:label ?label " +
+                "} ";
+            // end ofthe settings
+
+            SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+            String res = "";
+            if (results.Count != 0)
+            {
+                res = results[0]["label"].ToString().Split('^')[0];
+            }
+            if (res.Contains("@"))
+                res.Substring(0, res.IndexOf("@"));
+
+            return res;
         }
 
         /// <summary>
@@ -389,7 +427,7 @@ namespace BExIS.Aam.Services
         {
             Contract.Requires(uris.Count == labels.Count);
 
-            using(IUnitOfWork uow = this.GetUnitOfWork())
+            using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<Annotation> repo = uow.GetRepository<Annotation>();
                 IEnumerable<Annotation> allAnnotations = repo.Get();
@@ -397,24 +435,24 @@ namespace BExIS.Aam.Services
                 int changes = 0;
 
                 //For each annotation, check for each URI if we have a label for it in our input-lists
-                foreach(Annotation an in allAnnotations)
+                foreach (Annotation an in allAnnotations)
                 {
                     int index = uris.IndexOf(an.Entity);
-                    if(index != -1)
+                    if (index != -1)
                     {
                         an.Entity_Label = labels.ElementAt(index);
                         changes++;
                     }
 
                     index = uris.IndexOf(an.Characteristic);
-                    if(index != -1)
+                    if (index != -1)
                     {
                         an.Characteristic_Label = labels.ElementAt(index);
                         changes++;
                     }
 
                     index = uris.IndexOf(an.Standard);
-                    if(index != -1)
+                    if (index != -1)
                     {
                         an.Standard_Label = labels.ElementAt(index);
                         changes++;
@@ -426,6 +464,7 @@ namespace BExIS.Aam.Services
             return -1;
         }
 
+
         #region (Private) Helper functions
         /// <summary>
         /// Gets the id of the given standard from the given enumerable annotations.
@@ -436,7 +475,7 @@ namespace BExIS.Aam.Services
         /// <returns>A new id for the given standard</returns>
         private long GetOrGenerateStandardId(IEnumerable<Annotation> allAnnotations, string standard)
         {
-            Annotation unicorn = allAnnotations.Where(an => an.Standard!=null && an.Standard.Equals(standard)).FirstOrDefault();
+            Annotation unicorn = allAnnotations.Where(an => an.Standard != null && an.Standard.Equals(standard)).FirstOrDefault();
             if (unicorn != null)
             {
                 return unicorn.StandardId;
@@ -456,7 +495,7 @@ namespace BExIS.Aam.Services
         /// <returns>A new id for the given characteristic</returns>
         private long GetOrGenerateCharacteristicId(IEnumerable<Annotation> allAnnotations, string characteristic)
         {
-            Annotation unicorn = allAnnotations.Where(an => an.Characteristic!=null && an.Characteristic.Equals(characteristic)).FirstOrDefault();
+            Annotation unicorn = allAnnotations.Where(an => an.Characteristic != null && an.Characteristic.Equals(characteristic)).FirstOrDefault();
             if (unicorn != null)
             {
                 return unicorn.CharacteristicId;
@@ -476,7 +515,7 @@ namespace BExIS.Aam.Services
         /// <returns>A new id for the given entity</returns>
         private long GetOrGenerateEntityID(IEnumerable<Annotation> allAnnotations, string entity)
         {
-            Annotation unicorn = allAnnotations.Where(an => an.Entity!=null && an.Entity.Equals(entity)).FirstOrDefault();
+            Annotation unicorn = allAnnotations.Where(an => an.Entity != null && an.Entity.Equals(entity)).FirstOrDefault();
             if (unicorn != null)
             {
                 return unicorn.EntityId;
@@ -495,6 +534,37 @@ namespace BExIS.Aam.Services
         /// <param name="uri">Concept-URI that the label should be found for</param>
         /// <returns>A new id for the given entity</returns>
         private String GetLabelForURI(IEnumerable<Annotation> allAnnotations, string uri)
+        {
+            //Load the ontology as a graph
+            IGraph g = new Graph();
+            g.LoadFromFile(ADOntologyPath);
+            //Create a new queryString
+            SparqlParameterizedString queryString = new SparqlParameterizedString();
+            //Add some important namespaces
+            queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
+            queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+            //String commandTextTemplate = "SELECT ?label WHERE {{<{0}> rdfs:label ?label}}";
+
+            //set the entity to search through the graph
+            queryString.Namespaces.AddNamespace("entity", new Uri(uri.Trim()));
+            queryString.CommandText = "SELECT ?label WHERE" +
+                " { " +
+                "<" + uri.Trim() + "> rdfs:label ?label " +
+                "} ";
+            // end ofthe settings
+
+            SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+            String res = "";
+            if (results.Count != 0)
+            {
+                res = results[0]["label"].ToString().Split('^')[0];
+            }
+            if (res.Contains("@"))
+                res.Substring(0, res.IndexOf("@"));
+             
+            return res;
+        }
+        private String GetLabelForURI_(IEnumerable<Annotation> allAnnotations, string uri)
         {
             Annotation unicorn = allAnnotations.Where(an => an.Entity != null && an.Entity.Equals(uri)).FirstOrDefault();
             if (unicorn != null)

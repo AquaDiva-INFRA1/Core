@@ -1,0 +1,59 @@
+﻿@model IEnumerable<BExIS.Aam.Entities.Mapping.Aam_Dataset_column_annotation>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Dataset)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.variable_id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.entity_id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.characteristic_id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.standard_id)
+        </th>
+
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Dataset.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.variable_id.Label)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.entity_id.URI)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.characteristic_id.URI)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.standard_id.URI)
+            </td>
+            
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+            </td>
+        </tr>
+    }
+
+</table>

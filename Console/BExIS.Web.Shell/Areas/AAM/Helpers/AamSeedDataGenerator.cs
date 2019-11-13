@@ -22,8 +22,14 @@ namespace BExIS.Modules.Aam.UI.Helpers
                 Feature AquadivaAnnotationsFeature = features.FirstOrDefault(f => f.Name.Equals("Aquadiva Annotations"));
                 if (AquadivaAnnotationsFeature == null) AquadivaAnnotationsFeature = featureManager.Create("Aquadiva Annotations", "Aquadiva Annotations");
 
+                Feature AquadivaAnnotationsbackendFeature = features.FirstOrDefault(f => f.Name.Equals("Aquadiva Annotations back end"));
+                if (AquadivaAnnotationsbackendFeature == null) AquadivaAnnotationsbackendFeature = featureManager.Create("Aquadiva Annotations back end", "Aquadiva Annotations back end");
+
                 operationManager.Create("AAM", "Help", "*");
                 operationManager.Create("AAM", "Annotation", "*", AquadivaAnnotationsFeature);
+                operationManager.Create("AAM", "Aam_Dataset_column_annotation", "*", AquadivaAnnotationsbackendFeature);
+                operationManager.Create("AAM", "Aam_Observation_Context", "*", AquadivaAnnotationsbackendFeature);
+                operationManager.Create("AAM", "Aam_Uri", "*", AquadivaAnnotationsbackendFeature);
                 #endregion
             }
             finally
