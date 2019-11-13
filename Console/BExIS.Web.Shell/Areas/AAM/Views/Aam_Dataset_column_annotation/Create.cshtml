@@ -1,0 +1,89 @@
+﻿@model  BExIS.Modules.Aam.UI.Models.Aam_Dataset_column_annotation_Model
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Create</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Aam_Dataset_column_annotation</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.datasets, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.datasets,
+                new SelectList(Model.datasets, "Key", "Value"),
+                new { htmlAttributes = new { @class = "form-control" } }
+                )
+                @Html.ValidationMessageFor(model => model.datasets, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.DataAttributes, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.DataAttributes,
+                new SelectList(Model.DataAttributes, "Key", "Value"),
+                new { htmlAttributes = new { @class = "form-control" } }
+                )
+                @Html.ValidationMessageFor(model => model.DataAttributes, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.entites, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.entites,
+                new SelectList(Model.entites, "Key", "Value"),
+                new { htmlAttributes = new { @class = "form-control" } }
+                )
+                @Html.ValidationMessageFor(model => model.entites, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.characs, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.characs,
+                new SelectList(Model.characs, "Key", "Value"),
+                new { htmlAttributes = new { @class = "form-control" } }
+                )
+                @Html.ValidationMessageFor(model => model.characs, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.standards, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.standards,
+                new SelectList(Model.standards, "Key", "Value"),
+                new { htmlAttributes = new { @class = "form-control" } }
+                )
+                @Html.ValidationMessageFor(model => model.standards, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>

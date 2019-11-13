@@ -38,6 +38,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="VDS.Common">
+      <HintPath>..\..\..\packages\VDS.Common.1.9.0\lib\net40-client\VDS.Common.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -48,6 +51,15 @@
     <Folder Include="Mappings\PostgreSQL82Dialect\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Mappings\Default\Mapping\Aam_Dataset_column_annotation.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Mapping\Aam_Observation_Context.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Mapping\Aam_Uri.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Mappings\Default\Mapping\Annotation.hbm.xml">
       <SubType>Designer</SubType>
     </Content>

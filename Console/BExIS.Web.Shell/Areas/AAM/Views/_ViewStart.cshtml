@@ -1,4 +1,31 @@
 ﻿@using Vaiona.Web.Mvc;
 @{
     Layout = Html.GetLayoutName();
+
+
+
 }
+
+@Html.ActionLink(
+        linkText: "URIs",
+        actionName: "Index",
+        controllerName: "Aam_Uri",
+        routeValues: null,
+        htmlAttributes: new { @class = "bx-button action", @title = "URI s manager" }
+    )<br />
+
+@Html.ActionLink(
+    linkText: "Annotations",
+    actionName: "Index",
+    controllerName: "Aam_Dataset_column_annotation",
+    routeValues: null,
+    htmlAttributes: new { @class = "bx-button action", @title = "Annotation manager" }
+)<br />
+
+@Html.ActionLink(
+    linkText: "Observations",
+    actionName: "Index",
+    controllerName: "Aam_Observation_Context",
+    routeValues: null,
+    htmlAttributes: new { @class = "bx-button action", @title = "Observation manager" }
+)<br />

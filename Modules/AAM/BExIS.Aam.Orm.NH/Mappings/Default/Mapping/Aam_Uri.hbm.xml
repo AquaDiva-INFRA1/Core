@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
+                   assembly="BExIS.Aam.Entities"
+                   namespace="BExIS.Aam.Entities.Mapping">
+
+  <class xmlns="urn:nhibernate-mapping-2.2" name="Aam_Uri" table="Aam_Uri">
+
+    <id name="Id" type="Int64">
+      <generator class="native" />
+    </id>
+    
+    <version name="URI" type="string">
+      <column name="URI" />
+    </version>
+    
+    <property name="label" type="string">
+      <column name="label" />
+    </property>
+    
+    <property name="type" type="string">
+      <column name="type" />
+    </property>
+
+  </class>
+</hibernate-mapping>
