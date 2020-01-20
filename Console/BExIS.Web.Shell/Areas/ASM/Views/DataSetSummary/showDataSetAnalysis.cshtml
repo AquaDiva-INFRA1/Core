@@ -1,4 +1,5 @@
 ﻿@using Telerik.Web.Mvc.UI
+@using System.Linq;
 
 @section Information
 {
@@ -8,6 +9,8 @@
 }
 
 @{
+    Layout = null;
+
     //List<string> header = (List<string>)ViewData["header"];
     //List<List<string>> data_lines = (List<List<string>>)ViewData["data_lines"];
 
@@ -17,6 +20,10 @@
     List<List<string>> table = (List<List<string>>)ViewData["table"];
     List<List<string>> headers = (List<List<string>>)ViewData["headers"];
 
+    List<System.Type> column_types = (List<System.Type>)ViewData["column_types"];
+    List<List<KeyValuePair<int, object>>> data_ranges = (List<List<KeyValuePair<int, object>>>)ViewData["data_ranges"];
+    List<double> nullsCount = (List<double>)ViewData["nullsCount"];
+
     string error = (string)ViewData["error"];
     if (error.Length > 1)
     {
@@ -25,7 +32,7 @@
         </script>
     }
 
-    int number_of_graphs = labels.Count();
+    int number_of_graphs = labels.Count;
     int number_of_rows = (int)Math.Round((float)(1 / 2) + (float)number_of_graphs / (float)5);
     Int32 index = 0;
 }
@@ -73,19 +80,37 @@
                             {
                                 <th scope="col">@ss</th>
                             }
+                            <th>Numerical distribution</th>
+                            <th>Nulls / Missing values</th>
                         </tr>
                     }
                 </thead>
                 <tbody>
 
-                    @foreach (List<string> s in table)
+                    @for (int ind = 0; ind < table.Count; ind++) //List<string> s in table)
                     {
-
+                        List<string> s = table[ind];
                         <tr>
                             @foreach (string ss in s)
                             {
                                 <td>@ss</td>
                             }
+                            <td>
+                                @if (@data_ranges[ind].Count > 0)
+                                {
+                                    @Html.Raw(String.Format("{0:0.00}", @data_ranges[ind][0].Value) + " --> " + String.Format("{0:0.00}", @data_ranges[ind][@data_ranges[ind].Count - 1].Value))
+                                }
+                                else
+                                {
+                                    @Html.Raw("--");
+                                }
+
+                            </td>
+                            <td>
+                                <div class="chart-container" style="position: relative; height:40vh; width:80vw">
+                                    <canvas id="Pie_@ind" Value="@Html.Raw(nullsCount[ind])"></canvas>
+                                </div>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -143,6 +168,7 @@ else
 <script type="text/javascript">
 
     start();
+    load_pie_charts();
 
     $(window).resize(function () {
         //start();
@@ -262,6 +288,45 @@ else
             }
         });
     }
+
+    function load_pie_charts() {
+        var colors = [];
+        for (var i = 0; i < 2; i++) {
+            colors.push(getRandomColor());
+        }
+
+        for (var i = 0; i <  @table.Count; i++) {
+            var xx = document.getElementById('Pie_' + i);
+            var nulls_per = (xx.getAttribute("Value") * 100).toFixed(2);
+
+            var cc_per = ((1 - xx.getAttribute("Value")) * 100).toFixed(2);
+            data = {
+                datasets: [{
+                    data: [cc_per, nulls_per],
+                    backgroundColor: ["#0074D9", "#FF4136"]
+                }],
+                labels: [
+                    'Filled ',
+                    'NAs / Missing',
+                ]
+            };
+            console.log(data);
+            var ctx = document.getElementById('Pie_' + i).getContext('2d');
+            ctx.canvas.parentNode.style.height = '128px';
+            ctx.canvas.parentNode.style.width = '128px';
+            var myDoughnutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    legend: {
+                        display: false
+                    }
+                }
+            });
+        }
+
+    }
+
 
 
     function getRandomColor() {

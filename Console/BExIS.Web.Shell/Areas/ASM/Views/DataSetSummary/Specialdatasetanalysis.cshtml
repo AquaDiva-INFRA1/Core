@@ -6,7 +6,34 @@
 @using Telerik.Web.Mvc.UI;
 
 @{
-    Dictionary<string, List<string>> project_list_names = (Dictionary<string, List<string>>)ViewData["project_list_names"];
+    //Dictionary<string, List<string>> project_list_names = (Dictionary<string, List<string>>)ViewData["project_list_names"];
+
+    Dictionary<int, string> seasons = new Dictionary<int, string>() {
+        {1,"Spring" },
+        {2,"Autumn" },
+        {3,"Winter" },
+        {4,"Summer" }
+    };
+
+    Dictionary<string, List<string>> project_list_names = new Dictionary<string, List<string>> {
+            {"A01", new List<string> { "Wick", "Antonis Chatzinotas" } },
+            {"A02", new List<string> { "Pohnert", "Gleixner" } },
+            {"A03", new List<string> { "Kusel", "Martin Taubert", "Jürgen Popp" , "Petra Rosch" } },
+            {"A04", new List<string> { "Martin von Bergen", "Jehmlich" } },
+            {"A05", new List<string> { "Ulrich Brose", "Bjorn Rall" } },
+            {"A06", new List<string> { "Manja Marz" } },
+            {"B01", new List<string> { "Beate Michalzik", "Nicole van Dam" } },
+            {"B02", new List<string> { "Anke Hildebrandt " } },
+            {"B03", new List<string> { "Susan Trumbore", "Torsten Frosch" } },
+            {"B04", new List<string> { "Sabine Attinger" } },
+            {"B05", new List<string> { "Martina Herrmann" } },
+            {"C03", new List<string> { "Totsche" } },
+            {"C05", new List<string> { "Totsche", "Ulrich S. Schubert" } },
+            {"D01", new List<string> { "Birgitta König-Ries", "Udo Hahn" } },
+            {"D02", new List<string> { "Anke Hildebrandt", "Küsel" } },
+            {"D03", new List<string> { "Totsche", "Küsel" } }
+        };
+
 }
 
 <head>
@@ -14,7 +41,7 @@
 
     <style type="text/css">
         /* Always set the map height explicitly to define the size of the div
-                * element that contains the map. */
+                    * element that contains the map. */
         #mapid {
             border: 3px solid black;
             height: 400px;
@@ -57,7 +84,25 @@
                     @{
                         for (int x = 2013; x < 2020; x++)
                         {
-                            <li><input type="checkbox" name="YearFIlter_li" id="YearFIlter_li" class="YearFIlter_li" value=@x> @x </li>
+                            <li>
+                                <input type="checkbox" name="YearFIlter_li_" id="YearFIlter_li_"
+                                       class="YearFIlter_li_@x" value=@x
+                                       onclick="fillchildren('@Html.Raw(x)','@Html.Raw("SeasonList_Ul_")','@Html.Raw("YearFIlter_li_")')">
+                                @x
+                            </li>
+                            <div name="SeasonList_Ul_@x" id="SeasonList_Ul_@x" class="SeasonList_Ul_@x" hidden="true">
+                                <ul id="SeasonList_Ul_inside_@x">
+                                    @foreach (KeyValuePair<int, string> keyvaluepair in seasons)
+                                    {
+                                        <li>
+                                            <input type="checkbox" name="SeasonFIlter_li_" id="SeasonFIlter_li_"
+                                                   class="SeasonFIlter_li_@Html.Raw(x)" value=@keyvaluepair.Value
+                                                   onclick="child_click('@Html.Raw(x)','SeasonList_Ul_','YearFIlter_li_','SeasonFIlter_li_')">
+                                            @keyvaluepair.Value
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
                         }
                     }
                 </ul>
@@ -70,15 +115,21 @@
                         foreach (KeyValuePair<string, List<string>> kvp in project_list_names)
                         {
                             <li>
-                                <input type="checkbox" name="GroupFIlter_li" id="GroupFIlter_li" class="GroupFIlter_li_@Html.Raw(kvp.Key)" value=@kvp.Key onclick="fillchildren('@Html.Raw(kvp.Key)')">
+                                <input type="checkbox" name="GroupFIlter_li_" id="GroupFIlter_li_"
+                                       class="GroupFIlter_li_@Html.Raw(kvp.Key)" value=@kvp.Key
+                                       onclick="fillchildren('@Html.Raw(kvp.Key)','@Html.Raw("NameList_Ul_")','@Html.Raw("GroupFIlter_li_")')">
                                 @kvp.Key
                             </li>
                             <div name="NameList_Ul_@Html.Raw(kvp.Key)" id="NameList_Ul_@Html.Raw(kvp.Key)" class="NameList_Ul_@Html.Raw(kvp.Key)" hidden="true">
                                 <ul id="NameList_Ul_inside_@Html.Raw(kvp.Key)">
                                     @foreach (string s in kvp.Value)
                                     {
-                                        <li><input type="checkbox" name="NameFIlter_li" id="NameFIlter_li" class="NameFIlter_li_@Html.Raw(kvp.Key)" value=@s onclick="child_click('@Html.Raw(kvp.Key)')"> @s</li>
-                                    }
+                                        <li>
+                                            <input type="checkbox" name="NameFIlter_li" id="NameFIlter_li"
+                                                   class="NameFIlter_li_@Html.Raw(kvp.Key)" value=@s
+                                                   onclick="child_click('@Html.Raw(kvp.Key)','NameList_Ul_','GroupFIlter_li_','NameFIlter_li_')"> @s
+                                            </li>
+                                        }
                                 </ul>
                             </div>
 
@@ -90,8 +141,8 @@
                 <label for="FIlterFIlter">Filter type</label>
                 <ul id="FIlterFIlter">
                     <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="unspecified"> none</li>
-                    <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="0.1µm"> 0.1</li>
-                    <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="0.2µm"> 0.2</li>
+                    <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="0.1um"> 0.1</li>
+                    <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="0.2um"> 0.2</li>
                 </ul>
             </div>
             <button type="button" class="btn btn-primary" id="clear" onclick="clear(this)">Clear</button>
@@ -147,7 +198,7 @@
         });
 
         var elements = document.getElementsByClassName('NameList_Ul')
-        alert(elements);
+        //alert(elements);
         for (var i = 0; i < elements.length; i++) {
             elements[i].setAttribute("hidden", true);
         }
@@ -161,13 +212,25 @@
 
     function onMapClick(e) {
 
+        var seasonFIlter = {};
         var YearFIlter = [];
-        $.each($("input[name='YearFIlter_li']:checked"), function () {
+        $.each($("input[name='YearFIlter_li_']:checked"), function () {
             YearFIlter.push($(this).val());
+            var tete = $(this).val();
+            var ide = 'SeasonFIlter_li_' + tete;
+            var text = "";
+            $.each($("input[class='" + ide + "']:checked"), function () {
+                console.log($(this).val());
+                text = $(this).val() + ' , ' + text;
+            });
+            text = text.substring(0, text.length - 3);
+            console.log("results of seasons : " + text);
+            seasonFIlter[tete] = (text);
         });
 
+
         var GroupFIlter = [];
-        $.each($("input[name='GroupFIlter_li']:checked"), function () {
+        $.each($("input[name='GroupFIlter_li_']:checked"), function () {
             GroupFIlter.push($(this).val());
         });
 
@@ -190,12 +253,22 @@
                 .openOn(mymap);
         }
 
-        data = 'welllocation ' + welllocation + ' year ' + YearFIlter.toString() + ' filtersize ' + FilterFilter.toString() + ' GroupName ' + GroupFIlter.toString() + ' NameFIlter ' + NameFIlter;
+        data = 'welllocation ' + welllocation + ' year ' + YearFIlter.toString() + ' filtersize ' + FilterFilter.toString() +
+            ' GroupName ' + GroupFIlter.toString() + ' NameFIlter ' + NameFIlter + 'Season_dict' + JSON.stringify(seasonFIlter);
         console.log(" -> " + data);
 
-        summary = "<br><h3> <b>The table</b> represents the summary results in ";
-        if (YearFIlter.length == 0) summary = summary + "<b> all years</b>  ";
-        else summary = summary + " <b>" + YearFIlter.toString() + " </b> ";
+        summary = "<br><h3> <b>The table</b> represents the <b>percentage</b> of each analysis in <b>relation to the wells</b>. <br>The summary results in ";
+
+        if (YearFIlter.length == 0) summary = summary + "<b> all years </b> and <b> all seasons </b>  ";
+        else {
+            var x = Object.keys(seasonFIlter);
+            x.forEach(function (element) {
+                console.log(element);
+                console.log(seasonFIlter[element]);
+                summary = summary + "the seasons <b>" + seasonFIlter[element] + "</b> of the year <b>" + element + " </b> and ";
+            });
+        }
+        summary = summary.substring(0, summary.length - 4);
 
         if (FilterFilter.length == 0) summary = summary + " with <b>all filter types </b>  ";
         else summary = summary + "with <b> " + FilterFilter.toString() + " as filter type </b> ";
@@ -208,12 +281,17 @@
         if (NameFIlter.length == 0) summary = summary + "<b> all Project Investigators </b> ";
         else summary = summary + " <b> " + NameFIlter.toString() + " </b> </h3>";
 
+
+
         $("#summary").html(summary);
 
         $.ajax({
             url: '/ASM/DataSetSummary/Filter_Apply',
             type: 'POST',
-            data: { 'welllocation': welllocation, 'year': YearFIlter.toString(), 'filtersize': FilterFilter.toString(), 'GroupName': GroupFIlter.toString(), 'NameFIlter': NameFIlter.toString() },
+            data: {
+                'welllocation': welllocation, 'year': YearFIlter.toString(), 'filtersize': FilterFilter.toString(), 'GroupName': GroupFIlter.toString(),
+                'NameFIlter': NameFIlter.toString().replace('ü', 'u').replace('ö', 'o').replace('ä', 'a'), 'Season_dict': JSON.stringify(seasonFIlter)
+            },
             error: function (xhr) {
                 alert('Please choose a Filter');
                 document.getElementById("spinner_loader").setAttribute("hidden", true);
@@ -240,7 +318,7 @@
                                 if (b == true) {
                                     html = html + "<td><b>" + elems[i] + "</b> </td> ";
                                 }
-                                else html = html + "<td>" + elems[i] + " </td> ";
+                                else html = html + "<td>" + elems[i] + " % </td> ";
 
                             }
                             b = false;
@@ -256,15 +334,20 @@
         });
     }
 
-    function fillchildren(x) {
+    function fillchildren(x, child, classname) {
         // check if the group is checked : classname = GroupFIlter_li_"project name"
-        var query = $('#NameList_Ul_' + x);
-        child = 'NameList_Ul_' + x;
-        classname = 'GroupFIlter_li_' + x;
-        div = 'NameList_Ul_' + x;
-        ul = 'NameList_Ul_inside_' + x;
-        li = 'NameFIlter_li_' + x;
+        //var query = $('#NameList_Ul_' + x);
+        //child = 'NameList_Ul_' + x;
+        //classname = 'GroupFIlter_li_' + x;
+        child = child + x;
+        classname = classname + x;
 
+        //div = 'NameList_Ul_' + x;
+        //ul = 'NameList_Ul_inside_' + x;
+        //li = 'NameFIlter_li_' + x;
+
+        console.log(child);
+        console.log(classname);
         console.log(" -> " + Object.keys($('.' + classname)));
         console.log(" -> " + $('.' + classname).attr("checked"));
 
@@ -280,13 +363,19 @@
             document.getElementById(child).setAttribute("hidden", true);
         }
     }
-    function child_click(x) {
-        var query = $('#NameList_Ul_' + x);
-        child = 'NameList_Ul_' + x;
-        classname = 'GroupFIlter_li_' + x;
-        div = 'NameList_Ul_' + x;
-        ul = 'NameList_Ul_inside_' + x;
-        li = 'NameFIlter_li_' + x;
+
+
+    function child_click(x, child, classname, li_input_class) {
+        //var query = $('#NameList_Ul_' + x);
+        //child = 'NameList_Ul_' + x;
+        //classname = 'GroupFIlter_li_' + x;
+        //div = 'NameList_Ul_' + x;
+        //ul = 'NameList_Ul_inside_' + x;
+        //li = 'NameFIlter_li_' + x;
+
+        child = child + x;
+        classname = classname + x;
+        li = li_input_class + x;
 
         child_checked_length = $("." + li + ":checked").length
         console.log(" -> " + classname);
@@ -302,7 +391,7 @@
 
 
 <script type="text/javascript">
-    var mymap = L.map('mapid').setView([51.118835, 10.425906], 14);
+    var mymap = L.map('mapid').setView([51.114878, 10.433303], 14);
 
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -321,6 +410,7 @@
         },
         success: function (result) {
             jsonObject = JSON.parse(result);
+
             for (i = 0; i < jsonObject.length; i++) {
                 if ((jsonObject[i].Lat != null) && (jsonObject[i].Lon != null)) {
 
