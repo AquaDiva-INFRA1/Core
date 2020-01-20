@@ -44,6 +44,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Deedle, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\Deedle.2.1.0\lib\net45\Deedle.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\FSharp.Core.4.5.2\lib\net45\FSharp.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\..\..\..\Libraries\Ionic.Zip.dll</HintPath>
     </Reference>
@@ -245,12 +251,24 @@
     <Reference Include="Microsoft.Scripting.Metadata, Version=1.2.3.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\DynamicLanguageRuntime.1.2.3-alpha0\lib\net45\Microsoft.Scripting.Metadata.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Solver.Foundation, Version=3.0.2.10889, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\Microsoft.Solver.Foundation.3.1.0\lib\Microsoft.Solver.Foundation.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.Helpers">
       <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebHelpers.3.2.3\lib\net45\Microsoft.Web.Helpers.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="NMath, Version=6.2.0.58, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\CenterSpace.NMath.6.2.0.58\lib\net40\NMath.dll</HintPath>
+    </Reference>
+    <Reference Include="NMathPremium, Version=6.2.0.58, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\CenterSpace.NMath.Premium.6.2.0.58\lib\net40\NMathPremium.dll</HintPath>
+    </Reference>
+    <Reference Include="NMathStats, Version=4.2.0.58, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\CenterSpace.NMath.Stats.4.2.0.58\lib\net40\NMathStats.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=3.2.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -713,6 +731,14 @@
       <Project>{cac933a2-6849-4c61-82b4-cbf4052210cc}</Project>
       <Name>BExIS.Dim.Services</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AAM\BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
+      <Project>{2b541d06-3259-4aa3-ae6a-452c8f67164d}</Project>
+      <Name>BExIS.Aam.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AAM\BExIS.Aam.Services\BExIS.Aam.Services.csproj">
+      <Project>{898568be-061e-44d2-a94c-04729f07ddca}</Project>
+      <Name>BExIS.Aam.Services</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DDM\BExIS.Modules.Ddm.UI.csproj">
       <Project>{44DD2A5E-0D2F-4FAB-B297-4211441030B6}</Project>
       <Name>BExIS.Modules.Ddm.UI</Name>
@@ -973,7 +999,11 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\..\..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
     <Error Condition="!Exists('..\..\..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\..\..\..\packages\CenterSpace.NMath.Premium.6.2.0.58\build\CenterSpace.NMath.Premium.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\CenterSpace.NMath.Premium.6.2.0.58\build\CenterSpace.NMath.Premium.targets'))" />
+    <Error Condition="!Exists('..\..\..\..\packages\CenterSpace.NMath.6.2.0.58\build\CenterSpace.NMath.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\CenterSpace.NMath.6.2.0.58\build\CenterSpace.NMath.targets'))" />
   </Target>
+  <Import Project="..\..\..\..\packages\CenterSpace.NMath.Premium.6.2.0.58\build\CenterSpace.NMath.Premium.targets" Condition="Exists('..\..\..\..\packages\CenterSpace.NMath.Premium.6.2.0.58\build\CenterSpace.NMath.Premium.targets')" />
+  <Import Project="..\..\..\..\packages\CenterSpace.NMath.6.2.0.58\build\CenterSpace.NMath.targets" Condition="Exists('..\..\..\..\packages\CenterSpace.NMath.6.2.0.58\build\CenterSpace.NMath.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web.Mvc;
 using System.Diagnostics;
 using BExIS.Dlm.Services.Data;
 using Npgsql;
@@ -17,14 +16,17 @@ using System.IO;
 using Vaiona.Utils.Cfg;
 using System.Xml;
 using Vaiona.Web.Mvc;
+using System.Web.Mvc;
+using BExIS.Dlm.Entities.Data;
+using System.Linq;
 
 namespace BExIS.Modules.ASM.UI.Controllers
 {
     public class PortalStatisticsController : Controller
     {
-        static string DatastructAPI = "http://localhost:5412/api/structures/";
+        static string DatastructAPI = "https://aquadiva-pub1.inf-bb.uni-jena.de/api/structures/";
         static List<Variable_analytics> VA_list;
-
+        static String debugFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
         static List<string> project_list_names = new List<string> { "A01", "A02", "A03", "A04", "A05", "A06", "B01", "B02", "B03", "B04", "B05", "C03", "C05", "D01", "D02", "D03", "D04" };
 
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
@@ -180,6 +182,10 @@ namespace BExIS.Modules.ASM.UI.Controllers
                 }
                 catch (Exception e)
                 {
+                    using (StreamWriter sw = System.IO.File.AppendText(debugFile))
+                    {
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : analysis summary called : dataset " + id + " has an error : " + e.ToString());
+                    }
                     Debug.WriteLine(e.ToString());
                 }
             }
@@ -196,15 +202,23 @@ namespace BExIS.Modules.ASM.UI.Controllers
                 sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Analytic scalled: portal statistics - VA_list " + VA_list.ToString());
             }
 
-            return View(VA_list);
+            return View("Index");
         }
         
         public ActionResult Download_Report()
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            sb.AppendLine("dataset_id ,owner, project,Semantic Coverage, variable_id,variable_label,variable_concept_entity,variable_concept_caracteristic,dataType,unit");
+            sb.AppendLine("dataset_id ,owner, project,Semantic Coverage, variable_id,variable_label,variable_concept_entity,variable_concept_caracteristic,dataType,unit,data points");
+
+            DatasetManager dm = new DatasetManager();
+            
             foreach (var va in VA_list)
             {
+                Dataset ds = dm.DatasetRepo.Query().ToList().FirstOrDefault(p => p.Id == Int64.Parse(va.dataset_id.ToString()));
+                long noColumns = ds.DataStructure.Self is StructuredDataStructure ? (ds.DataStructure.Self as StructuredDataStructure).Variables.Count() : 0L;
+                long noRows = ds.DataStructure.Self is StructuredDataStructure ? dm.GetDatasetLatestVersionEffectiveTupleCount(ds) : 0; // It would save time to calc the row count for all the datasets at once!
+                long somme =  noRows * noColumns;
+
                 if (va.variable_id.Count > 0)
                 {
                     int Concepts_count = 0;
@@ -225,30 +239,47 @@ namespace BExIS.Modules.ASM.UI.Controllers
                             Caracteristics_count = Caracteristics_count + 1;
                         }
                     }
-                    sb.AppendLine(
-                        va.dataset_id.ToString() + "," +
-                        va.owner.Replace(",", "-") + "," +
-                        va.project.Replace(",", "-") + "," +
-                        Concepts_count.ToString() + "," +
-                        va.variable_id.Count.ToString() + "," +
-                        va.variable_id[0].ToString() + "," +
-                        va.variable_label[0] + "," +
-                        va.variable_concept_entity[0] + "," +
-                        va.variable_concept_caracteristic[0] + "," +
-                        va.dataType[0] + "," +
-                        va.unit[0]);
 
-                    for (int kk = 1; kk < va.variable_id.Count; kk++)
+                    for (int kk = 0; kk < va.variable_id.Count; kk++)
                     {
                         sb.AppendLine(
-                            ", , , ," +
+                            va.dataset_id.ToString() + "," +
+                            va.owner.Replace(",", "-") + "," +
+                            va.project.Replace(",", "-") + "," +
+                            Concepts_count.ToString() + "," +
+                            va.variable_id.Count.ToString() + "," +
                             va.variable_id[kk].ToString() + "," +
                             va.variable_label[kk].ToString() + "," +
                             va.variable_concept_entity[kk].ToString() + "," +
                             va.variable_concept_caracteristic[kk].ToString() + "," +
                             va.unit[kk].ToString() + "," +
-                            va.dataType[kk].ToString());
+                            va.dataType[kk].ToString() + "," +
+                            somme);
                     }
+                    //sb.AppendLine(
+                    //    va.dataset_id.ToString() + "," +
+                    //    va.owner.Replace(",", "-") + "," +
+                    //    va.project.Replace(",", "-") + "," +
+                    //    Concepts_count.ToString() + "," +
+                    //    va.variable_id.Count.ToString() + "," +
+                    //    va.variable_id[0].ToString() + "," +
+                    //    va.variable_label[0] + "," +
+                    //    va.variable_concept_entity[0] + "," +
+                    //    va.variable_concept_caracteristic[0] + "," +
+                    //    va.dataType[0] + "," +
+                    //    va.unit[0]);
+                    //
+                    //for (int kk = 1; kk < va.variable_id.Count; kk++)
+                    //{
+                    //    sb.AppendLine(
+                    //        ", , , , , " +
+                    //        va.variable_id[kk].ToString() + "," +
+                    //        va.variable_label[kk].ToString() + "," +
+                    //        va.variable_concept_entity[kk].ToString() + "," +
+                    //        va.variable_concept_caracteristic[kk].ToString() + "," +
+                    //        va.unit[kk].ToString() + "," +
+                    //        va.dataType[kk].ToString());
+                    //}
                 }
             }
             // save the string builder sb and ask for download 
