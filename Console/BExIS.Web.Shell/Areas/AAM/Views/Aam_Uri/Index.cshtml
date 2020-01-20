@@ -1,0 +1,136 @@
+﻿@model IEnumerable<BExIS.Aam.Entities.Mapping.Aam_Uri>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+@{
+    int int_MaxRequestLength = 1024 * 1024;
+    string errors = (string)ViewData["errors"];
+}
+
+
+
+<h2>Index</h2>
+
+
+@Html.ActionLink(
+        linkText: "Import Uris from Ontology file",
+        actionName: "import",
+        controllerName: "Aam_Uri",
+        routeValues: null,
+        htmlAttributes: new { @class = "bx-button action", @title = "import URIs" }
+    )
+
+@(Html.Telerik().Upload()
+                .Name("SelectFileUploader")
+                .Multiple(false)
+                .ShowFileList(true)
+                .HtmlAttributes(new { title = "Browse" })
+                .ClientEvents(events =>
+                    events.OnSelect("SelectFileProcess_OnSelect")
+                            .OnRemove("SelectFileProcess_OnRemove")
+                            .OnSuccess("SelectFileProcess_OnSuccess")
+                )
+                .Async(async => async
+                    .Save("SelectFileProcess", "Aam_Uri", new { area = "AAM" })
+                    .AutoUpload(true))
+
+)
+
+<br />
+
+
+
+
+
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.URI)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.label)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.type_uri)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.URI)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.label)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.type_uri)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+
+<script type="text/javascript">
+
+
+    function SelectFileProcess_OnSelect(e) {
+        var file = e.files[0];
+        var maxsize = '@int_MaxRequestLength';
+        //alert("is Ext " + IsExtentionValid(file.extension));
+        //alert(file.extension);
+        if (!IsExtentionValid(file.extension)) {
+            alert("Only .owl  files can be uploaded")
+            e.preventDefault();
+            return false;
+        }
+        else {
+            if (file.size > (maxsize * 1024)) {
+                alert("Max file : " + maxsize / 1024 + " MB is supported. Please contact your administrator to upload bigger files.");
+                e.preventDefault();
+                return false;
+            }
+            //Parameters.push("Extention:" + file.extension);
+        }
+    }
+
+    function SelectFileProcess_OnRemove(e) {
+        //$('#fileNameDiv').text("");
+    }
+
+    function SelectFileProcess_OnSuccess(e) {
+
+        $('.uploadWizardStep_Error').empty();
+        $('#fileNameDiv').text(e.files[0].name);
+    }
+
+    function IsExtentionValid(fileExtention)
+    {
+        var extListAsString = '.owl';
+        var extList = extListAsString.split(',');
+
+        for (var i = 0; i < extList.length; i++)
+        {
+            if (fileExtention.toLowerCase() == extList[i]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+</script>
