@@ -70,8 +70,18 @@
     <Reference Include="DataAnnotationsExtensions.ClientValidation">
       <HintPath>..\..\packages\DataAnnotationsExtensions.MVC3.1.1.0.0\lib\NETFramework40\DataAnnotationsExtensions.ClientValidation.dll</HintPath>
     </Reference>
+    <Reference Include="Deedle, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Deedle.2.1.0\lib\net45\Deedle.dll</HintPath>
+    </Reference>
+    <Reference Include="Deedle.Excel, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Deedle.Excel.2.1.0\lib\net45\Deedle.Excel.dll</HintPath>
+    </Reference>
     <Reference Include="DocumentFormat.OpenXml">
       <HintPath>..\..\Libraries\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelApi, Version=1.7.3.0, Culture=neutral, PublicKeyToken=26cf6d85ba68fa54, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NetOffice.Excel.1.7.4.4\lib\net45\ExcelApi.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="FluentBootstrap, Version=3.3.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FluentBootstrap.3.3.5.1\lib\net40\FluentBootstrap.dll</HintPath>
@@ -80,6 +90,9 @@
     <Reference Include="FluentBootstrap.Mvc, Version=3.3.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FluentBootstrap.Mvc.3.3.5.1\lib\net40\FluentBootstrap.Mvc.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FSharp.Core.4.5.2\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="Glimpse.AspNet, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Glimpse.AspNet.1.8.0\lib\net45\Glimpse.AspNet.dll</HintPath>
@@ -148,12 +161,19 @@
       <HintPath>..\..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Solver.Foundation, Version=3.0.2.10889, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Solver.Foundation.3.1.0\lib\Microsoft.Solver.Foundation.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebHelpers.3.2.3\lib\net45\Microsoft.Web.Helpers.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="NetOffice, Version=1.7.3.0, Culture=neutral, PublicKeyToken=acf636d62c39f8f5, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NetOffice.Core.1.7.4.4\lib\net45\NetOffice.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -163,9 +183,19 @@
       <HintPath>..\..\packages\NHibernate.4.1.1.4000\lib\net40\NHibernate.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="NMath, Version=6.2.0.57, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\CenterSpace.NMath.6.2.0.57\lib\net40\NMath.dll</HintPath>
+    </Reference>
+    <Reference Include="NMathStats, Version=4.2.0.57, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\CenterSpace.NMath.Stats.4.2.0.57\lib\net40\NMathStats.dll</HintPath>
+    </Reference>
     <Reference Include="Npgsql, Version=3.2.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Npgsql.3.2.5\lib\net451\Npgsql.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="OfficeApi, Version=1.7.3.0, Culture=neutral, PublicKeyToken=7c1c3e9d16cace88, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NetOffice.Core.1.7.4.4\lib\net45\OfficeApi.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
@@ -297,6 +327,10 @@
     </Reference>
     <Reference Include="Vaiona.Web.Mvc.Modularity">
       <HintPath>..\..\Libraries\Vaiona\Vaiona.Web.Mvc.Modularity.dll</HintPath>
+    </Reference>
+    <Reference Include="VBIDEApi, Version=1.7.3.0, Culture=neutral, PublicKeyToken=a3637beacf571e8a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NetOffice.Core.1.7.4.4\lib\net45\VBIDEApi.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="WebActivator">
       <HintPath>..\..\packages\WebActivator.1.2.0.0\lib\NETFramework40\WebActivator.dll</HintPath>
@@ -486,11 +520,106 @@
     <None Include="Properties\PublishProfiles\FileSystem.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\SITE.pubxml" />
+    <Content Include="HomePage\Content\bootstrap-grid.css.map" />
+    <Content Include="HomePage\Content\bootstrap-grid.min.css.map" />
+    <Content Include="HomePage\Content\bootstrap-reboot.css.map" />
+    <Content Include="HomePage\Content\bootstrap-reboot.min.css.map" />
+    <Content Include="HomePage\Content\bootstrap.css.map" />
+    <Content Include="HomePage\Content\bootstrap.min.css.map" />
+    <Content Include="HomePage\Scripts\bootstrap.bundle.js.map" />
+    <Content Include="HomePage\Scripts\bootstrap.bundle.min.js.map" />
+    <Content Include="HomePage\Scripts\bootstrap.js.map" />
+    <Content Include="HomePage\Scripts\bootstrap.min.js.map" />
+    <Content Include="HomePage\Scripts\jquery-2.1.4.min.map" />
+    <Content Include="HomePage\Scripts\jquery.min.map" />
+    <Content Include="HomePage\Scripts\jquery.slim.min.map" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\handsontable\handsontable.full.js" />
     <Content Include="Scripts\handsontable\handsontable.full.min.js" />
     <Content Include="Scripts\handsontable\handsontable.js" />
     <Content Include="Scripts\handsontable\handsontable.min.js" />
+    <Content Include="HomePage\Content\bootstrap-grid.css" />
+    <Content Include="HomePage\Content\bootstrap-grid.min.css" />
+    <Content Include="HomePage\Content\bootstrap-reboot.css" />
+    <Content Include="HomePage\Content\bootstrap-reboot.min.css" />
+    <Content Include="HomePage\Content\bootstrap-theme.css" />
+    <Content Include="HomePage\Content\bootstrap-theme.min.css" />
+    <Content Include="HomePage\Content\bootstrap.css" />
+    <Content Include="HomePage\Content\bootstrap.min.css" />
+    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171037.png" />
+    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171336.png" />
+    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171445.png" />
+    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171548.png" />
+    <Content Include="HomePage\Content\Images\binary-code.png" />
+    <Content Include="HomePage\Content\Images\D01.png" />
+    <Content Include="HomePage\Content\Images\dataset.png" />
+    <Content Include="HomePage\Content\Images\graphics.png" />
+    <Content Include="HomePage\Content\Images\Lehmann-Hainich004.jpg" />
+    <Content Include="HomePage\Content\Images\squares.png" />
+    <Content Include="HomePage\Content\Images\water-drop.jpg" />
+    <Content Include="HomePage\Content\Images\water-drop2.jpg" />
+    <Content Include="HomePage\Content\modern-business.css" />
+    <Content Include="HomePage\Scripts\2013.2.611\jquery-1.7.1.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\jquery.validate.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.all.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.autocomplete.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.calendar.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.chart.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.combobox.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.common.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.datepicker.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.datetimepicker.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.draganddrop.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.editor.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.editing.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.filtering.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.grouping.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.reordering.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.resizing.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.imagebrowser.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.list.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.menu.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.panelbar.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.slider.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.splitter.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.tabstrip.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.textbox.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.timepicker.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.treeview.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.upload.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.window.min.js" />
+    <Content Include="HomePage\Scripts\bootstrap.bundle.js" />
+    <Content Include="HomePage\Scripts\bootstrap.bundle.min.js" />
+    <Content Include="HomePage\Scripts\bootstrap.js" />
+    <Content Include="HomePage\Scripts\bootstrap.min.js" />
+    <Content Include="HomePage\Scripts\contact_me.js" />
+    <Content Include="HomePage\Scripts\draggabilly.pkgd.js" />
+    <Content Include="HomePage\Scripts\draggabilly.pkgd.min.js" />
+    <Content Include="HomePage\Scripts\isotope.pkgd.min.js" />
+    <Content Include="HomePage\Scripts\jqBootstrapValidation.js" />
+    <None Include="HomePage\Scripts\jquery-2.1.3.intellisense.js" />
+    <None Include="HomePage\Scripts\jquery-2.1.4.intellisense.js" />
+    <Content Include="HomePage\Scripts\jquery-2.1.4.js" />
+    <Content Include="HomePage\Scripts\jquery-2.1.4.min.js" />
+    <Content Include="HomePage\Scripts\jquery-migrate-1.2.1.js" />
+    <Content Include="HomePage\Scripts\jquery-migrate-1.2.1.min.js" />
+    <Content Include="HomePage\Scripts\jquery.js" />
+    <Content Include="HomePage\Scripts\jquery.min.js" />
+    <Content Include="HomePage\Scripts\jquery.slim.js" />
+    <Content Include="HomePage\Scripts\jquery.slim.min.js" />
+    <None Include="HomePage\Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="HomePage\Scripts\jquery.validate.js" />
+    <Content Include="HomePage\Scripts\jquery.validate.min.js" />
+    <Content Include="HomePage\Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="HomePage\Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="HomePage\Scripts\main.js" />
+    <Content Include="HomePage\Scripts\modernizr-2.8.3.js" />
+    <Content Include="HomePage\Scripts\packery.pkgd.bexis.min.js" />
+    <Content Include="HomePage\Scripts\packery.pkgd.js" />
+    <Content Include="HomePage\Scripts\packery.pkgd.min.js" />
+    <Content Include="HomePage\Scripts\respond.js" />
+    <Content Include="HomePage\Scripts\respond.min.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
@@ -1047,6 +1176,10 @@
       <Project>{c0c9f0f2-9e65-448d-8000-d311db326460}</Project>
       <Name>BExIS.Xml.Models</Name>
     </ProjectReference>
+    <ProjectReference Include="Areas\RPM\BExIS.Modules.Rpm.UI.csproj">
+      <Project>{76702A4F-D6E5-416F-BD81-58447514AF05}</Project>
+      <Name>BExIS.Modules.Rpm.UI</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.woff2" />
@@ -1196,10 +1329,12 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\..\packages\CenterSpace.NMath.6.2.0.57\build\CenterSpace.NMath.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\CenterSpace.NMath.6.2.0.57\build\CenterSpace.NMath.targets'))" />
   </Target>
   <Import Project="..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets" Condition="Exists('..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" />
   <Target Name="EnsurePostSharpImported" BeforeTargets="BeforeBuild" Condition="'$(PostSharp30Imported)' == ''">
     <Error Condition="!Exists('..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://www.postsharp.net/links/nuget-restore." />
     <Error Condition="Exists('..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://www.postsharp.net/links/nuget-restore." />
   </Target>
+  <Import Project="..\..\packages\CenterSpace.NMath.6.2.0.57\build\CenterSpace.NMath.targets" Condition="Exists('..\..\packages\CenterSpace.NMath.6.2.0.57\build\CenterSpace.NMath.targets')" />
 </Project>

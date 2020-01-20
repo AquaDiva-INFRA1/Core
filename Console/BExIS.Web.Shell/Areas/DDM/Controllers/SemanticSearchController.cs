@@ -922,7 +922,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 }
             }
             #endregion
-            return m;
+            if (m.Rows.Count > 0) return m;
+            return searchAndMerge(m, searchTerm);
+            //return m;
         }
 
         /*
