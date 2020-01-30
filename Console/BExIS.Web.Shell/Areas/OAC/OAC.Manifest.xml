@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Manifest moduleId="OAC" displayName="OAC Module" version="1.0.0" builtin="false">
+	<Description>
+    Imports metadata, primary from OMICS databases, NCBI/EBI and BioGPS
+  </Description>
+	<Assemblies>
+    <Assembly fullName="BEXIS.OAC.Entities" role=""/>
+    <Assembly fullName="BEXIS.OAC.Services" role=""/>
+	</Assemblies>
+	<Dependencies>
+    <Dependency moduleId="dcm" version="*.*.*" />
+	</Dependencies>
+	<Exports>
+
+    <Export tag="menubar" id="Import OMIC Archives" order="5"
+        title="Import OMIC Archives" description="Import OMIC Archives as samples to be integrated to the portal" icon=""
+        controller="Home" action="Index"
+        extends="./menubarRoot/collect" />
+	</Exports>
+</Manifest>
