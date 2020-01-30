@@ -1,0 +1,133 @@
+﻿@model BExIS.Modules.OAC.UI.Models.EBIresponseModel
+
+
+@using Telerik.Web.Mvc.UI;
+@using BExIS.Modules.Rpm.UI.Models;
+@using BExIS.Dlm.Entities.DataStructure;
+
+<header>
+    <script type="text/javascript" src="/Scripts/trunk8.js"></script>
+    <script type="text/javascript" src="/Scripts/jquery.ba-resize.min.js"></script>
+</header>
+
+@{ 
+    if (Model != null)
+    {
+        bool windowVisible = true;
+    }
+    else
+    {
+        bool windowVisible = false;
+    }
+}
+
+@section Information
+{
+    <p>Just provide your dataset ID from NCBI and the portal will extract the metadata related to your dataset and create a dataset for you</p>
+}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div id="Content">
+
+    @Html.TextBox("NCBIID", "SAMPLE ID from EBI ", new { @class = "form-control" })
+
+    <div class="bx-footer right">
+        <button value="Save" name="submit" id="submit" class="bx-button action" >Import Medata</button>
+    </div>
+
+
+</div>
+
+@if (Model != null)
+{
+            @(Html.Telerik().Window()
+                                        .Name("MetadataImport")
+                                        .Visible(true)
+                                        .Title("Metadata Import")
+                                        .Modal(true)
+                                        .HtmlAttributes(new { @class = "bx-window" })
+                                        .Draggable(true)
+                                        .Width(0)
+                                        .Height(500)
+                                        .ClientEvents(events => events
+                                                .OnActivate("MetadataImport_resizeOnRefresh")
+                                                .OnClose("MetadataImport_onClose")
+                                        )
+                                        .Buttons(buttons => buttons.Close())
+                                        .Content(@<text>
+                                            <div id="showSearchAttribute-resultGrid" class="showSearchAttribute">
+                                                @Html.Partial("getMetadataFromSampleID",Model)
+                                            </div>
+                                        </text>
+                                                            )
+            )
+}
+
+
+
+
+<script type="text/javascript">
+
+    var url = '@Url.Action("Index", "SequenceDataUpload")';
+    $('#submit').click(function() {
+        var sampleID = document.getElementById("NCBIID").value;
+        $('#results').load(url, { sampleID: sampleID });
+        window.location.href = "/OAC/SequenceDataUpload/Index?sampleID="+sampleID;
+    })
+
+    //function fetch(){
+    //var sampleID = document.getElementById("NCBIID").value;
+    //$.ajax({
+    //        url: '/OAC/SequenceDataUpload/Index',
+    //        data: { 'sampleID': JSON.stringify(sampleID)},
+    //        type: "POST",
+    //        dataType: "json",
+    //        success: function (result) {
+    //            if (result) {
+    //
+    //            }
+    //        },
+    //        error: function (xhr) {
+    //            alert('Error: ' + xhr.message);
+    //        }
+    //    });
+    //}
+
+    function OnSuccess() {
+        alert("success")
+    }
+
+    function OnFailure(response) {
+        alert("failed");
+    }
+
+    function MetadataImport_resizeOnRefresh() {
+        var winContent = $('#MetadataImport .t-window-content');
+        //winContent.css("height", "");
+
+        var detailwindow = $("#MetadataImport").data("t-window");
+
+        detailwindow.center();
+    }
+
+    $("#close").click(function (e) {
+            window.close();
+        });
+
+    function MetadataImport_onClose() {
+        $('.t-state-selected[title*="Edit"]').removeClass('t-state-selected');
+
+            $.post('@Url.Action("CloseWindow", "Admin", new RouteValueDictionary { { "area", "ddm" } })', function (response) {
+
+            })
+
+        $(".t-grid .t-refresh").trigger('click');
+
+        //Reloads the parent page please replace with proper solution
+
+        window.location.href = "/OAC/SequenceDataUpload/Index";
+    }
+
+</script>
