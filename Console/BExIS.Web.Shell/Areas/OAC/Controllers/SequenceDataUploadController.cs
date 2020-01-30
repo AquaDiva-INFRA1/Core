@@ -60,7 +60,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
         public ActionResult getMetadataFromSampleID(string sampleID)
         {
             sampleID = sampleID.Replace("\"", "");
-            var request = (HttpWebRequest)WebRequest.Create(ebiSampleAPIurl+sampleID);
+            var request = (HttpWebRequest)WebRequest.Create(ebiSampleAPIurl + sampleID);
 
             var response = (HttpWebResponse)request.GetResponse();
 
@@ -79,8 +79,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
             DataStructureManager dsm = new DataStructureManager();
             DatasetManager dm = new DatasetManager();
             XmlDocument MetadataDoc = new XmlDocument();
-            Dataset ds = new Dataset() ;
-            XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper() ;
+            Dataset ds = new Dataset();
+            XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
             try
             {
@@ -104,7 +104,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
                 //XmlDocument MetadataDoc = LoadFromXml_external(doc, metadataStructure);
                 MetadataDoc = LoadFromXml_external(EBIresponseModel.ConvertToXML(JsonResult), metadataStructure);
                 //XmlDocument MetadataDoc = EBIresponseModel.ConvertToXML(JsonResult);
-                
+
                 ds = dm.CreateEmptyDataset(dataStruct, rp, metadataStructure);
             }
             catch (Exception ex)
@@ -144,11 +144,13 @@ namespace BExIS.Modules.OAC.UI.Controllers
                     #endregion
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ("error in Entity Permission Manager structure : " + ex.ToString());
             }
-            try { 
+
+            try
+            {
 
                 if (dm.IsDatasetCheckedOutFor(ds.Id, GetUsernameOrDefault()) || dm.CheckOutDataset(ds.Id, GetUsernameOrDefault()))
                 {
@@ -175,7 +177,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
                     {
                         var x = this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", ds.Id } });
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Debug.WriteLine(ex.Message);
                     }
@@ -195,7 +197,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
             {
                 return ("error in re indexing : " + ex.ToString());
             }
-            
+
         }
 
         public string GetUsernameOrDefault()
@@ -209,8 +211,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
             return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
         }
-    
-        
+
+
         public XmlDocument LoadFromXml_external(XmlDocument metadataForImport, MetadataStructure MetadataStructure)
         {
             if ((metadataForImport != null) && (MetadataStructure != null))
@@ -246,8 +248,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
             }
             return null;
         }
-        
+
 
     }
-    
+
 }

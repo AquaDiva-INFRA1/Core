@@ -15,9 +15,34 @@ using System.Web.Routing;
 using Vaiona.Utils.Cfg;
 using System.Net;
 using System.Web.Mvc;
-using Newtonsoft.Json;
 using System.Xml.Linq;
 using System.Web.Script.Serialization;
+using System.Linq;
+using Newtonsoft.Json.Linq;
+using BExIS.Dlm.Services.Data;
+using BExIS.Dlm.Services.DataStructure;
+using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Services.Administration;
+using BExIS.Dlm.Services.MetadataStructure;
+using BExIS.Dlm.Entities.Administration;
+using BExIS.Dlm.Entities.MetadataStructure;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Services.Subjects;
+using System.Diagnostics;
+using Vaiona.Web.Mvc.Modularity;
+using Vaiona.Logging;
+using BExIS.Security.Services.Utilities;
+using System.Configuration;
+using BExIS.IO.Transform.Input;
+using System.Text;
+using System.Web.Configuration;
+using System.IO;
+using Vaiona.Persistence.Api;
+using BExIS.IO;
+using Newtonsoft.Json;
 
 namespace BExIS.Modules.OAC.UI.Controllers
 {
@@ -30,35 +55,56 @@ namespace BExIS.Modules.OAC.UI.Controllers
     /// </summary>
     public class HomeController : Controller
     {
-
-        #region source enums
-
-        // a list of all sources;
-        // the explicit link needs to be added further down
+        static SelectedImportOptionsModel model;
+        //static string EBI_study_accession = "https://www.ebi.ac.uk/ena/data/warehouse/filereport?accession=PRJEB25133&result=read_run&fields=study_accession,sample_accession,secondary_sample_accession,experiment_accession,run_accession,tax_id,scientific_name,instrument_model,library_layout,fastq_ftp,fastq_galaxy,submitted_ftp,submitted_galaxy,sra_ftp,sra_galaxy,cram_index_ftp,cram_index_galaxy&download=txt"
+        static string EBI_study_accession = "https://www.ebi.ac.uk/ena/data/warehouse/filereport?result=read_run&fields=sample_accession,study_accession&accession=";
+        static string EBI_sample_Accession = "https://www.ebi.ac.uk/biosamples/api/samples/";
+        static string EBI_study_metadata = "https://www.ebi.ac.uk/ena/data/view/";
+        static string temp_file_to_save_json_as_csv = Path.GetFullPath(WebConfigurationManager.AppSettings["output_Folder"]);
         public enum DataSource : long
         {
             BioGPS = 1,
             EBI = 2, NCBI = 3 // the same in our examples
         }
 
-        #endregion
 
-        #region main processing
 
-        public long GetDefaultUnstructuredDataStructureId()
+        public ActionResult Index()
         {
-            var x = new Dlm.Services.DataStructure.DataStructureManager();
-            var y = x.UnStructuredDataStructureRepo.Get();
-            return y[0].Id;
+            CreateDatasetController HelperController = new CreateDatasetController();
 
+            model = new SelectedImportOptionsModel()
+            {
+                MetadataStructureViewList = HelperController.LoadMetadataStructureViewList(),
+                DataStructureViewList = HelperController.LoadDataStructureViewList(),
+                DataSourceViewList = GetDataSourceList(),
+                Accessions = new Dictionary<string, string>()
+            };
+
+            HelperController.Dispose();
+
+            return View(model);
         }
 
-        /// <summary>
-        ///     processes the request, downloads the data, and then redirects & shows the DIM page for creation of a new dataset
-        /// </summary>
-        /// <returns>the page created</returns>
-        public ActionResult TransformMetadata()
+        public ActionResult FetchDataFromPortal()
         {
+            if (model != null)
+                if(model.Accessions.Count > 0 )
+                    if (Request.Params["Identifier"] == model.Identifier)
+                        return View("Index", model);
+
+            CreateDatasetController HelperController = new CreateDatasetController();
+
+            model = new SelectedImportOptionsModel()
+            {
+                MetadataStructureViewList = HelperController.LoadMetadataStructureViewList(),
+                DataStructureViewList = HelperController.LoadDataStructureViewList(),
+                DataSourceViewList = GetDataSourceList(),
+                Accessions = new Dictionary<string, string>()
+            };
+
+            HelperController.Dispose();
+
             try
             {
                 string Identifier = Request.Params["Identifier"];
@@ -66,6 +112,11 @@ namespace BExIS.Modules.OAC.UI.Controllers
                 long DataStructureId = Request.Params["SelectedDataStructureId"] == null ? GetDefaultUnstructuredDataStructureId() : long.Parse(Request.Params["SelectedDataStructureId"]);
                 long DataSourceId = long.Parse(Request.Params["SelectedDataSourceId"]);
 
+                model.Identifier = Identifier;
+                model.SelectedDataSourceId = DataSourceId;
+                model.SelectedDataStructureId = DataStructureId;
+                model.SelectedMetadataStructureId = MetadataStructureId;
+                
                 #region find out the correct URL for the metadata download
 
                 string Url = null;
@@ -75,7 +126,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
                 {
                     case DataSource.EBI:
                     case DataSource.NCBI: // the same in our examples
-                        Url = "https://www.ebi.ac.uk/biosamples/api/samples/" + Identifier;
+                        //Url = "https://www.ebi.ac.uk/biosamples/api/samples/" + Identifier;
+                        Url = EBI_study_accession + Identifier.Replace("\"", "");
                         break;
                     case DataSource.BioGPS:
                         Url = "http://biogps.org/dataset/" + Identifier + "/values/?format=xml";
@@ -88,60 +140,45 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
                 #endregion
 
-                #region download the metadata
-
-                // download the metadata
-                string DownloadedData = new WebClient().DownloadString(Url).Trim();
-
-                #endregion
-
-                #region convert it to xml
-                XmlDocument Metadata;
-
-                if (DownloadedData.StartsWith("{") || DownloadedData.StartsWith("[")) // it's json
+                #region parse through accessions numbers // study number or accession number on the main url have the same return type 
+                string Accessions_List = new WebClient().DownloadString(Url).Trim();
+                List<string> All_Accessions = Accessions_List.Split('\n').ToList<string>().GetRange(1, Accessions_List.Split('\n').ToList<string>().Count() - 1);
+                model.project = All_Accessions[0].Split('	')[1].ToString();
+                Session["All_Accessions"] = All_Accessions;
+                List<string> Accessions = new List<string>();
+                foreach (string s in All_Accessions)
                 {
-                    Metadata = JsonStringToXML("{\"root\":" + DownloadedData + "}"); // the root element is only allowed to have one property
-                }
-                else // it's xml
-                {
-                    Metadata = new XmlDocument();
-                    Metadata.LoadXml(DownloadedData);
+                    string sample_Url = "https://www.ebi.ac.uk/biosamples/api/samples/" + s.Split('	')[0];
+
+                    #region download the metadata
+                    // download the metadata
+                    string DownloadedData = new WebClient().DownloadString(sample_Url).Trim();
+
+                    #endregion
+                    model.Accessions.Add(s, DownloadedData);
                 }
                 #endregion
 
-                ConvertXMLItemKeys(Metadata, Metadata);
+                return View("Index", model);
 
-                #region map the data
-
-                XmlDocument Mapped = ConvertOmicsToBExIS(MetadataStructureId, Metadata, (DataSource)DataSourceId);
-
-                #endregion
-
-                return LoadMetadataForm(Mapped, MetadataStructureId, DataStructureId);
-
+                //return LoadMetadataForm(Mapped, MetadataStructureId, DataStructureId);
             }
-            catch(WebException e)
+            catch (WebException e)
             {
                 String msg = "";
                 HttpWebResponse errorResponse = e.Response as HttpWebResponse;
                 if (errorResponse.StatusCode == HttpStatusCode.NotFound)
                 {
                     msg = "Sample was not found!";
-                } else
+                }
+                else
                 {
                     msg = e.Message;
                 }
 
                 #region show the error message
 
-                CreateDatasetController HelperController = new CreateDatasetController();
-                SelectedImportOptionsModel model = new SelectedImportOptionsModel()
-                {
-                    MetadataStructureViewList = HelperController.LoadMetadataStructureViewList(),
-                    DataStructureViewList = HelperController.LoadDataStructureViewList(),
-                    DataSourceViewList = GetDataSourceList(),
-                    Error = "An error occurred: " + msg
-                };
+                model.Error = "An error occurred: " + msg;
 
                 return View("Index", model);
 
@@ -151,14 +188,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
             {
                 #region show the error message
 
-                CreateDatasetController HelperController = new CreateDatasetController();
-                SelectedImportOptionsModel model = new SelectedImportOptionsModel()
-                {
-                    MetadataStructureViewList = HelperController.LoadMetadataStructureViewList(),
-                    DataStructureViewList = HelperController.LoadDataStructureViewList(),
-                    DataSourceViewList = GetDataSourceList(),
-                    Error = "An error occurred: " + e.Message
-                };
+                model.Error = "An error occurred: " + e.Message;
 
                 return View("Index", model);
 
@@ -166,9 +196,258 @@ namespace BExIS.Modules.OAC.UI.Controllers
             }
         }
 
+        public ActionResult LoadSamplesViewMetadata(string sample, string project)
+        {
+            string x = "";
+            model.Accessions.TryGetValue(sample + "	" + project, out x);
+            EBIresponseModel EBIresponseModel = new EBIresponseModel(JObject.Parse(x));
+            return PartialView("View" , EBIresponseModel);
+        }
+
+        public Int64 Submit(string acc)
+        {
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+            foreach (string s in acc.Split(',').ToList())
+            {
+                KeyValuePair<string, string> xx = model.Accessions.FirstOrDefault(x => x.Key.Contains(s));
+                dict.Add(xx.Key, xx.Value);
+            }
+            Dataset ds = AddProjectsdataset(dict);
+            return ds.Id;
+        }
+
+        public Dataset AddProjectsdataset(Dictionary<string, string> xx )
+        {
+            DataStructureManager dsm = new DataStructureManager();
+            DatasetManager dm = new DatasetManager();
+            XmlDocument MetadataDoc = new XmlDocument();
+            Dataset ds = new Dataset() ;
+            XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+            DataStructure dataStruct = (DataStructure)dsm.AllTypesDataStructureRepo.Get().FirstOrDefault(x => x.Name == "none");
+            StructuredDataStructure dataStruct_ = (StructuredDataStructure)dsm.StructuredDataStructureRepo.Get().FirstOrDefault(x => x.Name == "Sequence Data");
+            MetadataStructureManager msm = new MetadataStructureManager();
+            ResearchPlanManager rpm = new ResearchPlanManager();
+            EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+
+            try
+            {
+                #region create empty dataset to be filled
+
+                ResearchPlan rp = rpm.Repo.Get().First();
+                MetadataStructure metadataStructure = msm.Repo.Get().FirstOrDefault(x => x.Name.ToLower() == "basic abcd");
+                ds = dm.CreateEmptyDataset(dataStruct_, rp, metadataStructure);
+                
+                #endregion
+
+                #region Aquadiva: permissions for PIs
+                if (GetUsernameOrDefault() != "DEFAULT")
+                {
+                    
+                    //Full permissions for the user
+                    entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                    UserPiManager upm = new UserPiManager();
+
+                    //Get PIs of the current user
+                    List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
+                    foreach (User pi in piList)
+                    {
+                        //Full permissions for the pis
+                        entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                        //Get all users with the same pi
+                        List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                        //Give view and download rights to the members
+                        foreach (User piMember in piMembers)
+                        {
+                            entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
+                                        RightType.Read,
+                                        RightType.Download
+                                    });
+                        }
+                    }
+                }
+                #endregion
+
+
+                #region submit metadata
+                if (dm.IsDatasetCheckedOutFor(ds.Id, GetUsernameOrDefault()) || dm.CheckOutDataset(ds.Id, GetUsernameOrDefault()))
+                {
+                    DatasetVersion dsv = dm.GetDatasetWorkingCopy(ds.Id);
+                    XmlDocument Metadata;
+                    string DownloadedData = new WebClient().DownloadString(EBI_study_metadata + model.project + "&display=xml").Trim();
+                    if (DownloadedData.StartsWith("{") || DownloadedData.StartsWith("[")) // it's json
+                    {
+                        Metadata = JsonStringToXML("{\"root\":" + DownloadedData + "}"); // the root element is only allowed to have one property
+                    }
+                    else // it's xml
+                    {
+                        Metadata = new XmlDocument();
+                        Metadata.LoadXml(DownloadedData);
+                    }
+                    ConvertXMLItemKeys(Metadata, Metadata);
+                    XmlDocument Mapped = ConvertOmicsToBExIS(model.SelectedMetadataStructureId, Metadata, (DataSource)model.SelectedDataSourceId);
+                    dsv.Metadata = Mapped;
+                    try
+                    {
+                        dsv.Metadata = xmlDatasetHelper.SetInformation(dsv, Mapped, NameAttributeValues.title, model.project);
+                        
+                    }
+                    catch (NullReferenceException ex)
+                    {
+                        //Reference of the title node is missing
+                        throw new NullReferenceException("The extra-field of this metadata-structure is missing the title-node-reference!");
+                    }
+                    dm.EditDatasetVersion(dsv, null, null, null);
+                }
+                #endregion
+
+                #region save primary data in csv format and temporary csv file
+                var json_array_data = new List<string[]>();
+                string temp_file_path = temp_file_to_save_json_as_csv + ds.Id + ".csv";
+
+                string data_csv = new EBIresponseModel().Initialise_header(temp_file_path);
+                json_array_data.Add(data_csv.Split(','));
+
+                foreach (KeyValuePair<string,string> kvp in xx)
+                {
+                    EBIresponseModel EBIresponseModel = new EBIresponseModel(JObject.Parse(kvp.Value));
+                    data_csv = data_csv + EBIresponseModel.ConvertTocsv(EBIresponseModel, temp_file_path);
+                    json_array_data.Add(EBIresponseModel.ConvertTocsv(EBIresponseModel,"").Split(','));
+                }
+                string json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(json_array_data);
+                #endregion
+
+                #region creating data tuples
+
+                if (!dm.IsDatasetCheckedOutFor(ds.Id, GetUsernameOrDefault()))
+                {
+                    throw new Exception(string.Format("Not able to checkout dataset '{0}' for  user '{1}'!", ds.Id, GetUsernameOrDefault()));
+                }
+                DatasetVersion workingCopy = dm.GetDatasetWorkingCopy(ds.Id);
+
+                DataTuple[] rows = null;
+                int packageSize = 10000;
+                int counter = 0;
+                counter++;
+
+
+                List<string> selectedDataAreaJsonArray = new List<string>() { "[1 , 0 ,"+ xx.Count.ToString() + ","+ (typeof(EBIresponseModel).GetProperties().Count() - 1).ToString() + "]" };
+                string selectedHeaderAreaJsonArray = string.Join(" ,", new List<string>() { "[0, 0, 0, " + (typeof(EBIresponseModel).GetProperties().Count()-1).ToString() + "]" });
+                List<int[]> areaDataValuesList = new List<int[]>();
+                foreach (string area in selectedDataAreaJsonArray)
+                {
+                    areaDataValuesList.Add(JsonConvert.DeserializeObject<int[]>(area));
+                }
+                int[] areaHeaderValues = JsonConvert.DeserializeObject<int[]>(selectedHeaderAreaJsonArray);
+                Orientation orientation = Orientation.columnwise;
+                String worksheetUri = temp_file_path;
+                int batchSize = (new Object()).GetUnitOfWork().PersistenceManager.PreferredPushSize;
+                int batchnr = 1;
+                foreach (int[] areaDataValues in areaDataValuesList)
+                {
+                    //First batch starts at the start of the current data area
+                    int currentBatchStartRow = areaDataValues[0] + 1;
+                    while (currentBatchStartRow <= areaDataValues[2] + 1) //While the end of the current data area has not yet been reached
+                    {
+                        //End row is start row plus batch size
+                        int currentBatchEndRow = currentBatchStartRow + batchSize;
+
+                        //Set the indices for the reader
+                        EasyUploadFileReaderInfo fri = new EasyUploadFileReaderInfo
+                        {
+                            DataStartRow = currentBatchStartRow,
+                            //End row is either at the end of the batch or the end of the marked area
+                            //DataEndRow = (currentBatchEndRow > areaDataValues[2] + 1) ? areaDataValues[2] + 1 : currentBatchEndRow,
+                            DataEndRow = Math.Min(currentBatchEndRow, areaDataValues[2] + 1),
+                            //Column indices as marked in a previous step
+                            DataStartColumn = areaDataValues[1] + 1,
+                            DataEndColumn = areaDataValues[3] + 1,
+
+                            //Header area as marked in a previous step
+                            VariablesStartRow = areaHeaderValues[0] + 1,
+                            VariablesStartColumn = areaHeaderValues[1] + 1,
+                            VariablesEndRow = areaHeaderValues[2] + 1,
+                            VariablesEndColumn = areaHeaderValues[3] + 1,
+
+                            Offset = areaDataValues[1],
+                            Orientation = orientation
+                        };
+                        #region csv / txt parsing to get data tuples and variables
+                        AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
+
+                        afri.Seperator = TextSeperator.semicolon;// doesnt matter cauz the delimiter is already used to fill the JSONtable and to finish the upload it is using the JSON Table instead of reading the data again
+
+                        List<String[]> Json_table_ = JsonConvert.DeserializeObject<List<String[]>>
+                            (json);
+
+                        AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload();
+                        FileStream Stream = reader_.Open(temp_file_path);
+                        rows = reader_.ReadFile(Stream, System.IO.Path.GetFileName(temp_file_path),
+                            Json_table_, afri, dataStruct_, ds.Id, packageSize, fri);
+                        Stream.Close();
+
+                        int lines = (areaDataValues[2] + 1) - (areaDataValues[0] + 1);
+                        int batches = lines / batchSize;
+                        batchnr++;
+
+                        //Next batch starts after the current one
+                        currentBatchStartRow = currentBatchEndRow + 1;
+
+                        #endregion csv parsing to get data tuples and variables 
+                    }
+                }
+                if (rows != null) dm.EditDatasetVersion(workingCopy, rows.ToList(), null, null);
+                dm.CheckInDataset(ds.Id, "Data was Uploaded", GetUsernameOrDefault(), ViewCreationBehavior.Create);
+                // if errors persist of type couldnt insert date/time bcz of date range , just change the format of postgres sql dates SHOW datestyle; SET datestyle = "ISO, DMY";
+
+                #endregion
+
+                System.IO.File.Delete(temp_file_path);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+
+            dsm.Dispose();
+            dm.Dispose();
+            entityPermissionManager.Dispose();
+
+            return ds;
+        }
+
+
+        public void add_Accessions_as_primary_Data(Dataset ds, DataStructure dataStruct, DataStructureManager dsm,string acc )
+        {
+            // add primary data top the dataset
+            long id = ds.Id;
+            long iddsd = dataStruct.Id;
+            StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(iddsd);
+            try
+            {
+                // tweak code from FinishUpload() from EasyUploadSummaryController under DCM module
+
+                //dsm.StructuredDataStructureRepo.LoadIfNot(sds.Variables);
+                string sample_metadata = new WebClient().DownloadString(EBI_sample_Accession + acc).Trim();
+                EBIresponseModel EBIresponseModel = new EBIresponseModel(JObject.Parse(sample_metadata));
+                string filepath = temp_file_to_save_json_as_csv + "tmp" + ds.Id + ".csv";
+                EBIresponseModel.ConvertTocsv(EBIresponseModel, filepath);
+                AsciiReader reader = new AsciiReader();
+                FileStream Stream = reader.Open(temp_file_to_save_json_as_csv + "tmp" + ds.Id + ".csv");
+                AsciiFileReaderInfo fri = new AsciiFileReaderInfo();
+                reader.ValidateFile(Stream, filepath + ds.Id + ".csv", fri, sds, id);
+                Stream.Close();
+            }
+            catch (Exception exc)
+            {
+                Debug.WriteLine(exc.Message);
+            }
+        }
+
+
         public ActionResult LoadMetadataForm(XmlDocument metadata, long MetadataStructureId, long DataStructureId)
         {
-
             // generate the CreateTaskManager Instance and add all important values for the form
             CreateTaskmanager taskManager = new CreateTaskmanager();
 
@@ -216,7 +495,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
             #endregion
 
-            //set taskmanager to session
+            //set taskmanager to session 
             Session["CreateDatasetTaskmanager"] = taskManager;
 
             // call the editor
@@ -224,7 +503,64 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
         }
 
-        // for debugging, can be removed later
+        public XmlDocument ConvertOmicsToBExIS(long metadataStructureId, XmlDocument metadataForImport, DataSource source)
+        {
+
+            string sourceName = GetSourceName(source);
+
+            CreateDatasetController HelperController = new CreateDatasetController();
+            string metadataStructureName = HelperController.LoadMetadataStructureViewList().Find(x => x.Id == metadataStructureId).Title;
+            HelperController.Dispose();
+            // create path to mapping file, MappingFile_extern_biogps.xsd_to_intern_bfgghng.xml
+            var path_mappingFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DIM"), "MappingFile_extern_" + sourceName + "21_to_intern_" + metadataStructureName + ".xml");
+            // use maybe XmlMetadataImportHelper.GetMappingFileName(metadataStructureId, TransmissionType.mappingFileImport, mappingFileName)
+
+            // if not existing, then an error will be thrown...
+            if (!System.IO.File.Exists(path_mappingFile))
+            {
+                throw new Exception("Missing mapping file from " + metadataStructureName + " to " + sourceName + ".");
+            }
+
+            // XML mapper + mapping file
+            var xmlMapperManager = new XmlMapperManager(TransactionDirection.ExternToIntern);
+            xmlMapperManager.Load(path_mappingFile, "");
+
+            // generate internal metadata without internal attributes
+            var metadataResult = xmlMapperManager.Generate(metadataForImport, 1, true);
+
+            // throw new Exception(XmlToString(metadataResult));
+
+            // generate internal template metadata xml with needed attribtes
+            var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
+            var metadataXml = xmlMetadataWriter.CreateMetadataXml(
+                metadataStructureId,
+                XmlUtility.ToXDocument(metadataResult)
+            );
+
+            // shall contain the attributes
+            var metadataXmlTemplate = XmlMetadataWriter.ToXmlDocument(metadataXml);
+
+            // set attributes FROM metadataXmlTemplate TO metadataResult
+            var completeMetadata = XmlMetadataImportHelper.FillInXmlValues(metadataResult, metadataXmlTemplate);
+
+            return completeMetadata;
+
+        }
+
+
+        ////////////////////////////////////
+
+
+
+
+        public long GetDefaultUnstructuredDataStructureId()
+        {
+            var x = new Dlm.Services.DataStructure.DataStructureManager();
+            var y = x.UnStructuredDataStructureRepo.Get();
+            return y[0].Id;
+
+        }
+
         public String XmlToString(XmlDocument xml)
         {
             StringWriter stringWriter = new StringWriter();
@@ -235,15 +571,6 @@ namespace BExIS.Modules.OAC.UI.Controllers
             return stringWriter.ToString();
         }
 
-        #endregion
-
-        #region mapping
-
-        /// <summary>
-        /// converts &lt;item key="name"&gt;&lt;/item&gt; to &lt;name&gt;&lt;/item&gt;
-        /// </summary>
-        /// <param name="doc"></param>
-        /// <param name="parent"></param>
         public void ConvertXMLItemKeys(XmlDocument doc, XmlNode parent)
         {
             foreach(XmlNode node in parent.ChildNodes)
@@ -290,98 +617,21 @@ namespace BExIS.Modules.OAC.UI.Controllers
             }
 
             JavaScriptSerializer js = new JavaScriptSerializer();
-
+            HelperController.Dispose();
             return Content(js.Serialize(list));
 
         }
 
-        public XmlDocument ConvertOmicsToBExIS(long metadataStructureId, XmlDocument metadataForImport, DataSource source)
-        {
-
-            string sourceName = GetSourceName(source);
-
-            CreateDatasetController HelperController = new CreateDatasetController();
-            string metadataStructureName = HelperController.LoadMetadataStructureViewList().Find(x => x.Id == metadataStructureId).Title;
-
-            // create path to mapping file, MappingFile_extern_biogps.xsd_to_intern_bfgghng.xml
-            var path_mappingFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DIM"), "MappingFile_extern_" + sourceName + "_to_intern_" + metadataStructureName + ".xml");
-            // use maybe XmlMetadataImportHelper.GetMappingFileName(metadataStructureId, TransmissionType.mappingFileImport, mappingFileName)
-
-            // if not existing, then an error will be thrown...
-            if (!System.IO.File.Exists(path_mappingFile))
-            {
-                throw new Exception("Missing mapping file from " + metadataStructureName + " to " + sourceName + ".");
-            }
-
-            // XML mapper + mapping file
-            var xmlMapperManager = new XmlMapperManager(TransactionDirection.ExternToIntern);
-            xmlMapperManager.Load(path_mappingFile, "");
-
-            // generate internal metadata without internal attributes
-            var metadataResult = xmlMapperManager.Generate(metadataForImport, 1, true);
-
-            // throw new Exception(XmlToString(metadataResult));
-
-            // generate internal template metadata xml with needed attribtes
-            var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
-            var metadataXml = xmlMetadataWriter.CreateMetadataXml(
-                metadataStructureId,
-                XmlUtility.ToXDocument(metadataResult)
-            );
-
-            // shall contain the attributes
-            var metadataXmlTemplate = XmlMetadataWriter.ToXmlDocument(metadataXml);
-
-            // set attributes FROM metadataXmlTemplate TO metadataResult
-            var completeMetadata = XmlMetadataImportHelper.FillInXmlValues(metadataResult, metadataXmlTemplate);
-
-            return completeMetadata;
-
-        }
-
-        /// <summary>
-        ///     converts JSON strings to XML documents for use in the XML based functions
-        ///     uses Newtonsoft, JsonConvert.DeserializeXmlNode
-        /// </summary>
-        /// <param name="json">The JSON, that should be converted to XML</param>
-        /// <returns>the XML created from the JSON string</returns>
         public XmlDocument JsonStringToXML(string json)
         {
-            XmlDocument doc = (XmlDocument) JsonConvert.DeserializeXmlNode(json);
+            XmlDocument doc = (XmlDocument) Newtonsoft.Json.JsonConvert.DeserializeXmlNode(json);
             return doc;
         }
 
-        #endregion
 
-        #region form page
 
-        /// <summary>
-        ///     shows the page, where the user enters all needed information
-        /// </summary>
-        /// <returns>the page created</returns>
-        public ActionResult Index()
-        {
 
-            CreateDatasetController HelperController = new CreateDatasetController();
 
-            SelectedImportOptionsModel model = new SelectedImportOptionsModel()
-            {
-                MetadataStructureViewList = HelperController.LoadMetadataStructureViewList(),
-                DataStructureViewList = HelperController.LoadDataStructureViewList(),
-                DataSourceViewList = GetDataSourceList()
-            };
-
-            return View(model);
-        }
-
-        #endregion
-
-        #region utilities
-
-        /// <summary>
-        ///     get a list of all sources, needed for the selection of the source
-        /// </summary>
-        /// <returns>the list of all available sources</returns>
         public List<ListViewItem> GetDataSourceList()
         {
             List<ListViewItem> temp = new List<ListViewItem>();
@@ -396,7 +646,17 @@ namespace BExIS.Modules.OAC.UI.Controllers
             return temp;
         }
 
-        #endregion
+        public string GetUsernameOrDefault()
+        {
+            string username = string.Empty;
+            try
+            {
+                username = HttpContext.User.Identity.Name;
+            }
+            catch { }
+
+            return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
+        }
     }
 
 }

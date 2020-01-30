@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Xml;
 using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Reflection;
 
 namespace BExIS.Modules.OAC.UI.Models
 {
@@ -14,7 +20,7 @@ namespace BExIS.Modules.OAC.UI.Models
         public string releaseDate { get; set; }
         public string updateDate { get; set; }
         public string description { get; set; }
-        public string _linksselfhref { get; set; }
+        public string _linksselfhref { get; set; } 
         public string _linkssamplehref { get; set; }
         public string _linksrelationshref { get; set; }
         public List<string> geographicLocationDepth { get; set; }
@@ -46,7 +52,7 @@ namespace BExIS.Modules.OAC.UI.Models
         public List<string> externalReferencesurl { get; set; }
 
         public EBIresponseModel() { }
-        
+
         public EBIresponseModel(JObject json)
         {
             this.accession = json["accession"].ToString();
@@ -58,9 +64,9 @@ namespace BExIS.Modules.OAC.UI.Models
             this.geographicLocationDepth = new List<string>();
             foreach (var x in json["characteristics"]["geographicLocationDepth"])
             {
-                geographicLocationDepth.Add(x["text"].ToString());
+                geographicLocationDepth.Add(x["text"].ToString().Replace(",","."));
             }
-            
+
             this.organismtext = new List<string>();
             this.organismontologyTerms = new List<string>();
             foreach (var x in json["characteristics"]["organism"])
@@ -100,7 +106,7 @@ namespace BExIS.Modules.OAC.UI.Models
             this.geographicLocationLongitude = new List<string>();
             foreach (var x in json["characteristics"]["geographicLocationLongitude"])
             {
-                geographicLocationLongitude.Add(x["text"].ToString());
+                geographicLocationLongitude.Add(x["text"].ToString().Replace(",","."));
             }
 
             this.titletext = new List<string>();
@@ -112,7 +118,7 @@ namespace BExIS.Modules.OAC.UI.Models
             this.geographicLocationLatitude = new List<string>();
             foreach (var x in json["characteristics"]["geographicLocationLatitude"])
             {
-                geographicLocationLatitude.Add(x["text"].ToString());
+                geographicLocationLatitude.Add(x["text"].ToString().Replace(",","."));
             }
 
             this.insdcLastUpdate = new List<string>();
@@ -222,6 +228,66 @@ namespace BExIS.Modules.OAC.UI.Models
             xml.Load(JsonReaderWriterFactory.CreateJsonReader(
                 Encoding.ASCII.GetBytes(jsonString), new XmlDictionaryReaderQuotas()));
             return xml;
+        }
+
+        public string ConvertTocsv(EBIresponseModel model, string tempfile)
+        {
+            string x = "";
+            //x = "accession,name,releaseDate,updateDate,description,_linksselfhref,_linkssamplehref,_linksrelationshref,geographicLocationDepth,organismtext,organismontologyTerms,environmentMaterial,insdcFirstPublic,enaChecklist,collectionDate,geographicLocationLongitude,titletext,geographicLocationLatitude,insdcLastUpdate,waterEnvironmentalPackage,waterEnvironmentalPackageontologyTerms,investigationType,synonym,insdcStatus,sequencingMethod,projectName,sraAccession,alias,environmentBiome,environmentFeature,insdcCenterName,geographicLocationCountryAndOrSea,externalReferences,externalReferencesacc,externalReferencesurl";
+            //sw.WriteLine(x);
+
+            x = model.accession + "," + model.name + "," + model.releaseDate + "," + model.updateDate + "," + model.description + "," + model._linksselfhref + "," + model._linkssamplehref + ","
+                + model._linksrelationshref + "," + string.Join("-", model.geographicLocationDepth) + "," + string.Join("-", model.organismtext) + "," + string.Join("-", model.organismontologyTerms) + ","
+                + string.Join("-", model.environmentMaterial) + "," + string.Join("-", model.insdcFirstPublic) + "," 
+                + string.Join("-", model.enaChecklist) + "," + string.Join("-", model.collectionDate) + "," + string.Join("-", model.geographicLocationLongitude) + "," + string.Join("-", model.titletext) + "," 
+                + string.Join("-", model.geographicLocationLatitude) + "," + string.Join("-", model.insdcLastUpdate) + "," + string.Join("-", model.waterEnvironmentalPackage) + "," + string.Join("-", model.waterEnvironmentalPackageontologyTerms) + ","
+                + string.Join("-", model.investigationType) + "," + string.Join("-", model.synonym) + "," + string.Join("-", model.insdcStatus) + "," + string.Join("-", model.sequencingMethod) + ","
+                + string.Join("-", model.projectName) + "," + string.Join("-", model.sraAccession) + "," + string.Join("-", model.alias) + "," 
+                + string.Join("-", model.environmentBiome) + "," + string.Join("-", model.environmentFeature) + "," + string.Join("-", model.environmentFeature) + "," + string.Join("-", model.insdcCenterName) + "," 
+                + string.Join("-", model.geographicLocationCountryAndOrSea) + "," + string.Join("-", model.externalReferences) + "," + string.Join("-", model.externalReferencesacc) + ","+ string.Join("-", model.externalReferencesurl) 
+                ;
+
+            if (tempfile != "")
+            {
+                if (!File.Exists(tempfile))
+                {
+                    StreamWriter sw = File.CreateText(tempfile);
+                    sw.Close();
+                }
+
+                using (StreamWriter sw = File.AppendText(tempfile))
+                {
+                    sw.WriteLine(x);
+                    sw.Close();
+                }
+            }
+            return x;
+        }
+
+        public string Initialise_header(string tempfile)
+        {
+            string data_csv = "accession,name,releaseDate,updateDate,description,_linksselfhref,_linkssamplehref," +
+                "_linksrelationshref,geographicLocationDepth,organismtext,organismontologyTerms,environmentMaterial," +
+                "insdcFirstPublic,enaChecklist,collectionDate,geographicLocationLongitude,titletext,geographicLocationLatitude," +
+                "insdcLastUpdate,waterEnvironmentalPackage,waterEnvironmentalPackageontologyTerms,investigationType,synonym," +
+                "insdcStatus,sequencingMethod,projectName,sraAccession,alias,environmentBiome,environmentFeature" +
+                ",insdcCenterName,geographicLocationCountryAndOrSea,externalReferences," +
+                "externalReferencesacc,externalReferencesurl";
+            if (tempfile != "")
+            {
+                if (!File.Exists(tempfile))
+                {
+                    StreamWriter sw = File.CreateText(tempfile);
+                    sw.Close();
+                }
+                    
+                
+                using (StreamWriter sw = File.AppendText(tempfile))
+                {
+                    sw.WriteLine(data_csv);sw.Close();
+                }
+            }
+            return data_csv;
         }
 
     }
