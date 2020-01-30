@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Vaiona.Persistence.Api;
 
-namespace BExIS.Modules.OAC.UI.Helpers
+namespace BExIS.Modules.OAC.UI.Helper
 {
     public class OACSeedDataGenerator : IDisposable
     {
