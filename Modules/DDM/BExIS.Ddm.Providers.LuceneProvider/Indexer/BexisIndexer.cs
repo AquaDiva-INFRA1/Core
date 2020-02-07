@@ -6,7 +6,10 @@ using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Orm.NH.Utils;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Objects;
 using BExIS.Utils.Models;
+using BExIS.Xml.Helpers;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
@@ -44,7 +47,19 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
         public List<XmlNode> generalXmlNodeList = new List<XmlNode>();
         public List<XmlNode> headerItemXmlNodeList = new List<XmlNode>();
 
-        public bool includePrimaryData = true;
+        public bool includePrimaryData = false;
+
+        private EntityManager entityManager;
+        private EntityPermissionManager entityPermissionManager;
+        private long? entityTypeId;
+        public BexisIndexer()
+        {
+            entityPermissionManager = new EntityPermissionManager();
+
+            entityManager = new EntityManager();
+            entityTypeId = entityManager.FindByName(typeof(Dataset).Name)?.Id;
+            entityTypeId = entityTypeId.HasValue ? entityTypeId.Value : -1;
+        }
         /// <summary>
         ///
         /// </summary>
@@ -98,7 +113,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     categoryXmlNodeList.Add(fieldProperty);
                     Category c = new Category();
                     c.Name = fieldProperty.Attributes.GetNamedItem("lucene_name").Value;
-                    c.Value = fieldProperty.Attributes.GetNamedItem("lucene_name").Value; ;
+                    c.Value = fieldProperty.Attributes.GetNamedItem("lucene_name").Value;
                     c.DefaultValue = "nothing";
                     AllCategories.Add(c);
                 }
@@ -358,7 +373,15 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             var dataset = new Document();
             List<XmlNode> facetNodes = facetXmlNodeList;
             dataset.Add(new Field("doc_id", docId, Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.NOT_ANALYZED));
-            
+            ///
+            /// Add a field to indicte whether the dataset is public, this will be used for the public datasets' search page.
+            ///
+            dataset.Add(new Field("gen_isPublic", entityPermissionManager.Exists(null, entityTypeId.Value, id) ? "TRUE" : "FALSE", Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.NOT_ANALYZED));
+
+            XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+            dataset.Add(new Field("gen_entity_name", xmlDatasetHelper.GetEntityName(id), Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.NOT_ANALYZED));
+
+
             foreach (XmlNode facet in facetNodes)
             {
                 String multivalued = facet.Attributes.GetNamedItem("multivalued").Value;
@@ -533,7 +556,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
                 if (!category.Attributes.GetNamedItem("type").Value.Equals("primary_data_field"))
                 {
-                  
+
                     String multivalued = category.Attributes.GetNamedItem("multivalued").Value;
                     String storing = category.Attributes.GetNamedItem("store").Value;
 
@@ -591,10 +614,15 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     }
 
                 }
+                else
+                {
+                    //if the primary data index exist in the config - this means the primary data should be indexed
+                    includePrimaryData = true;
+                }
             }
 
             indexPrimaryData(id, categoryNodes, ref dataset, docId, metadataDoc);
-            
+
             List<XmlNode> generalNodes = generalXmlNodeList;
 
             foreach (XmlNode general in generalNodes)
@@ -671,7 +699,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
         private void indexPrimaryData(long id, List<XmlNode> categoryNodes, ref Document dataset, string docId, XmlDocument metadataDoc)
         {
-            
+
 
             DatasetManager dm = new DatasetManager();
             DataStructureManager dsm = new DataStructureManager();

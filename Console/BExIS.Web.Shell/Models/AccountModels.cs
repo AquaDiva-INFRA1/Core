@@ -1,5 +1,7 @@
-﻿using BExIS.Utils.Filters;
+﻿using System.ComponentModel;
+using BExIS.Utils.Filters;
 using System.ComponentModel.DataAnnotations;
+using BExIS.Security.Entities.Subjects;
 
 namespace BExIS.Web.Shell.Models
 {
@@ -25,6 +27,36 @@ namespace BExIS.Web.Shell.Models
         public string Email { get; set; }
     }
 
+    public class LoginConfirmModel
+    {
+        [Required]
+        public long Id { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Display(Name = "Terms and Conditions")]
+        [MustBeTrue(ErrorMessage = "You must agree to the Terms and Conditions before register.")]
+        public bool TermsAndConditions { get; set; }
+
+        [Display(Name = "Privacy Policy")]
+        [MustBeTrue(ErrorMessage = "You must agree to the Privacy Policy before register.")]
+        public bool PrivacyPolicy { get; set; }
+
+        public static LoginConfirmModel Convert(User user)
+        {
+            return new LoginConfirmModel()
+            {
+                Id = user.Id,
+                Email = user.Email,
+                TermsAndConditions = user.HasTermsAndConditionsAccepted,
+                PrivacyPolicy = user.HasPrivacyPolicyAccepted
+            };
+        }
+    }
+
     public class LoginViewModel
     {
         [Required]
@@ -32,7 +64,7 @@ namespace BExIS.Web.Shell.Models
         public string Authenticator { get; set; }
 
         [Required]
-        [Display(Name = "User Name")]
+        [Display(Name = "Email or Username")]
         public string UserName { get; set; }
 
         [Required]
@@ -66,7 +98,7 @@ namespace BExIS.Web.Shell.Models
     public class RegisterViewModel
     {
         [Required]
-        [Display(Name = "User Name")]
+        [Display(Name = "Username")]
         public string UserName { get; set; }
 
         [Required]
@@ -88,6 +120,10 @@ namespace BExIS.Web.Shell.Models
         [Display(Name = "Terms and Conditions")]
         [MustBeTrue(ErrorMessage = "You must agree to the Terms and Conditions before register.")]
         public bool TermsAndConditions { get; set; }
+
+        [Display(Name = "Privacy Policy")]
+        [MustBeTrue(ErrorMessage = "You must agree to the Privacy Policy before register.")]
+        public bool PrivacyPolicy { get; set; }
     }
 
     public class ResetPasswordViewModel

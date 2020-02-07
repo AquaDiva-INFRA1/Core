@@ -1,8 +1,7 @@
-﻿using System;
+﻿using BExIS.Dcm.Wizard;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using BExIS.Dcm.Wizard;
 
 /// <summary>
 ///
@@ -55,10 +54,15 @@ namespace BExIS.Dcm.UploadWizard
         public static string VERIFICATION_ATTRIBUTESUGGESTIONS = "VerificationAttributeSuggestions";
         public static string ANNOTATIONMAPPING = "AnnotationMapping"; //Structure: Dictionary<Tuple<int:headerID, String:category>, Tuple<String:conceptURI, Boolean:userSelected>>
 
+        public static string ROWS = "ROWS";
+        public static string ALL_DATATYPES = "ALL_DATATYPES";
+
         public static string NUMBERSOFROWS = "NUMBERSOFROWS";
         public static string CURRENTPACKAGE = "CURRENTPACKAGE";
         public static string CURRENTPACKAGESIZE = "CURRENTPACKAGE";
-        
+
+        public static string ANNOTATION_ENTITY = "ANNOTATION_ENTITY";
+        public static string ANNOTATION_CHARACHTERISTIC = "ANNOTATION_CHARACHTERISTIC";
 
         //Annotation related
         public static string NOCONCEPTSFOUND = "NoConceptsFound"; //Structure: List<Tuple<int:headerId, String:Category>>

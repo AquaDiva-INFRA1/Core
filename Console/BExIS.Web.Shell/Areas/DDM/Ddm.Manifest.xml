@@ -24,9 +24,20 @@
             
     <Export tag="menubar" id="menuSearch" order="2"
             title="Search" description="Search datasets" icon=""
-            controller="home" action="index"
+            controller="Home" action="index"
             extends="./menubarRoot/search" />
 
+    <!--<Export tag="menubar" id="menuSearchPublic" order="2"
+            title="Public" description="Search in public datasets" icon=""
+            controller="publicsearch" action="public"
+            extends="./menubarRoot" />-->
+    <!--
+    <Export tag="menubar" id="dashboard" order="1"
+        title="Dashboard" description="Quick Access to User Area" icon=""
+        controller="dashboard" action="index"
+        extends="./menubarRoot" />
+    -->
+    
     <Export tag="menubar" id="semanticSearch" order="2"
             title="Semantic Search" description="Search datasets" icon=""
             controller="SemanticSearch" action="index"
@@ -36,11 +47,16 @@
             title="Search" description="Search Help Manual" icon=""
             controller="help" action="index"
             extends="./lunchbarRoot/help" />
-    
+
     <Export tag="api" id="tntList"
             title="No thing" description="Change me!" icon=""
             controller="home" action="index"
             extends="./apiRoot" />
+
+    <Export tag="internalApi" id="publicsearch"
+            title="Public Search" description="public search" icon=""
+            controller="PublicSearch" action="Index"
+            extends="" />
     
     <Export tag="menubar" id="interactiveSearch" order="2"
             title="Interactive Search" description="Interactive Search Based search on geo-localisation" icon=""
@@ -70,7 +86,7 @@
         extends="" />
 
     <Export tag="internalApi" id="freeTextSearch"
-            title="Free Text Search" description="free Text Search" icon=""
+            title="Free Text Search" description="free Text Search" icon="" 
             controller="SearchIndex" action="Get"
             extends="" />
 
@@ -84,6 +100,9 @@
             controller="SemanticSearch" action="FindOntologyLabels"
             extends="" />
     
-
   </Exports>
+
+  <EntityActions>
+    <EntityAction id="showDataset" entity="dataset" controller="data" action="Showdata" area="DDM" modus="show" />
+  </EntityActions>
 </Manifest>

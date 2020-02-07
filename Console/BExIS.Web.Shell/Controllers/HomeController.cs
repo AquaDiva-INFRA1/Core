@@ -10,6 +10,12 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using BExIS.Modules.Rpm.UI.Models;
+using Vaiona.Web.Extensions;
+using Vaiona.Web.Mvc.Models;
+using BExIS.Web.Shell.Helpers;
+using Vaiona.IoC;
+using BExIS.App.Bootstrap;
+using System;
 
 namespace BExIS.Web.Shell.Controllers
 {
@@ -61,6 +67,8 @@ namespace BExIS.Web.Shell.Controllers
         [DoesNotNeedDataAccess]
         public ActionResult SessionTimeout()
         {
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Session Timeout", this.Session.GetTenant());
+
             return View();
         }
         

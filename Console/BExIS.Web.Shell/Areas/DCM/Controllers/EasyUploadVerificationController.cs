@@ -8,7 +8,6 @@ using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.IO.Transform.Validation.ValueCheck;
 using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Utils.Models;
-using BExIS.Web.Shell.Areas.DCM.Helpers;
 using F23.StringSimilarity;
 using Newtonsoft.Json;
 using System;
@@ -23,14 +22,19 @@ using Vaiona.Utils.Cfg;
 using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Modularity;
 using BExIS.Aam.Entities.Mapping;
+using BExIS.Modules.Dcm.UI.Helpers;
+using OfficeOpenXml;
+using BExIS.Aam.Services;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
 {
+
     public class EasyUploadVerificationController : BaseController
     {
         private EasyUploadTaskManager TaskManager;
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "extendedAutocompletion.txt");
 
+        List<Dlm.Entities.DataStructure.Unit> tempUnitList = new List<Dlm.Entities.DataStructure.Unit>();
         //
         // GET: /DCM/SubmitSelectAreas/
 
@@ -57,8 +61,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 }
 
                 SelectVerificationModel model = new SelectVerificationModel();
+                List<DataTypeInfo> dataTypeInfos = new List<DataTypeInfo>();
+                List<UnitInfo> unitInfos = new List<UnitInfo>();
+                List<DataAttrInfo> dataAttributeInfos = new List<DataAttrInfo>();
+                List<EasyUploadSuggestion> suggestions = new List<EasyUploadSuggestion>();
+                List<string> headers = new List<string>();
 
-                //Grab all necessary managers and lists
 
                 tempUnitList = unitOfWork.GetReadOnlyRepository<Dlm.Entities.DataStructure.Unit>().Get().ToList();
                 allDataypes = unitOfWork.GetReadOnlyRepository<DataType>().Get().ToList();
@@ -66,9 +74,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
 
                 //Important for jumping back to this step
-                if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
+                if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ROWS))
                 {
-                    model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                    model.Rows = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
                 }
 
                 // get all DataTypes for each Units
@@ -80,6 +88,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     unitInfo.Description = unit.Description;
                     unitInfo.Name = unit.Name;
                     unitInfo.Abbreviation = unit.Abbreviation;
+                    unitInfo.DimensionId = unit.Dimension.Id;
 
                     if (unit.Name.ToLower() == "none")
                     {
@@ -89,24 +98,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             dataTypeInfo.DataTypeId = fullDataType.Id;
                             dataTypeInfo.Description = fullDataType.Description;
                             dataTypeInfo.Name = fullDataType.Name;
-                            //unitInfo.DataTypeInfos.Add(dataTypeInfo);
 
-                            // Hamdi Hamed: 
-                            // I changed the commented line above to this piece of code to set "String" Data Type at first so it can  
-                            // be selected by default in the "view" of the "verification step" for the "Easy Upload" process
-                            // instead of doing lot of test in the "View" side.
-                            // ===> tested and implemeted correctly on my machine.
-                            if (fullDataType.Name.ToString().ToLower() == "string")
-                            {
-                                unitInfo.DataTypeInfos.Insert(0, dataTypeInfo);
-                            }
-                            else
-                            {
-                                unitInfo.DataTypeInfos.Add(dataTypeInfo);
-                            }
+                            unitInfo.DataTypeInfos.Add(dataTypeInfo);
                         }
 
-                        model.AvailableUnits.Add(unitInfo);
+                        unitInfos.Add(unitInfo);
                     }
                     else
                     {
@@ -127,20 +123,29 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             unitInfo.DataTypeInfos.Add(dataTypeInfo);
                         }
                         if (hasDatatype)
-                            model.AvailableUnits.Add(unitInfo);
+                            unitInfos.Add(unitInfo);
                     }
                 }
 
                 //Sort the units by name
-                model.AvailableUnits.Sort(delegate (UnitInfo u1, UnitInfo u2)
+                unitInfos.Sort(delegate (UnitInfo u1, UnitInfo u2)
                 {
                     return String.Compare(u1.Name, u2.Name, StringComparison.InvariantCultureIgnoreCase);
                 });
 
-                if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS))
-                {
-                    TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS, model.AvailableUnits);
-                }
+
+                TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS, unitInfos);
+
+                // all datatypesinfos 
+                dataTypeInfos = unitInfos.SelectMany(u => u.DataTypeInfos).GroupBy(d => d.DataTypeId).Select(g => g.Last()).ToList();
+                TaskManager.AddToBus(EasyUploadTaskManager.ALL_DATATYPES, dataTypeInfos);
+
+
+                //Setall Data AttrInfos to Session -> default
+                allDataAttributes.ForEach(d => dataAttributeInfos.Add(new DataAttrInfo(d.Id, d.Unit.Id, d.DataType.Id, d.Description, d.Name, d.Unit.Dimension.Id)));
+                Session["DataAttributes"] = dataAttributeInfos;
+
+
 
                 string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
                 string selectedHeaderAreaJson = TaskManager.Bus[EasyUploadTaskManager.SHEET_HEADER_AREA].ToString();
@@ -158,78 +163,50 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 SheetFormat sheetFormat = 0;
                 Enum.TryParse<SheetFormat>(sheetFormatString, true, out sheetFormat);
 
-                model.HeaderFields = GetExcelHeaderFields(sheetFormat, selectedHeaderAreaJson).ToArray();
+                //headers = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson);
+                headers = GetExcelHeaderFields(sheetFormat, selectedHeaderAreaJson);
 
-                if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
+                headers = makeHeaderUnique(headers);
+
+                suggestions = new List<EasyUploadSuggestion>();
+
+                Aam_Dataset_column_annotationManager amm_manager = new Aam_Dataset_column_annotationManager();
+
+                if (!model.Rows.Any())
                 {
-                    TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS, model.HeaderFields);
+
+                    foreach (string varName in headers)
+                    {
+                        #region suggestions
+                        //Add a variable to the suggestions if the names are similar
+                        suggestions = getSuggestions(varName, dataAttributeInfos);
+                        #endregion
+
+                        //set rowmodel
+                        RowModel row = new RowModel(
+                            headers.IndexOf(varName),
+                            varName,
+                            null,
+                            null,
+                            null,
+                            suggestions,
+                            unitInfos,
+                            dataAttributeInfos,
+                            dataTypeInfos,
+                            amm_manager.get_all_dataset_column_annotationBy_Variable_measures(varName),
+                            amm_manager.get_all_dataset_column_annotationByVariable_label_matching(varName)
+                            );
+
+                        model.Rows.Add(row);
+
+                        TaskManager.AddToBus(EasyUploadTaskManager.ROWS, model.Rows);
+                        TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, RowsToTuples());
+                    }
                 }
 
+                amm_manager.Dispose();
 
-                model.Suggestions = new Dictionary<int, List<EasyUploadSuggestion>>();
-
-                for (int i = 0; i < model.HeaderFields.Length; i++)
-                {
-                    //Default unit should be "none" if it exists, otherwise just take the first unit
-                    UnitInfo currentUnitInfo = model.AvailableUnits.FirstOrDefault(u => u.Name.ToLower() == "none");
-                    if (currentUnitInfo != null)
-                    {
-                        currentUnitInfo = (UnitInfo)currentUnitInfo.Clone();
-                    }
-                    else
-                    {
-                        currentUnitInfo = (UnitInfo)model.AvailableUnits.FirstOrDefault().Clone();
-                    }
-
-                    DataTypeInfo dtinfo = currentUnitInfo.DataTypeInfos.FirstOrDefault();
-                    currentUnitInfo.SelectedDataTypeId = dtinfo.DataTypeId;
-                    ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
-                    ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
-
-                    if (model.HeaderVariableInformation.Where(t => t.headerId == i).FirstOrDefault() == null)
-                    {
-                        model.HeaderVariableInformation.Add(new EasyUploadVariableInformation(i, model.HeaderFields[i], currentUnitInfo));
-                    }
-
-                    #region suggestions
-                    //Add a variable to the suggestions if the names are similar
-                    model.Suggestions.Add(i, new List<EasyUploadSuggestion>());
-
-                    //Calculate similarity metric
-                    //Accept suggestion if the similarity is greater than some threshold
-                    double threshold = 0.4;
-                    IEnumerable<DataAttribute> suggestions = allDataAttributes.Where(att => Similarity(att.Name, model.HeaderFields[i]) >= threshold);
-
-                    //Order the suggestions according to the similarity
-                    List<DataAttribute> ordered = suggestions.ToList<DataAttribute>();
-                    ordered.Sort((x, y) => (Similarity(y.Name, model.HeaderFields[i])).CompareTo(Similarity(x.Name, model.HeaderFields[i])));
-
-                    //Add the ordered suggestions to the model
-                    foreach (DataAttribute att in ordered)
-                    {
-                        model.Suggestions[i].Add(new EasyUploadSuggestion(att.Name, att.Unit.Id, att.DataType.Id, att.Unit.Name, att.DataType.Name, true));
-                    }
-
-                    //Use the following to order suggestions alphabetically instead of ordering according to the metric
-                    //model.Suggestions[i] = model.Suggestions[i].Distinct().OrderBy(s => s.attributeName).ToList<EasyUploadSuggestion>();
-
-                    //Each Name-Unit-Datatype-Tuple should be unique
-                    model.Suggestions[i] = model.Suggestions[i].Distinct().ToList<EasyUploadSuggestion>();
-                    #endregion
-                }
-
-
-                TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS, model.Suggestions);
-
-                TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
-
-                // when jumping back to this step
-                if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.SHEET_JSON_DATA))
-                {
-                    if (!String.IsNullOrEmpty(Convert.ToString(TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA])))
-                    {
-                    }
-                }
+                TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, headers);
 
                 model.StepInfo = TaskManager.Current();
 
@@ -248,6 +225,49 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             {
                 TaskManager.Current().SetValid(false);
 
+                if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ROWS))
+                {
+                    List<RowModel> rows = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
+                    model.Rows = rows;
+                    bool allSelectionMade = true;
+
+                    foreach (var r in rows)
+                    {
+                        if (r.SelectedDataAttribute == null ||
+                            r.SelectedDataType == null ||
+                            r.SelectedUnit == null)
+                        {
+                            allSelectionMade = false;
+                            model.ErrorList.Add(new Error(ErrorType.Other, "Some Areas are not selected."));
+                            break;
+                        }
+                    }
+
+                    TaskManager.Current().SetValid(allSelectionMade);
+                }
+                else
+                {
+                    model.ErrorList.Add(new Error(ErrorType.Other, "Some Areas are not selected."));
+                }
+
+                if (TaskManager.Current().valid == true)
+                {
+                    TaskManager.AddExecutedStep(TaskManager.Current());
+                    TaskManager.GoToNext();
+                    Session["TaskManager"] = TaskManager;
+                    ActionInfo actionInfo = TaskManager.Current().GetActionInfo;
+                    return RedirectToAction(actionInfo.ActionName, actionInfo.ControllerName, new RouteValueDictionary { { "area", actionInfo.AreaName }, { "index", TaskManager.GetCurrentStepInfoIndex() } });
+                }
+                else
+                {
+                    TaskManager.Current().SetStatus(StepStatus.error);
+
+                    //reload model
+                    model.StepInfo = TaskManager.Current();
+                }
+
+                #region old 2.11
+                /*
                 if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
                 {
                     List<EasyUploadVariableInformation> mappedHeaderUnits = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
@@ -276,626 +296,228 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     //reload model
                     model.StepInfo = TaskManager.Current();
                 }
+                */
+                #endregion
             }
 
             //Default unit should be "none" if it exists, otherwise just take the first unit
-            UnitInfo currentUnitInfo = model.AvailableUnits.FirstOrDefault(u => u.Name.ToLower() == "none");
-            if (currentUnitInfo != null)
-            {
-                currentUnitInfo = (UnitInfo)currentUnitInfo.Clone();
-            }
-            else
-            {
-                currentUnitInfo = (UnitInfo)model.AvailableUnits.FirstOrDefault().Clone();
-            }
+            //UnitInfo currentUnitInfo = model.AvailableUnits.FirstOrDefault(u => u.Name.ToLower() == "none");
+            //if (currentUnitInfo != null)
+            //{
+            //    currentUnitInfo = (UnitInfo)currentUnitInfo.Clone();
+            //}
+            //else
+            //{
+            //    currentUnitInfo = (UnitInfo)model.AvailableUnits.FirstOrDefault().Clone();
+            //}
+            //
+            //DataTypeInfo dtinfo = currentUnitInfo.DataTypeInfos.FirstOrDefault();
+            //currentUnitInfo.SelectedDataTypeId = dtinfo.DataTypeId;
+            //ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
+            //ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
 
-            DataTypeInfo dtinfo = currentUnitInfo.DataTypeInfos.FirstOrDefault();
-            currentUnitInfo.SelectedDataTypeId = dtinfo.DataTypeId;
-            ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
-            ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
 
             return PartialView(model);
         }
 
-        [HttpGet]
-        public ActionResult GetMappingSuggestionDropdown(int headerIndex)
+        public ActionResult SaveSelection(int index, long selectedUnit, long selectedDataType, long selectedAttribute, string varName, string lastSelection, string selectedEntity, string selectedCharachteristic)
         {
-            //Get variable name, unit and datatype for matching purposes
+            /**
+             * if selectedAttribute == -1 == Unknown
+                  selectedAttribute == -2 ==  Not found
+             * 
+             */
+
+
+            List<DataTypeInfo> dataTypeInfos = new List<DataTypeInfo>();
+            List<UnitInfo> unitInfos = new List<UnitInfo>();
+            List<DataAttrInfo> dataAttributeInfos = new List<DataAttrInfo>();
+            List<EasyUploadSuggestion> suggestions = new List<EasyUploadSuggestion>();
+            List<string> headers = new List<string>();
+
+            List<Aam_Dataset_column_annotation> annot_list_by_variable_unit_type = new List<Aam_Dataset_column_annotation>() ;
+            Dictionary<Aam_Uri, double> annot_Dict_by_variable_string_similarities = new Dictionary<Aam_Uri, double>();
+
+            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+
+            //suggestions
+
+            #region load all lists
+
+            //dataattr
+            if (Session["DataAttributes"] != null)
+            {
+                dataAttributeInfos = (List<DataAttrInfo>)Session["DataAttributes"];
+            }
+
+            if (!string.IsNullOrEmpty(varName))
+            {
+                suggestions = getSuggestions(varName, dataAttributeInfos);
+            }
+
+            unitInfos = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
+
+            dataTypeInfos = (List<DataTypeInfo>)TaskManager.Bus[EasyUploadTaskManager.ALL_DATATYPES];
+            #endregion
+
+            #region load current seleted items
+
+            UnitInfo currentUnit = unitInfos.FirstOrDefault(u => u.UnitId == selectedUnit);
+            DataTypeInfo currentDataTypeInfo = dataTypeInfos.FirstOrDefault(d => d.DataTypeId.Equals(selectedDataType));
+
+            DataAttrInfo currentDataAttrInfo = null;
+            if (selectedAttribute > 0) currentDataAttrInfo = dataAttributeInfos.FirstOrDefault(da => da.Id.Equals(selectedAttribute));
+            if (selectedAttribute == -1) currentDataAttrInfo = new DataAttrInfo(-1, 0, 0, "Unknown", "Unknow", 1);
+            if (selectedAttribute == -2) currentDataAttrInfo = new DataAttrInfo(-2, 0, 0, "Not found", "Not found", 1); ;
+
+            Aam_UriManager aam_manag = new Aam_UriManager();
+            Aam_Uri selected_entity = aam_manag.get_Aam_Uri_by_id(Int64.Parse(selectedEntity));
+            Aam_Uri selected_char = aam_manag.get_Aam_Uri_by_id(Int64.Parse(selectedCharachteristic));
+            aam_manag.Dispose();
+
+            #endregion
+
+            #region filtering
+
+            if (currentUnit != null)
+            {
+                unitInfos = unitInfos.Where(u => u.UnitId.Equals(currentUnit.UnitId) || u.DimensionId.Equals(currentUnit.DimensionId)).ToList();
+
+                // filtering data attrs where the attr has the unit or there dimension
+                if (selectedAttribute == 0) dataAttributeInfos = dataAttributeInfos.Where(d => d.UnitId.Equals(currentUnit.UnitId) || d.DimensionId.Equals(currentUnit.DimensionId)).ToList();
+                else dataAttributeInfos = dataAttributeInfos.Where(d => d.Id.Equals(currentDataAttrInfo.Id)).ToList();
+
+                if (selectedDataType == 0) dataTypeInfos = dataTypeInfos.Where(d => currentUnit.DataTypeInfos.Any(ud => ud.DataTypeId.Equals(d.DataTypeId))).ToList();
+                else dataTypeInfos = dataTypeInfos.Where(dt => dt.DataTypeId.Equals(currentDataTypeInfo.DataTypeId)).ToList();
+
+            }
+
+            if (currentDataTypeInfo != null)
+            {
+                dataTypeInfos = dataTypeInfos.Where(dt => dt.DataTypeId.Equals(currentDataTypeInfo.DataTypeId)).ToList();
+
+                if (selectedAttribute == 0) dataAttributeInfos = dataAttributeInfos.Where(d => d.DataTypeId.Equals(currentDataTypeInfo.DataTypeId)).ToList();
+                else dataAttributeInfos = dataAttributeInfos.Where(d => d.Id.Equals(currentDataAttrInfo.Id)).ToList();
+
+                if (selectedUnit == 0) unitInfos = unitInfos.Where(u => u.DataTypeInfos.Any(d => d.DataTypeId.Equals(currentDataTypeInfo.DataTypeId))).ToList();
+                else unitInfos.Where(u => u.UnitId.Equals(currentUnit.UnitId) || u.DimensionId.Equals(currentUnit.DimensionId)).ToList();
+            }
+
+            if (currentDataAttrInfo != null)
+            {
+                ViewData["Show_unit_data_type"] = "disabled";
+                // is the seletced currentDataAttrInfo a suggestion then overrigth all selected items
+                if (currentDataAttrInfo.Id > 0)
+                {
+                    #region existing selected dataset
+
+                    if (suggestions.Any(s => s.attributeName.Equals(currentDataAttrInfo.Name)))
+                    {
+                        dataAttributeInfos = dataAttributeInfos.Where(d => d.Id.Equals(currentDataAttrInfo.Id)).ToList();
+                        unitInfos = unitInfos.Where(u => u.UnitId.Equals(currentDataAttrInfo.UnitId) || u.DimensionId.Equals(currentDataAttrInfo.DimensionId)).ToList();
+                        dataTypeInfos = unitInfos.SelectMany(u => u.DataTypeInfos).GroupBy(d => d.DataTypeId).Select(g => g.Last()).ToList();
+
+                        if (lastSelection == "Suggestions")
+                        {
+                            currentUnit = unitInfos.FirstOrDefault(u => u.UnitId.Equals(dataAttributeInfos.First().UnitId));
+                            currentDataTypeInfo = dataTypeInfos.FirstOrDefault(d => d.DataTypeId.Equals(dataAttributeInfos.First().DataTypeId));
+                        }
+
+                    }
+                    else
+                    {
+
+                        dataAttributeInfos = dataAttributeInfos.Where(d => d.Id.Equals(currentDataAttrInfo.Id)).ToList();
+
+                        //filtering units when data attr is selected, if id or dimension is the same
+                        if (selectedUnit == 0)
+                        {
+                            unitInfos = unitInfos.Where(u => u.UnitId.Equals(currentDataAttrInfo.UnitId) || u.DimensionId.Equals(currentDataAttrInfo.DimensionId)).ToList();
+                            currentUnit = unitInfos.FirstOrDefault(u => u.UnitId.Equals(currentDataAttrInfo.UnitId));
+                        }
+                        else unitInfos = unitInfos.Where(u => u.UnitId.Equals(currentUnit.UnitId) || u.DimensionId.Equals(currentUnit.DimensionId)).ToList();
+
+                        if (selectedDataType == 0)
+                        {
+                            dataTypeInfos = unitInfos.SelectMany(u => u.DataTypeInfos).GroupBy(d => d.DataTypeId).Select(g => g.Last()).ToList();
+
+                            currentDataTypeInfo = dataTypeInfos.FirstOrDefault(d => d.DataTypeId.Equals(currentDataAttrInfo.DataTypeId));
+
+                        }
+                        else dataTypeInfos = dataTypeInfos.Where(dt => dt.DataTypeId.Equals(currentDataTypeInfo.DataTypeId)).ToList();
+                    }
+
+                    #endregion existing selected dataset
+                }
+                else
+                if (currentDataAttrInfo.Id == -1) //unknow
+                {
+                    // do nothing
+                }
+                else
+                if (currentDataAttrInfo.Id == -2) //not found
+                {
+                    // do nothing
+                }
+            }
+
+            if(currentDataTypeInfo == null ) ViewData["Show_unit_data_type"] = "";
+            #endregion
+
+            #region update the annotations with every selection
+            string temp_var_name_from_suggestions = (currentDataAttrInfo != null) ? currentDataAttrInfo.Name.ToLower() : varName; // if current Data Attribute has changed selection (currentDataAttrInfo != null)
+            Aam_Dataset_column_annotationManager amm_manager = new Aam_Dataset_column_annotationManager();
+            annot_list_by_variable_unit_type = amm_manager.get_all_dataset_column_annotationBy_Variable_measures(temp_var_name_from_suggestions);
+            annot_Dict_by_variable_string_similarities = amm_manager.get_all_dataset_column_annotationByVariable_label_matching(temp_var_name_from_suggestions);
+            amm_manager.Dispose();
+            #endregion
+
+            RowModel model = new RowModel(
+                    index,
+                    varName,
+                    currentDataAttrInfo,
+                    currentUnit,
+                    currentDataTypeInfo,
+                    suggestions,
+                    unitInfos,
+                    dataAttributeInfos,
+                    dataTypeInfos,
+
+                    annot_list_by_variable_unit_type,
+                    annot_Dict_by_variable_string_similarities
+                );
+            model.selected_entity = (selected_entity != null) ? selected_entity : new Aam_Uri();
+            model.selected_charac = (selected_char != null) ? selected_char : new Aam_Uri();
+            TaskManager.AddToBus(EasyUploadTaskManager.ANNOTATION_ENTITY, selected_entity);
+            TaskManager.AddToBus(EasyUploadTaskManager.ANNOTATION_CHARACHTERISTIC, selected_entity); 
+            //update row in the bus of the taskmanager
+            UpdateRowInBus(model);
+
+            return PartialView("Row", model);
+        }
+
+        private void UpdateRowInBus(RowModel row)
+        {
             TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-            Session["TaskManager"] = TaskManager;
-            List<EasyUploadVariableInformation> variableInformationList = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-            EasyUploadVariableInformation variableInformation = variableInformationList.Where(el => el.headerId == headerIndex).FirstOrDefault();
-            string variableName = variableInformation.variableName;
-            long unit = variableInformation.unitInfo.UnitId;
-            long datatype = variableInformation.unitInfo.SelectedDataTypeId;
-            
-            //Structure of variable "currentAnnotations": Key=(headerIndex, category), Value=URI of the selected concept
-            Dictionary<Tuple<int, string>, Tuple<string, Boolean>> currentAnnotations = null;
-            Dictionary<string, Tuple<string, Boolean>> exAnnotations = null;
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
-            {
-                currentAnnotations = (Dictionary<Tuple<int, string>, Tuple<string, Boolean>>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
-                exAnnotations = currentAnnotations.Where(kvp => kvp.Key.Item1 == headerIndex).ToDictionary(kvp => kvp.Key.Item2, kvp => kvp.Value);
-            }
 
-            //The following lines just make sure that the suggestions that were already selected will be correctly selected in the dropdown
-            //Structure of variable "suggestions": Key=category ("Entity"|"Characteristic"), Value=List of the options that will be displayed in the dropdown
-            Dictionary<string, List<OntologyMappingSuggestionModel>> suggestions = GenerateOntologyMapping(headerIndex, variableName, datatype, unit, exAnnotations);
-            if (currentAnnotations != null)
+            if (TaskManager != null && TaskManager.Bus[EasyUploadTaskManager.ROWS] != null)
             {
-                //There are already annotations stored in the bus (from switching between steps) so set the "selected" properties accordingly
-                foreach(KeyValuePair<Tuple<int, string>, Tuple<string, Boolean>> kvp in currentAnnotations)
+                List<RowModel> rows = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
+                if (rows.Any(r => r.Index.Equals(row.Index)))
                 {
-                    //First, check if we're looking at an annotation for the current headerIndex
-                    if(kvp.Key.Item1 == headerIndex && kvp.Value.Item2)
+                    for (int i = 0; i < rows.Count; i++)
                     {
-                        //Now grab the option list for the correct category
-                        List<OntologyMappingSuggestionModel> optionList;
-                        if (suggestions.TryGetValue(kvp.Key.Item2, out optionList))
+                        RowModel tmp = rows.ElementAt(i);
+                        if (tmp.Index.Equals(row.Index))
                         {
-                            OntologyMappingSuggestionModel selected = optionList.Where(o => o.conceptURI == kvp.Value.Item1).FirstOrDefault();
-                            if(selected != null)
-                            {
-                                //Found the correct option in the list, now switch its "selected" state
-                                selected.selected = true;
-                            }
+                            rows[i] = row;
+                            break;
                         }
                     }
                 }
+
+                TaskManager.AddToBus(EasyUploadTaskManager.ROWS, rows);
             }
-
-            //Since the checkbox with the "No suitable concept found"-functionality defaults to "unchecked", the information on the bus should
-            //be reset when new dropdowns are generated
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.NOCONCEPTSFOUND))
-            {
-                List<Tuple<int, String>> noConceptsFound = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
-                noConceptsFound.RemoveAll(m => m.Item1 == headerIndex);
-                TaskManager.AddToBus(EasyUploadTaskManager.NOCONCEPTSFOUND, noConceptsFound);
-            }
-
-            //Model: (headerIndex, Dictionary)-Tuple
-            return PartialView("_mappingSuggestionDropdowns", 
-                new Tuple<int, Dictionary<string, List<OntologyMappingSuggestionModel>>>(headerIndex, suggestions));
-        }
-
-        [HttpPost]
-        public string SaveUnitSelection()
-        {
-
-            int? selectFieldId = null;
-            int? selectOptionId = null;
-            Int32 headerfield = -1;
-
-            //Keys submitted by Javascript in Verification.cshtml
-            foreach (string key in Request.Form.AllKeys)
-            {
-                if ("selectFieldId" == key)
-                {
-                    selectFieldId = Convert.ToInt32(Request.Form[key]);
-                    headerfield = Convert.ToInt32(Request.Form[key]);
-                }
-                if ("selectOptionId" == key)
-                {
-                    selectOptionId = Convert.ToInt32(Request.Form[key]);
-                }
-            }
-
-            SelectVerificationModel model = new SelectVerificationModel();
-
-            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
-            {
-                model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-            }
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS))
-            {
-                model.Suggestions = (Dictionary<int, List<EasyUploadSuggestion>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS];
-            }
-
-            /*
-             * Find the selected unit and adjust the AssignedHeaderUnits
-             * Also resets the Variable name
-             * */
-            if (selectFieldId != null && selectOptionId != null)
-            {
-                List<UnitInfo> availableUnits = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
-                string[] headerFields = (string[])TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_HEADERFIELDS];
-
-                string currentHeader = headerFields.ElementAt((int)selectFieldId);
-                UnitInfo currentUnit = availableUnits.Where(u => u.UnitId == selectOptionId).FirstOrDefault();
-
-                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
-                if (existingInformation != null)
-                {
-                    model.HeaderVariableInformation.Remove(existingInformation);
-                }
-                model.HeaderVariableInformation.Add(new EasyUploadVariableInformation((int)selectFieldId, currentHeader, currentUnit));
-
-                //Set the Datatype to the first one suitable for the selected unit
-                if (currentUnit.SelectedDataTypeId < 0)
-                {
-                    currentUnit.SelectedDataTypeId = currentUnit.DataTypeInfos.FirstOrDefault().DataTypeId;
-                }
-
-                //Filter the suggestions to only show those, that use the selected unit
-                int index = selectFieldId ?? -1;
-                List<EasyUploadSuggestion> suggestionList = null;
-                if (model.Suggestions.TryGetValue(index, out suggestionList))
-                {
-                    if (suggestionList != null)
-                    {
-                        foreach (EasyUploadSuggestion suggestion in suggestionList)
-                        {
-                            suggestion.show = (suggestion.unitID == selectOptionId);
-                        }
-                    }
-                }
-            }
-
-            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
-            {
-                model.HeaderFields = (string[])TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_HEADERFIELDS];
-            }
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS))
-            {
-                model.AvailableUnits = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
-            }
-
-
-            Session["TaskManager"] = TaskManager;
-
-
-            //create Model
-            model.StepInfo = TaskManager.Current();
-
-            //Submit default datatype id
-            //Default unit should be "none" if it exists, otherwise just take the first unit
-            UnitInfo currentUnitInfo = model.AvailableUnits.FirstOrDefault(u => u.Name.ToLower() == "none");
-            if (currentUnitInfo != null)
-            {
-                currentUnitInfo = (UnitInfo)currentUnitInfo.Clone();
-            }
-            else
-            {
-                currentUnitInfo = (UnitInfo)model.AvailableUnits.FirstOrDefault().Clone();
-            }
-
-            DataTypeInfo dtinfo = currentUnitInfo.DataTypeInfos.FirstOrDefault();
-            currentUnitInfo.SelectedDataTypeId = dtinfo.DataTypeId;
-            ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
-            ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
-            ViewData["dataheaderid"] = selectFieldId;
-
-            //return PartialView("Verification", model);
-            List<DataTypeInfo> list = model.HeaderVariableInformation.FirstOrDefault(x => x.headerId == headerfield).unitInfo.DataTypeInfos;
-            return JsonConvert.SerializeObject(list);
-
-        }
-
-        [HttpPost]
-        public ActionResult SaveAnnotationSelection()
-        {
-            int? selectFieldId = null;
-            string selectedAnnotationCategory = null;
-            string selectedAnnotationURI = null;
-            Boolean userSelected = false;
-
-            //Keys submitted by Javascript in _mappingSuggestionDropdowns.cshtml
-            foreach (string key in Request.Form.AllKeys)
-            {
-                if ("headerID" == key)
-                {
-                    selectFieldId = Convert.ToInt32(Request.Form[key]);
-                }
-                if("category" == key)
-                {
-                    selectedAnnotationCategory = Request.Form[key];
-                }
-                if ("uri" == key)
-                {
-                    selectedAnnotationURI = Request.Form[key];
-                }
-                if("userSelected" == key)
-                {
-                    userSelected = Boolean.Parse(Request.Form[key]);
-                }
-            }
-
-            if(selectFieldId == null)
-            {
-                //If no headerID was submitted, silently ignore the call (Returning empty Json to prevent javascript errors)
-                return Json(new{ });
-            }
-
-            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-
-            /* Annotations stored on the bus in form of a dictionary
-             * Key: Tuple<headerID, category> Value: Tuple<conceptURI, userSelected>
-             * Category is currently only "Entity" or "Characteristic"
-             * */
-            Dictionary<Tuple<int, string>, Tuple<string, Boolean>> currentAnnotations;
-            //If there already are some annotations on the bus, grab them - otherwise create a new dictionary
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ANNOTATIONMAPPING))
-            {
-                currentAnnotations = (Dictionary<Tuple<int, string>, Tuple<string, Boolean>>)TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING];
-            }
-            else
-            {
-                currentAnnotations = new Dictionary<Tuple<int, string>, Tuple<string, Boolean>>();
-            }
-
-            //If there's already an annotation for this (headerID, category)-pair, replace it
-            currentAnnotations[new Tuple<int, string>((int)selectFieldId, selectedAnnotationCategory)] = new Tuple<String, Boolean>(selectedAnnotationURI, userSelected);
-
-            //Store edited annotations in TaskManager
-            TaskManager.Bus[EasyUploadTaskManager.ANNOTATIONMAPPING] = currentAnnotations;
-
-            //Store TaskManager back in session object
-            Session["TaskManager"] = TaskManager;
-
-            //Returning empty Json to prevent javascript errors
-            return Json(new { });
-        }
-
-        /*
-         * Saves the selected datatype in the MappedheaderUnits and saves them on the bus
-         * */
-        [HttpPost]
-        public string SaveDataTypeSelection()
-        {
-
-            int? selectFieldId = null;
-            int? selectedDataTypeId = null;
-            
-            Int32 headerfield = -1;
-
-            //Keys submitted by Javascript in Verification.cshtml
-            foreach (string key in Request.Form.AllKeys)
-            {
-                if ("headerfieldId" == key)
-                {
-                    selectFieldId = Convert.ToInt32(Request.Form[key]);
-                    headerfield = Convert.ToInt32(Request.Form[key]);
-                }
-                if ("selectedDataTypeId" == key)
-                {
-                    selectedDataTypeId = Convert.ToInt32(Request.Form[key]);
-                }
-            }
-
-            SelectVerificationModel model = new SelectVerificationModel();
-
-            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
-            {
-                model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-            }
-
-            //Reset the name of the variable and save the new Datatype
-            string[] headerFields = (string[])TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_HEADERFIELDS];
-            string currentHeader = headerFields.ElementAt((int)selectFieldId);
-            EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == selectFieldId).FirstOrDefault();
-
-            existingInformation = new EasyUploadVariableInformation(existingInformation.headerId, existingInformation.variableName, (UnitInfo)existingInformation.unitInfo.Clone());
-
-            int j = model.HeaderVariableInformation.FindIndex(i => ((i.headerId == existingInformation.headerId)));
-
-            model.HeaderVariableInformation[j] = new EasyUploadVariableInformation(existingInformation.headerId, currentHeader, existingInformation.unitInfo);
-            model.HeaderVariableInformation[j].unitInfo.SelectedDataTypeId = Convert.ToInt32(selectedDataTypeId);
-
-            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
-            {
-                model.HeaderFields = (string[])TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_HEADERFIELDS];
-            }
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS))
-            {
-                model.AvailableUnits = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
-            }
-
-            //Grab the suggestions from the bus and filter them to only show those, that use the selected datatype
-            model.Suggestions = (Dictionary<int, List<EasyUploadSuggestion>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS];
-            //Filter the suggestions to only show those, that use the selected unit
-            int index = selectFieldId ?? -1;
-            List<EasyUploadSuggestion> suggestionList = null;
-            if (model.Suggestions.TryGetValue(index, out suggestionList))
-            {
-                if (suggestionList != null)
-                {
-                    foreach (EasyUploadSuggestion suggestion in suggestionList)
-                    {
-                        suggestion.show = (suggestion.dataTypeID == selectedDataTypeId);
-                    }
-                }
-            }
-
-            Session["TaskManager"] = TaskManager;
-
-            model.StepInfo = TaskManager.Current();
-
-            //Default unit should be "none" if it exists, otherwise just take the first unit
-            UnitInfo currentUnitInfo = model.AvailableUnits.FirstOrDefault(u => u.Name.ToLower() == "none");
-            if (currentUnitInfo != null)
-            {
-                currentUnitInfo = (UnitInfo)currentUnitInfo.Clone();
-            }
-            else
-            {
-                currentUnitInfo = (UnitInfo)model.AvailableUnits.FirstOrDefault().Clone();
-            }
-
-            DataTypeInfo dtinfo = currentUnitInfo.DataTypeInfos.FirstOrDefault();
-            currentUnitInfo.SelectedDataTypeId = dtinfo.DataTypeId;
-            ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
-            ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
-
-            //return PartialView("Verification", model);
-            List<UnitInfo> list_ = new List<UnitInfo>();
-            foreach(UnitInfo unit in model.AvailableUnits)
-            {
-                foreach (DataTypeInfo datatype in unit.DataTypeInfos)
-                {
-                    if (datatype.DataTypeId == selectedDataTypeId)
-                        if (!list_.Contains(unit))
-                            list_.Add(unit);
-                }
-            }
-
-            return JsonConvert.SerializeObject(list_);
-        }
-
-        /*
-         * Saves the name of the selected suggestion into the mapped-header-units
-         * */
-        [HttpPost]
-        public string Set_Unit_Datatype_Mappings()
-        {
-            SelectVerificationModel model = new SelectVerificationModel();
-
-            int? selectFieldId = null;
-            int? selectedUnitId = null;
-            int? selectedDatatypeId = null;
-            string selectedVariableName = null;
-
-            //Keys submitted by Javascript in Verification.cshtml
-            foreach (string key in Request.Form.AllKeys)
-            {
-                if ("headerfieldId" == key)
-                {
-                    selectFieldId = Convert.ToInt32(Request.Form[key]);
-                }
-                if ("selectedVariableName" == key)
-                {
-                    selectedVariableName = Convert.ToString(Request.Form[key]);
-                }
-                if ("selectedUnitId" == key)
-                {
-                    selectedUnitId = Convert.ToInt32(Request.Form[key]);
-                }
-                if ("selectedDataTypeId" == key)
-                {
-                    var test = Request.Form[key];
-                    selectedDatatypeId = Convert.ToInt32(Request.Form[key]);
-                }
-            }
-
-            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
-            {
-                model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-            }
-
-            /*
-             * Copy the assignedHeaderUnits, change the entry for which the suggestion was selected
-             * */
-            if (selectFieldId != null)
-            {
-                //Find the position of the Tuple that is about to be changed
-                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == selectFieldId).FirstOrDefault();
-                int i = model.HeaderVariableInformation.FindIndex(t => t.Equals(existingInformation));
-                //Insert a new Tuple at this position
-                model.HeaderVariableInformation[i] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, existingInformation.unitInfo);
-            }
-
-            UnitInfo currentUnit_ = new UnitInfo() ; // it is used to be loaded in the mapping suggestion later //hamdi
-            //Save unit and datatype
-            if (selectFieldId != null && selectedUnitId != null)
-            {
-                //Get all units
-                List<UnitInfo> availableUnits = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
-
-                //Get the current unit and clone it
-                UnitInfo currentUnit = (UnitInfo)availableUnits.Where(u => u.UnitId == selectedUnitId).FirstOrDefault().Clone();
-                currentUnit.SelectedDataTypeId = Convert.ToInt32(selectedDatatypeId);
-                currentUnit_ = currentUnit;
-
-                //Find the index of the suggestion that is about to be changed
-                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
-                int j = model.HeaderVariableInformation.FindIndex(t => t.Equals(existingInformation));
-                //Save the new unit with the new datatype
-                model.HeaderVariableInformation[j] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, currentUnit);
-            }
-
-            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
-            {
-                model.HeaderFields = (string[])TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_HEADERFIELDS];
-            }
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS))
-            {
-                model.AvailableUnits = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
-            }
-
-            model.Suggestions = (Dictionary<int, List<EasyUploadSuggestion>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS];
-
-            Session["TaskManager"] = TaskManager;
-
-            //create Model
-            model.StepInfo = TaskManager.Current();
-
-            //Submit default datatype id
-            //Default unit should be "none" if it exists, otherwise just take the first unit
-            UnitInfo currentUnitInfo = model.AvailableUnits.FirstOrDefault(u => u.Name.ToLower() == "none");
-            if (currentUnitInfo != null)
-            {
-                currentUnitInfo = (UnitInfo)currentUnitInfo.Clone();
-            }
-            else
-            {
-                currentUnitInfo = (UnitInfo)model.AvailableUnits.FirstOrDefault().Clone();
-            }
-
-            DataTypeInfo dtinfo = currentUnitInfo.DataTypeInfos.FirstOrDefault();
-            currentUnitInfo.SelectedDataTypeId = dtinfo.DataTypeId;
-            ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
-            ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
-
-            List<EasyUploadSuggestion> suggestionList = model.Suggestions[Int32.Parse(selectFieldId.ToString())];
-            EasyUploadSuggestion suggestionMatch = suggestionList.FirstOrDefault(x => x.attributeName == selectedVariableName);
-            if ((suggestionMatch == null) && (currentUnit_!=null))
-            {
-                suggestionMatch = new EasyUploadSuggestion(selectedVariableName, dtinfo.UnitId, dtinfo.DataTypeId, currentUnit_.Name, dtinfo.Name, true);
-                suggestionMatch.attributeName = selectedVariableName;
-                suggestionMatch.dataTypeID = dtinfo.DataTypeId;
-                suggestionMatch.datatypeName = dtinfo.Name;
-            }
-
-            AnnotationManager am = new AnnotationManager();
-            Annotation existing_annotation = am.GetAnnotationsByVariableLabel(selectedVariableName).FirstOrDefault();
-            if (existing_annotation != null)
-            {
-                suggestionMatch.finish_suggestion_block(dtinfo.Description, existing_annotation.Entity, existing_annotation.Characteristic);
-            }
-            else
-            {
-                suggestionMatch.finish_suggestion_block(dtinfo.Description, "" , "");
-            }
-            
-            string json = JsonConvert.SerializeObject(suggestionMatch);
-            return json;
-        }
-
-        /*
-         * Saves the name of the selected suggestion into the mapped-header-units
-         * */
-        [HttpPost]
-        public ActionResult SaveSuggestionSelection()
-        {
-            SelectVerificationModel model = new SelectVerificationModel();
-
-            int? selectFieldId = null;
-            int? selectedUnitId = null;
-            int? selectedDatatypeId = null;
-            string selectedVariableName = null;
-
-            //Keys submitted by Javascript in Verification.cshtml
-            foreach (string key in Request.Form.AllKeys)
-            {
-                if ("headerfieldId" == key)
-                {
-
-                    selectFieldId = Convert.ToInt32(Request.Form[key]);
-                }
-                if ("selectedVariableName" == key)
-                {
-                    selectedVariableName = Convert.ToString(Request.Form[key]);
-                }
-                if ("selectedUnitId" == key)
-                {
-                    selectedUnitId = Convert.ToInt32(Request.Form[key]);
-                }
-                if ("selectedDataTypeId" == key)
-                {
-                    var test = Request.Form[key];
-                    selectedDatatypeId = Convert.ToInt32(Request.Form[key]);
-                }
-            }
-
-            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS))
-            {
-                model.HeaderVariableInformation = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-            }
-
-            /*
-             * Copy the assignedHeaderUnits, change the entry for which the suggestion was selected
-             * */
-            if (selectFieldId != null)
-            {
-                //Find the position of the Tuple that is about to be changed
-                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == selectFieldId).FirstOrDefault();
-                int i = model.HeaderVariableInformation.FindIndex(t => t.Equals(existingInformation));
-                //Insert a new Tuple at this position
-                model.HeaderVariableInformation[i] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, existingInformation.unitInfo);
-            }
-
-
-            //Save unit and datatype
-            if (selectFieldId != null && selectedUnitId != null)
-            {
-                //Get all units
-                List<UnitInfo> availableUnits = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
-
-                //Get the current unit and clone it
-                UnitInfo currentUnit = (UnitInfo)availableUnits.Where(u => u.UnitId == selectedUnitId).FirstOrDefault().Clone();
-                currentUnit.SelectedDataTypeId = Convert.ToInt32(selectedDatatypeId);
-
-                //Find the index of the suggestion that is about to be changed
-                EasyUploadVariableInformation existingInformation = model.HeaderVariableInformation.Where(t => t.headerId == (int)selectFieldId).FirstOrDefault();
-                int j = model.HeaderVariableInformation.FindIndex(t => t.Equals(existingInformation));
-                //Save the new unit with the new datatype
-                model.HeaderVariableInformation[j] = new EasyUploadVariableInformation(existingInformation.headerId, selectedVariableName, currentUnit);
-            }
-
-            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, model.HeaderVariableInformation);
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS))
-            {
-                model.HeaderFields = (string[])TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_HEADERFIELDS];
-            }
-
-            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS))
-            {
-                model.AvailableUnits = (List<UnitInfo>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS];
-            }
-
-            model.Suggestions = (Dictionary<int, List<EasyUploadSuggestion>>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS];
-
-            Session["TaskManager"] = TaskManager;
-
-            //create Model
-            model.StepInfo = TaskManager.Current();
-
-            //Submit default datatype id
-            //Default unit should be "none" if it exists, otherwise just take the first unit
-            UnitInfo currentUnitInfo = model.AvailableUnits.FirstOrDefault(u => u.Name.ToLower() == "none");
-            if (currentUnitInfo != null)
-            {
-                currentUnitInfo = (UnitInfo)currentUnitInfo.Clone();
-            }
-            else
-            {
-                currentUnitInfo = (UnitInfo)model.AvailableUnits.FirstOrDefault().Clone();
-            }
-
-            DataTypeInfo dtinfo = currentUnitInfo.DataTypeInfos.FirstOrDefault();
-            currentUnitInfo.SelectedDataTypeId = dtinfo.DataTypeId;
-            ViewData["defaultUnitID"] = currentUnitInfo.UnitId;
-            ViewData["defaultDatatypeID"] = dtinfo.DataTypeId;
-
-            return PartialView("Verification", model);
 
         }
 
@@ -922,14 +544,14 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             switch (sheetFormat)
             {
                 case SheetFormat.TopDown:
-                    headerValues = GetExcelHeaderFieldsTopDown( selectedArea);
+                    headerValues = GetExcelHeaderFieldsTopDown(selectedArea);
                     break;
                 case SheetFormat.LeftRight:
                     headerValues = GetExcelHeaderFieldsLeftRight(selectedArea);
                     break;
                 case SheetFormat.Matrix:
-                    headerValues.AddRange(GetExcelHeaderFieldsTopDown( selectedArea));
-                    headerValues.AddRange(GetExcelHeaderFieldsLeftRight( selectedArea));
+                    headerValues.AddRange(GetExcelHeaderFieldsTopDown(selectedArea));
+                    headerValues.AddRange(GetExcelHeaderFieldsLeftRight(selectedArea));
                     break;
                 default:
                     break;
@@ -943,7 +565,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// </summary>
         /// <param name="selectedArea">Defined header area with start and end for rows and columns</param>
         /// <returns>Simple list with values of the header fields as string</returns>
-        private List<String> GetExcelHeaderFieldsTopDown( SheetArea selectedArea)
+        private List<String> GetExcelHeaderFieldsTopDown(SheetArea selectedArea)
         {
             List<String> headerValues = new List<string>();
 
@@ -963,7 +585,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         /// </summary>
         /// <param name="selectedArea">Defined header area with start and end for rows and columns</param>
         /// <returns>Simple list with values of the header fields as string</returns>
-        private List<String> GetExcelHeaderFieldsLeftRight( SheetArea selectedArea)
+        private List<String> GetExcelHeaderFieldsLeftRight(SheetArea selectedArea)
         {
             List<String> headerValues = new List<string>();
 
@@ -977,153 +599,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             return headerValues;
         }
-        
-        /*
-         * Validates each Data row and returns a JSON-Object with the errors (if there are any)
-         * */
-        [HttpPost]
-        public ActionResult ValidateSelection()
-        {
-            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-
-            string JsonArray = TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA].ToString();
-
-            List<Tuple<int, Error>> ErrorList = ValidateRows(JsonArray);
-            List<Tuple<int, ErrorInfo>> ErrorMessageList = new List<Tuple<int, ErrorInfo>>();
-
-            foreach (Tuple<int, Error> error in ErrorList)
-            {
-                ErrorMessageList.Add(new Tuple<int, ErrorInfo>(error.Item1, new ErrorInfo(error.Item2)));
-            }
-
-            return Json(new { errors = ErrorMessageList.ToArray(), errorCount = (ErrorList.Count) });
-        }
-
-        /// <summary>
-        /// Store the information about not found concepts in the Bus.
-        /// Structure in the bus: List<(headerfieldId, category)>
-        /// </summary>
-        /// <param name="headerfieldId"></param>
-        /// <param name="category"></param>
-        /// <param name="checkboxChecked"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public Boolean NoConceptFound(int headerfieldId, string category, Boolean checkboxChecked)
-        {
-            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-            if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.NOCONCEPTSFOUND))
-            {
-                TaskManager.AddToBus(EasyUploadTaskManager.NOCONCEPTSFOUND, new List<Tuple<int, String>>());
-            }
-
-            if (checkboxChecked)
-            {
-                //The checkbox was checked so add the new information to the bus
-                List<Tuple<int, String>> unicorn = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
-                unicorn.Add(new Tuple<int, string>(headerfieldId, category));
-                TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND] = unicorn;
-            }
-            else
-            {
-                //The checkbox was unchecked, remove the respective tuple from our bus
-                List<Tuple<int, String>> unicorn = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
-                unicorn.RemoveAll(tuple => tuple.Item1 == headerfieldId && tuple.Item2 == category);
-                TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND] = unicorn;
-            }
-            Session["TaskManager"] = TaskManager;
-            return true;
-        }
-
-        #region private methods
-
-        /// <summary>
-        /// Determin whether the selected datatypes are suitable
-        /// </summary>
-        private List<Tuple<int, Error>> ValidateRows(string JsonArray)
-        {
-            DataTypeManager dtm = new DataTypeManager();
-
-            try
-            {
-                const int maxErrorsPerColumn = 20;
-                TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-
-                string[][] DeserializedJsonArray = JsonConvert.DeserializeObject<string[][]>(JsonArray);
-
-                List<Tuple<int, Error>> ErrorList = new List<Tuple<int, Error>>();
-                List<EasyUploadVariableInformation> MappedHeaders = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
-                EasyUploadVariableInformation[] MappedHeadersArray = MappedHeaders.ToArray();
 
 
-                List<string> DataArea = (List<string>)TaskManager.Bus[EasyUploadTaskManager.SHEET_DATA_AREA];
-                List<int[]> IntDataAreaList = new List<int[]>();
-                foreach (string area in DataArea)
-                {
-                    IntDataAreaList.Add(JsonConvert.DeserializeObject<int[]>(area));
-                }
 
-                foreach (int[] IntDataArea in IntDataAreaList)
-                {
-                    string[,] SelectedDataArea = new string[(IntDataArea[2] - IntDataArea[0]), (IntDataArea[3] - IntDataArea[1])];
 
-                    for (int x = IntDataArea[1]; x <= IntDataArea[3]; x++)
-                    {
-                        int errorsInColumn = 0;
-                        for (int y = IntDataArea[0]; y <= IntDataArea[2]; y++)
-                        {
-                            int SelectedY = y - (IntDataArea[0]);
-                            int SelectedX = x - (IntDataArea[1]);
-                            string vv = DeserializedJsonArray[y][x];
-
-                            EasyUploadVariableInformation mappedHeader = MappedHeaders.Where(t => t.headerId == SelectedX).FirstOrDefault();
-
-                            DataType datatype = null;
-                            datatype = dtm.Repo.Get(mappedHeader.unitInfo.SelectedDataTypeId);
-                            string datatypeName = datatype.SystemType;
-
-                            #region DataTypeCheck
-                            DataTypeCheck dtc;
-                            double DummyValue = 0;
-                            if (Double.TryParse(vv, out DummyValue))
-                            {
-                                if (vv.Contains("."))
-                                {
-                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
-                                }
-                                else
-                                {
-                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.comma);
-                                }
-                            }
-                            else
-                            {
-                                dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
-                            }
-                            #endregion
-
-                            var ValidationResult = dtc.Execute(vv, y);
-                            if (ValidationResult is Error)
-                            {
-                                ErrorList.Add(new Tuple<int, Error>(SelectedX, (Error)ValidationResult));
-                                errorsInColumn++;
-                            }
-
-                            if (errorsInColumn >= maxErrorsPerColumn)
-                            {
-                                //Break inner (row) loop to jump to the next column
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                return ErrorList;
-            }
-            finally
-            {
-                dtm.Dispose();
-            }
-        }
 
         /// <summary>
         /// Calcualtes the Levenshtein distance between two strings
@@ -1209,188 +688,398 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 return output / similarities.Count;
             }
             else return Int64.Parse("0");
-            
+
+        }
+
+        private double similarity(string a, string b)
+        {
+            List<double> similarities = new List<double>();
+            double output = 0.0;
+
+            var l = new NormalizedLevenshtein();
+            similarities.Add(l.Similarity(a, b));
+            var jw = new JaroWinkler();
+            similarities.Add(jw.Similarity(a, b));
+            var jac = new Jaccard();
+            similarities.Add(jac.Similarity(a, b));
+
+            foreach (double sim in similarities)
+            {
+                output += sim;
+            }
+
+            return output / similarities.Count;
+        }
+
+
+
+        /*
+ * Validates each Data row and returns a JSON-Object with the errors (if there are any)
+ * */
+        [HttpPost]
+        public ActionResult ValidateSelection()
+        {
+            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+
+            string JsonArray = TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA].ToString();
+
+            List<Tuple<int, Error>> ErrorList = ValidateRows(JsonArray);
+            List<Tuple<int, ErrorInfo>> ErrorMessageList = new List<Tuple<int, ErrorInfo>>();
+
+            foreach (Tuple<int, Error> error in ErrorList)
+            {
+                ErrorMessageList.Add(new Tuple<int, ErrorInfo>(error.Item1, new ErrorInfo(error.Item2)));
+            }
+
+            return Json(new { errors = ErrorMessageList.ToArray(), errorCount = (ErrorList.Count) });
         }
 
         /// <summary>
-        /// Generates, for a given variable (name, datatype, unit), a sorted lists of entities/characteristics 
-        /// from the ontology that can be used for the annotation.
+        /// Determin whether the selected datatypes are suitable
         /// </summary>
-        /// <param name="variableIndex">Index of the header that is currently chosen</param>
-        /// <param name="variableName">Name of the variable that was picked for this header</param>
-        /// <param name="datatype">Currently selected datatype</param>
-        /// <param name="unit">Currently selected unit</param>
-        /// <param name="selectedAnnotations">Dictionary of currently selected annotations in the form of (Key=category, Value=uri)</param>
-        /// <returns>Dictionary with the category (Entity/Characteristic) as key and a (sorted) list of possible annotations as value</returns>
-        private Dictionary<string, List<OntologyMappingSuggestionModel>> GenerateOntologyMapping(int headerIndex, string variableName, long datatypeID, long unitID, Dictionary<String, Tuple<String, Boolean>> selectedAnnotations = null)
+        private List<Tuple<int, Error>> ValidateRows(string JsonArray)
         {
-            AnnotationManager am = new AnnotationManager();
-            List<Annotation> list_existing_annotation = am.GetAnnotationsByVariableLabel(variableName);
-            Dictionary<string, List<OntologyMappingSuggestionModel>> output = new Dictionary<string, List<OntologyMappingSuggestionModel>>();
+            DataTypeManager dtm = new DataTypeManager();
 
-            //check if the variable is already annotated.
-            if (list_existing_annotation.Count > 0)
+            try
             {
-                foreach(Annotation annot in list_existing_annotation)
+                const int maxErrorsPerColumn = 20;
+                TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+
+                string[][] DeserializedJsonArray = JsonConvert.DeserializeObject<string[][]>(JsonArray);
+
+                List<Tuple<int, Error>> ErrorList = new List<Tuple<int, Error>>();
+                //List<EasyUploadVariableInformation> MappedHeaders = (List<EasyUploadVariableInformation>)TaskManager.Bus[EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS];
+                //EasyUploadVariableInformation[] MappedHeadersArray = MappedHeaders.ToArray();
+                List<RowModel> Rows = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
+                RowModel[] MappedRowsArray = Rows.ToArray();
+
+                List<string> DataArea = (List<string>)TaskManager.Bus[EasyUploadTaskManager.SHEET_DATA_AREA];
+                List<int[]> IntDataAreaList = new List<int[]>();
+                foreach (string area in DataArea)
                 {
-                    if (!output.ContainsKey("Characteristic"))
-                    {
-                        output.Add("Characteristic", new List<OntologyMappingSuggestionModel>());
-                    }
-                    if (output["Characteristic"].Find(x => x.conceptURI == annot.Characteristic) == null )
-                    {
-                        output["Characteristic"].Add(new OntologyMappingSuggestionModel(annot.Characteristic, annot.Characteristic_Label, Similarity(variableName, annot.Characteristic_Label)));
-                    }
-                    if (!output.ContainsKey("Entity"))
-                    {
-                        output.Add("Entity", new List<OntologyMappingSuggestionModel>());
-                    }
-                    if (output["Entity"].Find(x => x.conceptURI == annot.Entity) == null)
-                    {
-                        output["Entity"].Add(new OntologyMappingSuggestionModel(annot.Entity, annot.Entity_Label, Similarity(variableName, annot.Entity_Label)));
-                    }
-                    
+                    IntDataAreaList.Add(JsonConvert.DeserializeObject<int[]>(area));
                 }
+
+                foreach (int[] IntDataArea in IntDataAreaList)
+                {
+                    string[,] SelectedDataArea = new string[(IntDataArea[2] - IntDataArea[0]), (IntDataArea[3] - IntDataArea[1])];
+
+                    for (int x = IntDataArea[1]; x <= IntDataArea[3]; x++)
+                    {
+                        int errorsInColumn = 0;
+                        for (int y = IntDataArea[0]; y <= IntDataArea[2]; y++)
+                        {
+                            #region old 2.11
+                            /*
+                            int SelectedY = y - (IntDataArea[0]);
+                            int SelectedX = x - (IntDataArea[1]);
+                            string vv = DeserializedJsonArray[y][x];
+
+                            //EasyUploadVariableInformation mappedHeader = MappedHeaders.Where(t => t.headerId == SelectedX).FirstOrDefault();
+                            RowModel mappedHeader = MappedRowsArray.Where(t => t.Index == SelectedX).FirstOrDefault();
+
+                            DataType datatype = null;
+                            datatype = dtm.Repo.Get(mappedHeader.unitInfo.SelectedDataTypeId);
+                            string datatypeName = datatype.SystemType;
+
+                            #region DataTypeCheck
+                            DataTypeCheck dtc;
+                            double DummyValue = 0;
+                            if (Double.TryParse(vv, out DummyValue))
+                            {
+                                if (vv.Contains("."))
+                                {
+                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
+                                }
+                                else
+                                {
+                                    dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.comma);
+                                }
+                            }
+                            else
+                            {
+                                dtc = new DataTypeCheck(mappedHeader.variableName, datatypeName, DecimalCharacter.point);
+                            }
+                            #endregion
+
+                            var ValidationResult = dtc.Execute(vv, y);
+                            if (ValidationResult is Error)
+                            {
+                                ErrorList.Add(new Tuple<int, Error>(SelectedX, (Error)ValidationResult));
+                                errorsInColumn++;
+                            }
+
+                            if (errorsInColumn >= maxErrorsPerColumn)
+                            {
+                                //Break inner (row) loop to jump to the next column
+                                break;
+                            }
+                            */
+                            #endregion
+
+                            int SelectedY = y - (IntDataArea[0]);
+                            int SelectedX = x - (IntDataArea[1]);
+                            string vv = DeserializedJsonArray[y][x];
+
+                            RowModel mappedHeader = MappedRowsArray.Where(t => t.Index == SelectedX).FirstOrDefault();
+
+                            DataType datatype = null;
+                            if (mappedHeader.SelectedDataType != null && mappedHeader.SelectedDataAttribute != null)
+                            {
+                                datatype = dtm.Repo.Get(mappedHeader.SelectedDataType.DataTypeId);
+                                string datatypeName = datatype.SystemType;
+
+                                #region DataTypeCheck
+                                DataTypeCheck dtc;
+                                double DummyValue = 0;
+                                if (Double.TryParse(vv, out DummyValue))
+                                {
+                                    if (vv.Contains("."))
+                                    {
+                                        dtc = new DataTypeCheck(mappedHeader.SelectedDataAttribute.Name, datatypeName, DecimalCharacter.point);
+                                    }
+                                    else
+                                    {
+                                        dtc = new DataTypeCheck(mappedHeader.SelectedDataAttribute.Name, datatypeName, DecimalCharacter.comma);
+                                    }
+                                }
+                                else
+                                {
+                                    dtc = new DataTypeCheck(mappedHeader.SelectedDataAttribute.Name, datatypeName, DecimalCharacter.point);
+                                }
+                                #endregion
+
+                                var ValidationResult = dtc.Execute(vv, y);
+                                if (ValidationResult is Error)
+                                {
+                                    ErrorList.Add(new Tuple<int, Error>(SelectedX, (Error)ValidationResult));
+                                    errorsInColumn++;
+                                }
+
+                                if (errorsInColumn >= maxErrorsPerColumn)
+                                {
+                                    //Break inner (row) loop to jump to the next column
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                ErrorList.Add(new Tuple<int, Error>(SelectedX, new Error(ErrorType.Other, "No datatype or data attribute selected in row " + SelectedX + 1)));
+                            }
+                        }
+                    }
+                }
+
+                return ErrorList;
+            }
+            finally
+            {
+                dtm.Dispose();
+            }
+        }
+
+        private List<Tuple<int, String, UnitInfo>> RowsToTuples()
+        {
+            List<Tuple<int, String, UnitInfo>> tmp = new List<Tuple<int, string, UnitInfo>>();
+            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+
+            if (TaskManager != null && TaskManager.Bus[EasyUploadTaskManager.ROWS] != null)
+            {
+                List<RowModel> rows = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
+
+                foreach (var row in rows)
+                {
+                    tmp.Add(RowToTuple(row));
+                }
+            }
+
+            return tmp;
+        }
+
+        private Tuple<int, String, UnitInfo> RowToTuple(RowModel row)
+        {
+            return new Tuple<int, string, UnitInfo>((int)row.Index, row.Name, row.SelectedUnit);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="excelWorksheet"></param>
+        /// <param name="sheetFormat"></param>
+        /// <param name="selectedAreaJsonArray"></param>
+        /// <returns></returns>
+        private List<String> GetExcelHeaderFields(ExcelWorksheet excelWorksheet, SheetFormat sheetFormat, string selectedAreaJsonArray)
+        {
+            List<String> headerValues = new List<string>();
+
+            int[] areaValues = JsonConvert.DeserializeObject<int[]>(selectedAreaJsonArray);
+
+            if (areaValues.Length != 4)
+            {
+                throw new InvalidOperationException("Given JSON string for selected area got an invalid length of [" + Convert.ToString(areaValues.Length) + "]");
+            }
+
+            SheetArea selectedArea = new SheetArea(areaValues[1], areaValues[3], areaValues[0], areaValues[2]);
+
+
+            switch (sheetFormat)
+            {
+                case SheetFormat.TopDown:
+                    headerValues = GetExcelHeaderFieldsTopDown(excelWorksheet, selectedArea);
+                    break;
+                case SheetFormat.LeftRight:
+                    headerValues = GetExcelHeaderFieldsLeftRight(excelWorksheet, selectedArea);
+                    break;
+                case SheetFormat.Matrix:
+                    headerValues.AddRange(GetExcelHeaderFieldsTopDown(excelWorksheet, selectedArea));
+                    headerValues.AddRange(GetExcelHeaderFieldsLeftRight(excelWorksheet, selectedArea));
+                    break;
+                default:
+                    break;
+            }
+
+            return headerValues;
+        }
+
+        /// <summary>
+        /// Gets all values from selected header area. This method is for top to down scheme, so the header fields are in one row
+        /// </summary>
+        /// <param name="excelWorksheet">ExcelWorksheet with the data</param>
+        /// <param name="selectedArea">Defined header area with start and end for rows and columns</param>
+        /// <returns>Simple list with values of the header fields as string</returns>
+        private List<String> GetExcelHeaderFieldsTopDown(ExcelWorksheet excelWorksheet, SheetArea selectedArea)
+        {
+            List<String> headerValues = new List<string>();
+
+            String jsonTableString = TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA].ToString();
+            String[][] jsonTable = JsonConvert.DeserializeObject<string[][]>(jsonTableString);
+
+            for (int i = selectedArea.StartColumn; i <= selectedArea.EndColumn; i++)
+            {
+                headerValues.Add(jsonTable[selectedArea.StartRow][i]);
+            }
+
+            return headerValues;
+        }
+
+        /// <summary>
+        /// Gets all values from selected header area. This method is for left to right scheme, so the header fields are in one coulumn
+        /// </summary>
+        /// <param name="excelWorksheet">ExcelWorksheet with the data</param>
+        /// <param name="selectedArea">Defined header area with start and end for rows and columns</param>
+        /// <returns>Simple list with values of the header fields as string</returns>
+        private List<String> GetExcelHeaderFieldsLeftRight(ExcelWorksheet excelWorksheet, SheetArea selectedArea)
+        {
+            List<String> headerValues = new List<string>();
+
+            String jsonTableString = TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA].ToString();
+            String[][] jsonTable = JsonConvert.DeserializeObject<string[][]>(jsonTableString);
+
+            for (int row = selectedArea.StartRow; row <= selectedArea.EndColumn; row++)
+            {
+                headerValues.Add(jsonTable[row][selectedArea.StartColumn]);
+            }
+
+            return headerValues;
+        }
+
+        private List<string> makeHeaderUnique(List<string> header)
+        {
+            List<string> temp = new List<string>();
+
+            foreach (string s in header)
+            {
+                if (temp.Contains(s))
+                {
+                    string tmp;
+                    int i = 1;
+                    do
+                    {
+                        tmp = s + " (" + i + ")";
+                        i++;
+                    }
+                    while (temp.Contains(tmp));
+                    temp.Add(tmp);
+                }
+                else
+                {
+                    temp.Add(s);
+                }
+            }
+            return (temp);
+        }
+
+
+
+
+
+        private List<EasyUploadSuggestion> getSuggestions(string varName, List<DataAttrInfo> allDataAttributes)
+        {
+            #region suggestions
+            //Add a variable to the suggestions if the names are similar
+            List<EasyUploadSuggestion> suggestions = new List<EasyUploadSuggestion>();
+
+            //Calculate similarity metric
+            //Accept suggestion if the similarity is greater than some threshold
+            double threshold = 0.4;
+            IEnumerable<DataAttrInfo> suggestionAttrs = allDataAttributes.Where(att => similarity(att.Name, varName) >= threshold);
+
+            //Order the suggestions according to the similarity
+            List<DataAttrInfo> ordered = suggestionAttrs.ToList<DataAttrInfo>();
+            ordered.Sort((x, y) => (similarity(y.Name, varName)).CompareTo(similarity(x.Name, varName)));
+
+            //Add the ordered suggestions to the model
+            foreach (DataAttrInfo att in ordered)
+            {
+                suggestions.Add(new EasyUploadSuggestion(att.Id, att.Name, att.UnitId, att.DataTypeId, true));
+            }
+
+            //Use the following to order suggestions alphabetically instead of ordering according to the metric
+            //model.Suggestions[i] = model.Suggestions[i].Distinct().OrderBy(s => s.attributeName).ToList<EasyUploadSuggestion>();
+
+            //Each Name-Unit-Datatype-Tuple should be unique
+            suggestions = suggestions.Distinct().ToList<EasyUploadSuggestion>();
+            #endregion
+
+            return suggestions;
+        }
+
+        /// <summary>
+        /// Store the information about not found concepts in the Bus.
+        /// Structure in the bus: List<(headerfieldId, category)>
+        /// </summary>
+        /// <param name="headerfieldId"></param>
+        /// <param name="category"></param>
+        /// <param name="checkboxChecked"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public Boolean NoConceptFound(int headerfieldId, string category, Boolean checkboxChecked)
+        {
+            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+            if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.NOCONCEPTSFOUND))
+            {
+                TaskManager.AddToBus(EasyUploadTaskManager.NOCONCEPTSFOUND, new List<Tuple<int, String>>());
+            }
+
+            if (checkboxChecked)
+            {
+                //The checkbox was checked so add the new information to the bus
+                List<Tuple<int, String>> unicorn = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
+                unicorn.Add(new Tuple<int, string>(headerfieldId, category));
+                TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND] = unicorn;
             }
             else
             {
-                //get the suggestions based on the Extendedautocompletition file
-                //Order entire lists of entitites and characteristics according to a mapping metric
-                //For now: Just use a string similarity
-                List<String> ontologyTerms = global::System.IO.File.ReadAllLines(autocompletionFilePath).ToList<String>();
-
-
-                string informationSeparator = "";
-                for (int i = 0; i < ontologyTerms.Count; i++)
-                {
-                    if (i == 0)
-                    {
-                        //First line, read the separator
-                        informationSeparator = ontologyTerms.ElementAt(i);
-                    }
-                    if (i >= 1)
-                    {
-                        string entry = ontologyTerms.ElementAt(i);
-                        //Split entry into display name, uri and concept group
-                        string[] splitEntry = entry.Split(new string[] { informationSeparator }, StringSplitOptions.RemoveEmptyEntries);
-                        if (splitEntry.Length == 3)
-                        {
-                            string label = splitEntry[0];
-                            string uri = splitEntry[1];
-                            string category = splitEntry[2];
-
-                            if (!output.ContainsKey(category))
-                            {
-                                output.Add(category, new List<OntologyMappingSuggestionModel>());
-                            }
-
-                            //Calculate the similarity
-                            output[category].Add(new OntologyMappingSuggestionModel(uri, label, Similarity(variableName, label)));
-                        }
-                        else
-                        {
-                            throw new Exception("Invalid entry in autocomplete file!");
-                        }
-                    }
-                }
+                //The checkbox was unchecked, remove the respective tuple from our bus
+                List<Tuple<int, String>> unicorn = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
+                unicorn.RemoveAll(tuple => tuple.Item1 == headerfieldId && tuple.Item2 == category);
+                TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND] = unicorn;
             }
-            
-
-            //Order suggested mappings according to their similarity
-            List<String> keys = new List<String>(output.Keys);
-            foreach(string key in keys)
-            {
-                List<OntologyMappingSuggestionModel> tmp = output[key];
-                Tuple<String, Boolean> alreadySelected;
-                if(selectedAnnotations != null && tmp.Find(x=> x.conceptURI == null) != null && selectedAnnotations.TryGetValue(key, out alreadySelected))
-                {
-                    //We have a selected annotation that we have to take care of - put it at the beginning of the list by tweaking its similarity
-                    var unicorn = tmp.OrderByDescending(el => el.conceptURI.Equals(alreadySelected.Item1) ? double.MaxValue : el.similarity).Take(50).ToList();
-                    output[key] = unicorn;
-                }
-                else
-                {
-                    //No selected annotation that we have to take care of
-                    var unicorn = tmp.OrderByDescending(el => el.similarity).Take(50).ToList();
-                    output[key] = unicorn;
-                }                               
-            }
-
-            // test to see if the annotation is filled from an existing one so we dont need to add more annotation from the database 
-            if (list_existing_annotation != null)
-            {
-                return output;
-            }
-
-            //Now add the annotations that we already have in the database to the start of the list (and remove duplicates)
-            if (this.IsAccessibale("AAM", "Annotation", "GetExistingAnnotationsByVariableLabel"))
-            {
-                ContentResult res = (ContentResult)this.Run("AAM", "Annotation", "GetExistingAnnotationsByVariableLabel", new RouteValueDictionary()
-                {
-                    { "variableLabel", variableName }
-                });
-
-                dynamic response = JsonConvert.DeserializeObject(res.Content);
-
-                if(response.Count != 0)
-                {
-                    for (int i = 0; i < response.Count; i++)
-                    {
-                        var unicorn = response[i]; //Disclaimer: This is what my temporary variables usually look like..
-
-                        //Add to the start of the output (if the Entity/Characteristic is not empty and has a label)
-                        //Remove entries with the same URIs that we're about to add so we won't have any duplicates
-                        if (unicorn.Entity != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity) && unicorn.Entity_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity_Label))
-                        {
-                            output["Entity"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Entity));
-                            output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity_Label, double.MaxValue));
-                        }
-
-                        if (unicorn.Characteristic != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic) && unicorn.Characteristic_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic_Label))
-                        {
-                            output["Characteristic"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Characteristic));
-                            output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic_Label, double.MaxValue));
-                        }
-                    }
-                }
-                else
-                {
-                    //If we didn't get a response that means we don't have annotations for this variable yet
-                    //So we should be looking for annotations of variables that share the same unit and datatype.
-                    res = (ContentResult)this.Run("AAM", "Annotation", "GetExistingAnnotationsByUnitAndDatatype", new RouteValueDictionary()
-                    {
-                        { "unitID", unitID },
-                        { "datatypeID", datatypeID }
-                    });
-
-                    response = JsonConvert.DeserializeObject(res.Content);
-
-                    for(int i = 0; i < response.Count; i++)
-                    {
-                        var unicorn = response[i]; //Disclaimer: This is what my temporary variables usually look like..
-
-                        //Add to the start of the output (if the Entity/Characteristic is not empty and has a label)
-                        //Remove entries with the same URIs that we're about to add so we won't have any duplicates
-                        if (unicorn.Entity != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity) && unicorn.Entity_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Entity_Label))
-                        {
-                            output["Entity"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Entity));
-                            output["Entity"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Entity, (String)unicorn.Entity_Label, double.MaxValue));
-                        }
-
-                        if (unicorn.Characteristic != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic) && unicorn.Characteristic_Label != null && !String.IsNullOrWhiteSpace((String)unicorn.Characteristic_Label))
-                        {
-                            output["Characteristic"].RemoveAll(m => m.conceptURI.Equals((String)unicorn.Characteristic));
-                            output["Characteristic"].Insert(0, new OntologyMappingSuggestionModel((String)unicorn.Characteristic, (String)unicorn.Characteristic_Label, double.MaxValue));
-                        }
-                    }
-                }                
-            }
-            return output;
+            Session["TaskManager"] = TaskManager;
+            return true;
         }
-        #endregion
 
 
 
-        
     }
 }

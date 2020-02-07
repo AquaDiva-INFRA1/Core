@@ -1,17 +1,24 @@
-﻿using BExIS.Modules.Sam.UI.Models;
+﻿using BExIS.Dlm.Services.Party;
+using BExIS.Dlm.Entities.Party;
+using BExIS.Modules.Sam.UI.Models;
 using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Subjects;
+using BExIS.UI.Helpers;
+using BExIS.Utils.NH.Querying;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web.Routing;
 using Telerik.Web.Mvc;
 using Telerik.Web.Mvc.Extensions;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Models;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Sam.UI.Controllers
 {
@@ -28,6 +35,11 @@ namespace BExIS.Modules.Sam.UI.Controllers
                 if (entityPermission == null)
                 {
                     entityPermissionManager.Create(null, entityId, instanceId, (int)RightType.Read);
+
+                    if (this.IsAccessible("DDM", "SearchIndex", "ReIndexSingle"))
+                    {
+                        var x = this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", instanceId } });
+                    }
                 }
             }
             finally
@@ -112,6 +124,71 @@ namespace BExIS.Modules.Sam.UI.Controllers
             }
         }
 
+        public ActionResult Permissions(long subjectId, long entityId, long instanceId)
+        {
+            return PartialView("_Permissions", new SubjectInstanceModel() { SubjectId = subjectId, EntityId = entityId, InstanceId = instanceId });
+        }
+
+        [GridAction]
+        public ActionResult Permissions_Select(long subjectId, long entityId, long instanceId)
+        {
+            var entityPermissionManager = new EntityPermissionManager();
+            var subjectManager = new SubjectManager();
+            var partyManager = new PartyManager();
+            var entityManager = new EntityManager();
+
+            try
+            {
+                var subject = subjectManager.SubjectRepository.Get(subjectId);
+
+                var entityPermissions = new List<ReferredEntityPermissionGridRowModel>();
+
+                // User & Group Permissions
+                if (subject is User)
+                {
+                    var user = subject as User;
+
+                    // Group Permissions
+                    foreach (var group in user.Groups)
+                    {
+                        entityPermissions.Add(ReferredEntityPermissionGridRowModel.Convert(group.Name, "Group", entityPermissionManager.GetRights(group.Id, entityId, instanceId)));
+                    }
+
+                    // Party Relationships
+                    var userParty = partyManager.GetPartyByUser(user.Id);
+
+                    if (userParty != null)
+                    {
+                        var entityParty = partyManager.Parties.FirstOrDefault(m => m.PartyType.Title == entityManager.FindById(entityId).Name && m.Name == instanceId.ToString());
+
+                        if (entityParty != null)
+                        {
+                            var partyRelationships = partyManager.PartyRelationships.Where(m => m.SourceParty.Id == userParty.Id && m.TargetParty.Id == entityParty.Id);
+
+                            foreach (var partyRelationship in partyRelationships)
+                            {
+                                entityPermissions.Add(ReferredEntityPermissionGridRowModel.Convert("Party Relationship", partyRelationship.Title, partyRelationship.Permission));
+                            }
+                        }
+                    }
+                }
+
+                // Public Permission
+                var publicRights = entityPermissionManager.GetRights(null, entityId, instanceId);
+                if (publicRights > 0)
+                {
+                    entityPermissions.Add(ReferredEntityPermissionGridRowModel.Convert("Public Dataset", "", publicRights));
+                }
+
+                return View(new GridModel<ReferredEntityPermissionGridRowModel> { Data = entityPermissions });
+            }
+            finally
+            {
+                subjectManager.Dispose();
+                entityPermissionManager.Dispose();
+            }
+        }
+
         public void RemoveInstanceFromPublic(long entityId, long instanceId)
         {
             var entityPermissionManager = new EntityPermissionManager();
@@ -122,6 +199,11 @@ namespace BExIS.Modules.Sam.UI.Controllers
 
                 if (entityPermission == null) return;
                 entityPermissionManager.Delete(entityPermission);
+
+                if (this.IsAccessible("DDM", "SearchIndex", "ReIndexSingle"))
+                {
+                    var x = this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", instanceId } });
+                }
             }
             finally
             {
@@ -161,24 +243,48 @@ namespace BExIS.Modules.Sam.UI.Controllers
             return PartialView("_Subjects", new EntityInstanceModel() { EntityId = entityId, InstanceId = instanceId });
         }
 
-        [GridAction]
-        public ActionResult Subjects_Select(long entityId, long instanceId)
+        [GridAction(EnableCustomBinding = true)]
+        public ActionResult Subjects_Select(GridCommand command, long entityId, long instanceId)
         {
             var subjectManager = new SubjectManager();
             var entityPermissionManager = new EntityPermissionManager();
 
             try
             {
+                var subjectsDb = new List<Subject>();
+                var count = 0;
+                if (command != null)// filter subjects based on grid filter settings
+                {
+                    FilterExpression filter = TelerikGridHelper.Convert(command.FilterDescriptors.ToList());
+                    OrderByExpression orderBy = TelerikGridHelper.Convert(command.SortDescriptors.ToList());
+
+                    subjectsDb = subjectManager.GetSubjects(filter, orderBy, command.Page, command.PageSize, out count);
+                }
+                else
+                {
+                    subjectsDb = subjectManager.Subjects.ToList();
+                    count = subjectsDb.Count();
+                }
+
                 var subjects = new List<EntityPermissionGridRowModel>();
-                foreach (var subject in subjectManager.Subjects)
+                using (PartyManager partyManager = new PartyManager())
+                
+                foreach (var subject in subjectsDb)
                 {
                     var rights = entityPermissionManager.GetRights(subject.Id, entityId, instanceId);
                     var effectiveRights = entityPermissionManager.GetEffectiveRights(subject.Id, entityId, instanceId);
 
+                    // Replace account name by party name todo: check performance. If to slow retieve first all party entities and select in result
+                    Party party = partyManager.GetPartyByUser(subject.Id);
+                    if (party != null)
+                    {
+                        subject.Name = party.Name;
+                    }
+
                     subjects.Add(EntityPermissionGridRowModel.Convert(subject, rights, effectiveRights));
                 }
 
-                return View(new GridModel<EntityPermissionGridRowModel> { Data = subjects });
+                return View(new GridModel<EntityPermissionGridRowModel> { Data = subjects, Total = count });
             }
             finally
             {

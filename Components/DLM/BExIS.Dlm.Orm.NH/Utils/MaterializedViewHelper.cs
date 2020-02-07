@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Vaiona.Persistence.Api;
 using Vaiona.Utils.Cfg;
+using BExIS.Utils.NH.Querying;
 
 namespace BExIS.Dlm.Orm.NH.Utils
 {
@@ -13,8 +14,9 @@ namespace BExIS.Dlm.Orm.NH.Utils
     {
         // use this to access proper templates. All the templates are in one XML file under nativeObjects
         // they can be in default, or specific dialect folder
-        string dbDialect = AppConfiguration.DatabaseDialect;
-        List<string> columnLabels = new List<string>();
+        private string dbDialect = AppConfiguration.DatabaseDialect;
+
+        private List<string> columnLabels = new List<string>();
 
         public MaterializedViewHelper()
         {
@@ -41,6 +43,35 @@ namespace BExIS.Dlm.Orm.NH.Utils
             return retrieve(mvBuilder.ToString(), datasetId);
         }
 
+        public DataTable Retrieve(long datasetId, FilterExpression filter, OrderByExpression orderBy, ProjectionExpression projection, int pageNumber = 0, int pageSize = 0)
+        {
+            // Would be better to additionally have a ToHQL() method.
+            var projectionClause = projection?.ToSQL();
+            var orderbyClause = orderBy?.ToSQL();
+            var whereClause = filter?.ToSQL();
+
+            return Retrieve(datasetId, whereClause, orderbyClause, projectionClause, pageNumber, pageSize);
+        }
+
+        // can be public, but after the other overloads got matured enough.
+        protected DataTable Retrieve(long datasetId, string whereClause, string orderbyClause, string projectionClause, int pageNumber = 0, int pageSize = 0)
+        {
+            // the following query must be converted to HQL for DB portability purpose. Also, all other dynamically created queries.
+            StringBuilder mvBuilder = new StringBuilder();
+            mvBuilder
+                .Append("SELECT ")
+                .Append(string.IsNullOrWhiteSpace(projectionClause) ? "*" : projectionClause).Append(" ") // projection
+                .Append("FROM ").Append(this.BuildName(datasetId).ToLower()).Append(" ") // source mat. view
+                .Append(string.IsNullOrWhiteSpace(whereClause) ? "" : "WHERE (" + whereClause + ")").Append(" ") // where
+                .Append(string.IsNullOrWhiteSpace(orderbyClause) ? "Order By OrderNo, Id" : "Order By " + orderbyClause).Append(" ") //order by
+                .Append(pageNumber <= 0 ? "" : "OFFSET " + pageNumber * pageSize).Append(" ") //offset
+                .Append(pageSize <= 0 ? "LIMIT 10" : "LIMIT " + pageSize) // limit, default page size is 10
+                .AppendLine()
+                ;
+            // execute the statement
+            return retrieve(mvBuilder.ToString(), datasetId);
+        }
+
         private DataTable retrieve(string queryStr, long datasetId)
         {
             try
@@ -56,7 +87,6 @@ namespace BExIS.Dlm.Orm.NH.Utils
             {
                 throw new Exception(string.Format("Could not retrieve data from dataset {0}. Check whether the corresponding view exists and is populated with data.", datasetId), ex);
             }
-
         }
 
         private DataTable applyColumnLabels(DataTable table, long datasetId)
@@ -86,7 +116,8 @@ namespace BExIS.Dlm.Orm.NH.Utils
             {
                 var columnName = row["columnname"].ToString();
                 var columnLabel = row["description"].ToString();
-                table.Columns[columnName].Caption = columnLabel;
+                if (table.Columns.Contains(columnName))
+                    table.Columns[columnName].Caption = columnLabel;
             }
             return table;
         }
@@ -98,7 +129,6 @@ namespace BExIS.Dlm.Orm.NH.Utils
         /// <param name="columnDefinitionList">A list of column definitions coming from the data structure of the dataset. Each definition conatins: variable's name, data type, order, and Id</param>
         public void Create(long datasetId, List<Tuple<string, string, int, long>> columnDefinitionList)
         {
-
             StringBuilder mvBuilder = new StringBuilder();
             // build MV's name
             mvBuilder.AppendLine(string.Format("CREATE MATERIALIZED VIEW {0} AS", this.BuildName(datasetId)));
@@ -129,7 +159,7 @@ namespace BExIS.Dlm.Orm.NH.Utils
                 .AppendLine("FROM datasetversions v INNER JOIN datatuples t ON t.datasetversionref = v.id")
                 .AppendLine(string.Format("WHERE (v.datasetref = {0} AND v.status = 2) OR (v.datasetref = {0} AND v.status = 0)", datasetId))
                 .Append("WITH NO DATA") //avoids refreshing the MV at the creation time, the view will not be queryable until explicitly refreshed.
-                //.Append("WITH DATA") //marks the view as queryable even if there is no data at creation time.
+                                        //.Append("WITH DATA") //marks the view as queryable even if there is no data at creation time.
                 ;
 
             // build the satetment
@@ -221,6 +251,32 @@ namespace BExIS.Dlm.Orm.NH.Utils
             }
         }
 
+        public long Count(long datasetId, FilterExpression filter)
+        {
+            var whereClause = filter?.ToSQL();
+            StringBuilder mvBuilder = new StringBuilder();
+            mvBuilder
+                .Append("SELECT ")
+                .Append("COUNT(id) AS cnt").Append(" ")
+                .Append("FROM ").Append(this.BuildName(datasetId).ToLower()).Append(" ") // source mat. view
+                .Append(string.IsNullOrWhiteSpace(whereClause) ? "" : "WHERE (" + whereClause + ")").Append(" ") // where
+                .AppendLine()
+                ;
+            // execute the statement
+            try
+            {
+                using (IUnitOfWork uow = this.GetBulkUnitOfWork())
+                {
+                    var result = uow.ExecuteScalar(mvBuilder.ToString());
+                    return (long)result;
+                }
+            }
+            catch
+            {
+                return -1;
+            }
+        }
+
         public void Drop(long datasetId)
         {
             StringBuilder mvBuilder = new StringBuilder();
@@ -239,7 +295,6 @@ namespace BExIS.Dlm.Orm.NH.Utils
             }
         }
 
-
         public string BuildName(long datasetId)
         {
             return "mvDataset" + datasetId; // the strings must come from the mappings, nativeObjects/templates.xml. considering dialects and hierarchy
@@ -257,14 +312,14 @@ namespace BExIS.Dlm.Orm.NH.Utils
             // string template = @"unnest(xpath('/Content/Item[{0}]/Property[@Name=""Value""]/@value', t.xmlvariablevalues)\\:\\:varchar[])\\:\\:{1} as {2}";
             // string template =   @"cast(unnest(cast(xpath('/Content/Item[Property[@Name=""VariableId"" and @value=""{0}""]][1]/Property[@Name=""Value""]/@value', t.xmlvariablevalues) AS varchar[])) AS {1}) AS {2}";
             // string template = @"unnest(xpath('/Content/Item[Property[@Name=""VariableId"" and @value=""{0}""]][1]/Property[@Name=""Value""]/@value', t.xmlvariablevalues)::character varying[]){1} AS {2}";
-            
+
             string fieldType = dbDataType(dataType);
             fieldType = !string.IsNullOrEmpty(fieldType) ? " AS " + fieldType : "";
 
             string accessPathTemplate = @"xpath('/Content/Item[Property[@Name=""VariableId"" and @value=""{0}""]][1]/Property[@Name=""Value""]/@value', t.xmlvariablevalues)";
             string accessPath = string.Format(accessPathTemplate, Id);
 
-            string fieldDef = $"CASE WHEN ({accessPath}::text = '{{\"\"}}'::text) THEN NULL WHEN ({accessPath}::text = '{{_null_null}}'::text) THEN NULL ELSE cast(unnest({accessPath}::character varying[]) {fieldType}) END AS {this.BuildColumnName(Id).ToLower()}";
+            string fieldDef = $"CASE WHEN ({accessPath}::text = '{{\"\"}}'::text) THEN NULL WHEN ({accessPath}::text = '{{_null_null}}'::text) THEN NULL ELSE cast(({accessPath}::character varying[])[1] {fieldType}) END AS {this.BuildColumnName(Id).ToLower()}";
             //string fieldDef = string.Format(fieldTemplate, accessPath, fieldType, this.BuildColumnName(Id).ToLower());
             // guard the column mapping for NULL protection
             return fieldDef;
@@ -285,7 +340,7 @@ namespace BExIS.Dlm.Orm.NH.Utils
                 { "long", "bigint" },
                 { "int64", "bigint" },
                 { "text", "" }, // not needed -> character varying[]
-                { "string", "character varying(255)" } 
+                { "string", "character varying(255)" }
             };
 
         /// <summary>

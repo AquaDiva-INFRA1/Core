@@ -98,7 +98,13 @@
                 e.preventDefault();
                 return false;
             } else {
-                if (file.size > (maxsize * 1024 * 1024 )) {
+
+                //alert(file.size);
+                //alert(maxsize);
+
+
+                // file.size is in bytes - maxsize need to convert to bytes
+                if (file.size > (maxsize*1024*1024)) {
 
                     alert("Max file : " +
                         maxsize +

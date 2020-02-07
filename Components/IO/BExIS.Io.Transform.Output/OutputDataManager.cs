@@ -1,14 +1,13 @@
 ﻿using BExIS.Dlm.Entities.Data;
-using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Xml.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Web;
 using Vaiona.Utils.Cfg;
 
 namespace BExIS.IO.Transform.Output
@@ -17,7 +16,7 @@ namespace BExIS.IO.Transform.Output
     {
         #region export prepare files
 
-        public string GenerateAsciiFile(long id, string title, string mimeType)
+        public string GenerateAsciiFile(long id, string title, string mimeType, bool withUnits)
         {
             DatasetManager datasetManager = new DatasetManager();
 
@@ -26,7 +25,7 @@ namespace BExIS.IO.Transform.Output
                 DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
                 long datasetVersionId = datasetVersion.Id;
 
-                return GenerateAsciiFile(id, datasetVersionId, title, mimeType);
+                return GenerateAsciiFile(id, datasetVersionId, title, mimeType, withUnits);
             }
             finally
             {
@@ -34,31 +33,49 @@ namespace BExIS.IO.Transform.Output
             }
         }
 
-        public string GenerateAsciiFile(long id, long versionId, string title, string mimeType)
+        public string GenerateAsciiFile(long id, long versionId, string title, string mimeType, bool withUnits)
         {
             DatasetManager datasetManager = new DatasetManager();
+            DataStructureManager datasetStructureManager = new DataStructureManager();
 
             try
             {
                 DatasetVersion datasetVersion = datasetManager.GetDatasetVersion(versionId);
+                int versionNr = datasetManager.GetDatasetVersionNr(datasetVersion);
 
                 string contentDescriptorTitle = "";
                 string ext = "";
-
+                string nameExt = "";
                 TextSeperator textSeperator = TextSeperator.semicolon;
+
+                if (withUnits) nameExt = "_withunits";
 
                 switch (mimeType)
                 {
                     case "text/csv":
+                    case "text/comma-separated-values":
+                    case "application/octet-stream":
+                        /* of course this is a wrong  mimetype for csv.
+                        but the c# class MimeMapping.GetMimeMapping(ext) currently returns this as a result for .csv.
+                        since we don't use the datatype at the moment,
+                        it will be rebuilt into the case here*/
                         {
-                            contentDescriptorTitle = "generatedCSV";
+                            contentDescriptorTitle = "generatedCSV" + nameExt;
                             ext = ".csv";
                             textSeperator = TextSeperator.semicolon;
                             break;
                         }
+                    case "text/tsv":
+                    case "text/tab-separated-values":
+                        {
+                            contentDescriptorTitle = "generatedTSV" + nameExt;
+                            ext = ".tsv";
+                            textSeperator = TextSeperator.tab;
+                            break;
+                        }
                     default:
                         {
-                            contentDescriptorTitle = "generatedTXT";
+                            contentDescriptorTitle = "generatedTXT" + nameExt;
                             ext = ".txt";
                             textSeperator = TextSeperator.tab;
                             break;
@@ -70,7 +87,9 @@ namespace BExIS.IO.Transform.Output
                 string path = "";
 
                 //ascii allready exist
-                if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(contentDescriptorTitle) && p.URI.Contains(datasetVersion.Id.ToString())) > 0)
+                if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(contentDescriptorTitle) &&
+                    p.URI.Contains(datasetVersion.Id.ToString())) > 0 &&
+                    !withUnits)
                 {
                     #region FileStream exist
 
@@ -81,41 +100,27 @@ namespace BExIS.IO.Transform.Output
                     {
                         return path;
                     }
-                    else
-                    {
-                        List<long> datatupleIds = datasetManager.GetDatasetVersionEffectiveTupleIds(datasetVersion);
-                        long datastuctureId = datasetVersion.Dataset.DataStructure.Id;
 
-                        path = generateDownloadFile(id, datasetVersion.Id, datastuctureId, "Data", ext, writer);
-
-                        storeGeneratedFilePathToContentDiscriptor(id, datasetVersion, ext);
-
-                        writer.AddDataTuples(datasetManager, datatupleIds, path, datastuctureId);
-
-                        return path;
-                    }
-
-                    #endregion
-
+                    #endregion FileStream exist
                 }
-                // not exist needs to generated
-                else
-                {
-                    #region FileStream not exist
 
-                    List<long> datatupleIds = datasetManager.GetDatasetVersionEffectiveTupleIds(datasetVersion);
-                    long datastuctureId = datasetVersion.Dataset.DataStructure.Id;
+                // not exist, needs to generated
+                DataTable data = datasetManager.GetLatestDatasetVersionTuples(id);
+                data.Strip();
 
-                    path = generateDownloadFile(id, datasetVersion.Id, datastuctureId, "data", ext, writer);
+                long datastuctureId = datasetVersion.Dataset.DataStructure.Id;
 
-                    storeGeneratedFilePathToContentDiscriptor(id, datasetVersion, ext);
+                path = createDownloadFile(id, versionNr, datastuctureId, "data", ext, writer, null, withUnits);
 
-                    writer.AddDataTuples(datasetManager, datatupleIds, path, datastuctureId);
+                storeGeneratedFilePathToContentDiscriptor(id, datasetVersion, ext, withUnits);
 
-                    return path;
+                //add units if want
+                string[] units = null;
+                if (withUnits) units = getUnits(datastuctureId, null);
 
-                    #endregion
-                }
+                writer.AddData(data, path, datastuctureId, units);
+
+                return path;
             }
             finally
             {
@@ -123,7 +128,7 @@ namespace BExIS.IO.Transform.Output
             }
         }
 
-        public string GenerateAsciiFile(string ns, DataTable table, string title, string mimeType, long dataStructureId)
+        public string GenerateAsciiFile(string ns, DataTable table, string title, string mimeType, long dataStructureId, bool withUnits = false)
         {
             string ext = "";
             TextSeperator textSeperator = TextSeperator.semicolon;
@@ -131,9 +136,22 @@ namespace BExIS.IO.Transform.Output
             switch (mimeType)
             {
                 case "text/csv":
+                case "text/comma-separated-values":
+                case "application/octet-stream":
+                    /* of course this is a wrong  mimetype for csv.
+                    but the c# class MimeMapping.GetMimeMapping(ext) currently returns this as a result for .csv.
+                    since we don't use the datatype at the moment,
+                    it will be rebuilt into the case here*/
                     {
                         ext = ".csv";
                         textSeperator = TextSeperator.semicolon;
+                        break;
+                    }
+                case "text/tsv":
+                case "text/tab-separated-values":
+                    {
+                        ext = ".tsv";
+                        textSeperator = TextSeperator.tab;
                         break;
                     }
                 default:
@@ -148,47 +166,19 @@ namespace BExIS.IO.Transform.Output
 
             // write to file
             // if there is already a file, replace it
-            string path = generateDownloadFile(ns, dataStructureId, title, ext, writer);
+            string path = createDownloadFile(ns, dataStructureId, title, ext, writer);
 
-            writer.AddDataTuples(table, path, dataStructureId);
+            string[] units = null;
+            string[] columns = null;
+            if (withUnits)
+            {
+                columns = getColumnNames(table);
+                units = getUnits(dataStructureId, columns);
+            }
+
+            writer.AddData(table, path, dataStructureId, units);
 
             return path;
-
-        }
-
-        public string GenerateAsciiFile(long id, string title, string mimeType, string[] visibleColumns)
-        {
-            string ext = "";
-            string path = "";
-
-            DatasetManager datasetManager = new DatasetManager();
-
-            try
-            {
-
-                DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
-                AsciiWriter writer = new AsciiWriter(TextSeperator.comma);
-
-                // Javad: It is better to have a list of tuple IDs and pass it to the AddDataTuples method. 
-                // This method is using a special iterator to reduce the number of queries. 18.11.2016
-
-                List<long> datatuples = new List<long>(); //GetFilteredDataTuples(datasetVersion);
-
-                long datastuctureId = datasetVersion.Dataset.DataStructure.Id;
-
-                path = generateDownloadFile(id, datasetVersion.Id, datastuctureId, "data", ext, writer);
-
-                if (visibleColumns != null)
-                    writer.VisibleColumns = visibleColumns;
-
-                writer.AddDataTuples(datasetManager, datatuples, path, datastuctureId);
-
-                return path;
-            }
-            finally
-            {
-                datasetManager.Dispose();
-            }
         }
 
         /// <summary>
@@ -198,39 +188,57 @@ namespace BExIS.IO.Transform.Output
         /// <param name="table"></param>
         /// <param name="title"></param>
         /// <returns></returns>
-        public string GenerateExcelFile(string ns, DataTable table, string title, long dsId)
+        public string GenerateExcelFile(string ns, DataTable table, string title, long dsId, string ext = ".xlsm", bool withUnits = false)
         {
             ExcelWriter writer = new ExcelWriter();
-            string path = generateDownloadFile(ns, dsId, title, ".xlsm", writer);
-            writer.AddDataTuplesToFile(table, path, dsId);
+            string path = createDownloadFile(ns, dsId, title, ext, writer);
+
+            string[] units = null;
+            string[] columns = getColumnNames(table);
+            if (withUnits) units = getUnits(dsId, columns);
+
+            writer.AddDataTuplesToFile(table, path, dsId, units);
 
             return path;
         }
 
-        public string GenerateExcelFile(long id, string title)
+        public string GenerateExcelFile(long id, string title, bool createAsTemplate, DataTable data = null, bool withUnits = false)
         {
-            string mimeType = "application / xlsm";
-            string contentDescriptorTitle = "generated";
-            string ext = ".xlsm";
+            string mimeType = "";
+            string ext = ".xlsx";
+            string contentDescriptorTitle = "";
 
+            if (createAsTemplate)
+            {
+                ext = ".xlsm";
+                contentDescriptorTitle = "generated";
+            }
+            else
+            {
+                ext = ".xlsx";
+                if (withUnits) contentDescriptorTitle = "generatedExcelWithUnits";
+                else contentDescriptorTitle = "generatedExcel";
+            }
+
+            mimeType = MimeMapping.GetMimeMapping(ext);
 
             DatasetManager datasetManager = new DatasetManager();
-
 
             try
             {
                 DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
-                ExcelWriter writer = new ExcelWriter();
+                ExcelWriter writer = new ExcelWriter(createAsTemplate);
 
                 string path = "";
 
                 //excel allready exist
-                if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals("generated") && p.URI.Contains(datasetVersion.Id.ToString())) > 0)
+                if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(contentDescriptorTitle) && p.URI.Contains(datasetVersion.Id.ToString())) > 0 &&
+                    data == null)
                 {
                     #region FileStream exist
 
                     ContentDescriptor contentdescriptor =
-                        datasetVersion.ContentDescriptors.Where(p => p.Name.Equals("generated"))
+                        datasetVersion.ContentDescriptors.Where(p => p.Name.Equals(contentDescriptorTitle))
                             .FirstOrDefault();
                     path = Path.Combine(AppConfiguration.DataPath, contentdescriptor.URI);
 
@@ -244,42 +252,47 @@ namespace BExIS.IO.Transform.Output
                         return path;
                     }
 
-                    // if not generate
-                    else
-                    {
-                        List<long> datatupleIds =
-                            datasetManager.GetDatasetVersionEffectiveTupleIds(datasetVersion);
-                        long datastuctureId = datasetVersion.Dataset.DataStructure.Id;
-                        path = generateDownloadFile(id, datasetVersion.Id, datastuctureId, title, ext,
-                            writer);
-
-                        storeGeneratedFilePathToContentDiscriptor(id, datasetVersion, ext);
-                        writer.AddDataTuplesToTemplate(datasetManager, datatupleIds, path, datastuctureId);
-
-                        return path;
-                    }
-
-                    #endregion
+                    #endregion FileStream exist
                 }
+
                 // not exist needs to generated
+
+                #region FileStream not exist
+
+                if (data == null)
+                {
+                    DatasetManager dm = new DatasetManager();
+                    data = dm.GetLatestDatasetVersionTuples(id);
+                    data.Strip();
+                }
+
+                long datastuctureId = datasetVersion.Dataset.DataStructure.Id;
+                int versionNr = datasetManager.GetDatasetVersionNr(datasetVersion);
+                if (createAsTemplate)
+                {
+                    string[] columnNames = (from dc in data.Columns.Cast<DataColumn>()
+                                            select dc.Caption).ToArray();
+
+                    path = createDownloadFile(id, versionNr, datastuctureId, "data", ext, writer, columnNames);
+                    storeGeneratedFilePathToContentDiscriptor(id, datasetVersion, ext, false);
+                    writer.AddData(data.Rows, path, datastuctureId);
+                }
                 else
                 {
-                    #region FileStream not exist
+                    path = createDownloadFile(id, versionNr, datastuctureId, "data", ext, writer, null, withUnits);
 
-                    List<long> datatupleIds =
-                        datasetManager.GetDatasetVersionEffectiveTupleIds(datasetVersion);
-                    long datastuctureId = datasetVersion.Dataset.DataStructure.Id;
-                    path = generateDownloadFile(id, datasetVersion.Id, datastuctureId, "data", ext, writer);
+                    // the default data is without units, so store the path of the file if it was generated
+                    storeGeneratedFilePathToContentDiscriptor(id, datasetVersion, ext, withUnits);
 
-                    storeGeneratedFilePathToContentDiscriptor(id, datasetVersion, ext);
-                    writer.AddDataTuplesToTemplate(datasetManager, datatupleIds, path, datastuctureId);
+                    string[] units = null;
+                    if (withUnits) units = getUnits(datastuctureId, null);
 
-                    return path;
-
-                    #endregion
+                    writer.AddData(data, path, datastuctureId, units);
                 }
 
-                return "";
+                return path;
+
+                #endregion FileStream not exist
             }
             catch (Exception ex)
             {
@@ -291,23 +304,34 @@ namespace BExIS.IO.Transform.Output
             }
         }
 
-        private string generateDownloadFile(long id, long datasetVersionOrderNo, long dataStructureId, string title, string ext, DataWriter writer)
+        private string createDownloadFile(long id, long datasetVersionOrderNo, long dataStructureId, string title, string ext, DataWriter writer, string[] columns = null, bool withUnits = false)
         {
-            if (ext.Equals(".csv") || ext.Equals(".txt"))
+            string addtionalFileNameExt = "";
+            if (withUnits) addtionalFileNameExt = "_withunits";
+
+            string filename = "data" + addtionalFileNameExt;
+
+            if (ext.Equals(".csv") || ext.Equals(".txt") || ext.Equals(".tsv"))
             {
                 AsciiWriter asciiwriter = (AsciiWriter)writer;
-                return asciiwriter.CreateFile(id, datasetVersionOrderNo, dataStructureId, "data", ext);
+                return asciiwriter.CreateFile(id, datasetVersionOrderNo, dataStructureId, filename, ext);
             }
             else
             if (ext.Equals(".xlsm"))
             {
                 ExcelWriter excelwriter = (ExcelWriter)writer;
-                return excelwriter.CreateFile(id, datasetVersionOrderNo, dataStructureId, "data", ext);
+                excelwriter.VisibleColumns = columns;
+                return excelwriter.CreateFile(id, datasetVersionOrderNo, dataStructureId, filename, ext);
+            }
+            else
+            if (ext.Equals(".xlsx"))
+            {
+                ExcelWriter excelwriter = (ExcelWriter)writer;
+                return excelwriter.CreateFile(id, datasetVersionOrderNo, dataStructureId, filename, ext);
             }
 
             return "";
         }
-
 
         /// <summary>
         /// create a new file of given extension
@@ -318,20 +342,26 @@ namespace BExIS.IO.Transform.Output
         /// <param name="ext"></param>
         /// <param name="writer"></param>
         /// <returns></returns>
-        private string generateDownloadFile(string ns, long datastructureId, string title, string ext, DataWriter writer)
+        private string createDownloadFile(string ns, long datastructureId, string title, string ext, DataWriter writer, string[] columns = null)
         {
+            ExcelWriter excelwriter = null;
             switch (ext)
             {
                 // text based files
                 case ".csv":
                 case ".txt":
+                case ".tsv":
                     AsciiWriter asciiwriter = (AsciiWriter)writer;
                     return asciiwriter.CreateFile(ns, title, ext);
 
                 // excel files
                 case ".xlsx":
+                    excelwriter = (ExcelWriter)writer;
+                    return excelwriter.CreateFile(ns, datastructureId, title, ext);
+
                 case ".xlsm":
-                    ExcelWriter excelwriter = (ExcelWriter)writer;
+                    excelwriter = (ExcelWriter)writer;
+                    excelwriter.VisibleColumns = columns;
                     return excelwriter.CreateFile(ns, datastructureId, title, ext);
 
                 // no valid extension given
@@ -340,27 +370,33 @@ namespace BExIS.IO.Transform.Output
             }
         }
 
-        private void storeGeneratedFilePathToContentDiscriptor(long datasetId, DatasetVersion datasetVersion, string ext)
+        private void storeGeneratedFilePathToContentDiscriptor(long datasetId, DatasetVersion datasetVersion, string ext, bool withUnits)
         {
-
             DatasetManager dm = new DatasetManager();
+            string nameExt = "";
+            if (withUnits) nameExt = "_withunits";
+
             try
             {
-
-
                 string name = "";
                 string mimeType = "";
 
                 if (ext.Contains("csv"))
                 {
-                    name = "generatedCSV";
+                    name = "generatedCSV" + nameExt;
                     mimeType = "text/csv";
                 }
 
                 if (ext.Contains("txt"))
                 {
-                    name = "generatedTXT";
+                    name = "generatedTXT" + nameExt;
                     mimeType = "text/plain";
+                }
+
+                if (ext.Contains("tsv"))
+                {
+                    name = "generatedTSV" + nameExt;
+                    mimeType = "text/tsv";
                 }
 
                 if (ext.Contains("xlsm"))
@@ -369,8 +405,16 @@ namespace BExIS.IO.Transform.Output
                     mimeType = "application/xlsm";
                 }
 
+                if (ext.Contains("xlsx"))
+                {
+                    name = "generatedExcel" + nameExt;
+                    mimeType = "application/xlsx";
+                }
+
+                int versionNr = dm.GetDatasetVersionNr(datasetVersion);
+
                 // create the generated FileStream and determine its location
-                string dynamicPath = IOHelper.GetDynamicStorePath(datasetId, datasetVersion.Id, "data", ext);
+                string dynamicPath = IOHelper.GetDynamicStorePath(datasetId, versionNr, "data", ext);
                 //Register the generated data FileStream as a resource of the current dataset version
                 //ContentDescriptor generatedDescriptor = new ContentDescriptor()
                 //{
@@ -382,7 +426,7 @@ namespace BExIS.IO.Transform.Output
                 //};
 
                 if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(name)) > 0)
-                {   // remove the one contentdesciptor 
+                {   // remove the one contentdesciptor
                     foreach (ContentDescriptor cd in datasetVersion.ContentDescriptors)
                     {
                         if (cd.Name == name)
@@ -405,275 +449,52 @@ namespace BExIS.IO.Transform.Output
             {
                 dm.Dispose();
             }
-
         }
 
-        #endregion
-
-        #region datatable
-
-        //[MeasurePerformance]
-        public static DataTable ConvertPrimaryDataToDatatable(DatasetManager datasetManager, DatasetVersion datasetVersion, string tableName = "", bool useLabelsAsColumnNames = false)
+        private string[] getUnits(long datastuctureId, string[] columns)
         {
+            DataStructureManager datasetStructureManager = new DataStructureManager();
 
-            DataStructureManager dsm = new DataStructureManager();
+            List<string> units = new List<string>();
 
             try
             {
+                var sds = datasetStructureManager.StructuredDataStructureRepo.Get(datastuctureId);
 
-                DataTable dt = new DataTable();
-                if (string.IsNullOrEmpty(tableName))
-                    dt.TableName = "Primary data table";
-                else
-                    dt.TableName = tableName;
-                StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(datasetVersion.Dataset.DataStructure.Id);
-                var tupleIds = datasetManager.GetDatasetVersionEffectiveTupleIds(datasetVersion);
-
-                if (tupleIds != null && tupleIds.Count > 0 && sds != null)
+                if (sds != null)
                 {
-                    buildTheHeader(sds, useLabelsAsColumnNames, dt);
-                    buildTheBody(datasetManager, tupleIds, dt, sds, useLabelsAsColumnNames);
+                    var varList = sds.Variables.ToList();
+                    if (columns != null && columns.Count() > 0)
+                        varList = varList.Where(v => columns.Contains(v.Label)).ToList();
+
+                    varList.ForEach(v => units.Add(v.Unit.Abbreviation));
                 }
 
-                return dt;
+                return units.ToArray();
             }
             finally
             {
-                dsm.Dispose();
+                datasetStructureManager.Dispose();
             }
         }
 
-        private static void buildTheBody(DatasetManager datasetManager, List<long> tupleIds, DataTable dt, StructuredDataStructure sds, bool useLabelsAsColumnNames)
+        private string[] getColumnNames(DataTable table)
         {
-            DataTupleIterator tupleIterator = new DataTupleIterator(tupleIds, datasetManager);
-            foreach (var tuple in tupleIterator)
-            {
-                dt.Rows.Add(ConvertTupleIntoDataRow(dt, tuple, sds, useLabelsAsColumnNames));
-            }
+            return table.Columns.Cast<DataColumn>()
+                                 .Select(x => x.Caption)
+                                 .ToArray();
         }
 
-        private static void buildTheHeader(StructuredDataStructure sds, bool useLabelsAsColumnNames, DataTable dt)
-        {
-            foreach (var vu in sds.Variables)
-            {
-                DataColumn col = null;
-                if (useLabelsAsColumnNames)
-                {
-                    col = dt.Columns.Add(vu.Label);
-                }
-                else
-                {
-                    col = dt.Columns.Add("ID" + vu.Id.ToString()); // or DisplayName also
-                }
+        #endregion export prepare files
 
-                col.Caption = vu.Label;
-
-                switch (vu.DataAttribute.DataType.SystemType)
-                {
-                    case "String":
-                        {
-                            col.DataType = Type.GetType("System.String");
-                            break;
-                        }
-
-                    case "Double":
-                        {
-                            col.DataType = Type.GetType("System.Double");
-                            break;
-                        }
-
-                    case "Int16":
-                        {
-                            col.DataType = Type.GetType("System.Int16");
-                            break;
-                        }
-
-                    case "Int32":
-                        {
-                            col.DataType = Type.GetType("System.Int32");
-                            break;
-                        }
-
-                    case "Int64":
-                        {
-                            col.DataType = Type.GetType("System.Int64");
-                            break;
-                        }
-
-                    case "Decimal":
-                        {
-                            col.DataType = Type.GetType("System.Decimal");
-                            break;
-                        }
-
-                    case "DateTime":
-                        {
-                            col.DataType = Type.GetType("System.DateTime");
-                            break;
-                        }
-
-                    default:
-                        {
-                            col.DataType = Type.GetType("System.String");
-                            break;
-                        }
-                }
-
-                if (vu.Parameters.Count > 0)
-                {
-                    foreach (var pu in vu.Parameters)
-                    {
-                        DataColumn col2 = dt.Columns.Add(pu.Label.Replace(" ", "")); // or DisplayName also
-                        col2.Caption = pu.Label;
-
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// This function convert a datatuple into datarow for a datatable to show on the client side
-        /// the grid in the client side (in client mode) has unknow problem with value 0 and null
-        /// So every empty cell get the max value of the specific Systemtype.
-        /// On the client side this values replaced with ""
-        /// </summary>
-        /// <param name="dt"></param>
-        /// <param name="t"></param>
-        /// <returns></returns>
-        private static DataRow ConvertTupleIntoDataRow(DataTable dt, AbstractTuple t, StructuredDataStructure sts, bool useLabelsAsColumnName = false)
-        {
-            DataRow dr = dt.NewRow();
-            string columnName = "";
-            foreach (var vv in t.VariableValues)
-            {
-                Variable variable = sts.Variables.FirstOrDefault(v => v.Id.Equals(vv.VariableId));
-
-                columnName = useLabelsAsColumnName == true ? variable.Label : "ID" + vv.VariableId.ToString();
-
-                if (vv.VariableId > 0)
-                {
-                    string valueAsString = "";
-                    if (vv.Value == null)
-                    {
-                        dr[columnName] = DBNull.Value;
-                    }
-                    else
-                    {
-                        valueAsString = vv.Value.ToString();
-
-                        Dlm.Entities.DataStructure.Variable varr = sts.Variables.Where(p => p.Id == vv.VariableId).SingleOrDefault();
-                        switch (varr.DataAttribute.DataType.SystemType)
-                        {
-                            case "String":
-                                {
-                                    dr[columnName] = valueAsString;
-
-                                    break;
-                                }
-
-                            case "Double":
-                                {
-                                    double value;
-                                    if (double.TryParse(valueAsString, out value))
-                                        dr[columnName] = Convert.ToDouble(valueAsString);
-                                    else
-                                        dr[columnName] = -99999;//double.MaxValue;
-                                    break;
-                                }
-
-                            case "Int16":
-                                {
-                                    Int16 value;
-                                    if (Int16.TryParse(valueAsString, out value))
-                                        dr[columnName] = Convert.ToInt16(valueAsString);
-                                    else
-                                        dr[columnName] = Int16.MaxValue;
-                                    break;
-                                }
-
-                            case "Int32":
-                                {
-                                    Int32 value;
-                                    if (Int32.TryParse(valueAsString, out value))
-                                        dr[columnName] = Convert.ToInt32(valueAsString);
-                                    else
-                                        dr[columnName] = Int32.MaxValue;
-                                    break;
-                                }
-
-                            case "Int64":
-                                {
-                                    Int64 value;
-                                    if (Int64.TryParse(valueAsString, out value))
-                                        dr[columnName] = Convert.ToInt64(valueAsString);
-                                    else
-                                        dr[columnName] = Int64.MaxValue;
-                                    break;
-                                }
-
-                            case "Decimal":
-                                {
-                                    decimal value;
-                                    if (decimal.TryParse(valueAsString, out value))
-                                        dr[columnName] = Convert.ToDecimal(valueAsString);
-                                    else
-                                        dr[columnName] = -99999;//decimal.MaxValue;
-                                    break;
-                                }
-
-                            case "Float":
-                                {
-                                    decimal value;
-                                    if (decimal.TryParse(valueAsString, out value))
-                                        dr[columnName] = Convert.ToDecimal(valueAsString);
-                                    else
-                                        dr[columnName] = -99999;
-                                    break;
-                                }
-
-                            case "DateTime":
-                                {
-                                    if (!String.IsNullOrEmpty(valueAsString))
-                                        dr[columnName] = Convert.ToDateTime(valueAsString, CultureInfo.InvariantCulture);
-                                    else
-                                        dr[columnName] = DateTime.MaxValue;
-
-                                    break;
-                                }
-
-                            default:
-                                {
-                                    if (!String.IsNullOrEmpty(vv.Value.ToString()))
-                                        dr[columnName] = valueAsString;
-                                    else
-                                        dr[columnName] = DBNull.Value;
-
-                                    break;
-                                }
-                        }
-                    }
-
-
-
-                    /*if (vv.ParameterValues.Count > 0)
-                    {
-                        foreach (var pu in vv.ParameterValues)
-                        {
-                            dr[pu.Parameter.Label.Replace(" ", "")] = pu.Value;
-                        }
-                    }*/
-                }
-            }
-
-            return dr;
-        }
+        #region datatable
 
         public static DataTable ProjectionOnDataTable(DataTable dt, string[] visibleColumns)
         {
             List<DataColumn> columnTobeDeleted = new List<DataColumn>();
             foreach (DataColumn column in dt.Columns)
             {
-                if (!visibleColumns.Contains(column.ColumnName.ToUpper()))
+                if (!visibleColumns.Contains(column.Caption.ToUpper()))
                 {
                     columnTobeDeleted.Add(column);
                 }
@@ -682,8 +503,18 @@ namespace BExIS.IO.Transform.Output
             return dt;
         }
 
-        public static DataTable SelectionOnDataTable(DataTable dt, string selection)
+        public static DataTable SelectionOnDataTable(DataTable dt, string selection, bool useCaption = false)
         {
+            //if selection contains variable like defind in the caption the datatable need to change
+            if (useCaption)
+            {
+                foreach (DataColumn c in dt.Columns)
+                {
+                    var t = c.Caption;
+                    c.ColumnName = t;
+                }
+            }
+
             DataTable newDt = dt.Clone();
             DataRow[] rows = dt.Select(selection);
             foreach (var row in rows)
@@ -691,10 +522,27 @@ namespace BExIS.IO.Transform.Output
                 newDt.ImportRow(row);
             }
 
-
             return newDt;
         }
 
-        #endregion
+        public static void ClearTempDirectory()
+        {
+            string path = Path.Combine(AppConfiguration.DataPath, "Datasets", "Temp");
+            if (Directory.Exists(path))
+            {
+                System.IO.DirectoryInfo di = new DirectoryInfo(path);
+
+                foreach (FileInfo file in di.EnumerateFiles())
+                {
+                    file.Delete();
+                }
+                foreach (DirectoryInfo dir in di.EnumerateDirectories())
+                {
+                    dir.Delete(true);
+                }
+            }
+        }
+
+        #endregion datatable
     }
 }

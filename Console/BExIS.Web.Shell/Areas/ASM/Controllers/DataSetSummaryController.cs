@@ -103,7 +103,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
                                                 datasetVersion.Id);
-                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv");
+                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv",true);
                 
                 LoggerFactory.LogCustom(message);
 
@@ -834,7 +834,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
                                                 datasetVersion.Id);
-                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv");
+                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv",true);
 
                 LoggerFactory.LogCustom(message);
 
@@ -1012,7 +1012,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
                                                 datasetVersion.Id);
-                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv");
+                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv",true);
 
                 LoggerFactory.LogCustom(message);
 
@@ -1106,7 +1106,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
                                                 datasetVersion.Id);
-                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv");
+                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv",true);
 
                 LoggerFactory.LogCustom(message);
 

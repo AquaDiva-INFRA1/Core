@@ -243,7 +243,7 @@ namespace BExIS.Modules.OAC.UI.Models
                 + string.Join("-", model.geographicLocationLatitude) + "," + string.Join("-", model.insdcLastUpdate) + "," + string.Join("-", model.waterEnvironmentalPackage) + "," + string.Join("-", model.waterEnvironmentalPackageontologyTerms) + ","
                 + string.Join("-", model.investigationType) + "," + string.Join("-", model.synonym) + "," + string.Join("-", model.insdcStatus) + "," + string.Join("-", model.sequencingMethod) + ","
                 + string.Join("-", model.projectName) + "," + string.Join("-", model.sraAccession) + "," + string.Join("-", model.alias) + "," 
-                + string.Join("-", model.environmentBiome) + "," + string.Join("-", model.environmentFeature) + "," + string.Join("-", model.environmentFeature) + "," + string.Join("-", model.insdcCenterName) + "," 
+                + string.Join("-", model.environmentBiome) + "," + string.Join("-", model.environmentFeature) + "," + string.Join("-", model.insdcCenterName) + "," 
                 + string.Join("-", model.geographicLocationCountryAndOrSea) + "," + string.Join("-", model.externalReferences) + "," + string.Join("-", model.externalReferencesacc) + ","+ string.Join("-", model.externalReferencesurl) 
                 ;
 

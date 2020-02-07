@@ -1,21 +1,18 @@
-﻿using DocumentFormat.OpenXml;
+﻿using BExIS.IO.DataType.DisplayPattern;
+using BExIS.Utils.Models;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
-using System.IO;
-using System.Linq;
-using System.Web.UI.WebControls;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
-using DocumentFormat.OpenXml.Spreadsheet;
-using BExIS.Utils.Models;
-using Newtonsoft.Json;
-using BExIS.IO.DataType.DisplayPattern;
-using System.Diagnostics;
 
 namespace BExIS.UI.Helpers
 {
-
     public class JsonTableGenerator
     {
         private static List<char> Letters = new List<char>() { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', ' ' };
@@ -39,13 +36,13 @@ namespace BExIS.UI.Helpers
             WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart;
             _sharedStrings = workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ToArray();
             _stylesheet = workbookPart.WorkbookStylesPart.Stylesheet;
-            
+
             WorksheetPart worksheetPart = null;
             foreach (Sheet worksheet in workbookPart.Workbook.Descendants<Sheet>())
             {
                 //Get the current worksheetpart and see if it is the correct one
                 WorksheetPart tmp = (WorksheetPart)workbookPart.GetPartById(worksheet.Id);
-                if(tmp.Uri.ToString() == worksheetUri)
+                if (tmp.Uri.ToString() == worksheetUri)
                 {
                     //Found the correct WorksheetPart
                     worksheetPart = tmp;
@@ -61,14 +58,13 @@ namespace BExIS.UI.Helpers
                 {
                     do
                     {
-
                         DocumentFormat.OpenXml.Spreadsheet.Row row = (DocumentFormat.OpenXml.Spreadsheet.Row)reader.LoadCurrentElement();
 
                         List<String> rowAsStringList = new List<string>();
 
                         //Since this library will ignore empty rows, check if we skipped some and add empty rows if necessary
                         //This will still ignore empty rows at the end of the file but those wouldn't have any influence on the indices of data & header anyway
-                        while(row.RowIndex > expectedRowIndex)
+                        while (row.RowIndex > expectedRowIndex)
                         {
                             List<String> dummyRow = new List<string>();
                             dummyRow.Add("");
@@ -118,7 +114,7 @@ namespace BExIS.UI.Helpers
                                     //If cell contains boolean (doesn't always work for files saved with libre office)
                                     else if (c.DataType != null && c.DataType.HasValue && c.DataType.Value == CellValues.Boolean)
                                     {
-                                        if(c.InnerText == "1")
+                                        if (c.InnerText == "1")
                                         {
                                             value = "true";
                                         }
@@ -136,7 +132,7 @@ namespace BExIS.UI.Helpers
                                         {
                                             uint numberFormatId = cellFormat.NumberFormatId.Value;
 
-                                            NumberingFormat numberFormat = _stylesheet.NumberingFormats.FirstOrDefault(numFormat => ((NumberingFormat)numFormat).NumberFormatId.Value == numberFormatId) as NumberingFormat;
+                                            NumberingFormat numberFormat = _stylesheet.NumberingFormats?.FirstOrDefault(numFormat => ((NumberingFormat)numFormat).NumberFormatId.Value == numberFormatId) as NumberingFormat;
 
                                             //
                                             if (numberFormat != null)
@@ -154,7 +150,7 @@ namespace BExIS.UI.Helpers
                                                         DateTime dateTime = DateTime.FromOADate(double.Parse(c.CellValue.Text, CultureInfo.InvariantCulture));
                                                         //value = dateTime.ToString(new CultureInfo("en-us"));
                                                         //get c# display pattern
-                                                        
+
                                                         DataTypeDisplayPattern dataTypeDisplayPattern = DataTypeDisplayPattern.GetByExcelPattern(formatCode);
                                                         value = dataTypeDisplayPattern != null ? dateTime.ToString(dataTypeDisplayPattern.StringPattern) : dateTime.ToString(new CultureInfo("en-us"));
 
@@ -162,15 +158,16 @@ namespace BExIS.UI.Helpers
                                                         //Debug.WriteLine(formatCode);
                                                     }
                                                 }
-                                            }
-                                        }
+                                            } // numberformat not null end
+                                        }// (cellFormat != null && cellFormat.NumberFormatId != null && cellFormat.NumberFormatId.HasValue)
 
+                                        //It may happen that values are in a cell, but the associated information such as numberformat or style are missing.
+                                        // In this case, we decide to display the values, even if they are incorrect.
+                                        if (string.IsNullOrEmpty(value) && (!string.IsNullOrEmpty(c?.CellValue?.Text))) value = c.CellValue.Text;
                                     }
-
-                                    if (string.IsNullOrEmpty(value)) value = c.CellValue.Text;
+                                    else { value = c.CellValue.Text; }
 
                                     rowAsStringList.Add(value);
-
                                 }//end if cell value null
                                 else
                                 {
@@ -192,7 +189,6 @@ namespace BExIS.UI.Helpers
 
                     break;
                 }
-
             }
 
             //Make sure each row has the same number of values in it
@@ -233,7 +229,7 @@ namespace BExIS.UI.Helpers
         //Solution from https://stackoverflow.com/a/3981249
         /// <summary>
         /// Given just the column name (no row index), it will return the zero based column index.
-        /// Note: This method will only handle columns with a length of up to two (ie. A to Z and AA to ZZ). 
+        /// Note: This method will only handle columns with a length of up to two (ie. A to Z and AA to ZZ).
         /// A length of three can be implemented when needed.
         /// </summary>
         /// <param name="columnName">Column Name (ie. A or AB)</param>
@@ -276,6 +272,7 @@ namespace BExIS.UI.Helpers
         /*
          * Returns a dictionary, containing the Uris of all worksheets as keys and their names (displaynames) as values
          * */
+
         public Dictionary<Uri, String> GetWorksheetUris()
         {
             if (this.fileStream != null)

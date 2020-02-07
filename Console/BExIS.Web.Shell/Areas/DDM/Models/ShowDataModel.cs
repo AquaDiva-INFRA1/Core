@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Xml;
-
-namespace BExIS.Modules.Ddm.UI.Models
+﻿namespace BExIS.Modules.Ddm.UI.Models
 {
     public class ShowDataModel
     {
         public long Id { get; set; }
+        public long VersionId { get; set; }
+        public int Version { get; set; }
+        public int VersionSelect { get; set; }
+        public bool LatestVersion { get; set; }
 
         public long MetadataStructureId { get; set; }
         public long DataStructureId { get; set; }
@@ -18,5 +16,11 @@ namespace BExIS.Modules.Ddm.UI.Models
         public bool ViewAccess { get; set; }
         public bool GrantAccess { get; set; }
         public bool IsCheckedIn { get; set; }
+
+        public string DataStructureType { get; set; }
+        public bool DownloadAccess { get; set; }
+
+        public bool RequestExist { get; set; }
+        public bool RequestAble { get; set; }
     }
 }

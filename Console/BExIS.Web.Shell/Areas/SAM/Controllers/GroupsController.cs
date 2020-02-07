@@ -1,8 +1,11 @@
 ﻿using BExIS.Modules.Sam.UI.Models;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Subjects;
+using BExIS.UI.Helpers;
+using BExIS.Utils.NH.Querying;
 using Microsoft.AspNet.Identity;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -89,6 +92,12 @@ namespace BExIS.Modules.Sam.UI.Controllers
             try
             {
                 var group = identityGroupService.FindByIdAsync(groupId).Result;
+
+                foreach (var user in group.Users)
+                {
+                    await RemoveUserFromGroup(user.Id, @group.Name);
+                }
+
                 var result = await identityGroupService.DeleteAsync(group);
                 return result.Succeeded;
             }
@@ -98,16 +107,28 @@ namespace BExIS.Modules.Sam.UI.Controllers
             }
         }
 
-        [GridAction]
-        public ActionResult Groups_Select()
+        [GridAction(EnableCustomBinding = true)]
+        public ActionResult Groups_Select(GridCommand command)
         {
             var groupManager = new GroupManager();
 
             try
             {
-                var groups = groupManager.Groups.Select(GroupGridRowModel.Convert).ToList();
+                var groups = new List<GroupGridRowModel>();
+                int count = groupManager.Groups.Count();
+                if (command != null)// filter subjects based on grid filter settings
+                {
+                    FilterExpression filter = TelerikGridHelper.Convert(command.FilterDescriptors.ToList());
+                    OrderByExpression orderBy = TelerikGridHelper.Convert(command.SortDescriptors.ToList());
 
-                return View(new GridModel<GroupGridRowModel> { Data = groups });
+                    groups = groupManager.GetGroups(filter, orderBy, command.Page, command.PageSize, out count).Select(GroupGridRowModel.Convert).ToList();
+                }
+                else
+                {
+                    groups = groupManager.Groups.Select(GroupGridRowModel.Convert).ToList();
+                }
+
+                return View(new GridModel<GroupGridRowModel> { Data = groups, Total = count });
             }
             finally
             {
@@ -181,8 +202,14 @@ namespace BExIS.Modules.Sam.UI.Controllers
                 if (!ModelState.IsValid) return PartialView("_Update", model);
 
                 var group = groupManager.FindByIdAsync(model.Id).Result;
-
                 if (group == null) return PartialView("_Update", model);
+
+                // check wheter group name exist
+                if (groupManager.FindByNameAsync(model.Name).Result != null)
+                {
+                    ModelState.AddModelError("Name", "The name exists already.");
+                    if (!ModelState.IsValid) return PartialView("_Update", model);
+                }
 
                 group.Name = model.Name;
                 group.Description = model.Description;
@@ -239,5 +266,41 @@ namespace BExIS.Modules.Sam.UI.Controllers
         }
 
         #endregion Hilfsprogramme
+
+        #region Remote Validation
+
+        public JsonResult ValidateGroupname(string username, long id = 0)
+        {
+            var groupManager = new GroupManager();
+
+            try
+            {
+                var group = groupManager.FindByNameAsync(username);
+
+                if (group == null)
+                {
+                    return Json(true, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    if (group.Id == id)
+                    {
+                        return Json(true, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var error = string.Format(CultureInfo.InvariantCulture, "The groupname exists already.", username);
+
+                        return Json(error, JsonRequestBehavior.AllowGet);
+                    }
+                }
+            }
+            finally
+            {
+                groupManager.Dispose();
+            }
+        }
+
+        #endregion Remote Validation
     }
 }

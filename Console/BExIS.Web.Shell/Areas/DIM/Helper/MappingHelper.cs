@@ -6,6 +6,8 @@ using BExIS.Dlm.Entities.Party;
 using BExIS.Dlm.Services.MetadataStructure;
 using BExIS.Dlm.Services.Party;
 using BExIS.Modules.Dim.UI.Models.Mapping;
+using BExIS.Security.Entities.Objects;
+using BExIS.Security.Services.Objects;
 using BExIS.Utils.Data.MetadataStructure;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,7 +19,6 @@ namespace BExIS.Modules.Dim.UI.Helper
     public class MappingHelper
     {
         private static MetadataStructureUsageHelper metadataStructureUsageHelper = new MetadataStructureUsageHelper();
-
 
         #region load rootList
 
@@ -31,7 +32,6 @@ namespace BExIS.Modules.Dim.UI.Helper
 
                 //load System
                 LinkElementRootListItem li = new LinkElementRootListItem(0, "System", LinkElementType.System);
-
 
                 tmp.Add(li);
 
@@ -49,7 +49,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                     tmp.Add(li);
                 }
 
-
                 return tmp;
             }
             finally
@@ -58,14 +57,12 @@ namespace BExIS.Modules.Dim.UI.Helper
             }
         }
 
-        #endregion
-
+        #endregion load rootList
 
         #region load Model from metadataStructure
 
         public static LinkElementRootModel LoadFromMetadataStructure(long id, LinkElementPostion rootModelType, MappingManager mappingManager)
         {
-
             MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
 
             try
@@ -76,14 +73,12 @@ namespace BExIS.Modules.Dim.UI.Helper
 
                 if (metadataStructure != null)
                 {
-
                     LinkElement metadataStructureLinkElement = mappingManager.GetLinkElement(metadataStructure.Id,
                             LinkElementType.MetadataStructure);
 
                     long metadataStructureLinkElementId = 0;
                     if (metadataStructureLinkElement != null)
                         metadataStructureLinkElementId = metadataStructureLinkElement.Id;
-
 
                     LinkElementModel LEModel = new LinkElementModel(
                         metadataStructureLinkElementId,
@@ -93,7 +88,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                         rootModelType,
                         LinkElementComplexity.Complex,
                         metadataStructure.Description);
-
 
                     foreach (var pUsage in metadataStructure.MetadataPackageUsages)
                     {
@@ -117,10 +111,7 @@ namespace BExIS.Modules.Dim.UI.Helper
             int min = usage.MinCardinality;
             string childName = "";
 
-
-
             //MappingManager mappingManager = new MappingManager();
-
 
             string usageName = usage.Label;
             string typeName = "x";
@@ -148,7 +139,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                     addTypeAsLinkElement = true;
                     typeId = n.Member.Self.Id;
                     typeDescription = n.Member.Self.Description;
-
                 }
 
                 if (n.Member.Self is MetadataSimpleAttribute)
@@ -167,7 +157,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                     addTypeAsLinkElement = true;
                     typeId = u.MetadataAttribute.Self.Id;
                     typeDescription = u.MetadataAttribute.Self.Description;
-
                 }
 
                 if (u.MetadataAttribute.Self is MetadataSimpleAttribute)
@@ -190,15 +179,12 @@ namespace BExIS.Modules.Dim.UI.Helper
                 linkElementId = linkElement.Id;
             }
 
-
             LinkElementModel LEModel = new LinkElementModel(
                 linkElementId,
                 usage.Id,
                 type, usage.Label, xPath, rootModel.Position, complexity, usage.Description);
             LEModel.Parent = parent;
             rootModel.LinkElements.Add(LEModel);
-
-
 
             //add type
             if (addTypeAsLinkElement)
@@ -229,14 +215,12 @@ namespace BExIS.Modules.Dim.UI.Helper
 
                 LEModel.Parent = parent;
 
-
                 if (!rootModel.LinkElements.Any(le => le.ElementId.Equals(typeId) &&
                                                       le.Type.Equals(LinkElementType.ComplexMetadataAttribute)))
                 {
                     rootModel.LinkElements.Add(LEModel);
                 }
             }
-
 
             //Debug.WriteLine("1: " + LEModel.Name + " " + LEModel.Type);
 
@@ -252,10 +236,9 @@ namespace BExIS.Modules.Dim.UI.Helper
                 //AddChildrens
                 //addLinkElementsFromChildrens(usage, xPath, rootModel);
             }
-
         }
 
-        #endregion
+        #endregion load Model from metadataStructure
 
         #region Load Model From System
 
@@ -263,6 +246,9 @@ namespace BExIS.Modules.Dim.UI.Helper
         {
             //get all parties - complex
             PartyTypeManager partyTypeManager = new PartyTypeManager();
+            PartyRelationshipTypeManager partyRelationshipTypeManager = new PartyRelationshipTypeManager();
+
+            EntityManager entityManager = new EntityManager();
 
             try
             {
@@ -278,7 +264,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                     elementId = SystemRoot.ElementId;
                 }
 
-
                 LinkElementModel LEParent = new LinkElementModel(
                        id,
                        elementId,
@@ -288,7 +273,7 @@ namespace BExIS.Modules.Dim.UI.Helper
                        LinkElementComplexity.Complex,
                        "");
 
-
+                #region get party types
 
                 IEnumerable<PartyType> partyTypes = partyTypeManager.PartyTypeRepository.Get();
 
@@ -299,6 +284,10 @@ namespace BExIS.Modules.Dim.UI.Helper
                     //get all partyCustomTypeAttr -> simple
                     model.LinkElements.AddRange(createLinkElementModelPartyCustomType(pt, model, ptModel, mappingManager));
                 }
+
+                #endregion get party types
+
+                #region keys
 
                 //get all keys -> simple
                 foreach (Key value in Key.GetValues(typeof(Key)))
@@ -314,8 +303,61 @@ namespace BExIS.Modules.Dim.UI.Helper
                     LEModel.Parent = LEParent;
 
                     model.LinkElements.Add(LEModel);
-
                 }
+
+                #endregion keys
+
+                #region get all relationships
+
+                IEnumerable<PartyRelationshipType> relationshipTypes = partyRelationshipTypeManager.PartyRelationshipTypeRepository.Get();
+
+                foreach (PartyRelationshipType partyRelationshipType in relationshipTypes)
+                {
+                    long value = partyRelationshipType.Id;
+                    long linkElementId = GetId(partyRelationshipType.Id, LinkElementType.Key, mappingManager);
+
+                    LinkElementModel LEModel = new LinkElementModel(
+                            linkElementId,
+                            partyRelationshipType.Id,
+                            LinkElementType.PartyRelationshipType,
+                            partyRelationshipType.DisplayName,
+                            "",
+                            model.Position,
+                            LinkElementComplexity.Simple,
+                            "");
+
+                    LEModel.Parent = LEParent;
+
+                    model.LinkElements.Add(LEModel);
+                }
+
+                #endregion get all relationships
+
+                #region entities
+
+                foreach (Entity entity in entityManager.Entities)
+                {
+                    long value = entity.Id;
+                    long linkElementId = GetId(entity.Id, LinkElementType.Entity, mappingManager);
+
+                    LinkElementModel LEModel = new LinkElementModel(
+                            linkElementId,
+                            entity.Id,
+                            LinkElementType.Entity,
+                            entity.Name,
+                            "",
+                            model.Position,
+                            LinkElementComplexity.Simple,
+                            "");
+
+                    LEModel.Parent = LEParent;
+
+                    model.LinkElements.Add(LEModel);
+                }
+
+                //test
+
+                #endregion entities
 
                 //create container
                 model = CreateLinkElementContainerModels(model);
@@ -325,8 +367,8 @@ namespace BExIS.Modules.Dim.UI.Helper
             finally
             {
                 partyTypeManager.Dispose();
+                entityManager.Dispose();
             }
-
         }
 
         private static LinkElementModel createLinkElementModelType(
@@ -334,7 +376,6 @@ namespace BExIS.Modules.Dim.UI.Helper
             LinkElementRootModel rootModel,
             LinkElementModel parent, MappingManager mappingManager)
         {
-
             long linkElementId = GetId(partyType.Id, LinkElementType.PartyType, mappingManager);
 
             LinkElementModel LEModel = new LinkElementModel(
@@ -355,7 +396,6 @@ namespace BExIS.Modules.Dim.UI.Helper
 
             try
             {
-
                 foreach (var partyCustomType in partyType.CustomAttributes)
                 {
                     long linkElementId = GetId(partyCustomType.Id, LinkElementType.PartyCustomType, mappingManager);
@@ -369,7 +409,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                     tmp.Add(LEModel);
                 }
 
-
                 return tmp;
             }
             finally
@@ -378,8 +417,7 @@ namespace BExIS.Modules.Dim.UI.Helper
             }
         }
 
-
-        #endregion
+        #endregion Load Model From System
 
         #region loadMapping
 
@@ -395,13 +433,10 @@ namespace BExIS.Modules.Dim.UI.Helper
 
                 foreach (var mapping in mappings)
                 {
-
                     ComplexMappingModel model = CreateComplexMappingModel(mapping);
-
 
                     //get all complex mappings
                     List<Mapping> childMappings = mappingManager.GetChildMapping(mapping.Id, 2).ToList();
-
 
                     foreach (var cm in childMappings)
                     {
@@ -419,19 +454,15 @@ namespace BExIS.Modules.Dim.UI.Helper
             }
         }
 
-
-
-        #endregion
+        #endregion loadMapping
 
         public static LinkElementRootModel CreateLinkElementContainerModels(LinkElementRootModel model)
         {
-
             foreach (LinkElementComplexity value in LinkElementComplexity.GetValues(typeof(LinkElementComplexity)))
             {
                 LinkElementContainerModel tmp = CreateLinkeContainerModel(value, model.LinkElements, model.Position);
                 if (tmp != null) model.LinkElementContainers.Add(tmp);
             }
-
 
             return model;
         }
@@ -452,7 +483,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                 return null;
             }
         }
-
 
         public static LinkElementModel LoadChildren(LinkElementModel model)
         {
@@ -535,7 +565,6 @@ namespace BExIS.Modules.Dim.UI.Helper
 
             try
             {
-
                 MetadataCompoundAttribute mca = metadataAttributeManager.MetadataCompoundAttributeRepo.Get(metadataCompountAttributeId);
 
                 foreach (var attr in mca.MetadataNestedAttributeUsages)
@@ -552,7 +581,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                     //    : LinkElementType.ComplexMetadataAttribute;
 
                     type = LinkElementType.MetadataNestedAttributeUsage;
-
 
                     tmp.Add(
                             new LinkElementModel(
@@ -575,7 +603,6 @@ namespace BExIS.Modules.Dim.UI.Helper
             MetadataAttributeManager metadataAttributeManager = new MetadataAttributeManager();
             try
             {
-
                 MetadataAttributeUsage metadataAttributeUsage = metadataAttributeManager.MetadataAttributeUsageRepo.Get(model.ElementId);
 
                 LinkElementComplexity complexity = LinkElementComplexity.None;
@@ -596,7 +623,6 @@ namespace BExIS.Modules.Dim.UI.Helper
             {
                 metadataAttributeManager.Dispose();
             }
-
         }
 
         private static List<LinkElementModel> getChildrenFromMetadataNestedUsage(LinkElementModel model)
@@ -605,10 +631,8 @@ namespace BExIS.Modules.Dim.UI.Helper
 
             try
             {
-
                 MetadataNestedAttributeUsage metadataNestedAttributeUsage =
                     metadataAttributeManager.MetadataNestedAttributeUsageRepo.Get(model.ElementId);
-
 
                 LinkElementComplexity complexity = LinkElementComplexity.None;
                 LinkElementType type = LinkElementType.ComplexMetadataAttribute;
@@ -630,7 +654,6 @@ namespace BExIS.Modules.Dim.UI.Helper
             }
         }
 
-
         private static List<LinkElementModel> getChildrenFromMetadataPackage(LinkElementModel model)
         {
             return getChildrenFromMetadataPackage(model.ElementId, model.Position);
@@ -638,7 +661,6 @@ namespace BExIS.Modules.Dim.UI.Helper
 
         private static List<LinkElementModel> getChildrenFromMetadataPackageUsage(LinkElementModel model)
         {
-
             MetadataStructureManager msm = new MetadataStructureManager();
             try
             {
@@ -658,7 +680,6 @@ namespace BExIS.Modules.Dim.UI.Helper
 
             try
             {
-
                 MetadataPackage metadataPackage = metadataPackageManager.MetadataPackageRepo.Get(metadataPackageId);
 
                 List<LinkElementModel> tmp = new List<LinkElementModel>();
@@ -677,14 +698,12 @@ namespace BExIS.Modules.Dim.UI.Helper
 
                     type = LinkElementType.MetadataNestedAttributeUsage;
 
-
                     tmp.Add(
                             new LinkElementModel(
                                 0,
                                 attr.Id,
                                 type, attr.Label, "", pos, complexity, attr.Description)
                             );
-
                 }
 
                 return tmp;
@@ -692,7 +711,6 @@ namespace BExIS.Modules.Dim.UI.Helper
             finally
             {
                 metadataPackageManager.Dispose();
-
             }
         }
 
@@ -716,7 +734,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                 ParentId = parentId,
                 Source = sourceModel,
                 Target = targetModel
-
             };
         }
 
@@ -726,7 +743,6 @@ namespace BExIS.Modules.Dim.UI.Helper
             LinkElementModel targetModel = CreateLinkElementModel(target, LinkElementPostion.Target);
 
             TransformationRuleModel transformationRuleModel = null;
-
 
             if (mapping.TransformationRule != null)
             {
@@ -744,7 +760,6 @@ namespace BExIS.Modules.Dim.UI.Helper
             if (mapping.Parent != null)
                 parentId = mapping.Parent.Id;
 
-
             //ToDo Load Rules
             return new SimpleMappingModel()
             {
@@ -753,14 +768,11 @@ namespace BExIS.Modules.Dim.UI.Helper
                 Target = targetModel,
                 TransformationRule = transformationRuleModel,
                 ParentId = parentId
-
             };
         }
 
         public static LinkElementModel CreateLinkElementModel(LinkElement le, LinkElementPostion position)
         {
-
-
             return new LinkElementModel()
             {
                 Id = le.Id,
@@ -770,9 +782,7 @@ namespace BExIS.Modules.Dim.UI.Helper
                 Position = position,
                 Type = le.Type,
                 Complexity = le.Complexity
-
             };
-
         }
 
         public static LinkElement CreateLinkElement(LinkElementModel model)
@@ -780,7 +790,6 @@ namespace BExIS.Modules.Dim.UI.Helper
             MappingManager mappingManager = new MappingManager();
             try
             {
-
                 Debug.WriteLine("CreateLinkElement");
                 Debug.WriteLine(model.ElementId);
                 Debug.WriteLine(model.Type);
@@ -814,7 +823,6 @@ namespace BExIS.Modules.Dim.UI.Helper
             MappingManager mappingManager = new MappingManager();
             try
             {
-
                 return mappingManager.CreateLinkElement(
                         model.ElementId,
                         model.Type,
@@ -832,7 +840,6 @@ namespace BExIS.Modules.Dim.UI.Helper
 
         public static LinkElement CreateIfNotExistLinkElement(LinkElementModel leModel, MappingManager mappingManager)
         {
-
             if (ExistLinkElement(leModel))
             {
                 return mappingManager.LinkElementRepo.Get()
@@ -910,18 +917,15 @@ namespace BExIS.Modules.Dim.UI.Helper
                 }
             }
 
-
             return mapping;
-
         }
 
-        #endregion
+        #endregion create
 
         #region delete
 
         public static bool UpdateSimpleMappings(long sourceId, long targetId, List<SimpleMappingModel> newListOfSimpleMappings, Mapping parent, MappingManager mappingManager)
         {
-
             List<Mapping> mappingsInDatabase = mappingManager.MappingRepo.Get()
                     .Where(m => m.Parent != null && m.Parent.Id.Equals(parent.Id)).ToList();
 
@@ -943,14 +947,12 @@ namespace BExIS.Modules.Dim.UI.Helper
 
                 if (!exist)
                     deleteMappings.Add(mapping.Id);
-
             }
 
             foreach (var id in deleteMappings)
             {
                 DeleteMapping(id, mappingManager, false);
             }
-
 
             //Create simple mappings
             //all mappings with the same  source or target should
@@ -959,26 +961,21 @@ namespace BExIS.Modules.Dim.UI.Helper
 
             foreach (var sm in newListOfSimpleMappings)
             {
-
                 LinkElement simpleMappingSource = null;
                 LinkElement simpleMappingTarget = null;
 
                 //if its not a new parent mapping or its in the list, please select existing
                 simpleMappingSource = MappingHelper.CreateIfNotExistLinkElement(sm.Source, sourceId, mappingManager);
 
-
                 //if its not a new parent mapping or its in the list, please select existing
                 ////if (ExistLinkElementModel(sm.Target, createdLinkELementModels))
 
                 simpleMappingTarget = MappingHelper.CreateIfNotExistLinkElement(sm.Target, targetId, mappingManager);
 
-
                 //if (sm.TransformationRule. != null)
                 //    simpleMappingTarget = mappingManager.UpdateLinkElement(simpleMappingTarget.Id);
 
-
                 TransformationRule transformationRule = new TransformationRule(sm.TransformationRule.Id, sm.TransformationRule.RegEx, sm.TransformationRule.Mask);
-
 
                 Mapping simplemapping = MappingHelper.CreateIfNotExistMapping(simpleMappingSource, simpleMappingTarget, 2, null, parent, mappingManager);
 
@@ -991,7 +988,6 @@ namespace BExIS.Modules.Dim.UI.Helper
                 }
 
                 sm.Id = simplemapping.Id;
-
             }
 
             return false;
@@ -1012,19 +1008,15 @@ namespace BExIS.Modules.Dim.UI.Helper
             }
             mappingManager.DeleteMapping(mapping.Id);
 
-
             return true;
-
         }
 
-
-        #endregion
+        #endregion delete
 
         #region helper
 
         public static bool ExistLinkElementModel(LinkElementModel leModel, List<LinkElementModel> leModels)
         {
-
             if (leModels.Any(le => le.ElementId.Equals(leModel.ElementId) &&
                 le.Type.Equals(leModel.Type) &&
                 le.Complexity.Equals(leModel.Complexity)))
@@ -1061,7 +1053,6 @@ namespace BExIS.Modules.Dim.UI.Helper
         {
             MappingManager mappingManager = new MappingManager();
 
-
             try
             {
                 LinkElement le = mappingManager.GetLinkElement(id);
@@ -1076,10 +1067,8 @@ namespace BExIS.Modules.Dim.UI.Helper
             }
         }
 
-
         public static long GetId(long elementId, LinkElementType type, MappingManager mappingManager)
         {
-
             long linkElementId = 0;
 
             LinkElement linkElement =
@@ -1119,7 +1108,6 @@ namespace BExIS.Modules.Dim.UI.Helper
         ///// <returns></returns>
         //public static List<long> GetChildrenIds(LinkElement parent)
         //{
-
         //    List<long> childrenIds = new List<long>();
 
         //    if (parent.Complexity.Equals(LinkElementComplexity.Simple))
@@ -1137,6 +1125,6 @@ namespace BExIS.Modules.Dim.UI.Helper
         //    return childrenIds;
         //}
     }
-    #endregion
 
+    #endregion helper
 }

@@ -1,21 +1,31 @@
 ﻿using BExIS.Dcm.CreateDatasetWizard;
 using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
+using BExIS.Dim.Entities.Mapping;
+using BExIS.Dim.Helpers.Mapping;
 using BExIS.Dlm.Entities.Administration;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Entities.MetadataStructure;
+using BExIS.Dlm.Entities.Party;
 using BExIS.Dlm.Services.Administration;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Services.MetadataStructure;
+using BExIS.Dlm.Services.Party;
+using BExIS.Modules.Dcm.UI.Helpers;
 using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Modules.Dcm.UI.Models.CreateDataset;
+using BExIS.Modules.Dcm.UI.Models.EntityReference;
 using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Entities.Objects;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Subjects;
 using BExIS.Security.Services.Utilities;
+using BExIS.Utils.Data.Upload;
+using BExIS.Utils.Extensions;
 using BExIS.Web.Shell.Helpers;
 using BExIS.Web.Shell.Models;
 using BExIS.Xml.Helpers;
@@ -27,6 +37,7 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using System.Xml;
 using System.Xml.Linq;
+using Vaiona.Entities.Common;
 using Vaiona.Logging;
 using Vaiona.Persistence.Api;
 using Vaiona.Web.Extensions;
@@ -39,7 +50,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
     public class CreateDatasetController : BaseController
     {
         private CreateTaskmanager TaskManager;
-        XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+        private XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
         #region Aquadiva PI-Management
         /*public ActionResult AddPi()
@@ -87,7 +98,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 {
                     ViewBag.Title = PresentationModel.GetViewTitleForTenant("Copy Dataset", this.Session.GetTenant());
 
-
                     Dataset dataset = this.GetUnitOfWork().GetReadOnlyRepository<Dataset>().Get(id);
                     Model.SelectedDatasetId = id;
                     Model.SelectedMetadataStructureId = dataset.MetadataStructure.Id;
@@ -134,8 +144,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             //if id is set and its type dataset
             if (id != -1 && type.ToLower().Equals("datasetid"))
             {
-
-
                 Dataset dataset = this.GetUnitOfWork().GetReadOnlyRepository<Dataset>().Get(id);
                 Model.SelectedDatasetId = id;
                 Model.SelectedMetadataStructureId = dataset.MetadataStructure.Id;
@@ -227,8 +235,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             try
             {
-
-
                 if (model == null)
                 {
                     model = GetDefaultModel();
@@ -459,6 +465,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         public long SubmitDataset(bool valid)
         {
             #region create dataset
+
             DatasetManager dm = new DatasetManager();
             DataStructureManager dsm = new DataStructureManager();
             ResearchPlanManager rpm = new ResearchPlanManager();
@@ -475,7 +482,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     && TaskManager.Bus.ContainsKey(CreateTaskmanager.RESEARCHPLAN_ID)
                     && TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATASTRUCTURE_ID))
                 {
-
                     // for e new dataset
                     if (!TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_ID))
                     {
@@ -517,10 +523,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 //Give view and download rights to the members
                                 foreach (User piMember in piMembers)
                                 {
-                                    entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
-                                        RightType.Read,
-                                        RightType.Download
-                                    });
+                                    entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                                 }
                             }
                             #endregion
@@ -542,15 +545,18 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         {
                             XDocument xMetadata = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
                             workingCopy.Metadata = Xml.Helpers.XmlWriter.ToXmlDocument(xMetadata);
+
+                            //check if modul exist
+                            int v = 1;
+                            if (workingCopy.Dataset.Versions != null && workingCopy.Dataset.Versions.Count > 1) v = workingCopy.Dataset.Versions.Count();
+
+                            TaskManager.Bus[CreateTaskmanager.METADATA_XML] = setSystemValuesToMetadata(datasetId, v, workingCopy.Dataset.MetadataStructure.Id, workingCopy.Metadata, newDataset);
                         }
 
                         //set status
-
-                        if (workingCopy.StateInfo == null) workingCopy.StateInfo = new Vaiona.Entities.Common.EntityStateInfo();
-
-                        if (valid)
-                            workingCopy.StateInfo.State = DatasetStateInfo.Valid.ToString();
-                        else workingCopy.StateInfo.State = DatasetStateInfo.NotValid.ToString();
+                        workingCopy = setStateInfo(workingCopy, valid);
+                        //set modifikation
+                        workingCopy = setModificationInfo(workingCopy, newDataset, GetUsernameOrDefault(), "Metadata");
 
                         title = xmlDatasetHelper.GetInformationFromVersion(workingCopy.Id, NameAttributeValues.title);
                         if (string.IsNullOrEmpty(title)) title = "No Title available.";
@@ -559,31 +565,30 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         TaskManager.AddToBus(CreateTaskmanager.ENTITY_ID, datasetId);
 
                         dm.EditDatasetVersion(workingCopy, null, null, null);
-                        dm.CheckInDataset(datasetId, "Metadata was submited.", GetUsernameOrDefault(), ViewCreationBehavior.None);
+                        dm.CheckInDataset(datasetId, "", GetUsernameOrDefault(), ViewCreationBehavior.None);
 
-                        //add to index
-                        // ToDo check which SearchProvider it is, default luceneprovider
+                        #region set releationships
 
-                        // BUG: invalid call to ddm method
-                        // TODO: mODULARITY ->Call DDM Reindex
-                        /*
-                         <Export tag="internalApi" id="SearchIndex"
-                        title="Reindex Search" description="Reindex Search" icon=""
-                        controller="SearchIndex" action="Get"
-                        extends="" />
-                         */
-                        // WORKAROUND: do not reindex
-                        //ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>() as ISearchProvider;
-                        //provider?.UpdateSingleDatasetIndex(datasetId, IndexingAction.CREATE);
+                        //todo check if dim is active
+                        // todo call to  a function in dim
+                        setRelationships(datasetId, workingCopy.Dataset.MetadataStructure.Id, workingCopy.Metadata);
 
-                        if (this.IsAccessibale("DDM", "SearchIndex", "ReIndexSingle"))
+                        // references
+
+                        #endregion set releationships
+
+                        #region set references
+
+                        setReferences(workingCopy);
+
+                        #endregion set references
+
+                        if (this.IsAccessible("DDM", "SearchIndex", "ReIndexSingle"))
                         {
-
                             var x = this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", datasetId } });
                         }
 
                         LoggerFactory.LogData(datasetId.ToString(), typeof(Dataset).Name, Vaiona.Entities.Logging.CrudState.Created);
-
 
                         if (newDataset)
                         {
@@ -603,7 +608,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
                     }
 
-
                     return datasetId;
                 }
             }
@@ -621,7 +625,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 rpm.Dispose();
                 dsm.Dispose();
             }
-
 
             #endregion create dataset
 
@@ -730,11 +733,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            BExIS.Dcm.UploadWizard.DataStructureType type = new BExIS.Dcm.UploadWizard.DataStructureType();
+            DataStructureType type = new DataStructureType();
 
             if (TaskManager.Bus.ContainsKey(CreateTaskmanager.DATASTRUCTURE_TYPE))
             {
-                type = (BExIS.Dcm.UploadWizard.DataStructureType)TaskManager.Bus[CreateTaskmanager.DATASTRUCTURE_TYPE];
+                type = (DataStructureType)TaskManager.Bus[CreateTaskmanager.DATASTRUCTURE_TYPE];
             }
 
             long datasetid = 0;
@@ -782,7 +785,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             try
             {
-
                 List<long> datasetIds = entityPermissionManager.GetKeys(GetUsernameOrDefault(), "Dataset",
                     typeof(Dataset), RightType.Write);
 
@@ -796,7 +798,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         temp.Add(new ListViewItem(id, title, description));
                     }
                 }
-
 
                 return temp.OrderBy(p => p.Title).ToList();
             }
@@ -813,7 +814,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             DataStructureManager dsm = new DataStructureManager();
             try
             {
-
                 List<ListViewItemWithType> temp = new List<ListViewItemWithType>();
 
                 foreach (DataStructure dataStructure in dsm.AllTypesDataStructureRepo.Get())
@@ -839,7 +839,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             {
                 dsm.Dispose();
             }
-
         }
 
         public List<ListViewItem> LoadMetadataStructureViewList()
@@ -848,7 +847,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             try
             {
-
                 IEnumerable<MetadataStructure> metadataStructureList = metadataStructureManager.Repo.Get();
 
                 List<ListViewItem> temp = new List<ListViewItem>();
@@ -875,7 +873,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         private DataStructureType GetDataStructureType(long id)
         {
             DataStructureManager dataStructureManager = new DataStructureManager();
-
 
             try
             {
@@ -928,6 +925,310 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             TaskManager.Actions.Add(CreateTaskmanager.COPY_ACTION, copyAction);
             TaskManager.Actions.Add(CreateTaskmanager.RESET_ACTION, resetAction);
             TaskManager.Actions.Add(CreateTaskmanager.SUBMIT_ACTION, submitAction);
+        }
+
+        //toDo this function to DIM or BAM ??
+        /// <summary>
+        /// this function is parsing the xmldocument to
+        /// create releationships based on releationshiptypes between datasets and person parties
+        /// </summary>
+        /// <param name="datasetid"></param>
+        /// <param name="metadataStructureId"></param>
+        /// <param name="metadata"></param>
+        private void setRelationships(long datasetid, long metadataStructureId, XmlDocument metadata)
+        {
+            PartyManager partyManager = new PartyManager();
+            PartyTypeManager partyTypeManager = new PartyTypeManager();
+            PartyRelationshipTypeManager partyRelationshipTypeManager = new PartyRelationshipTypeManager();
+
+            try
+            {
+                using (var uow = this.GetUnitOfWork())
+                {
+                    //check if mappings exist between system/relationships and the metadatastructure/attr
+                    // get all party mapped nodes
+                    IEnumerable<XElement> complexElements = XmlUtility.GetXElementsByAttribute("partyid", XmlUtility.ToXDocument(metadata));
+
+                    // get releaionship type id for owner
+                    var relationshipTypes = uow.GetReadOnlyRepository<PartyRelationshipType>().Get().Where(
+                        p => p.AssociatedPairs.Any(
+                            ap => ap.SourcePartyType.Title.ToLower().Equals("dataset") || ap.TargetPartyType.Title.ToLower().Equals("dataset")
+                            ));
+
+                    #region delete relationships
+
+                    foreach (var relationshipType in relationshipTypes)
+                    {
+                        bool exist = false;
+                        var partyTpePair = relationshipType.AssociatedPairs.FirstOrDefault();
+
+                        if (partyTpePair.SourcePartyType.Title.ToLower().Equals("dataset"))
+                        {
+                            IEnumerable<PartyRelationship> relationships = uow.GetReadOnlyRepository<PartyRelationship>().Get().Where(
+                                    r =>
+                                    r.SourceParty != null && r.SourceParty.Name.Equals(datasetid.ToString()) &&
+                                    r.PartyTypePair != null && r.PartyTypePair.Id.Equals(partyTpePair.Id)
+                                );
+
+                            IEnumerable<long> partyids = complexElements.Select(i => Convert.ToInt64(i.Attribute("partyid").Value));
+
+                            foreach (PartyRelationship pr in relationships)
+                            {
+                                if (!partyids.Contains(pr.TargetParty.Id)) partyManager.RemovePartyRelationship(pr);
+                            }
+                        }
+                        else
+                        {
+                            IEnumerable<PartyRelationship> relationships = uow.GetReadOnlyRepository<PartyRelationship>().Get().Where(
+                                    r =>
+                                    r.TargetParty != null && r.TargetParty.Name.Equals(datasetid.ToString()) &&
+                                    r.PartyTypePair != null && r.PartyTypePair.Id.Equals(partyTpePair.Id)
+                                );
+
+                            IEnumerable<long> partyids = complexElements.Select(i => Convert.ToInt64(i.Attribute("partyid").Value));
+
+                            foreach (PartyRelationship pr in relationships)
+                            {
+                                if (!partyids.Contains(pr.SourceParty.Id)) partyManager.RemovePartyRelationship(pr);
+                            }
+                        }
+                    }
+
+                    #endregion delete relationships
+
+                    #region add relationship
+
+                    foreach (XElement item in complexElements)
+                    {
+                        if (item.HasAttributes)
+                        {
+                            long sourceId = Convert.ToInt64(item.Attribute("roleId").Value);
+                            long id = Convert.ToInt64(item.Attribute("id").Value);
+                            string type = item.Attribute("type").Value;
+                            long partyid = Convert.ToInt64(item.Attribute("partyid").Value);
+
+                            LinkElementType sourceType = LinkElementType.MetadataNestedAttributeUsage;
+                            if (type.Equals("MetadataPackageUsage")) sourceType = LinkElementType.MetadataPackageUsage;
+
+                            foreach (var relationship in relationshipTypes)
+                            {
+                                // when mapping in both directions are exist
+                                if ((MappingUtils.ExistMappings(id, sourceType, relationship.Id, LinkElementType.PartyRelationshipType) &&
+                                    MappingUtils.ExistMappings(relationship.Id, LinkElementType.PartyRelationshipType, id, sourceType)) ||
+                                    (MappingUtils.ExistMappings(sourceId, LinkElementType.MetadataAttributeUsage, relationship.Id, LinkElementType.PartyRelationshipType) &&
+                                    MappingUtils.ExistMappings(relationship.Id, LinkElementType.PartyRelationshipType, sourceId, LinkElementType.MetadataAttributeUsage)) ||
+                                    (MappingUtils.ExistMappings(sourceId, LinkElementType.ComplexMetadataAttribute, relationship.Id, LinkElementType.PartyRelationshipType) &&
+                                    MappingUtils.ExistMappings(relationship.Id, LinkElementType.PartyRelationshipType, sourceId, LinkElementType.ComplexMetadataAttribute)) ||
+                                    (MappingUtils.ExistMappings(sourceId, LinkElementType.MetadataNestedAttributeUsage, relationship.Id, LinkElementType.PartyRelationshipType) &&
+                                    MappingUtils.ExistMappings(relationship.Id, LinkElementType.PartyRelationshipType, sourceId, LinkElementType.MetadataNestedAttributeUsage)))
+                                {
+                                    // create releationship
+
+                                    // create a Party for the dataset
+                                    var customAttributes = new Dictionary<String, String>();
+                                    customAttributes.Add("Name", datasetid.ToString());
+                                    customAttributes.Add("Id", datasetid.ToString());
+
+                                    // get or create datasetParty
+                                    Party datasetParty = partyManager.GetPartyByCustomAttributeValues(partyTypeManager.PartyTypeRepository.Get(cc => cc.Title == "Dataset").First(), customAttributes).FirstOrDefault();
+                                    if (datasetParty == null) datasetParty = partyManager.Create(partyTypeManager.PartyTypeRepository.Get(cc => cc.Title == "Dataset").First(), "[description]", null, null, customAttributes);
+
+                                    // Get user party
+                                    var person = partyManager.GetParty(partyid);
+
+                                    var partyTpePair = relationship.AssociatedPairs.FirstOrDefault();
+
+                                    if (partyTpePair != null && person != null && datasetParty != null)
+                                    {
+                                        if (!uow.GetReadOnlyRepository<PartyRelationship>().Get().Any(
+                                            r =>
+                                            r.SourceParty != null && r.SourceParty.Id.Equals(person.Id) &&
+                                            r.PartyTypePair != null && r.PartyTypePair.Id.Equals(partyTpePair.Id) &&
+                                            r.TargetParty.Id.Equals(datasetid)
+                                        ))
+                                        {
+                                            partyManager.AddPartyRelationship(
+                                                person.Id,
+                                                datasetParty.Id,
+                                                relationship.Title,
+                                                "",
+                                                partyTpePair.Id
+
+                                                );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #endregion add relationship
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                partyManager.Dispose();
+                partyTypeManager.Dispose();
+            }
+        }
+
+        private XDocument setSystemValuesToMetadata(long datasetid, long version, long metadataStructureId, XmlDocument metadata, bool newDataset)
+        {
+            SystemMetadataHelper SystemMetadataHelper = new SystemMetadataHelper();
+
+            Key[] myObjArray = { };
+
+            if (newDataset) myObjArray = new Key[] { Key.Id, Key.Version, Key.DateOfVersion, Key.MetadataCreationDate, Key.MetadataLastModfied, Key.DataCreationDate, Key.DataLastModified };
+            else myObjArray = new Key[] { Key.Id, Key.Version, Key.DateOfVersion, Key.MetadataLastModfied, Key.DataLastModified };
+
+            metadata = SystemMetadataHelper.SetSystemValuesToMetadata(metadataStructureId, version, metadataStructureId, metadata, myObjArray);
+
+            return XmlUtility.ToXDocument(metadata);
+        }
+
+        private void setReferences(DatasetVersion datasetVersion)
+        {
+            EntityReferenceManager entityReferenceManager = new EntityReferenceManager();
+            XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+            EntityManager entityManager = new EntityManager();
+            EntityReferenceHelper helper = new EntityReferenceHelper();
+
+            try
+            {
+                if (datasetVersion != null)
+                {
+                    List<EntityReference> refs = getAllMetadataReferences(datasetVersion);
+
+                    foreach (var singleRef in refs)
+                    {
+                        if (!entityReferenceManager.Exist(singleRef, true, true))
+                            entityReferenceManager.Create(singleRef);
+                    }
+                }
+            }
+            finally
+            {
+            }
+        }
+
+        private List<EntityReference> getAllMetadataReferences(DatasetVersion datasetVersion)
+        {
+            List<EntityReference> tmp = new List<EntityReference>();
+            EntityReferenceHelper helper = new EntityReferenceHelper();
+            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
+            MappingUtils mappingUtils = new MappingUtils();
+            XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+            DatasetManager datasetManager = new DatasetManager();
+            EntityManager entityManager = new EntityManager();
+
+            long id = 0;
+            long typeid = 0;
+            int version = 0;
+
+            try
+            {
+                if (datasetVersion != null)
+                {
+                    long metadataStrutcureId = datasetVersion.Dataset.MetadataStructure.Id;
+
+                    //get entity type like dataset or sample
+                    string entityName = xmlDatasetHelper.GetEntityNameFromMetadatStructure(metadataStrutcureId, new Dlm.Services.MetadataStructure.MetadataStructureManager());
+                    Entity entityType = entityManager.Entities.Where(e => e.Name.Equals(entityName)).FirstOrDefault();
+
+                    //get id of the entity type
+                    id = datasetVersion.Dataset.Id;
+                    typeid = entityType.Id;
+                    version = datasetVersion.Dataset.Versions.Count();
+
+                    // if mapping to entites type exist
+                    if (MappingUtils.ExistMappingWithEntityFromRoot(
+                        datasetVersion.Dataset.MetadataStructure.Id,
+                        BExIS.Dim.Entities.Mapping.LinkElementType.MetadataStructure,
+                        typeid))
+                    {
+                        //load metadata and searching for the entity Attrs
+                        XDocument metadata = XmlUtility.ToXDocument(datasetVersion.Metadata);
+                        IEnumerable<XElement> xelements = XmlUtility.GetXElementsByAttribute(EntityReferenceXmlAttribute.entityid.ToString(), metadata);
+
+                        foreach (XElement e in xelements)
+                        {
+                            //get attributes from xml node
+                            long xId = 0;
+                            int xVersion = 0;
+                            long xTypeId = 0;
+
+                            if (Int64.TryParse(e.Attribute(EntityReferenceXmlAttribute.entityid.ToString()).Value.ToString(), out xId) &&
+                                Int32.TryParse(e.Attribute(EntityReferenceXmlAttribute.entityversion.ToString()).Value.ToString(), out xVersion) &&
+                                Int64.TryParse(e.Attribute(EntityReferenceXmlAttribute.entitytype.ToString()).Value.ToString(), out xTypeId)
+                                )
+                            {
+                                //entityName = xmlDatasetHelper.GetEntityNameFromMetadatStructure(metadataStrutcureId, new Dlm.Services.MetadataStructure.MetadataStructureManager());
+                                //entityType = entityManager.Entities.Where(e => e.Name.Equals(entityName)).FirstOrDefault();
+                                string xpath = e.GetAbsoluteXPath();
+
+                                tmp.Add(new EntityReference(
+                                        id,
+                                        typeid,
+                                        version,
+                                        xId,
+                                        xTypeId,
+                                        xVersion,
+                                        xpath,
+                                        DefaultEntitiyReferenceType.MetadataLink.GetDisplayName()
+                                    ));
+                            }
+                        }
+                    }
+                }
+
+                return tmp;
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+            }
+
+            return tmp;
+        }
+
+        private DatasetVersion setStateInfo(DatasetVersion workingCopy, bool valid)
+        {
+            //StateInfo
+            if (workingCopy.StateInfo == null) workingCopy.StateInfo = new Vaiona.Entities.Common.EntityStateInfo();
+
+            if (valid)
+                workingCopy.StateInfo.State = DatasetStateInfo.Valid.ToString();
+            else workingCopy.StateInfo.State = DatasetStateInfo.NotValid.ToString();
+
+            return workingCopy;
+        }
+
+        private DatasetVersion setModificationInfo(DatasetVersion workingCopy, bool newDataset, string user, string comment)
+        {
+            // modifikation info
+            if (workingCopy.StateInfo == null) workingCopy.ModificationInfo = new EntityAuditInfo();
+
+            if (newDataset)
+                workingCopy.ModificationInfo.ActionType = AuditActionType.Create;
+            else
+                workingCopy.ModificationInfo.ActionType = AuditActionType.Edit;
+
+            //set performer
+            workingCopy.ModificationInfo.Performer = string.IsNullOrEmpty(user) ? "" : user;
+
+            //set comment
+            workingCopy.ModificationInfo.Comment = string.IsNullOrEmpty(comment) ? "" : comment;
+
+            //set time
+            workingCopy.ModificationInfo.Timestamp = DateTime.Now;
+
+            return workingCopy;
         }
 
         #endregion Helper

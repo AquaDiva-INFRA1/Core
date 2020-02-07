@@ -15,12 +15,14 @@ namespace BExIS.IO.Transform.Input
 {
     public class EasyUploadExcelReader : ExcelReader
     {
-        public DataTuple[] ReadFile(Stream file, string fileName, EasyUploadFileReaderInfo fri, StructuredDataStructure sds, long datasetId, String worksheetUri)
+        public EasyUploadExcelReader(StructuredDataStructure structuredDatastructure, EasyUploadFileReaderInfo fileReaderInfo) : base(structuredDatastructure, fileReaderInfo)
+        {
+        }
+
+        public DataTuple[] ReadFile(Stream file, string fileName, EasyUploadFileReaderInfo fri, long datasetId, String worksheetUri)
         {
             this.FileStream = file;
             this.FileName = fileName;
-
-            this.StructuredDataStructure = sds;
             this.Info = fri;
             this.DatasetId = datasetId;
 
@@ -52,7 +54,7 @@ namespace BExIS.IO.Transform.Input
 
                 //SheetDimension dimension = workbookPart.WorksheetParts.First().Worksheet.GetFirstChild<SheetDimension>();
 
-                // get all the defined area 
+                // get all the defined area
                 //List<DefinedNameVal> namesTable = BuildDefinedNamesTable(workbookPart);
 
                 /*
@@ -72,7 +74,6 @@ namespace BExIS.IO.Transform.Input
                 this._areaOfData.StartRow = fri.DataStartRow;
                 this._areaOfData.EndRow = fri.DataEndRow;
 
-
                 // Get intergers for reading data
                 startColumn = fri.VariablesStartColumn;
                 endColumn = fri.VariablesEndColumn;
@@ -91,8 +92,7 @@ namespace BExIS.IO.Transform.Input
                 // Get shared strings
                 _sharedStrings = workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ToArray();
 
-
-                if (this.SubmitedVariableIdentifiers != null && worksheetPart != null)
+                if (ValidateDatastructure(worksheetPart, this._areaOfVariables.StartRow, this._areaOfVariables.EndRow))
                 {
                     ReadRows(worksheetPart, fri.DataStartRow, endRowData);
                 }

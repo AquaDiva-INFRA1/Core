@@ -1,0 +1,56 @@
+﻿/***SHOW DATA***/
+#view-header {
+    padding:5px 0 5px 0;
+}
+
+#view-header-dataset-details {
+
+
+}
+
+#view-warning {
+    width: 300px;
+    height: 35px;
+    padding: 7px 0 0 10px;
+}
+
+#view-warning-icon {
+    padding:0 10px 0 0;
+}
+
+#view-warning-container {
+  
+}
+
+
+.primaryDataResultGrid .t-grid-content td
+{
+	padding-left:0;
+	text-align:left;
+}
+
+.margin
+{
+	margin-left:2px;
+}
+
+
+.fit_to_screen table {
+
+}
+
+.scroll_in_screen {
+    width: 100%;
+    /*overflow-x: hidden;*/
+}
+
+.scroll_in_screen table {
+    width: 100%;
+    display: block;
+    overflow: auto;
+}
+
+.scroll_in_screen table th, .scroll_in_screen table td {
+    max-width: 200px;
+
+}
