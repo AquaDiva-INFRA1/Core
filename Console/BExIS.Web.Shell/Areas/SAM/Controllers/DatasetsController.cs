@@ -2,15 +2,19 @@
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
 using BExIS.Modules.Sam.UI.Models;
-using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Objects;
+using BExIS.Security.Services.Subjects;
+using BExIS.Security.Services.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Vaiona.Logging.Aspects;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Models;
@@ -18,8 +22,6 @@ using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Sam.UI.Controllers
 {
-
-
     /// <summary>
     /// Manages all funactions an authorized user can do with datasets and their versions
     /// </summary>
@@ -35,40 +37,6 @@ namespace BExIS.Modules.Sam.UI.Controllers
             return View();
         }
 
-        public ActionResult SyncAll()
-        {
-            var datasetManager = new DatasetManager();
-            var datasetIds = datasetManager.GetDatasetLatestIds();
-            try
-            {
-                datasetManager.SyncView(datasetIds, ViewCreationBehavior.Create | ViewCreationBehavior.Refresh);
-                // if the viewData has a model error, the redirect forgets about it.
-                return RedirectToAction("Index", new { area = "Sam" });
-            }
-            catch (Exception ex)
-            {
-                ViewData.ModelState.AddModelError("", $@"'{ex.Message}'");
-                return View("Sync");
-            }
-        }
-
-        public ActionResult Sync(long id)
-        {
-            var datasetManager = new DatasetManager();
-
-            try
-            {
-                datasetManager.SyncView(id, ViewCreationBehavior.Create | ViewCreationBehavior.Refresh);
-                // if the viewData has a model error, the redirect forgets about it.
-                return RedirectToAction("Index", new { area = "Sam" });
-            }
-            catch (Exception ex)
-            {
-                ViewData.ModelState.AddModelError("", $@"'{ex.Message}'");
-                return View();
-            }
-        }
-
         /// <summary>
         /// Deletes a dataset, which means the dataset is marked as deleted, but is not physically removed from the database.
         /// </summary>
@@ -76,29 +44,116 @@ namespace BExIS.Modules.Sam.UI.Controllers
         /// <remarks>When a dataset is deleted, it is consodered as non-exisiting, but for the sake or provenance, citation, history, etc, it is not removed froom the database.
         /// The function to recover a deleted dataset, will not be provided.</remarks>
         /// <returns></returns>
+        [MeasurePerformance]
         public ActionResult Delete(long id)
         {
             var datasetManager = new DatasetManager();
             var entityPermissionManager = new EntityPermissionManager();
+            var entityManager = new EntityManager();
+            var subjectManager = new SubjectManager();
+            var userManager = new UserManager();
 
             try
             {
-                if (datasetManager.DeleteDataset(id, ControllerContext.HttpContext.User.Identity.Name, true))
-                {
-                    //entityPermissionManager.Delete(typeof(Dataset), id); // This is not needed here.
+                var userName = GetUsernameOrDefault();
+                var user = userManager.Users.Where(u => u.Name.Equals(userName)).FirstOrDefault();
 
-                    if (this.IsAccessibale("DDM", "SearchIndex", "ReIndexUpdateSingle"))
+                // check if a user is logged in 
+                if (user != null)
+                {
+                    // is the user allowed to delete this dataset
+                    if (entityPermissionManager.HasEffectiveRight(user, entityManager.FindByName("Dataset"), id, Security.Entities.Authorization.RightType.Delete))
                     {
-                        var x = this.Run("DDM", "SearchIndex", "ReIndexUpdateSingle", new RouteValueDictionary() { { "id", id }, { "actionType", "DELETE" } });
+                        //try delete the dataset
+                        if (datasetManager.DeleteDataset(id, ControllerContext.HttpContext.User.Identity.Name, true))
+                        {
+
+                            //send email
+                            var es = new EmailService();
+                            es.Send(MessageHelper.GetDeleteDatasetHeader(),
+                                MessageHelper.GetDeleteDatasetMessage(id, user.Name),
+                                ConfigurationManager.AppSettings["SystemEmail"]
+                                );
+
+                            //entityPermissionManager.Delete(typeof(Dataset), id); // This is not needed here.
+
+                            if (this.IsAccessible("DDM", "SearchIndex", "ReIndexUpdateSingle"))
+                            {
+                                var x = this.Run("DDM", "SearchIndex", "ReIndexUpdateSingle", new RouteValueDictionary() { { "id", id }, { "actionType", "DELETE" } });
+                            }
+                        }
+                    }
+                    else // user is not allowed
+                    {
+                        ViewData.ModelState.AddModelError("", $@"You do not have the permission to delete the record.");
+
+                        var es = new EmailService();
+                        es.Send(MessageHelper.GetTryToDeleteDatasetHeader(),
+                            MessageHelper.GetTryToDeleteDatasetMessage(id, GetUsernameOrDefault()),
+                            ConfigurationManager.AppSettings["SystemEmail"]
+                            );
                     }
                 }
+                else // no user exist
+                {
+                    ViewData.ModelState.AddModelError("", $@"This function can only be executed with a logged-in user.");
+
+                    var es = new EmailService();
+                    es.Send(MessageHelper.GetTryToDeleteDatasetHeader(),
+                        MessageHelper.GetTryToDeleteDatasetMessage(id, userName),
+                        ConfigurationManager.AppSettings["SystemEmail"]
+                        );
+                }
             }
-            catch (Exception e)
+            catch (Exception e) //for technical reasons the dataset cannot be deleted
             {
                 ViewData.ModelState.AddModelError("", $@"Dataset {id} could not be deleted.");
             }
             return View();
             //return RedirectToAction("List");
+        }
+
+        public ActionResult FlipDateTime(long id, long variableid)
+        {
+            DatasetManager datasetManager = new DatasetManager();
+
+            try
+            {
+                DatasetVersion dsv = datasetManager.GetDatasetLatestVersion(id);
+                IEnumerable<long> datatupleIds = datasetManager.GetDatasetVersionEffectiveTupleIds(dsv);
+
+                foreach (var tid in datatupleIds)
+                {
+                    DataTuple dataTuple = datasetManager.DataTupleRepo.Get(tid);
+                    dataTuple.Materialize();
+                    bool needUpdate = false;
+
+                    foreach (var vv in dataTuple.VariableValues)
+                    {
+                        string systemType = vv.DataAttribute.DataType.SystemType;
+                        if (systemType.Equals(typeof(DateTime).Name) && vv.VariableId.Equals(variableid))
+                        {
+                            string value = vv.Value.ToString();
+                            vv.Value = flip(value, out needUpdate);
+                        }
+                    }
+
+                    if (needUpdate)
+                    {
+                        dataTuple.Dematerialize();
+                        datasetManager.UpdateDataTuple(dataTuple);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            finally
+            {
+                datasetManager.Dispose();
+            }
+
+            return RedirectToAction("Index");
         }
 
         /// <summary>
@@ -157,23 +212,65 @@ namespace BExIS.Modules.Sam.UI.Controllers
         /// <param name="id">the identifier of the dataset to be purged.</param>
         /// <remarks>This operation is not revocerable.</remarks>
         /// <returns></returns>
+        [MeasurePerformance]
         public ActionResult Purge(long id)
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Purge", Session.GetTenant());
 
             DatasetManager dm = new DatasetManager();
             var entityPermissionManager = new EntityPermissionManager();
+            var datasetManager = new DatasetManager();
+            var entityManager = new EntityManager();
+            var userManager = new UserManager();
 
             try
             {
-                if (dm.PurgeDataset(id))
-                {
-                    entityPermissionManager.Delete(typeof(Dataset), id);
+                var userName = GetUsernameOrDefault();
+                var user = userManager.Users.Where(u => u.Name.Equals(userName)).FirstOrDefault();
 
-                    if (this.IsAccessibale("DDM", "SearchIndex", "ReIndexUpdateSingle"))
+                // check if a user is logged in 
+                if (user != null)
+                {
+                    // is the user allowed to delete this dataset
+                    if (entityPermissionManager.HasEffectiveRight(user, entityManager.FindByName("Dataset"), id, Security.Entities.Authorization.RightType.Delete))
                     {
-                        var x = this.Run("DDM", "SearchIndex", "ReIndexUpdateSingle", new RouteValueDictionary() { { "id", id }, { "actionType", "DELETE" } });
+                        if (dm.PurgeDataset(id))
+                        {
+                            entityPermissionManager.Delete(typeof(Dataset), id);
+
+                            var es = new EmailService();
+                            es.Send(MessageHelper.GetPurgeDatasetHeader(),
+                                MessageHelper.GetPurgeDatasetMessage(id, user.Name),
+                                ConfigurationManager.AppSettings["SystemEmail"]
+                                );
+
+
+                            if (this.IsAccessible("DDM", "SearchIndex", "ReIndexUpdateSingle"))
+                            {
+                                var x = this.Run("DDM", "SearchIndex", "ReIndexUpdateSingle", new RouteValueDictionary() { { "id", id }, { "actionType", "DELETE" } });
+                            }
+                        }
+
                     }
+                    else // user is not allowed
+                    {
+                        ViewData.ModelState.AddModelError("", $@"You do not have the permission to purge the record.");
+
+                        var es = new EmailService();
+                        es.Send(MessageHelper.GetTryToPurgeDatasetHeader(),
+                            MessageHelper.GetTryToPurgeDatasetMessage(id, user.Name),
+                            ConfigurationManager.AppSettings["SystemEmail"]
+                            );
+                    }
+                }
+                else // no user exist
+                {
+                    ViewData.ModelState.AddModelError("", $@"This function can only be executed with a logged-in user.");
+                    var es = new EmailService();
+                    es.Send(MessageHelper.GetTryToPurgeDatasetHeader(),
+                        MessageHelper.GetTryToPurgeDatasetMessage(id, userName),
+                        ConfigurationManager.AppSettings["SystemEmail"]
+                        );
                 }
             }
             catch (Exception e)
@@ -186,6 +283,65 @@ namespace BExIS.Modules.Sam.UI.Controllers
         public ActionResult Rollback(int id)
         {
             return View();
+        }
+
+        public ActionResult Sync(long id)
+        {
+            var datasetManager = new DatasetManager();
+
+            try
+            {
+                datasetManager.SyncView(id, ViewCreationBehavior.Create | ViewCreationBehavior.Refresh);
+                // if the viewData has a model error, the redirect forgets about it.
+                return RedirectToAction("Index", new { area = "Sam" });
+            }
+            catch (Exception ex)
+            {
+                ViewData.ModelState.AddModelError("", $@"'{ex.Message}'");
+                return View();
+            }
+        }
+
+        public ActionResult SyncAll()
+        {
+            var datasetManager = new DatasetManager();
+            var datasetIds = datasetManager.GetDatasetLatestIds();
+            try
+            {
+                datasetManager.SyncView(datasetIds, ViewCreationBehavior.Create | ViewCreationBehavior.Refresh);
+                // if the viewData has a model error, the redirect forgets about it.
+                return RedirectToAction("Index", new { area = "Sam" });
+            }
+            catch (Exception ex)
+            {
+                ViewData.ModelState.AddModelError("", $@"'{ex.Message}'");
+                return View("Sync");
+            }
+        }
+
+        public ActionResult CountRows(long id)
+        {
+            int number = 0;
+
+            DatasetManager dm = new DatasetManager();
+
+
+            try
+            {
+                if (id > 0)
+                {
+                    Dataset ds = dm.GetDataset(id);
+                    number = ds.DataStructure.Self is StructuredDataStructure ? dm.GetDatasetLatestVersionEffectiveTupleCount(ds) : 0;
+                }
+
+                return Json(number, JsonRequestBehavior.AllowGet);
+
+            }
+            finally
+            {
+                dm.Dispose();
+            }
+
         }
 
         /// <summary>
@@ -229,62 +385,13 @@ namespace BExIS.Modules.Sam.UI.Controllers
             return View(versions);
         }
 
-        public ActionResult FlipDateTime(long id, long variableid)
-        {
-            DatasetManager datasetManager = new DatasetManager();
-            
-            try
-            {
-                DatasetVersion dsv = datasetManager.GetDatasetLatestVersion(id);
-                IEnumerable<long> datatupleIds = datasetManager.GetDatasetVersionEffectiveTupleIds(dsv);
-
-                foreach (var tid in datatupleIds)
-                {
-                    DataTuple dataTuple = datasetManager.DataTupleRepo.Get(tid);
-                    dataTuple.Materialize();
-                    bool needUpdate = false;
-
-                    foreach (var vv in dataTuple.VariableValues)
-                    {
-                        string systemType = vv.DataAttribute.DataType.SystemType;
-                        if (systemType.Equals(typeof(DateTime).Name) && vv.VariableId.Equals(variableid))
-                        {
-                            string value = vv.Value.ToString();
-                            vv.Value = flip(value,out needUpdate);
-
-
-                        }
-                    }
-
-                    if (needUpdate)
-                    {
-                        dataTuple.Dematerialize();
-                        datasetManager.UpdateDataTuple(dataTuple);
-                    }
-
-                }
-
-            }
-            catch (Exception ex)
-            {
-
-            }
-            finally
-            {
-                datasetManager.Dispose();
-            }
-
-            return RedirectToAction("Index");
-        }
-
-
         private string flip(string dateTime, out bool needUpdate)
         {
             string newDt = "";
 
             DateTime dt;
 
-            if(DateTime.TryParse(dateTime, new CultureInfo("en-us"),DateTimeStyles.NoCurrentDateDefault,out dt))
+            if (DateTime.TryParse(dateTime, new CultureInfo("en-us"), DateTimeStyles.NoCurrentDateDefault, out dt))
             {
                 int day = dt.Day;
                 int month = dt.Month;
@@ -294,7 +401,6 @@ namespace BExIS.Modules.Sam.UI.Controllers
                     needUpdate = true;
                     //1/1/2017 12:00:00 AM
                     return day + "/" + month + "/" + dt.Year + " " + dt.TimeOfDay;
-
                 }
             }
 
@@ -302,6 +408,19 @@ namespace BExIS.Modules.Sam.UI.Controllers
 
             return dateTime;
         }
-        
+
+
+        public string GetUsernameOrDefault()
+        {
+            var username = string.Empty;
+            try
+            {
+                username = HttpContext.User.Identity.Name;
+            }
+            catch { }
+
+            return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
+        }
+
     }
 }

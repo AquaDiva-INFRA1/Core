@@ -22,8 +22,12 @@ namespace BExIS.Modules.Dcm.UI.Models
         /// this class is used to read and validate ascii files
         /// </summary>
         /// <remarks></remarks>        
-        public class AsciiReaderEasyUpload : DataReader
+        public class AsciiReaderEasyUpload : AsciiReader
         {
+            public AsciiReaderEasyUpload (StructuredDataStructure structuredDatastructure, AsciiFileReaderInfo fileReaderInfo) : base(structuredDatastructure, fileReaderInfo)
+            {
+            }
+
             /// <summary>
             /// Read line by line based on a packageSize. 
             /// Convert the lines into a datatuple based on the datastructure.
@@ -75,17 +79,17 @@ namespace BExIS.Modules.Dcm.UI.Models
                     int Var_StartRow = EasyUploadFileReader.DataStartRow - 1;
                     int Var_EndRow = EasyUploadFileReader.DataEndRow - 1;
 
+                    char seperator = AsciiFileReaderInfo.GetSeperator(fri.Seperator);
 
                     for (int i = header_StartRow; i <= header_EndRow; i++)
                     {
-                        string[] cells = Json_table[i];
-                        List<String> vars = new List<string>();
-                        for (int j = header_StartColumn; j <= header_EndColumn; j++)
-                        {
-                            vars.Add(cells[j]);
-                        }
-                        VariableIdentifierRows.Add(vars);
-                        convertAndAddToSubmitedVariableIdentifier();
+                            string[] cells = Json_table[i];
+                            List<String> vars = new List<string>();
+                            for (int j = header_StartColumn; j <= header_EndColumn; j++)
+                            {
+                                vars.Add(cells[j]);
+                            }
+                            ValidateDatastructure(String.Join(",", vars.ToArray()), seperator);
                     }
 
                     for (int i = Var_StartRow; i <= Var_EndRow; i++)
@@ -97,16 +101,13 @@ namespace BExIS.Modules.Dcm.UI.Models
                         {
                             vars.Add(cells[j]);
                         }
-
-                        //index of the row is not needed in the method "ReadRow"
+                    //index of the row is not needed in the method "ReadRow"
                         this.DataTuples.Add(ReadRow(vars, 0));
                     }
                 }
 
                 return this.DataTuples.ToArray();
             }
-        
-            #region validate
         
             /// <summary>
             /// Convert a list of variable names to 
@@ -116,7 +117,6 @@ namespace BExIS.Modules.Dcm.UI.Models
             /// <param name="variablesRow"></param>
             private void convertAndAddToSubmitedVariableIdentifier()
             {
-
                 if (VariableIdentifierRows != null)
                 {
                     foreach (List<string> l in VariableIdentifierRows)
@@ -144,8 +144,11 @@ namespace BExIS.Modules.Dcm.UI.Models
                 }
             }
 
-            #endregion
-        
+
+            public void setSubmittedVariableIdentifiers(List<VariableIdentifier> vi)
+            {
+                this.SubmitedVariableIdentifiers = vi;
+            }
 
         }
     }

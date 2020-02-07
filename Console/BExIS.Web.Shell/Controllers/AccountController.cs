@@ -10,6 +10,7 @@ using System.Configuration;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using Vaiona.Utils.Cfg;
 using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Web.Shell.Controllers
@@ -18,7 +19,6 @@ namespace BExIS.Web.Shell.Controllers
     {
         //
         // GET: /Account/ConfirmEmail
-
         public async Task<ActionResult> ConfirmEmail(long userId, string code)
         {
             var identityUserService = new IdentityUserService();
@@ -43,7 +43,7 @@ namespace BExIS.Web.Shell.Controllers
                     );
 
 
-                return this.IsAccessibale("bam", "PartyService", "UserRegistration")
+                return this.IsAccessible("bam", "PartyService", "UserRegistration")
                     ? RedirectToAction("UserRegistration", "PartyService", new { area = "bam" })
                     : RedirectToAction("Index", "Home");
             }
@@ -221,6 +221,13 @@ namespace BExIS.Web.Shell.Controllers
             return View();
         }
 
+        public ActionResult ClearSession()
+        {
+            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+
+            return RedirectToAction("SessionTimeout", "Home", new { area = "" });
+        }
+
         //
         // POST: /Account/Login
         [HttpPost]
@@ -236,14 +243,26 @@ namespace BExIS.Web.Shell.Controllers
                     return View(model);
                 }
 
-                // Require the user to have a confirmed email before they can log on.
+                
 
-                var user = await identityUserService.FindByNameAsync(model.UserName);
+                // Search for user by email, if not found search by user name
+                var user = await identityUserService.FindByEmailAsync(model.UserName);
+
+                if (user != null)
+                {
+                    model.UserName = user.UserName;
+                }
+                else
+                { 
+                    user = await identityUserService.FindByNameAsync(model.UserName);
+                }
+                
+                // Require the user to have a confirmed email before they can log on.
                 if (user != null)
                 {
                     if (!await identityUserService.IsEmailConfirmedAsync(user.Id))
                     {
-                        ViewBag.errorMessage = "You must have a confirmed email to log in.";
+                        ViewBag.errorMessage = "You must have a confirmed email address to log in. Please check your email and verify your email address. If you did not receive an email, please also check your spam folder.";
                         return View("Error");
                     }
                 }
@@ -251,6 +270,7 @@ namespace BExIS.Web.Shell.Controllers
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, change to shouldLockout: true
                 var signInManager = new SignInManager(AuthenticationManager);
+
                 var result =
                     await signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, false);
                 switch (result)
@@ -316,7 +336,7 @@ namespace BExIS.Web.Shell.Controllers
                     // Weitere Informationen zum Aktivieren der Kontobestätigung und Kennwortzurücksetzung finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=320771".
                     // E-Mail-Nachricht mit diesem Link senden
                     var code = await identityUserService.GenerateEmailConfirmationTokenAsync(user.Id);
-                    await SendEmailConfirmationTokenAsync(user.Id, "Confirm your account");
+                    await SendEmailConfirmationTokenAsync(user.Id, "Account registration - Verify your email address");
 
                     var es = new EmailService();
                     es.Send(MessageHelper.GetTryToRegisterUserHeader(),
@@ -325,7 +345,7 @@ namespace BExIS.Web.Shell.Controllers
                         );
 
 
-                    ViewBag.Message = "Check your email and confirm your account, you must be confirmed before you can log in.";
+                    ViewBag.Message = "Before you can log in to complete your registration, please check your email and verify your email address. If you did not receive an email, please also check your spam folder.";
 
                     return View("Info");
                 }
@@ -405,7 +425,19 @@ namespace BExIS.Web.Shell.Controllers
                 var code = await identityUserService.GenerateEmailConfirmationTokenAsync(userId);
                 var callbackUrl = Url.Action("ConfirmEmail", "Account",
                    new { userId, code }, Request.Url.Scheme);
-                await identityUserService.SendEmailAsync(userId, subject, $"Please confirm your account by clicking <a href=\"{callbackUrl}\">here</a>");
+
+                var policyUrl = Url.Action("Index", "PrivacyPolicy", null, Request.Url.Scheme);
+                var termsUrl = Url.Action("Index", "TermsAndConditions", null, Request.Url.Scheme);
+                
+                var applicationName = AppConfiguration.ApplicationName;
+
+                await identityUserService.SendEmailAsync(userId, subject,
+                    $"<p>Dear user,</p>" +
+                    $"<p>please confirm your email address and complete your registration by clicking <a href=\"{callbackUrl}\">here</a>.</p>" +
+                    $"<p>Once you finished the registration, a system administrator will decide based on your provided information about your assigned permissions. " +
+                    $"This process can take up to 3 days.</p>" +
+                    $"<p>You agreed on our <a href=\"{policyUrl}\">data policy</a> and <a href=\"{termsUrl}\">terms and conditions</a>.</p>" +
+                    $"<br><p>Sincerely your {applicationName} administration team");
 
                 return callbackUrl;
             }
@@ -413,8 +445,35 @@ namespace BExIS.Web.Shell.Controllers
             {
                 identityUserService.Dispose();
             }
+        }
 
+        public async Task<ActionResult> Profile()
+        {
+            var identityUserService = new IdentityUserService();
+            var userManager = new UserManager();
 
+            try
+            {
+                long userId = 0;
+                long.TryParse(this.User.Identity.GetUserId(), out userId);
+
+                var user = identityUserService.FindById(userId);
+
+                if (string.IsNullOrEmpty(user.Token))
+                {
+                    await userManager.SetTokenAsync(user);
+                }
+
+                user = identityUserService.FindById(userId);
+                var token = await userManager.GetTokenAsync(user);
+
+                return View(model: token);
+            }
+            finally
+            {
+                identityUserService.Dispose();
+                userManager.Dispose();
+            }
         }
 
         #region Hilfsprogramme

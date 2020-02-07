@@ -80,10 +80,10 @@
 
                     <td>
                         @(Html.Telerik().DropDownList()
-                    .Placeholder("Select, please")
-                    .Name("SelectedServerFileName")
-                    .BindTo(new SelectList(Model.serverFileList))
-                    .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
+                                    .Placeholder("Please select")
+                                    .Name("SelectedServerFileName")
+                                    .BindTo(new SelectList(Model.serverFileList))
+                                    .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
 
                         @*@Html.DropDownListFor(m => m.SelectedServerFileName, new SelectList(Model.serverFileList), "Select")*@@*, new { disabled = "disabled" })*@
                     </td>

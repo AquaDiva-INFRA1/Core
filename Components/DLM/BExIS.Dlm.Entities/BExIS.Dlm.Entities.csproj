@@ -32,6 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Debug\BExIS.Dlm.Entities.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,6 +42,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'TestServerRelease|AnyCPU'">
+    <OutputPath>bin\TestServerRelease\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -80,6 +90,7 @@
     <Compile Include="DataStructure\ExtendedProperty.cs" />
     <Compile Include="DataStructure\GlobalizationInfo.cs" />
     <Compile Include="DataStructure\Mathodology.cs" />
+    <Compile Include="DataStructure\MissingValue.cs" />
     <Compile Include="DataStructure\ObtainingMethod.cs" />
     <Compile Include="DataStructure\StructuredDataStructure.cs" />
     <Compile Include="DataStructure\Unit.cs" />
@@ -115,9 +126,9 @@
     <Compile Include="Party\PartyStatusType.cs" />
     <Compile Include="Party\PartyType.cs" />
     <Compile Include="Party\PartyTypePair.cs" />
+    <Compile Include="Party\PartyCustomGridColumns.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="Administration\Administration.cd" />
     <None Include="DataStructure\DataStructure.cd" />

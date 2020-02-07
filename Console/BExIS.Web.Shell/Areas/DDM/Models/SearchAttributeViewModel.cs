@@ -7,6 +7,7 @@ using BExIS.Ddm.Api;
 using BExIS.Ddm.Providers.LuceneProvider;
 using BExIS.Utils;
 using BExIS.Utils.Models;
+using System.Linq;
 
 namespace BExIS.Modules.Ddm.UI.Models
 {

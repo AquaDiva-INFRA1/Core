@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
 using BExIS.IO.Transform.Validation.Exceptions;
+using BExIS.Utils.Data.Upload;
 
 namespace BExIS.Modules.Dcm.UI.Models
 {
@@ -12,6 +14,7 @@ namespace BExIS.Modules.Dcm.UI.Models
         public List<long> PK_Id_List { get; set; }
         public StepInfo StepInfo { get; set; }
         public bool IsUnique { get; set; }
+        public UploadMethod UploadMethod { get; set; }
 
         public PrimaryKeyViewModel()
         {
@@ -20,6 +23,7 @@ namespace BExIS.Modules.Dcm.UI.Models
             PrimaryKeysList = new List<ListViewItem>();
             PK_Id_List = new List<long>();
             IsUnique = false;
+            UploadMethod = UploadMethod.Update;
         }
     }
 }

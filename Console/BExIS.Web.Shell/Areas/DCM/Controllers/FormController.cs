@@ -1,4 +1,5 @@
-﻿using BExIS.Dcm.CreateDatasetWizard;
+﻿using BExIS.App.Bootstrap.Attributes;
+using BExIS.Dcm.CreateDatasetWizard;
 using BExIS.Dcm.Wizard;
 using BExIS.Dim.Entities.Mapping;
 using BExIS.Dim.Helpers.Mapping;
@@ -10,13 +11,16 @@ using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.MetadataStructure;
 using BExIS.Dlm.Services.TypeSystem;
 using BExIS.IO;
+using BExIS.IO.Transform.Output;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Helpers;
 using BExIS.Modules.Dcm.UI.Models.CreateDataset;
 using BExIS.Modules.Dcm.UI.Models.Metadata;
 using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Entities.Objects;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Objects;
 using BExIS.Utils.Data.MetadataStructure;
 using BExIS.Xml.Helpers;
 using BExIS.Xml.Helpers.Mapping;
@@ -24,8 +28,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Routing;
 using System.Xml;
 using System.Xml.Linq;
 using Vaiona.Persistence.Api;
@@ -33,6 +39,7 @@ using Vaiona.Utils.Cfg;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Models;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
 {
@@ -40,11 +47,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
     {
         private CreateTaskmanager TaskManager;
         private MetadataStructureUsageHelper metadataStructureUsageHelper = new MetadataStructureUsageHelper();
-        XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
-
+        private XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
         #region Load Metadata formular actions
 
+        [BExISEntityAuthorize("Dataset", typeof(Dataset), "datasetId", RightType.Write)]
         public ActionResult EditMetadata(long datasetId, bool locked = false, bool created = false)
         {
             return RedirectToAction("LoadMetadata", "Form", new { entityId = datasetId, locked = false, created = false, fromEditMode = true });
@@ -56,13 +63,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            var newMetadata = (XmlDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            //var newMetadata = TaskManager.Bus[CreateTaskmanager.METADATA_XML];
 
             var stepInfoModelHelpers = new List<StepModelHelper>();
             var Model = new MetadataEditorModel();
 
-
-            TaskManager.AddToBus(CreateTaskmanager.METADATA_XML, XmlUtility.ToXDocument(newMetadata));
+            //TaskManager.AddToBus(CreateTaskmanager.METADATA_XML, newMetadata);
 
             AdvanceTaskManagerBasedOnExistingMetadata(metadataStructureId);
 
@@ -113,8 +119,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 Model.EditRight = hasUserEditRights(entityId);
                 Model.EditAccessRight = hasUserEditAccessRights(entityId);
                 Model.DatasetId = entityId;
-
-
             }
             else
             {
@@ -175,14 +179,44 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             Model.EditRight = hasUserEditRights(entityId);
             Model.EditAccessRight = hasUserEditAccessRights(entityId);
+            Model.LatestVersion = true;
 
             //set addtionaly functions
             Model.Actions = getAddtionalActions();
 
+            //save with errors?
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.SAVE_WITH_ERRORS))
+            {
+                Model.SaveWithErrors = (bool)TaskManager.Bus[CreateTaskmanager.SAVE_WITH_ERRORS];
+            }
+
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.NO_IMPORT_ACTION))
+            {
+                Model.Import = !(bool)TaskManager.Bus[CreateTaskmanager.NO_IMPORT_ACTION];
+            }
+
+            //Replace the title of the info box on top
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.INFO_ON_TOP_TITLE))
+            {
+                ViewBag.Title = PresentationModel.GetViewTitleForTenant(Convert.ToString(TaskManager.Bus[CreateTaskmanager.INFO_ON_TOP_TITLE]), this.Session.GetTenant());
+            }
+
+            //Replace the description in the info box on top
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.INFO_ON_TOP_DESCRIPTION))
+            {
+                Model.HeaderHelp = Convert.ToString(TaskManager.Bus[CreateTaskmanager.INFO_ON_TOP_DESCRIPTION]);
+            }
+
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.LOCKED))
+            {
+                ViewData["Locked"] = (bool)TaskManager.Bus[CreateTaskmanager.LOCKED];
+            }
+
+            ViewData["MetadataStructureID"] = TaskManager.Bus["MetadataStructureId"];
             return PartialView("MetadataEditor", Model);
         }
 
-        public ActionResult LoadMetadataFromExternal(long entityId, string title, long metadatastructureId, long datastructureId = -1, long researchplanId = -1, string sessionKeyForMetadata = "", bool resetTaskManager = false)
+        public ActionResult LoadMetadataFromExternal(long entityId, string title, long metadatastructureId, long datastructureId = -1, long researchplanId = -1, string sessionKeyForMetadata = "", bool resetTaskManager = false, bool latest = true, string isValid = "yes")
         {
             var loadFromExternal = true;
             long metadataStructureId = -1;
@@ -191,6 +225,176 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             var metadata = Session[sessionKeyForMetadata] != null
                 ? (XmlDocument)Session[sessionKeyForMetadata]
                 : new XmlDocument();
+
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Dataset", this.Session.GetTenant()); ;
+            ViewData["Locked"] = true;
+            ViewData["ShowOptional"] = false;
+            ViewData["isValid"] = isValid;
+
+            TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+            if (TaskManager == null || resetTaskManager)
+            {
+                TaskManager = new CreateTaskmanager();
+            }
+
+            var stepInfoModelHelpers = new List<StepModelHelper>();
+            var Model = new MetadataEditorModel();
+
+            if (loadFromExternal)
+            {
+                var entityClassPath = "";
+                //TaskManager = new CreateTaskmanager();
+                Session["CreateDatasetTaskmanager"] = TaskManager;
+                TaskManager.AddToBus(CreateTaskmanager.ENTITY_ID, entityId);
+
+                if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_CLASS_PATH))
+                    entityClassPath = TaskManager.Bus[CreateTaskmanager.ENTITY_CLASS_PATH].ToString();
+
+                var ready = true;
+
+                // todo i case of entity "BExIS.Dlm.Entities.Data.Dataset" we need to have a check if the dataset is checked in later all enitities should support such functions over webapis
+                if (entityClassPath.Equals("BExIS.Dlm.Entities.Data.Dataset"))
+                {
+                    var dm = new DatasetManager();
+                    //todo need a check if entity is in use
+                    if (!dm.IsDatasetCheckedIn(entityId))
+                    {
+                        ready = false;
+                    }
+                }
+
+                if (ready)
+                {
+                    TaskManager.AddToBus(CreateTaskmanager.METADATASTRUCTURE_ID, metadatastructureId);
+                    if (researchplanId != -1) TaskManager.AddToBus(CreateTaskmanager.RESEARCHPLAN_ID, researchplanId);
+                    if (datastructureId != -1) TaskManager.AddToBus(CreateTaskmanager.DATASTRUCTURE_ID, datastructureId);
+
+                    if (metadata != null && metadata.DocumentElement != null)
+                        TaskManager.AddToBus(CreateTaskmanager.METADATA_XML, convertMetadata(metadata));
+
+                    TaskManager.AddToBus(CreateTaskmanager.ENTITY_TITLE, title);
+
+                    var rpm = new ResearchPlanManager();
+                    TaskManager.AddToBus(CreateTaskmanager.RESEARCHPLAN_ID, rpm.Repo.Get().First().Id);
+
+                    AdvanceTaskManagerBasedOnExistingMetadata(metadatastructureId);
+                    //AdvanceTaskManager(dsv.Dataset.MetadataStructure.Id);
+
+                    foreach (var stepInfo in TaskManager.StepInfos)
+                    {
+                        var stepModelHelper = GetStepModelhelper(stepInfo.Id);
+
+                        if (stepModelHelper.Model == null)
+                        {
+                            if (stepModelHelper.UsageType.Equals(typeof(MetadataPackageUsage)))
+                            {
+                                stepModelHelper.Model = createPackageModel(stepInfo.Id, false);
+                                if (stepModelHelper.Model.StepInfo.IsInstanze)
+                                    LoadSimpleAttributesForModelFromXml(stepModelHelper);
+                            }
+
+                            if (stepModelHelper.UsageType.Equals(typeof(MetadataNestedAttributeUsage)))
+                            {
+                                stepModelHelper.Model = createCompoundModel(stepInfo.Id, false);
+                                if (stepModelHelper.Model.StepInfo.IsInstanze)
+                                    LoadSimpleAttributesForModelFromXml(stepModelHelper);
+                            }
+
+                            getChildModelsHelper(stepModelHelper);
+                        }
+
+                        stepInfoModelHelpers.Add(stepModelHelper);
+                    }
+
+                    if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_XML))
+                    {
+                        var xMetadata = getMetadata();
+
+                        if (String.IsNullOrEmpty(title)) title = "No Title available.";
+
+                        if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_TITLE))
+                        {
+                            if (TaskManager.Bus[CreateTaskmanager.ENTITY_TITLE] != null)
+                                Model.DatasetTitle = TaskManager.Bus[CreateTaskmanager.ENTITY_TITLE].ToString();
+                        }
+                        else
+                            Model.DatasetTitle = "No Title available.";
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError(String.Empty, "Dataset is just in processing.");
+                }
+            }
+
+            Model.DatasetId = entityId;
+            Model.StepModelHelpers = stepInfoModelHelpers;
+            Model.Created = false;
+
+            //check if a metadatastructure has a import mapping
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATASTRUCTURE_ID))
+                metadataStructureId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.METADATASTRUCTURE_ID]);
+
+            if (metadataStructureId != -1)
+                Model.Import = IsImportAvavilable(metadataStructureId);
+
+            //FromCreateOrEditMode
+            TaskManager.AddToBus(CreateTaskmanager.EDIT_MODE, false);
+            Model.FromEditMode = (bool)TaskManager.Bus[CreateTaskmanager.EDIT_MODE];
+
+            // set edit rights
+            Model.EditRight = hasUserEditRights(entityId);
+            Model.EditAccessRight = hasUserEditAccessRights(entityId);
+            Model.LatestVersion = latest;
+
+            //set addtionaly functions
+            Model.Actions = getAddtionalActions();
+
+            //save with errors?
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.SAVE_WITH_ERRORS))
+            {
+                Model.SaveWithErrors = (bool)TaskManager.Bus[CreateTaskmanager.SAVE_WITH_ERRORS];
+            }
+
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.NO_IMPORT_ACTION))
+            {
+                Model.Import = !(bool)TaskManager.Bus[CreateTaskmanager.NO_IMPORT_ACTION];
+            }
+
+            //Replace the title of the info box on top
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.INFO_ON_TOP_TITLE))
+            {
+                ViewBag.Title = PresentationModel.GetViewTitleForTenant(Convert.ToString(TaskManager.Bus[CreateTaskmanager.INFO_ON_TOP_TITLE]), this.Session.GetTenant());
+            }
+
+            //Replace the description in the info box on top
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.INFO_ON_TOP_DESCRIPTION))
+            {
+                Model.HeaderHelp = Convert.ToString(TaskManager.Bus[CreateTaskmanager.INFO_ON_TOP_DESCRIPTION]);
+            }
+
+            ViewData["MetadataStructureID"] = TaskManager.Bus["MetadataStructureId"];
+            return PartialView("MetadataEditor", Model);
+        }
+
+        public ActionResult LoadMetadataOfflineVersion(long entityId, string title, long metadatastructureId, long datastructureId = -1, long researchplanId = -1, string sessionKeyForMetadata = "", bool resetTaskManager = false)
+        {
+            var loadFromExternal = true;
+            long metadataStructureId = -1;
+
+            var dm = new DatasetManager();
+            //load metadata from session if exist
+            var metadata = new XmlDocument();
+
+            if (Session[sessionKeyForMetadata] != null)
+            {
+                metadata = (XmlDocument)Session[sessionKeyForMetadata];
+            }
+            else
+            {
+                //load metadata from latest version
+                metadata = dm.GetDatasetLatestMetadataVersion(entityId);
+            }
 
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Dataset", this.Session.GetTenant()); ;
             ViewData["Locked"] = true;
@@ -220,7 +424,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 // todo i case of entity "BExIS.Dlm.Entities.Data.Dataset" we need to have a check if the dataset is checked in later all enitities should support such functions over webapis
                 if (entityClassPath.Equals("BExIS.Dlm.Entities.Data.Dataset"))
                 {
-                    var dm = new DatasetManager();
                     //todo need a check if entity is in use
                     if (!dm.IsDatasetCheckedIn(entityId))
                     {
@@ -273,7 +476,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_XML))
                     {
-                        var xMetadata = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+                        var xMetadata = getMetadata();
 
                         if (String.IsNullOrEmpty(title)) title = "No Title available.";
 
@@ -314,7 +517,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             //set addtionaly functions
             Model.Actions = getAddtionalActions();
 
-            return PartialView("MetadataEditor", Model);
+            return PartialView("MetadataEditorOffline", Model);
         }
 
         public ActionResult ReloadMetadataEditor(
@@ -322,7 +525,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             bool show = false,
             bool created = false,
             long entityId = -1,
-            bool fromEditMode = false
+            bool fromEditMode = false,
+            bool latestVersion = false
             )
         {
             ViewData["Locked"] = locked;
@@ -330,6 +534,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Dataset", this.Session.GetTenant());
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+
+            TaskManager?.AddToBus(CreateTaskmanager.SAVE_WITH_ERRORS, true);
+
             var stepInfoModelHelpers = new List<StepModelHelper>();
 
             foreach (var stepInfo in TaskManager.StepInfos)
@@ -340,7 +547,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 {
                     if (stepModelHelper.UsageType.Equals(typeof(MetadataPackageUsage)))
                         stepModelHelper.Model = createPackageModel(stepInfo.Id, false);
-
 
                     if (stepModelHelper.UsageType.Equals(typeof(MetadataNestedAttributeUsage)))
                         stepModelHelper.Model = createCompoundModel(stepInfo.Id, false);
@@ -353,6 +559,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             var Model = new MetadataEditorModel();
             Model.StepModelHelpers = stepInfoModelHelpers;
+            Model.SaveWithErrors = Model.StepModelHelpers.Any(s => s.Model.ErrorList.Count() > 0);
 
             #region security permissions and authorisations check
 
@@ -386,9 +593,33 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             //set addtionaly functions
             Model.Actions = getAddtionalActions();
 
+            //save with errors?
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.SAVE_WITH_ERRORS))
+            {
+                Model.SaveWithErrors = (bool)TaskManager.Bus[CreateTaskmanager.SAVE_WITH_ERRORS];
+            }
+
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.NO_IMPORT_ACTION))
+            {
+                Model.Import = !(bool)TaskManager.Bus[CreateTaskmanager.NO_IMPORT_ACTION];
+            }
+
+            //Replace the title of the info box on top
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.INFO_ON_TOP_TITLE))
+            {
+                ViewBag.Title = PresentationModel.GetViewTitleForTenant(Convert.ToString(TaskManager.Bus[CreateTaskmanager.INFO_ON_TOP_TITLE]), this.Session.GetTenant());
+            }
+
+            //Replace the description in the info box on top
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.INFO_ON_TOP_DESCRIPTION))
+            {
+                Model.HeaderHelp = Convert.ToString(TaskManager.Bus[CreateTaskmanager.INFO_ON_TOP_DESCRIPTION]);
+            }
+
             Model.Created = created;
             Model.FromEditMode = fromEditMode;
             Model.DatasetId = entityId;
+            Model.LatestVersion = latestVersion;
 
             //set title
             if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_TITLE))
@@ -399,13 +630,14 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             else
                 Model.DatasetTitle = "No Title available.";
 
+            ViewData["MetadataStructureID"] = TaskManager.Bus["MetadataStructureId"];
             return PartialView("MetadataEditor", Model);
         }
 
         public ActionResult StartMetadataEditor()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Dataset", this.Session.GetTenant());
-            ViewData["ShowOptional"] = false;
+            ViewData["ShowOptional"] = true;
 
             var Model = new MetadataEditorModel();
 
@@ -467,12 +699,37 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 //set addtionaly functions
                 Model.Actions = getAddtionalActions();
+
+                //save with errors?
+                if (TaskManager.Bus.ContainsKey(CreateTaskmanager.SAVE_WITH_ERRORS))
+                {
+                    Model.SaveWithErrors = (bool)TaskManager.Bus[CreateTaskmanager.SAVE_WITH_ERRORS];
+                }
+
+                if (TaskManager.Bus.ContainsKey(CreateTaskmanager.NO_IMPORT_ACTION))
+                {
+                    Model.Import = !(bool)TaskManager.Bus[CreateTaskmanager.NO_IMPORT_ACTION];
+                }
+
+                //Replace the title of the info box on top
+                if (TaskManager.Bus.ContainsKey(CreateTaskmanager.INFO_ON_TOP_TITLE))
+                {
+                    ViewBag.Title = PresentationModel.GetViewTitleForTenant(Convert.ToString(TaskManager.Bus[CreateTaskmanager.INFO_ON_TOP_TITLE]), this.Session.GetTenant());
+                }
+
+                //Replace the description in the info box on top
+                if (TaskManager.Bus.ContainsKey(CreateTaskmanager.INFO_ON_TOP_DESCRIPTION))
+                {
+                    Model.HeaderHelp = Convert.ToString(TaskManager.Bus[CreateTaskmanager.INFO_ON_TOP_DESCRIPTION]);
+                }
+
             }
 
+            ViewData["MetadataStructureID"] = TaskManager.Bus["MetadataStructureId"];
             return View("MetadataEditor", Model);
         }
 
-        public ActionResult SwitchVisibilityOfOptionalElements(bool show, bool created, long entityId, bool fromEditMode)
+        public ActionResult SwitchVisibilityOfOptionalElements(bool show, bool created, long entityId, bool fromEditMode, bool latestVersion)
         {
             return RedirectToAction("ReloadMetadataEditor", new
             {
@@ -480,7 +737,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 show = !show,
                 created,
                 entityId,
-                fromEditMode
+                fromEditMode,
+                latestVersion
             });
         }
 
@@ -509,7 +767,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATASTRUCTURE_ID) &&
                 TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_IMPORT_XML_FILEPATH))
             {
-
                 //xml metadata for import
                 var metadataForImportPath = (string)TaskManager.Bus[CreateTaskmanager.METADATA_IMPORT_XML_FILEPATH];
 
@@ -543,14 +800,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     var completeMetadata = XmlMetadataImportHelper.FillInXmlValues(metadataResult,
                         metadataXmlTemplate);
 
-                    TaskManager.AddToBus(CreateTaskmanager.METADATA_XML, completeMetadata);
+                    TaskManager.AddToBus(CreateTaskmanager.METADATA_XML, XmlUtility.ToXDocument(completeMetadata));
 
                     //LoadMetadata(long datasetId, bool locked= false, bool created= false, bool fromEditMode = false, bool resetTaskManager = false, XmlDocument newMetadata=null)
                     return RedirectToAction("ImportMetadata", "Form",
                         new { metadataStructureId = metadataStructureId });
                 }
-
-
             }
 
             return Content("Error Message :" + validationMessage);
@@ -626,7 +881,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
         #endregion Import Metadata From external XML
 
-        #region Add and Remove and Activate
+        #region Add and Remove and Activate and Update
 
         public ActionResult ActivateComplexUsage(int id)
         {
@@ -651,10 +906,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            //TaskManager.SetCurrent(TaskManager.Get(parentStepId));
-
             var stepModelHelper = GetStepModelhelper(id);
-            //StepModelHelper parentStepModelHelper = GetStepModelhelper(parentStepId);
 
             var active = stepModelHelper.Activated ? false : true;
             stepModelHelper.Activated = active;
@@ -667,25 +919,24 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             var pStepModelHelper = GetStepModelhelper(stepModelHelper.Parent.StepId);
             pStepModelHelper.Activated = active;
 
-            // update stepmodel to dictionary
-            //AddStepModelhelper(newStepModelhelper);
-
             //update stepModel to parentStepModel
             for (var i = 0; i < pStepModelHelper.Childrens.Count; i++)
             {
-                var child = pStepModelHelper.Childrens.ElementAt(i);
-                var childStepModelHelper = GetStepModelhelper(child.StepId);
-                child.Activated = child.StepId.Equals(id);
-                childStepModelHelper.Activated = child.StepId.Equals(id);
+                var usage = pStepModelHelper.Childrens.ElementAt(i);
+                var childStepModelHelper = GetStepModelhelper(usage.StepId);
+                usage.Activated = usage.StepId.Equals(id);
+                childStepModelHelper.Activated = usage.StepId.Equals(id);
 
-                var childOfChild = child.Childrens.FirstOrDefault();
-                if (childOfChild != null)
-                    childOfChild.Activated = child.StepId.Equals(id);
+                var type = usage.Childrens.FirstOrDefault();
+                if (type != null)
+                {
+                    type.Activated = usage.Activated;
+
+                    if (!usage.Activated) ClearXml(type.XPath);
+                }
             }
 
-
             return PartialView("_metadataCompoundAttributeUsageView", pStepModelHelper);
-
         }
 
         public ActionResult AddComplexUsage(int parentStepId, int number)
@@ -728,7 +979,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 //Update metadata xml
                 //add step to metadataxml
                 AddCompoundAttributeToXml(model.Source, model.Number, parentStepModelHelper.XPath);
-
             }
 
             if (parentStepModelHelper.UsageType.Equals(typeof(MetadataPackageUsage)))
@@ -784,10 +1034,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             }
 
             //// load InstanzB for parentmodel
-            parentStepModelHelper.Model.ConvertInstance((XDocument)(TaskManager.Bus[CreateTaskmanager.METADATA_XML]), parentStepModelHelper.XPath);
+            parentStepModelHelper.Model.ConvertInstance(getMetadata(), parentStepModelHelper.XPath);
 
             return PartialView("_metadataCompoundAttributeView", parentStepModelHelper);
-
         }
 
         public ActionResult AddMetadataAttributeUsage(int id, int parentid, int number, int parentModelNumber, int parentStepId)
@@ -818,22 +1067,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             //addtoxml
             AddAttributeToXml(parentUsage, parentModelNumber, metadataAttributeUsage, number, stepModelHelperParent.XPath);
 
-            model.ConvertInstance((XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML], stepModelHelperParent.XPath + "//" + metadataAttributeUsage.Label.Replace(" ", string.Empty));
+            model.ConvertInstance(getMetadata(), stepModelHelperParent.XPath + "//" + metadataAttributeUsage.Label.Replace(" ", string.Empty));
 
             if (model != null)
             {
-                //if (model is MetadataPackageModel)
-                //{
-                //    return PartialView("_metadataPackageUsageView", stepModelHelperParent);
-                //}
-
-                //if (model is MetadataCompoundAttributeModel)
-                //{
-                //    return PartialView("_metadataCompoundAttributeUsageView", stepModelHelperParent);
-                //}
-
                 return PartialView("_metadataCompoundAttributeUsageView", stepModelHelperParent);
-
             }
 
             return null;
@@ -881,12 +1119,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     si.title = (i + 1).ToString();
                 }
 
-                stepModelHelper.Model.ConvertInstance((XDocument)(TaskManager.Bus[CreateTaskmanager.METADATA_XML]), stepModelHelper.XPath);
+                stepModelHelper.Model.ConvertInstance(getMetadata(), stepModelHelper.XPath);
             }
 
-
             return PartialView("_metadataCompoundAttributeView", stepModelHelper);
-
         }
 
         public ActionResult DownMetadataAttributeUsage(object value, int id, int parentid, int number, int parentModelNumber, int parentStepId)
@@ -905,9 +1141,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             var xPathOfSelectedElement = stepModelHelperParent.XPath + "//" + attrUsage.Label + "//" + GetUsageAttrName(attrUsage).Replace(" ", string.Empty) + "[" + number + "]";
             var destinationXPathElement = stepModelHelperParent.XPath + "//" + attrUsage.Label + "//" + GetUsageAttrName(attrUsage).Replace(" ", string.Empty) + "[" + (number + 1) + "]";
 
-
             ChangeInXml(xPathOfSelectedElement, destinationXPathElement);
-
 
             Down(stepModelHelperParent, id, number);
 
@@ -931,7 +1165,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             var stepModelHelper = GetStepModelhelper(parentStepId);
             RemoveFromXml(stepModelHelper.XPath + "//" + stepModelHelper.UsageAttrName.Replace(" ", string.Empty) + "[" + number + "]");
-
 
             stepModelHelper.Model = createModel(TaskManager.Current().Id, true, stepModelHelper.UsageType);
             stepModelHelper.Childrens.RemoveAt(number - 1);
@@ -1018,10 +1251,135 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     si.title = (i + 1).ToString();
                 }
 
-                stepModelHelper.Model.ConvertInstance((XDocument)(TaskManager.Bus[CreateTaskmanager.METADATA_XML]), stepModelHelper.XPath);
+                stepModelHelper.Model.ConvertInstance(getMetadata(), stepModelHelper.XPath);
             }
 
             return PartialView("_metadataCompoundAttributeView", stepModelHelper);
+        }
+
+        public ActionResult UpdateComplexUsageWithEntity(int stepId, int number, int inputattrid, int inputAttrNumber, long entityId, long entityTypeId, string value)
+        {
+            ViewData["ShowOptional"] = true;
+
+            TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+            TaskManager.SetCurrent(TaskManager.Get(stepId));
+
+            var stepModelHelper = GetStepModelhelper(stepId);
+            stepModelHelper.Model = createModel(stepId, true, stepModelHelper.UsageType);
+            var usage = loadUsage(stepModelHelper.UsageId, stepModelHelper.UsageType);
+
+            metadataStructureUsageHelper = new MetadataStructureUsageHelper();
+
+            foreach (var attrModel in stepModelHelper.Model.MetadataAttributeModels.Where(a => a.Id.Equals(inputattrid) && a.Number.Equals(inputAttrNumber)))
+            {
+                var metadataAttributeUsage = metadataStructureUsageHelper.GetChildren(usage.Id, usage.GetType()).Where(u => u.Id.Equals(attrModel.Id)).FirstOrDefault();
+
+                if (entityId > 0 && attrModel.Id.Equals(inputattrid))
+                {
+                    if (MappingUtils.ExistMappingWithEntity(attrModel.Id, LinkElementType.MetadataNestedAttributeUsage))
+                    {
+                        attrModel.Value = MappingUtils.GetAllMatchesInEntities(attrModel.Id, LinkElementType.MetadataNestedAttributeUsage, value).Where(e => e.EntityId.Equals(entityId)).FirstOrDefault().Value;
+                        attrModel.Locked = false;
+                        int version = 0;
+
+                        // if an enity mapping exists, the question is whether the entity has a version or not. The url created may have to be created with version.
+                        // Get version of a entity with the entity store
+
+                        #region entity
+
+                        try
+                        {
+                            if (entityTypeId > 0)
+                            {
+                                EntityManager entityManager = new EntityManager();
+                                Entity entity = entityManager.Entities.FirstOrDefault(e => e.Id.Equals(entityTypeId));
+
+                                if (entity != null)
+                                {
+                                    var instanceStore = (IEntityStore)Activator.CreateInstance(entity.EntityStoreType);
+                                    if (instanceStore != null)
+                                    {
+                                        version = instanceStore.CountVersions(entityId);
+                                    }
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            version = 0;
+                        }
+
+                        #endregion entity
+
+                        //create dic for the xml attr
+                        Dictionary<string, string> xmlAttr = new Dictionary<string, string>();
+                        xmlAttr.Add(EntityReferenceXmlAttribute.entityid.ToString(), entityId.ToString());
+                        xmlAttr.Add(EntityReferenceXmlAttribute.entitytype.ToString(), entityTypeId.ToString());
+                        if (version > 0) xmlAttr.Add(EntityReferenceXmlAttribute.entityversion.ToString(), version.ToString());
+
+                        UpdateAttribute(
+                        usage,
+                        number,
+                        metadataAttributeUsage,
+                        Convert.ToInt32(inputAttrNumber),
+                        attrModel.Value,
+                        stepModelHelper.XPath,
+                        xmlAttr);
+                    }
+                }
+            }
+
+            return PartialView("_metadataCompoundAttributeUsageView", stepModelHelper);
+        }
+
+        public ActionResult UpdateComplexUsageWithParty(int stepId, int number, long partyId)
+        {
+            ViewData["ShowOptional"] = true;
+
+            TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+            TaskManager.SetCurrent(TaskManager.Get(stepId));
+
+            var stepModelHelper = GetStepModelhelper(stepId);
+            stepModelHelper.Model = createModel(stepId, true, stepModelHelper.UsageType);
+            var usage = loadUsage(stepModelHelper.UsageId, stepModelHelper.UsageType);
+
+            metadataStructureUsageHelper = new MetadataStructureUsageHelper();
+
+            foreach (var attrModel in stepModelHelper.Model.MetadataAttributeModels)
+            {
+                var metadataAttributeUsage = metadataStructureUsageHelper.GetChildren(usage.Id, usage.GetType()).Where(u => u.Id.Equals(attrModel.Id)).FirstOrDefault();
+
+                if (partyId > 0)
+                {
+                    if (MappingUtils.ExistMappingWithParty(attrModel.Id, LinkElementType.MetadataNestedAttributeUsage))
+                    {
+                        attrModel.Value = MappingUtils.GetValueFromSystem(partyId, attrModel.Id, LinkElementType.MetadataNestedAttributeUsage);
+                        attrModel.Locked = !MappingUtils.PartyAttrIsMain(attrModel.Id, LinkElementType.MetadataNestedAttributeUsage);
+
+                        UpdateAttribute(
+                        usage,
+                        number,
+                        metadataAttributeUsage,
+                        Convert.ToInt32(attrModel.Number),
+                        attrModel.Value,
+                        stepModelHelper.XPath);
+                    }
+                }
+                else
+                {
+                    if (MappingUtils.ExistMappingWithParty(attrModel.Id, LinkElementType.MetadataNestedAttributeUsage))
+                    {
+                        attrModel.Value = "";
+                        attrModel.Locked = false;
+                    }
+
+                    attrModel.Locked = false;
+                }
+
+                AddXmlAttribute(stepModelHelper.XPath, "partyid", partyId.ToString());
+            }
+
+            return PartialView("_metadataCompoundAttributeUsageView", stepModelHelper);
         }
 
         public ActionResult UpMetadataAttributeUsage(object value, int id, int parentid, int number, int parentModelNumber, int parentStepId)
@@ -1055,7 +1413,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             return null;
         }
 
-        #endregion Add and Remove and Activate
+        #endregion Add and Remove and Activate and Update
 
         #region Load & Update advanced steps
 
@@ -1087,7 +1445,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_XML))
             {
-                var xMetadata = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+                var xMetadata = getMetadata();
 
                 var x = new XElement("null");
                 var elements = new List<XElement>();
@@ -1436,7 +1794,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_XML))
             {
-                var xMetadata = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+                var xMetadata = getMetadata();
 
                 //var x = new XElement("null");
                 var parentXElement = new XElement("tmp");
@@ -1553,7 +1911,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_XML))
             {
-                var xMetadata = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+                var xMetadata = getMetadata();
 
                 var x = XmlUtility.GetXElementByXPath(parentXpath, xMetadata);
 
@@ -1687,7 +2045,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     stepModelHelperList.Add(stepModelHelper);
 
-
                     si = AddStepsBasedOnUsage(mpu, si, "Metadata//" + mpu.Label.Replace(" ", string.Empty) + "[1]", stepModelHelper);
                     TaskManager.Root.Children.Add(si);
 
@@ -1701,7 +2058,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             {
                 metadataStructureManager.Dispose();
             }
-
         }
 
         private void AdvanceTaskManagerBasedOnExistingMetadata(long MetadataStructureId)
@@ -1750,7 +2106,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 TaskManager.Bus[CreateTaskmanager.METADATA_STEP_MODEL_HELPER] = stepModelHelperList;
                 Session["CreateDatasetTaskmanager"] = TaskManager;
-
             }
             finally
             {
@@ -1788,7 +2143,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
         private StepModelHelper getChildModelsHelper(StepModelHelper stepModelHelper)
         {
-
             StepInfo currentStepInfo = stepModelHelper.Model.StepInfo;
 
             if (currentStepInfo.Children.Count > 0)
@@ -1801,7 +2155,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     if (childStepModelHelper.Model == null)
                     {
-
                         childStepModelHelper.Model = createModel(childStep.Id, false, childStepModelHelper.UsageType);
 
                         if (childStepModelHelper.Model.StepInfo.IsInstanze)
@@ -1879,6 +2232,19 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             return null;
         }
 
+        //private StepModelHelper updateStepModelHelper(StepModelHelper stepModelHelper)
+        //{
+        //    TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+        //    if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_STEP_MODEL_HELPER))
+        //    {
+        //        var x = ((List<StepModelHelper>)TaskManager.Bus[CreateTaskmanager.METADATA_STEP_MODEL_HELPER]).Where(s => s.StepId.Equals(stepModelHelper.StepId)).FirstOrDefault();
+        //        x = stepModelHelper;
+
+        //        return x;
+        //    }
+
+        //    return null;
+        //}
 
         private bool IsImportAvavilable(long metadataStructureId)
         {
@@ -1948,70 +2314,60 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             }
         }
 
-        //private StepModelHelper GetStepModelhelper(long usageId, int number)
-        //{
-        //    TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
-        //    if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_STEP_MODEL_HELPER))
-        //    {
-        //        return ((List<StepModelHelper>)TaskManager.Bus[CreateTaskmanager.METADATA_STEP_MODEL_HELPER]).Where(s => s.Usage.Id.Equals(usageId) && s.Number.Equals(number)).FirstOrDefault();
-        //    }
+        private string storeGeneratedFilePathToContentDiscriptor(long datasetId, DatasetVersion datasetVersion,
+            string title, string ext)
+        {
+            string name = "";
+            string mimeType = "";
 
-        //    return null;
-        //}
+            if (ext.Contains("csv"))
+            {
+                name = "datastructure";
+                mimeType = "text/comma-separated-values";
+            }
 
-        //private int GetNumberOfUsageInStepModelHelper(long usageId)
-        //{
-        //    TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
-        //    if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_STEP_MODEL_HELPER))
-        //    {
-        //        return ((List<StepModelHelper>)TaskManager.Bus[CreateTaskmanager.METADATA_STEP_MODEL_HELPER]).Where(s => s.Usage.Id.Equals(usageId)).Count() - 1;
-        //    }
+            if (ext.Contains("html"))
+            {
+                name = title;
+                mimeType = "application/html";
+            }
 
-        //    return 0;
-        //}
+            // create the generated FileStream and determine its location
+            string dynamicPath = OutputDatasetManager.GetDynamicDatasetStorePath(datasetId, datasetVersion.Id, title,
+                ext);
+            //Register the generated data FileStream as a resource of the current dataset version
+            //ContentDescriptor generatedDescriptor = new ContentDescriptor()
+            //{
+            //    OrderNo = 1,
+            //    Name = name,
+            //    MimeType = mimeType,
+            //    URI = dynamicPath,
+            //    DatasetVersion = datasetVersion,
+            //};
 
-        //private void GenerateModelsForChildrens(StepModelHelper modelHelper, long metadataStructureId)
-        //{
-        //    foreach (StepModelHelper item in modelHelper.Childrens)
-        //    {
-        //        if (item.Childrens.Count() > 0)
-        //        {
-        //            GenerateModelsForChildrens(item, metadataStructureId);
-        //        }
+            DatasetManager dm = new DatasetManager();
+            if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(name)) > 0)
+            {
+                // remove the one contentdesciptor
+                foreach (ContentDescriptor cd in datasetVersion.ContentDescriptors)
+                {
+                    if (cd.Name == name)
+                    {
+                        cd.URI = dynamicPath;
+                        dm.UpdateContentDescriptor(cd);
+                    }
+                }
+            }
+            else
+            {
+                // add current contentdesciptor to list
+                //datasetVersion.ContentDescriptors.Add(generatedDescriptor);
+                dm.CreateContentDescriptor(name, mimeType, dynamicPath, 1, datasetVersion);
+            }
 
-        //        if (item.Model == null)
-        //        {
-        //            BaseUsage u = LoadUsage(item.Usage);
-        //            if (u is MetadataAttributeUsage || u is MetadataNestedAttributeUsage)
-        //            {
-        //                item.Model = MetadataCompoundAttributeModel.ConvertToModel(u, item.Number);
-        //                ((MetadataCompoundAttributeModel)item.Model).ConvertMetadataAttributeModels(u, metadataStructureId, item.StepId);
-        //            }
-
-        //            if (u is MetadataPackageUsage)
-        //            {
-        //                item.Model = MetadataPackageModel.Convert(u, item.Number);
-        //                ((MetadataPackageModel)item.Model).ConvertMetadataAttributeModels(u, metadataStructureId, item.StepId);
-        //            }
-        //        }
-        //    }
-
-        //}
-
-        //private StepModelHelper GenerateModelsForChildrens(StepInfo stepInfo, long metadataStructureId)
-        //{
-        //    StepModelHelper stepModelHelper = GetStepModelhelper(stepInfo.Id);
-
-        //    if (stepModelHelper.Model == null)
-        //    {
-        //        if (stepModelHelper.UsageType.Equals(typeof(MetadataPackageUsage)))
-        //            stepModelHelper.Model = CreatePackageModel(stepInfo.Id, false);
-
-        //        if (stepModelHelper.UsageType.Equals(typeof(MetadataNestedAttributeUsage)))
-        //            stepModelHelper.Model = CreateCompoundModel(stepInfo.Id, false);
-
-        //        getChildModelsHelper(stepModelHelper);
-        //    }
+            //dm.EditDatasetVersion(datasetVersion, null, null, null);
+            return dynamicPath;
+        }
 
         #endregion Helper
 
@@ -2023,21 +2379,48 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         [HttpPost]
         public ActionResult _AutoCompleteAjaxLoading(string text, long id, string type)
         {
-            var x = new List<string>();
+            // if mapping with etities exits
+            if (MappingUtils.ExistMappingWithEntity(id, LinkElementType.MetadataNestedAttributeUsage))
+            {
+                var y = new List<MappingEntityResultElement>();
+
+                y = MappingUtils.GetAllMatchesInEntities(id, LinkElementType.MetadataNestedAttributeUsage, text);
+
+                var tmp = y.Select(e => new SelectListItem() { Text = e.Value + " (" + e.EntityId + "_" + e.EntityTypeId + ")", Value = e.EntityTypeId.ToString() });
+
+                tmp.Distinct();
+
+                return new JsonResult
+                {
+                    Data = tmp,
+                    JsonRequestBehavior = JsonRequestBehavior.AllowGet
+                };
+            }
+
+            var x = new List<MappingPartyResultElemenet>();
+            // if mapping with parties exits
+
             switch (type)
             {
                 case "MetadataNestedAttributeUsage":
                     {
-                        x = MappingUtils.GetAllMatchesInSystem(id, LinkElementType.MetadataNestedAttributeUsage, text);
+                        if (MappingUtils.PartyAttrIsMain(id, LinkElementType.MetadataNestedAttributeUsage))
+                        {
+                            x = MappingUtils.GetAllMatchesInSystem(id, LinkElementType.MetadataNestedAttributeUsage, text);
+                        }
                         break;
                     }
                 case "MetadataAttributeUsage":
                     {
-                        x = MappingUtils.GetAllMatchesInSystem(id, LinkElementType.MetadataNestedAttributeUsage, text);
+                        if (MappingUtils.PartyAttrIsMain(id, LinkElementType.MetadataNestedAttributeUsage))
+                        {
+                            x = MappingUtils.GetAllMatchesInSystem(id, LinkElementType.MetadataNestedAttributeUsage, text);
+                        }
                         break;
                     }
             }
 
+            var list = x.Select(e => new SelectListItem() { Text = e.Value + " (" + e.PartyId + ")" });
 
             // BUG: invalid call to ddm method
             // TODO: mODULARITY ->Call DDM Reindex
@@ -2051,7 +2434,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             //return new JsonResult { Data = new SelectList(provider.GetTextBoxSearchValues(text, "all", "new", 10).SearchComponent.TextBoxSearchValues, "Value", "Name") };
 
             // WORKAROUND: return always an empty list
-            return new JsonResult { Data = new SelectList(x) };
+            return new JsonResult
+            {
+                Data = list,
+                JsonRequestBehavior = JsonRequestBehavior.AllowGet
+            };
         }
 
         private StepModelHelper Down(StepModelHelper stepModelHelperParent, long id, int number)
@@ -2063,7 +2450,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             list.RemoveAt(index);
             list.Insert(index + 1, temp);
-
 
             return stepModelHelperParent;
         }
@@ -2161,7 +2547,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            var metadataXml = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadataXml = getMetadata();
 
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
             metadataXml = xmlMetadataWriter.AddAttribute(metadataXml, attribute, number, metadataStructureUsageHelper.GetNameOfType(attribute), metadataStructureUsageHelper.GetIdOfType(attribute).ToString(), parentXPath);
@@ -2177,7 +2563,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            var metadataXml = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadataXml = getMetadata();
 
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
 
@@ -2190,7 +2576,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            var metadataXml = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadataXml = getMetadata();
 
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
 
@@ -2211,7 +2597,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         private void ChangeInXml(string selectedXPath, string destinationXPath)
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
-            var metadataXml = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadataXml = getMetadata();
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
 
             metadataXml = xmlMetadataWriter.Change(metadataXml, selectedXPath, destinationXPath);
@@ -2225,7 +2611,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         private void RemoveAttributeToXml(int packageNumber, BaseUsage attribute, int number, string metadataAttributeName, string parentXPath)
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
-            var metadataXml = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadataXml = getMetadata();
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
 
             metadataXml = xmlMetadataWriter.RemoveAttribute(metadataXml, attribute, number, metadataAttributeName, parentXPath);
@@ -2240,7 +2626,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            var metadataXml = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadataXml = getMetadata();
 
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
             metadataXml = xmlMetadataWriter.RemovePackage(metadataXml, usage, number, metadataStructureUsageHelper.GetNameOfType(usage));
@@ -2252,7 +2638,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            var metadataXml = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadataXml = getMetadata();
 
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
             metadataXml = xmlMetadataWriter.Remove(metadataXml, xpath);
@@ -2260,10 +2646,22 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             TaskManager.Bus[CreateTaskmanager.METADATA_XML] = metadataXml;
         }
 
+        private void ClearXml(string xpath)
+        {
+            TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+
+            var metadataXml = getMetadata();
+
+            var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
+            metadataXml = xmlMetadataWriter.Clean(metadataXml, xpath);
+
+            TaskManager.Bus[CreateTaskmanager.METADATA_XML] = metadataXml;
+        }
+
         private void UpdateAttribute(BaseUsage parentUsage, int packageNumber, BaseUsage attribute, int number, object value, string parentXpath)
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
-            var metadataXml = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadataXml = getMetadata();
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
 
             metadataXml = xmlMetadataWriter.Update(metadataXml, attribute, number, value, metadataStructureUsageHelper.GetNameOfType(attribute), parentXpath);
@@ -2274,11 +2672,49 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             metadataXml.Save(path);
         }
 
+        private void UpdateAttribute(BaseUsage parentUsage, int packageNumber, BaseUsage attribute, int number, object value, string parentXpath, Dictionary<string, string> xmlAttrs)
+        {
+            TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+            var metadataXml = getMetadata();
+            var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
+
+            metadataXml = xmlMetadataWriter.Update(metadataXml, attribute, number, value, metadataStructureUsageHelper.GetNameOfType(attribute), parentXpath, xmlAttrs);
+
+            TaskManager.Bus[CreateTaskmanager.METADATA_XML] = metadataXml;
+            // locat path
+            var path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "metadataTemp.Xml");
+            metadataXml.Save(path);
+        }
+
+        //ToDo really said function, but cant find a other solution for now
+        private void AddXmlAttribute(string xpath, string attrName, string attrValue)
+        {
+            TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+            XDocument metadataXml = getMetadata();
+
+            XmlDocument xmlDocument = XmlUtility.ToXmlDocument(metadataXml);
+
+            XmlNode tmp = xmlDocument.SelectSingleNode(xpath);
+
+            XmlAttribute xmlAttr = xmlDocument.CreateAttribute(attrName);
+            xmlAttr.Value = attrValue;
+
+            tmp.Attributes.Append(xmlAttr);
+
+            metadataXml = XmlUtility.ToXDocument(xmlDocument);
+
+            TaskManager.Bus[CreateTaskmanager.METADATA_XML] = metadataXml;
+
+            // locat path
+            var path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "metadataTemp.Xml");
+            metadataXml.Save(path);
+        }
+
         private void UpdateCompoundAttributeToXml(BaseUsage usage, int number, string xpath)
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            var metadataXml = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadataXml = getMetadata();
 
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
 
@@ -2293,6 +2729,59 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         }
 
         #endregion Xml Add / Remove / Update
+
+        #region Xml Helper
+
+        private XDocument getMetadata()
+        {
+            try
+            {
+                if (TaskManager == null) TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+
+                if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_XML))
+                {
+                    var metadata = TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+
+                    if (metadata is XDocument) return (XDocument)metadata;
+                    else
+                    {
+                        if (metadata is XmlDocument)
+                        {
+                            return XmlUtility.ToXDocument((XmlDocument)metadata);
+                        }
+                    }
+                }
+
+                return new XDocument();
+            }
+            catch
+            {
+                return new XDocument();
+            }
+        }
+
+        private XDocument convertMetadata(object metadata)
+        {
+            try
+            {
+                if (metadata is XDocument) return (XDocument)metadata;
+                else
+                {
+                    if (metadata is XmlDocument)
+                    {
+                        return XmlUtility.ToXDocument((XmlDocument)metadata);
+                    }
+                }
+
+                return new XDocument();
+            }
+            catch
+            {
+                return new XDocument();
+            }
+        }
+
+        #endregion Xml Helper
 
         #endregion Xml
 
@@ -2350,12 +2839,17 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             UpdateAttribute(parentUsage, parentModelNumber, metadataAttributeUsage, number, value, stepModelHelper.XPath);
 
+            ViewData["Xpath"] = stepModelHelper.XPath; // set Xpath for idbyxapth
+
             if (stepModelHelper.Model.MetadataAttributeModels.Where(a => a.Id.Equals(id) && a.Number.Equals(number)).Count() > 0)
             {
                 var selectedMetadatAttributeModel = stepModelHelper.Model.MetadataAttributeModels.Where(a => a.Id.Equals(id) && a.Number.Equals(number)).FirstOrDefault();
                 // select the attributeModel and change the value
                 selectedMetadatAttributeModel.Value = model.Value;
                 selectedMetadatAttributeModel.Errors = validateAttribute(selectedMetadatAttributeModel);
+
+                Session["CreateDatasetTaskmanager"] = TaskManager;
+
                 return PartialView("_metadataAttributeView", selectedMetadatAttributeModel);
             }
             else
@@ -2370,10 +2864,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             var errors = new List<Error>();
             //optional check
             if (aModel.MinCardinality > 0 && (aModel.Value == null || String.IsNullOrEmpty(aModel.Value.ToString())))
-                errors.Add(new Error(ErrorType.MetadataAttribute, "is not optional", new object[] { aModel.DisplayName, aModel.Value, aModel.Number, aModel.ParentModelNumber, aModel.Parent.Label }));
+                errors.Add(new Error(ErrorType.MetadataAttribute, "is required", new object[] { aModel.DisplayName, aModel.Value, aModel.Number, aModel.ParentModelNumber, aModel.Parent.Label }));
             else
                 if (aModel.MinCardinality > 0 && String.IsNullOrEmpty(aModel.Value.ToString()))
-                errors.Add(new Error(ErrorType.MetadataAttribute, "is not optional", new object[] { aModel.DisplayName, aModel.Value, aModel.Number, aModel.ParentModelNumber, aModel.Parent.Label }));
+                errors.Add(new Error(ErrorType.MetadataAttribute, "is required", new object[] { aModel.DisplayName, aModel.Value, aModel.Number, aModel.ParentModelNumber, aModel.Parent.Label }));
 
             //check datatype
             if (aModel.Value != null && !String.IsNullOrEmpty(aModel.Value.ToString()))
@@ -2412,42 +2906,51 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
         private void ValidateModels(List<StepModelHelper> stepModelHelpers)
         {
-            foreach (var stepModeHelper in stepModelHelpers)
+            List<Error> tmp = new List<Error>();
+
+            foreach (var stepModelHelper in stepModelHelpers)
             {
-                // if model exist then validate attributes
-                if (stepModeHelper.Model != null)
+                //only check if step is a instance
+                if (stepModelHelper.Model.StepInfo.IsInstanze)
                 {
-                    foreach (var metadataAttrModel in stepModeHelper.Model.MetadataAttributeModels)
+                    // if model exist then validate attributes
+                    if (stepModelHelper.Model != null)
                     {
-                        metadataAttrModel.Errors = validateAttribute(metadataAttrModel);
-                        //if (metadataAttrModel.Errors.Count > 0)
-                        //    step.stepStatus = StepStatus.error;
+                        foreach (var metadataAttrModel in stepModelHelper.Model.MetadataAttributeModels)
+                        {
+                            metadataAttrModel.Errors = validateAttribute(metadataAttrModel);
+
+                            if (metadataAttrModel.Errors != null) tmp.AddRange(metadataAttrModel.Errors);
+
+                            //if (metadataAttrModel.Errors.Count > 0)
+                            //    step.stepStatus = StepStatus.error;
+                        }
                     }
-                }
-                // else check for required elements
-                else
-                {
-                    if (metadataStructureUsageHelper.HasUsagesWithSimpleType(stepModeHelper.UsageId, stepModeHelper.UsageType))
+                    // else check for required elements
+                    else
                     {
-                        //foreach (var metadataAttrModel in stepModeHelper.Model.MetadataAttributeModels)
-                        //{
-                        //    metadataAttrModel.Errors = validateAttribute(metadataAttrModel);
-                        //    if (metadataAttrModel.Errors.Count>0)
-                        //        step.stepStatus = StepStatus.error;
-                        //}
+                        if (metadataStructureUsageHelper.HasUsagesWithSimpleType(stepModelHelper.UsageId, stepModelHelper.UsageType))
+                        {
+                            //foreach (var metadataAttrModel in stepModeHelper.Model.MetadataAttributeModels)
+                            //{
+                            //    metadataAttrModel.Errors = validateAttribute(metadataAttrModel);
+                            //    if (metadataAttrModel.Errors.Count>0)
+                            //        step.stepStatus = StepStatus.error;
+                            //}
 
-                        //if(MetadataStructureUsageHelper.HasRequiredSimpleTypes(stepModeHelper.Usage))
-                        //{
-                        //    StepInfo step = TaskManager.Get(stepModeHelper.StepId);
-                        //    if (step != null && step.IsInstanze)
-                        //    {
-                        //        Error error = new Error(ErrorType.Other, String.Format("{0} : {1} {2}", "Step: ", stepModeHelper.Usage.Label, "is not valid. There are fields that are required and not yet completed are."));
+                            //if(MetadataStructureUsageHelper.HasRequiredSimpleTypes(stepModeHelper.Usage))
+                            //{
+                            //    StepInfo step = TaskManager.Get(stepModeHelper.StepId);
+                            //    if (step != null && step.IsInstanze)
+                            //    {
+                            //        Error error = new Error(ErrorType.Other, String.Format("{0} : {1} {2}", "Step: ", stepModeHelper.Usage.Label, "is not valid. There are fields that are required and not yet completed are."));
 
-                        //        errors.Add(new Tuple<StepInfo, List<Error>>(step, tempErrors));
+                            //        errors.Add(new Tuple<StepInfo, List<Error>>(step, tempErrors));
 
-                        //        step.stepStatus = StepStatus.error;
-                        //    }
-                        //}
+                            //        step.stepStatus = StepStatus.error;
+                            //    }
+                            //}
+                        }
                     }
                 }
             }
@@ -2548,7 +3051,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 //get Instance
                 if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_XML))
                 {
-                    var xMetadata = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+                    var xMetadata = getMetadata();
                     model.ConvertInstance(xMetadata, stepModelHelper.XPath);
                 }
             }
@@ -2601,7 +3104,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 //get Instance
                 if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_XML))
                 {
-                    var xMetadata = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+                    var xMetadata = getMetadata();
                     model.ConvertInstance(xMetadata, stepModelHelper.XPath);
                 }
             }
@@ -2636,7 +3139,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         private AbstractMetadataStepModel LoadSimpleAttributesForModelFromXml(StepModelHelper stepModelHelper)
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
-            var metadata = (XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML];
+            var metadata = getMetadata();
 
             var complexElement = XmlUtility.GetXElementByXPath(stepModelHelper.XPath, metadata);
             var additionalyMetadataAttributeModel = new List<MetadataAttributeModel>();
@@ -2664,6 +3167,29 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         if (simpleElement != null && !String.IsNullOrEmpty(simpleElement.Value))
                         {
                             simpleMetadataAttributeModel.Value = simpleElement.Value;
+
+                            #region entity mapping
+
+                            // if this simple attr is linked to a enity, some attr need to get from the xelement and create a url for the model
+                            if (simpleElement.Attributes().Any(a => a.Name.LocalName.ToLowerInvariant().Equals("entityid")))
+                            {
+                                long id = 0;
+                                int version = 0;
+                                string idAsString = simpleElement.Attributes().FirstOrDefault(a => a.Name.LocalName.ToLowerInvariant().Equals("entityid"))?.Value;
+                                string versionAsString = simpleElement.Attributes().FirstOrDefault(a => a.Name.LocalName.ToLowerInvariant().Equals("entityversion"))?.Value;
+
+                                if (Int64.TryParse(idAsString, out id) &&
+                                    Int32.TryParse(versionAsString, out version))
+                                {
+                                    string server = this.Request.Url.GetLeftPart(UriPartial.Authority);
+                                    string url = server + "/DDM/Data/Show/" + id.ToString() + "?version=" + version;
+
+                                    simpleMetadataAttributeModel.EntityUrl = url;
+                                }
+                            }
+
+                            #endregion entity mapping
+
                             // if at least on item has a value, the parent should be activated
                             setStepModelActive(stepModelHelper);
                         }
@@ -2701,7 +3227,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             FeaturePermissionManager featurePermissionManager = new FeaturePermissionManager();
 
-
             try
             {
                 return featurePermissionManager.HasAccess<User>(GetUsernameOrDefault(), "DCM", "CreateDataset", "*");
@@ -2721,7 +3246,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             #region security permissions and authorisations check
 
             EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-
 
             try
             {
@@ -2770,7 +3294,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             else
                                 TaskManager.Actions.Add(CreateTaskmanager.SUBMIT_ACTION, action);
 
-
                             //TaskManager.Actions.ContainsKey(CreateTaskmanager.SUBMIT_ACTION) ? TaskManager.Actions[CreateTaskmanager.SUBMIT_ACTION] = action : TaskManager.Actions.Add(CreateTaskmanager.SUBMIT_ACTION, action);
 
                             break;
@@ -2801,14 +3324,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
                 }
 
-
                 Session["CreateDatasetTaskmanager"] = TaskManager;
 
                 return Json(true);
             }
             catch (Exception ex)
             {
-
                 return Json(ex.Message);
             }
         }
@@ -2834,7 +3355,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     var dataset = dm.GetDataset(datasetid);
                     metadataStructureid = dataset.MetadataStructure.Id;
                     metadata = dm.GetDatasetLatestMetadataVersion(datasetid);
-                    TaskManager.UpdateBus(CreateTaskmanager.METADATA_XML, metadata);
+                    TaskManager.UpdateBus(CreateTaskmanager.METADATA_XML, XmlUtility.ToXDocument(metadata));
                 }
 
                 return RedirectToAction("ImportMetadata", "Form", new { area = "Dcm", metadataStructureId = metadataStructureid, edit = false, created = false, locked = true });
@@ -2866,7 +3387,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     var dataset = dm.GetDataset(datasetid);
                     metadataStructureid = dataset.MetadataStructure.Id;
                     metadata = dm.GetDatasetLatestMetadataVersion(datasetid);
-                    TaskManager.UpdateBus(CreateTaskmanager.METADATA_XML, metadata);
+                    TaskManager.UpdateBus(CreateTaskmanager.METADATA_XML, XmlUtility.ToXDocument(metadata));
                 }
 
                 return RedirectToAction("ImportMetadata", "Form", new { area = "Dcm", metadataStructureId = metadataStructureid, edit, created });
@@ -2876,5 +3397,70 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         }
 
         #endregion overrideable Action
+
+        #region download
+
+        public ActionResult DownloadAsHtml()
+        {
+            if (TaskManager == null) TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+
+            if (TaskManager != null)
+            {
+                DatasetManager datasetManager = new DatasetManager();
+
+                XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+                long entityId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.ENTITY_ID]);
+                long datastructureId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.DATASTRUCTURE_ID]);
+                long researchplanId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.RESEARCHPLAN_ID]);
+                long metadatastructureId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.METADATASTRUCTURE_ID]);
+
+                string title = xmlDatasetHelper.GetInformation(entityId, NameAttributeValues.title);
+
+                // get the offline version of the metadata
+                var view = this.Render("DCM", "Form", "LoadMetadataOfflineVersion", new RouteValueDictionary()
+                {
+                    { "entityId", entityId },
+                    { "title", title },
+                    { "metadatastructureId", metadatastructureId },
+                    { "datastructureId", datastructureId },
+                    { "researchplanId", researchplanId },
+                    { "sessionKeyForMetadata", null },
+                    { "resetTaskManager", false }
+                });
+
+                // prepare view to write it to the file
+                byte[] content = Encoding.ASCII.GetBytes(view.ToString());
+
+                return File(content, "application/xhtml+xml", "metadata.htm");
+            }
+
+            return Content("no metadata html file is loaded.");
+        }
+
+        public ActionResult DownloadAsXml()
+        {
+            try
+            {
+                if (TaskManager == null) TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+
+                if (TaskManager != null)
+                {
+                    long entityId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.ENTITY_ID]);
+                    string path = OutputMetadataManager.CreateConvertedMetadata(entityId, TransmissionType.mappingFileExport);
+
+                    path = Path.Combine(AppConfiguration.DataPath, path);
+
+                    return File(path, "application/xml", Path.GetFileName(path));
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+
+            return Content("no metadata xml file is loaded.");
+        }
+
+        #endregion download
     }
 }

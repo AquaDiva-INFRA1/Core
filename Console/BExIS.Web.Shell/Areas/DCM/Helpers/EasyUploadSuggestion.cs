@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
-namespace BExIS.Web.Shell.Areas.DCM.Helpers
+namespace BExIS.Modules.Dcm.UI.Helpers
 {
     public class EasyUploadSuggestion
     {
+        public long Id;
         public string attributeName;
         public long unitID;
         public long dataTypeID;
@@ -15,8 +14,17 @@ namespace BExIS.Web.Shell.Areas.DCM.Helpers
         public Boolean show;
 
         public string datatypeDescription;
-        public string conceptAnnotation;
+        public string conceptAnnotation ;
         public string characteristicAnnotation;
+
+        public EasyUploadSuggestion(long Id, string attributeName, long unitID, long dataTypeID, Boolean show)
+        {
+            this.Id = Id;
+            this.attributeName = attributeName;
+            this.unitID = unitID;
+            this.dataTypeID = dataTypeID;
+            this.show = show;
+        }
 
         public EasyUploadSuggestion(string attributeName, long unitID, long dataTypeID, string unitName, string datatypeName, Boolean show)
         {
@@ -27,8 +35,8 @@ namespace BExIS.Web.Shell.Areas.DCM.Helpers
             this.datatypeName = datatypeName;
             this.show = show;
         }
-        
-        public void finish_suggestion_block (string desc, string concept, string charac)
+
+        public void finish_suggestion_block(string desc,string concept, string charac)
         {
             this.conceptAnnotation = concept;
             this.characteristicAnnotation = charac;

@@ -3,236 +3,41 @@
 @using Telerik.Web.Mvc.Resources;
 @using BExIS.Modules.Dcm.UI.Models;
 @using BExIS.Dlm.Entities.DataStructure;
-@using BExIS.Web.Shell.Areas.DCM.Helpers;
 
-<link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
-<style>
-
-    .ontologyMapping select {
-        width: 50%
-    }
-    /*Overwriting the css of the wizard*/
-    #Step5 .uploadWizardStep_Main {
-        width: 90%
-    }
-
-    /*Borders to visually separate the rows of the table*/
-    #verificationTable {
-        border-collapse: collapse
-    }
-
-    #verificationTable tr {
-        border: solid;
-        border-width: 1px 0;
-    }
-
-    #verificationTable tr:first-child {
-        border-top: none;
-    }
-
-    #verificationTable tr:last-child {
-        border-bottom: none;
-    }
-
-    /*Annotation Suggestion styling*/
-    .suggestionContainer {
-        display: block;
-        /*border: 1px dashed black;*/
-        overflow: hidden;
-    }
-
-    .suggestionContainer label {
-        float: left;
-        clear: left;
-    }
-
-    .suggestionContainer select {
-        float: right;
-    }
-
-    .feedbackContainer{
-        display: none;
-    }
-
-    /*Tooltip-css from https://www.w3schools.com/howto/howto_css_tooltip.asp*/
-    /* Tooltip container */
-    .tooltipAD {
-        position: relative;
-        display: inline-block;
-        border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-    }
-
-    /* Tooltip text */
-    .tooltipAD .tooltiptextAD {
-        visibility: hidden;
-        width: 250px;
-        background-color: #555;
-        color: #fff;
-        text-align: center;
-        padding: 5px 0;
-        border-radius: 6px;
-        /* Position the tooltip text */
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        margin-left: -125px;
-        /* Fade in tooltip */
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-        /* Tooltip arrow */
-        .tooltipAD .tooltiptextAD::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #555 transparent transparent transparent;
-        }
-
-    /* Show the tooltip text when you mouse over the tooltip container */
-    .tooltipAD:hover .tooltiptextAD {
-        visibility: visible;
-        opacity: 1;
-    } 
-</style>
 
 <div id="Step5" class="uploadWizardStep">
 
     <div class="uploadWizardStep_Main">
         <div class="uploadWizardStep_Header stepper">
             <h3>@Model.StepInfo.title</h3>
-            <h5>"Unit" and "data type" are linked incase you decide to not select from the suggestions dorpdown of the "variable Name", else they are blocked.</h5>
-            <h7>"variable name" suggestions are displayed in the dropdown menu under the paattern of "variable name - Unit - Data Type".</h7>
         </div>
 
         <div class="uploadWizardStep_Description stepper">
+
         </div>
 
-        <div class="uploadWizardStep_Content stepper" style="height: inherit;">
-            <table id="verificationTable">
+        <div class="uploadWizardStep_Content stepper" style="height: inherit; width: 800px;">
+            <table>
                 <thead>
                     <tr>
-                        <th>Variable name</th>
-                        <th>Unit</th>
-                        <th>Datatype</th>
-                        <!--<th>Datatype description</th>-->
-                        <th>
-                            Ontology mapping
-                            <div class="tooltipAD">
-                                <i class="fa fa-question-circle" aria-hidden="true"></i>
-                                <span class="tooltiptextAD">
-                                    Entity: The kind of observed object </br> Characteristic: The observed property
-                                </span>
-                            </div>
-                        </th>
+                        <th class="first-header">Variable name</th>
+                        <th class="first-header">Datatype</th>
+                        <th class="first-header">Unit</th>
+                        <th class="first-header">Means</th>
+                        <th colspan="2" class="first-header">Ontology mapping</th>
+                    </tr>
+                    <tr>
+                        <th class="second-header">The variable [Name]</th>
+                        <th class="second-header">is of [Datatype]</th>
+                        <th class="second-header">has [Unit]</th>
+                        <th class="second-header">and means [Attribute]</th>
+                        <th colspan="2" class="second-header">semantically refers to </th>
                     </tr>
                 </thead>
-                <tbody id="tbody">
-                    @for (int i = 0; i < Model.HeaderFields.Length; i++)
+                <tbody>
+                    @foreach (var row in Model.Rows)
                     {
-                        <tr id="@("tr_"+i)" class= "@("tr_"+i)" data-index=@i >
-                            <td>
-                                <i class="fa" aria-hidden="true" title=""></i>
-
-                                <!--Dropdown-Menu to choose a suggested Attribute from - unit and datatype stored in html-Attributes for usage in javascript-->
-                                <select  style="width: 80%" id="suggestionSelect" name="Suggestions" headerfieldId="@(i)" onchange="suggestionSelected(this, @i)" class="@("suggestionSelect_"+i)">
-
-                                    <!--The default option is the name of the column in the submitted table-->
-                                    <option data-unit="@ViewData["defaultUnitID"]" data-datatype="@ViewData["defaultDatatypeID"]" value="@Html.Name(Model.HeaderFields[i])">@Html.Name(Model.HeaderFields[i])</option>
-
-                                    <!--Create an option for each variable in the respective suggestions
-                                        make sure that the one that is registered as selected is actually shown as selected in the list-->
-                                    @foreach (EasyUploadSuggestion sug in Model.Suggestions[i])
-                                    {
-                                        if (@sug.show)
-                                        {
-                                            string selected = "";
-                                            if (Model.HeaderVariableInformation.Count > 0)
-                                            {
-                                                EasyUploadVariableInformation tuple = Model.HeaderVariableInformation.Where(t => (t.headerId == i) &&
-                                                                                                                    (t.variableName == sug.attributeName) &&
-                                                                                                                    (t.unitInfo.UnitId == sug.unitID) &&
-                                                                                                                    (t.unitInfo.SelectedDataTypeId == sug.dataTypeID)).FirstOrDefault();
-                                                if (tuple != null)
-                                                {
-                                                    selected = "selected";
-                                                }
-                                            }
-
-                                            string display = sug.attributeName + " - " + sug.unitName + " - " + sug.datatypeName;
-
-                                            <option @Html.Raw(selected) data-unit="@sug.unitID" data-datatype="@sug.dataTypeID" value="@sug.attributeName">@display</option>
-                                        }
-                                    }
-                                </select>
-                            </td>
-
-                            <td>
-                                <!--Unit Selector-->
-                                <select id=@("unitID_"+i) style="width: 80%" name="Unit" headerfieldId="@(i)" onfocus="deselect(this)" onblur="reselect(this)">
-                                    @foreach (UnitInfo unit in Model.AvailableUnits)
-                                    {
-                                        string selected = "";
-
-                                        if (Model.HeaderVariableInformation.Count > 0)
-                                        {
-                                            EasyUploadVariableInformation tuple = Model.HeaderVariableInformation.Where(t => t.unitInfo.UnitId == unit.UnitId && t.headerId == i).FirstOrDefault();
-
-                                            if (tuple != null)
-                                            {
-                                                selected = "selected";
-                                            }
-
-                                        }
-                                        <option @Html.Raw(selected) value="@Html.Name(Convert.ToString(unit.UnitId))" title="@Html.Name(unit.Description)">@Html.Name(unit.Name) (@Html.Name(unit.Abbreviation))</option>
-                                    }
-                                </select>
-                                <!--<div id="@("Unitlock_"+i)"></div>-->
-                            </td>
-                            <td>
-                                <!--Datatype Selector-->
-                                <select id=@("Datatype_"+i) style="width: 80%" name="Datatype" headerfieldId="@(i)" onfocus="deselect(this)" onblur="reselect(this)">
-                                    @{
-
-                                        EasyUploadVariableInformation tupleBla = Model.HeaderVariableInformation.Where(t => t.headerId == i).FirstOrDefault();
-                                        string datatypeDescription = "";
-
-                                        if (tupleBla != null && tupleBla.unitInfo.UnitId >= 0)
-                                        {
-                                            foreach (DataTypeInfo dataTypeInfo in ((UnitInfo)tupleBla.unitInfo).DataTypeInfos)
-                                            {
-                                                string selected = "";
-
-                                                if (tupleBla.unitInfo.SelectedDataTypeId == dataTypeInfo.DataTypeId)
-                                                {
-                                                    selected = "selected";
-                                                    datatypeDescription = dataTypeInfo.Description;
-                                                }
-
-                                                <option @Html.Raw(selected) value="@Html.Name(Convert.ToString(dataTypeInfo.DataTypeId))" title="@Html.Name(dataTypeInfo.Description)">@Html.Name(dataTypeInfo.Name)</option>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <option value="none" title="Please select a unit">Please select a unit</option>
-                                        }
-                                    }
-                                </select>
-                                <!--<div id="@("Datatypelock_"+i)"></div>-->
-                            </td>
-                            <!--
-                            <td id="@("datatypeinfo_"+i)" class="datatypeinfo">
-                                @Html.Raw(datatypeDescription)
-                            </td>
-                            -->
-                            <td id="@("ontologyMapping_"+i)" class="ontologyMapping">
-                            </td>
-                        </tr>
+                        @Html.Partial("Row", row);
                     }
                 </tbody>
             </table>
@@ -258,6 +63,17 @@
 </div>
 
 <style>
+
+    .first-header {
+        min-width: 150px;
+        border-bottom: none;
+    }
+
+    .second-header {
+        font-size: 12px;
+        border-top: 1px solid;
+    }
+
     .fa-exclamation-triangle {
         color: darkorange;
     }
@@ -269,23 +85,7 @@
 
 <script type="text/javascript">
 
-    function disable_clicks() {
-        $('body').css('pointer-events', '');
-        //alert("page clickable");
-    };
-    function enable_clicks() {
-        $('body').css('pointer-events', 'none');
-        //alert("page non clickable");
-    }
-
-    function handler(e) {
-        e.stopPropagation();
-        e.preventDefault();
-    }
-
     function validateData(button) {
-        // listener on
-        enable_clicks();
         //Hide the results of previous validation attempts
         $(button).closest('tr').find('i').prop('title', "");
 
@@ -308,16 +108,14 @@
                 $(this).removeClass("fa-exclamation-triangle");
                 $(this).removeClass("fa-check");
             });
-            //listener off
-            disable_clicks();
+
             //See if there are errors, display them or display a check mark
             if (response.errors.length > 0) {
                 for (var i = 0; i < response.errors.length; i++) {
                     var error = response.errors[i];
                     //var VariableName = error.VariableName;
                     //var TitleCell = $('td[varName="' + VariableName + '"] > i');
-                    console.log(error);
-                    var TitleCell = $('tr[data-index="' + error.Item1 + '"] td > i');
+                    var TitleCell = $('td[index="' + error.Item1 + '"] > i');
 
                     //Show a warning sign, hide check marks if they were visible before
                     TitleCell.removeClass("fa-check");
@@ -356,7 +154,6 @@
             }
         });
     }
-    
 
     $(document).ready(function () {
 
@@ -365,274 +162,76 @@
             hot.destroy();
             hotActive = false;
         }
-        
-        
-        $('select[name="Unit"]').change(function () {
-            //listener on
-            enable_clicks();
-            if ($(this).val() != null && $(this).val() != '') {
-                var selectOptionId = $(this).val();
-                var selectId = $(this).attr('headerfieldId');
-                // send to bus
-                $.post('@Url.Action("SaveUnitSelection", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })', { "selectFieldId": selectId, "selectOptionId": selectOptionId },
-                    function (response) {
-                        //listener off
-                        disable_clicks();
-                        //$('#StepView > div').first().html(response);
-                        var json = JSON.parse(response);
-                        console.log(" response = " + json);
-                        var options = "";
-                        for (i = 0; i < json.length; i++) {
-                            var item = json[i];
-                            var DataTypeId = item.DataTypeId;
-                            var description = item.Description;
-                            var name = item.Name;
-                            var selected = '';
-                            if (i == 0)
-                                selected = 'selected';
-                            var option = '<option ' + selected + ' value="' + DataTypeId + '" title="' + description + '">' + name+'</option>';
-                            options = options + option;
-                        }
-                        $("#Datatype_" + selectId).html(options);
-                    }
-                );
-            }
-        });
-        
-        $('select[name="Datatype"]').change(function () {
-            //listener on
-            enable_clicks();
-            var selectedDataTypeId = $(this).val();
-            var headerfieldId = $(this).attr('headerfieldId');
-        
-            // send to bus
-            $.post('@Url.Action("SaveDataTypeSelection", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })', { headerfieldId: headerfieldId, selectedDataTypeId: selectedDataTypeId },
-                function (response) {
-                    //listener off
-                    disable_clicks();
-                //$('#StepView > div').first().html(response);
-                    //var json = JSON.parse(response);
-                    //console.log(" response = " + json);
-                    //var options = "";
-                    //for (i = 0; i < json.length; i++) {
-                    //    var item = json[i];
-                    //    var UnitId = item.UnitId;
-                    //    var Description = item.Description;
-                    //    var Name = item.Name;
-                    //    var Abbreviation = item.Abbreviation;
-                    //    var selected = '';
-                    //    if (i == 0)
-                    //        selected = 'selected';
-                    //    var option = '<option ' + selected + ' value="' + UnitId + '" title="' + Description + '">' + Name + ' ' + ' (' + Abbreviation + ')</option>';
-                    //    options = options + option;
-                    //}
-                    //$("#unitID_" + headerfieldId).html(options);
-            });
-        });
 
-        //Get the annotation suggestions from the server
-        loadMappingSuggestions();
     });
 
-    function loadMappingSuggestions(ref) {
-        //listener on
-        enable_clicks();
-        //
-        $('#verificationTable tr').each(function (index) {
-            
-            var headerItemIndex = $(this).data("index");
+    function change(e){
 
-            //Dirty workaround to get the value of the javascript variable into the generated URL
-            var url = '@Url.Action("GetMappingSuggestionDropdown", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" }, { "headerIndex", "-1" } })';
-            //url = url.replace("-1", headerItemIndex);
-            if (ref != undefined )
-                url = url.replace("-1", ref);
-            else 
-                url = url.replace("-1", headerItemIndex);
-            console.log("url : " + url);
-            //Show preloader
-            $(this).find(".ontologyMapping").preloader(12, "Loading mapping suggestions")
-            //Load and show mapping suggestion select-boxes
-            $(this).find(".ontologyMapping").load(url);
 
-            //desactivate the drop down menu if the variable is selected from suggestions
-            var index = $("#suggestionSelect").prop('selectedIndex');
-            var unitselectID = "unitID_" + headerItemIndex;
-            var DatatypeselectID = "Datatype_" + headerItemIndex;
+            var index = 0;
+            var selectedUnit = 0;
+            var selectedDataType = 0;
+            var selectedAttribute = 0;
+            var varName = "";
+            var selected_entity = "";
+            var selected_charac = "";
 
-            var variable = $('.suggestionSelect_' + headerItemIndex).find(":selected").text();
-            output = variable.split(' - ');
-            console.log("variables names selected : " + output.toString() + " with size : "+output.length);
-            if ((index != 0) && (output.length > 1)) {
-                $("#" + DatatypeselectID ).attr('disabled', 'disabled');
-                $("#" + unitselectID).attr('disabled', 'disabled');
-                $("#" + DatatypeselectID).css('backgroundColor', '#f2f2f2');
-                $("#" + unitselectID).css('backgroundColor', '#f2f2f2');
-                //$("#Unitlock_" + headerItemIndex).html('<i class="em em-lock"></i>');
-                //$("#Datatypelock_" + headerItemIndex).html('<i class="em em-lock"></i>');
-            }
-            else{
-                $("#" + DatatypeselectID ).removeAttr('disabled');
-                $("#" + DatatypeselectID ).attr('disabled',false);
-                $("#" + unitselectID ).removeAttr('disabled');
-                $("#" + unitselectID).attr('disabled', false);
-                $("#" + DatatypeselectID).css('backgroundColor', '');
-                $("#" + unitselectID).css('backgroundColor', '');
-                //$("#Unitlock_" + headerItemIndex).html('<i class="em em-unlock"></i>');
-                //$("#Datatypelock_" + headerItemIndex).html('<i class="em em-unlock"></i>');
-            }
-            disable_clicks();
-        });
-    }
+            //set unit id
+            console.log($(e).attr("name"));
 
-    function suggestionSelected(suggestionSelectObject, i) {
-        //listener on
-        enable_clicks();
-        //
+            //console.log($(e).parents("tr.eu-row"));
 
-        console.log("Index of row  : " + i);
+            var parent = $(e).parents("tr.eu-row")[0]
 
-        //Find the selected option object
-        var selectedOption = suggestionSelectObject.options[suggestionSelectObject.selectedIndex];
-        var index = $(suggestionSelectObject).prop('selectedIndex');
+            var dataTypeContainer = $(parent).find('select.datatype');
+            var unitContainer = $(parent).find('select.unit');
+            var dataAttrContainer = $(parent).find('select.dataattribute');
+            var entityContainer = $(parent).find('select.entity');
+            var charachteristicContainer = $(parent).find('select.charachteristic');
+            var lastSelection = $(e).attr("name");
 
-        var selectedVariableName = selectedOption.value;
-        //Now grab the unitID and datatype from the html attributes of the selected option element
-        var unitID = selectedOption.getAttribute("data-unit");
-        var datatypeID = selectedOption.getAttribute("data-datatype");
-        var selectedVariableId = selectedOption.getAttribute("data-attributeid");
-        
-         //Send selection to Bus
-        $.post('@Url.Action("Set_Unit_Datatype_Mappings", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })',
-            {
-                headerfieldId: i,
-                selectedVariableName: selectedVariableName,
-                selectedVariableId: selectedVariableId,
-                selectedUnitId: unitID,
-                selectedDataTypeId: datatypeID
+            selectedDataType = $($(dataTypeContainer).find(":selected")[0]).val();
+            selectedUnit = $($(unitContainer).find(":selected")[0]).val();
+            selectedAttribute = $($(dataAttrContainer).find(":selected")[0]).val();
+            selectedEntity = $($(entityContainer).find(":selected")[0]).val();
+            selectedCharachteristic = $($(charachteristicContainer).find(":selected")[0]).val();
+            varName = $($(parent).find(".name")[0]).attr("varName");
+            index = $($(parent).find(".name")[0]).attr("index");
+
+            //console.log(selectedDataType);
+            console.log(selectedUnit);
+            //console.log(selectedAttribute);
+            //console.log(varName);
+            //console.log(index);
+
+            $(parent).find(".preloader").each(function () {
+                $(this).preloader(12,".");
+            })
+
+
+            $.post('@Url.Action("SaveSelection", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })', {
+                index,
+                selectedUnit,
+                selectedDataType,
+                selectedAttribute,
+                varName,
+                lastSelection,
+                selectedEntity,
+                selectedCharachteristic
+
             }, function (response) {
-                
-                var obj = JSON.parse(response);
-                var unitselectID = "unitID_"+i;
-                var DatatypeselectID = "Datatype_"+i;
-                var DataTypedescrition = "datatypeinfo_" + i;
-                var entity = "Entity_" + i;
-                var charac = "Characteristic_" + i;
-                var ontology_id = "ontologyMapping_" + i;
 
-                $("#" + unitselectID + " option[value=" + obj.unitID + "]").attr('selected', '');
-                $("#" + unitselectID + " option[value=" + obj.unitID + "]").attr('selected', 'selected');
-                $("#" + unitselectID).val(obj.unitID);
 
-                $("#" + DatatypeselectID + " option[value=" + obj.dataTypeID + "]").attr('selected', '');
-                $("#" + DatatypeselectID + " option[value=" + obj.dataTypeID + "]").attr('selected', 'selected');
-                $("#" + DatatypeselectID).val(obj.dataTypeID);
+                //console.log("back from server");
+                //console.log(response);
+                //console.log(parent);
 
-                if (index != 0){
-                    $("#" + unitselectID).attr('disabled', 'disabled');
-                    $("#" + unitselectID).css('backgroundColor', '#f2f2f2');
-                    //$("#Unitlock_" + i).html('<i class="em em-lock"></i>');
+                $(parent).replaceWith(response);
+            });
 
-                    $("#" + DatatypeselectID).attr('disabled', 'disabled');
-                    $("#" + DatatypeselectID).css('backgroundColor', '#f2f2f2');
-                    //$("#Datatypelock_" + i).html('<i class="em em-lock"></i>');
-                }
-                else{
-                    $("#" + unitselectID ).removeAttr('disabled');
-                    $("#" + unitselectID).attr('disabled', false); 
-                    $("#" + unitselectID).css('background-color', ''); 
-                    //$("#Unitlock_" + i).html('<i class="em em-unlock"></i>');
 
-                    $("#" + DatatypeselectID).removeAttr('disabled');
-                    $("#" + DatatypeselectID).attr('disabled', false);
-                    $("#" + DatatypeselectID).css('background-color', '');
-                    //$("#Datatypelock_" + i).html('<i class="em em-unlock"></i>');
-                }
-
-                
-
-                //$("#" + entity + " option[value=\"" + obj.conceptAnnotation + "\"]").attr('selected', '');
-                //$("#" + entity + " option[value=\"" + obj.conceptAnnotation + "\"]").attr('selected', 'selected');
-                //$("#" + entity).val(obj.conceptAnnotation);
-                //
-                //$("#" + charac + " option[value=\"" + obj.characteristicAnnotation + "\"]").attr('selected', '');
-                //$("#" + charac + " option[value=\"" + obj.characteristicAnnotation + "\"]").attr('selected', 'selected');
-                //$("#" + charac).val(obj.characteristicAnnotation);
-
-                //document.getElementById(DataTypedescrition).innerHTML = obj.datatypeDescription;
-                //loadMappingSuggestions(i);
-                //$("#datatypeinfo").val(obj.datatypeDescription);
-
-                console.log("updated fields, going to recall the loading of the mapping ontology");
-
-                //Dirty workaround to get the value of the javascript variable into the generated URL
-                var url = '@Url.Action("GetMappingSuggestionDropdown", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" }, { "headerIndex", "-1" } })';
-                //url = url.replace("-1", headerItemIndex);
-                if (i != undefined )
-                    url = url.replace("-1", i);
-                console.log("url : " + url);
-                //Show preloader
-                $(this).find("#" + ontology_id).preloader(12, "Loading mapping suggestions")
-                //Load and show mapping suggestion select-boxes
-                $("#"+ontology_id).load(url);
-                console.log("updated ontology mapping");
-                //listener off
-                disable_clicks();
-        });
-
-        ////Send selection to Bus
-        //$.post('@Url.Action("SaveSuggestionSelection", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } })',
-        //    {
-        //        headerfieldId: i,
-        //        selectedVariableName: selectedVariableName,
-        //        selectedVariableId: selectedVariableId,
-        //        selectedUnitId: unitID,
-        //        selectedDataTypeId: datatypeID
-        //    }, function (response) {
-        //        $('#StepView > div').first().html(response);
-        //});
-    }
-
-    //Sends information to the backend that the user wasn't able to find the concept he was looking for
-    function noConceptFound(cb, category) {
-        //listener on
-        enable_clicks();
-        //
-        var headerfieldId = $(cb).closest('tr').data('index');
-        $.post('@Url.Action("NoConceptFound", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" } } )',
-            {
-                headerfieldId: headerfieldId,
-                category: category,
-                checkboxChecked: cb.checked
-            },
-            function (res) {
-                //listener off
-                disable_clicks();
-                //Maybe display a "Thank you for your feedback" message here?
-                if (cb.checked)
-                    $(cb).siblings().filter('.feedbackContainer').show();
-                var checkboxid = category + "_" + headerfieldId + "_checkbox";
-                if ($("#" + checkboxid).prop("checked") == true) {
-                    $("#" + category + "_" + headerfieldId).attr('disabled', 'disabled');
-                    $("#" + category + "_" + headerfieldId).css('backgroundColor', '#f2f2f2');
-                }
-                else {
-                    $("#" + category + "_" + headerfieldId).removeAttr('disabled');
-                    $("#" + category + "_" + headerfieldId).attr('disabled', false);
-                    $("#" + category + "_" + headerfieldId).css('backgroundColor', '');
-                }
-            }
-        );
-        //Dis-/Enable the dropdown
-        var dropdown = $(cb).closest('.suggestionContainer').find('select');
-        if (cb.checked) {
-            dropdown.attr('disabled', 'disabled');
-        } else {
-            dropdown.removeAttr('disabled');
-            $(cb).siblings().filter('.feedbackContainer').hide();
         }
-        disable_clicks();
-    }
+
 
     //Necessary to trigger onChange even when the same option is selected again
     function deselect(select) {
@@ -646,6 +245,7 @@
             select.selectedIndex = $(select).data('storedIndex');
         }
     }
+
 
 
 </script>

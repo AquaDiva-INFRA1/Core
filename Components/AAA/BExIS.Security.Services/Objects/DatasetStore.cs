@@ -4,6 +4,11 @@ namespace BExIS.Security.Services.Objects
 {
     public class DatasetStore : IEntityStore
     {
+        public int CountVersions(long id)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public List<EntityStoreItem> GetEntities()
         {
             var datasets = new List<EntityStoreItem>();
@@ -14,6 +19,26 @@ namespace BExIS.Security.Services.Objects
             }
 
             return datasets;
+        }
+
+        public string GetTitleById(long id)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public int GetVersionById(long id)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool HasVersions()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

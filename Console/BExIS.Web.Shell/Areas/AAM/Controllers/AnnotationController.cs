@@ -198,7 +198,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
             }
 
             //Send each of the lists to the SemanticSearchController to find the labels from the ontology
-            if (this.IsAccessibale("DDM", "SemanticSearch", "FindOntologyLabels"))
+            if (this.IsAccessible("DDM", "SemanticSearch", "FindOntologyLabels"))
             {
                 ContentResult entityLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(entityURIs) } });
                 ContentResult charLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(charURIs) } });

@@ -41,7 +41,7 @@ using Vaiona.Logging;
 using BExIS.Security.Services.Utilities;
 using System.Configuration;
 using System.Text;
-
+using BExIS.IO.Transform.Validation.Exceptions;
 
 namespace BExIS.Modules.OAC.UI.Controllers
 {
@@ -227,7 +227,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
             MetadataStructureManager msm = new MetadataStructureManager();
             ResearchPlanManager rpm = new ResearchPlanManager();
             EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-
+            List<Error> temp = new List<Error>();
             try
             {
                 #region create empty dataset to be filled
@@ -259,10 +259,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
                         //Give view and download rights to the members
                         foreach (User piMember in piMembers)
                         {
-                            entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
-                                        RightType.Read,
-                                        RightType.Download
-                                    });
+                            entityPermissionManager.Create<User> (GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                         }
                     }
                 }
@@ -372,19 +369,29 @@ namespace BExIS.Modules.OAC.UI.Controllers
                             Offset = areaDataValues[1],
                             Orientation = orientation
                         };
+
+
                         #region csv / txt parsing to get data tuples and variables
                         AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
-
-                        afri.Seperator = TextSeperator.semicolon;// doesnt matter cauz the delimiter is already used to fill the JSONtable and to finish the upload it is using the JSON Table instead of reading the data again
+                        afri.Seperator = TextSeperator.comma;
 
                         List<String[]> Json_table_ = JsonConvert.DeserializeObject<List<String[]>>
                             (json);
 
-                        AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload();
+                        AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload(dataStruct_, afri);
                         FileStream Stream = reader_.Open(temp_file_path);
-                        rows = reader_.ReadFile(Stream, System.IO.Path.GetFileName(temp_file_path),
-                            Json_table_, afri, dataStruct_, ds.Id, packageSize, fri);
+                        //rows = reader_.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(), ds.Id).ToArray();
+                        rows = reader_.ReadFile(Stream, System.IO.Path.GetFileName(temp_file_path), Json_table_, afri, dataStruct_, ds.Id, packageSize, fri);
                         Stream.Close();
+
+                        if (reader_.ErrorMessages.Count > 0)
+                        {
+                            foreach (var err in reader_.ErrorMessages)
+                            {
+                                temp.Add(new Error(ErrorType.Dataset, err.GetMessage()));
+                            }
+                            //return temp;
+                        }
 
                         int lines = (areaDataValues[2] + 1) - (areaDataValues[0] + 1);
                         int batches = lines / batchSize;
@@ -432,10 +439,11 @@ namespace BExIS.Modules.OAC.UI.Controllers
                 EBIresponseModel EBIresponseModel = new EBIresponseModel(JObject.Parse(sample_metadata));
                 string filepath = temp_file_to_save_json_as_csv + "tmp" + ds.Id + ".csv";
                 EBIresponseModel.ConvertTocsv(EBIresponseModel, filepath);
-                AsciiReader reader = new AsciiReader();
-                FileStream Stream = reader.Open(temp_file_to_save_json_as_csv + "tmp" + ds.Id + ".csv");
                 AsciiFileReaderInfo fri = new AsciiFileReaderInfo();
-                reader.ValidateFile(Stream, filepath + ds.Id + ".csv", fri, sds, id);
+                fri.Seperator = TextSeperator.comma;
+                AsciiReader reader = new AsciiReader(sds, fri);
+                Stream Stream = reader.Open(temp_file_to_save_json_as_csv + "tmp" + ds.Id + ".csv");
+                reader.ValidateFile(Stream, Path.GetFileName(filepath) , ds.Id );
                 Stream.Close();
             }
             catch (Exception exc)

@@ -27,6 +27,19 @@ namespace BExIS.Modules.Dcm.UI.Models.Metadata
         public int NumberOfSourceInPackage { get; set; }
         public List<object> DomainList { get; set; }
         public List<Error> Errors { get; set; }
+        public bool Locked { get; set; }
+        public double LowerBoundary { get; set; }
+        public double UpperBoundary { get; set; }
+
+        #region Mapping Variables
+
+        public bool PartyMappingExist { get; set; }
+        public bool EntityMappingExist { get; set; }
+
+        //url to the show view of the entity
+        public string EntityUrl { get; set; }
+
+        #endregion Mapping Variables
 
         public string ConstraintDescription { get; set; }
 
@@ -75,9 +88,14 @@ namespace BExIS.Modules.Dcm.UI.Models.Metadata
                 last = false,
                 MetadataAttributeId = this.MetadataAttributeId,
                 ParentStepId = this.ParentStepId,
-                Errors = null
+                Errors = null,
+                Locked = false,
+                PartyMappingExist = this.PartyMappingExist,
+                EntityMappingExist = this.EntityMappingExist,
+                EntityUrl = "",
+                UpperBoundary = this.UpperBoundary,
+                LowerBoundary = this.LowerBoundary
             };
         }
-
     }
 }

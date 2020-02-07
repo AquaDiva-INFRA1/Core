@@ -2,6 +2,7 @@
 using BExIS.Dim.Services;
 using BExIS.IO;
 using BExIS.Xml.Helpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +15,6 @@ namespace BExIS.Dim.Helpers
     {
         private const string sourceFile = "submissionConfig.xml";
         private XmlDocument requirementXmlDocument = null;
-
 
         public List<Broker> Brokers;
 
@@ -30,7 +30,6 @@ namespace BExIS.Dim.Helpers
 
             try
             {
-
                 string filepath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DIM"), sourceFile);
 
                 if (FileHelper.FileExist(filepath))
@@ -46,6 +45,10 @@ namespace BExIS.Dim.Helpers
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
             finally
             {
                 publicationManager.Dispose();
@@ -55,7 +58,6 @@ namespace BExIS.Dim.Helpers
         private Broker createBroker(XmlNode node, PublicationManager publicationManager)
         {
             Broker tmp = new Broker();
-
 
             //create broker in DB
             string brokerName = XmlUtility.GetXmlNodeByName(node, "name").InnerText;
@@ -76,13 +78,10 @@ namespace BExIS.Dim.Helpers
                 tmp = publicationManager.CreateBroker(tmp);
             }
 
-
-
             XmlNode dataRepos = XmlUtility.GetXmlNodeByName(node, "dataRepos");
 
             foreach (XmlNode dataRepo in dataRepos.ChildNodes)
             {
-
                 Repository repo = null;
                 string repoName = XmlUtility.GetXmlNodeByName(dataRepo, "name").InnerText;
 
@@ -97,7 +96,6 @@ namespace BExIS.Dim.Helpers
 
                 if (repo != null) publicationManager.CreateRepository(repo.Name, repo.Url, tmp);
             }
-
 
             return tmp;
         }
@@ -128,24 +126,24 @@ namespace BExIS.Dim.Helpers
             return Path.Combine("Datasets", datasetid.ToString(), "publish", dataRepositoryName);
         }
 
-        public string GetZipFileName(long datasetid, long datasetVersionid)
+        public string GetZipFileName(long datasetid, long versionNr)
         {
-            return datasetid + "_" + datasetVersionid + "_Dataset.zip";
+            return datasetid + "_" + versionNr + "_Dataset.zip";
         }
 
-        public string GetFileNameForDataRepo(long datasetid, long datasetVersionid, string datarepo, string ext)
+        public string GetFileNameForDataRepo(long datasetid, long versionNr, string datarepo, string ext)
         {
-            return datasetid + "_" + datasetVersionid + "_Dataset_" + datarepo + "." + ext;
+            return datasetid + "_" + versionNr + "_Dataset_" + datarepo + "." + ext;
         }
 
-        public bool Exist(long datasetid, long datasetVersionid, string dataRepositoryName)
+        public bool Exist(long datasetid, long versionNr, string dataRepositoryName)
         {
             // check directory
             string d = GetDirectoryPath(datasetid, dataRepositoryName);
             if (!Directory.Exists(d)) return false;
 
             //check file
-            string file = GetZipFileName(datasetid, datasetVersionid);
+            string file = GetZipFileName(datasetid, versionNr);
             string filePath = Path.Combine(d, file);
 
             if (File.Exists(filePath)) return true;
@@ -153,9 +151,6 @@ namespace BExIS.Dim.Helpers
             return false;
         }
 
-        #endregion
-
-
-
+        #endregion helper function
     }
 }

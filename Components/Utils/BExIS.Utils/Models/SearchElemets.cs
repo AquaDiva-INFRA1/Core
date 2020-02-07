@@ -59,6 +59,16 @@ namespace BExIS.Utils.Models
         public string Value { get; set; }
     }
 
+    public class General : SearchComponentBase
+    {
+        public General()
+        {
+            this.Type = SearchComponentBaseType.General;
+            this.IsVisible = false;
+        }
+        public string Value { get; set; }
+
+    }
     /// <summary>
     ///
     /// </summary>
@@ -197,6 +207,7 @@ namespace BExIS.Utils.Models
         /// <remarks></remarks>
         /// <seealso cref=""/>
         public IEnumerable<string> Values { get; set; }
+        public string SelectedValue { get; set; }
     }
 
     /// <summary>
@@ -205,6 +216,10 @@ namespace BExIS.Utils.Models
     /// <remarks></remarks>
     public class SearchComponentBase
     {
+        public SearchComponentBase()
+        {
+            this.IsVisible = true;
+        }
         /// <summary>
         ///
         /// </summary>
@@ -219,6 +234,7 @@ namespace BExIS.Utils.Models
         /// <seealso cref=""/>
         public string DisplayName { get; set; }
 
+        public bool IsVisible { get; set; }
         /// <summary>
         ///
         /// </summary>

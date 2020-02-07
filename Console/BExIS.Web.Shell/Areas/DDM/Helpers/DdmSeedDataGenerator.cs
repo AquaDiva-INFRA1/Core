@@ -1,19 +1,22 @@
 ﻿
+using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Objects;
+using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Vaiona.Utils.Cfg;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Ddm.UI.Helpers
 {
-    public class DdmSeedDataGenerator
+    public class DdmSeedDataGenerator : IModuleSeedDataGenerator
     {
         static String DebugFilePath = System.IO.Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Debug.txt");
 
-        public static void GenerateSeedData()
+        public void GenerateSeedData()
         {
             FeatureManager featureManager = new FeatureManager();
             OperationManager operationManager = new OperationManager();
@@ -98,10 +101,16 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 // I had to remove the feature to get dashboard running without DDM feature permissions.
                 // We have to think about how we can fix it in a long run. Maybe "DDM/Home" is not the proper
                 // place for dashboard!?
-                operationManager.Create("DDM", "Home", "*"); //, SearchFeature);
+                operationManager.Create("DDM", "PublicSearch", "*");
+                operationManager.Create("DDM", "Home", "*", SearchFeature);
                 operationManager.Create("DDM", "Data", "*", SearchFeature);
                 operationManager.Create("DDM", "SemanticSearch", "*", SearchFeature);
                 operationManager.Create("DDM", "InteractiveSearch", "*", SearchFeature);
+
+                var featurePermissionManager = new FeaturePermissionManager();
+
+                if (!featurePermissionManager.Exists(null, SearchFeature.Id, PermissionType.Grant))
+                    featurePermissionManager.Create(null, SearchFeature.Id, PermissionType.Grant);
 
                 #endregion
 
@@ -127,5 +136,10 @@ namespace BExIS.Modules.Ddm.UI.Helpers
             }
 
         }
+
+        public void Dispose()
+        {
+        }
+
     }
 }

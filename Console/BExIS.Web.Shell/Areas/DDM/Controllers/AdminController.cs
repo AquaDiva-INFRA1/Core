@@ -125,6 +125,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         public ActionResult Save(SearchAttributeViewModel model)
         {
+            /*
             if (ModelState.IsValid)
             {
                 return Json(true);
@@ -137,7 +138,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             //setluceneName
 
-            /*
+            */
             if (ModelState.IsValid)
             {
                 //if (submit != null)
@@ -174,7 +175,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return Json(false);
             //return View("SearchDesigner", (List<SearchAttributeViewModel>)Session["searchAttributeList"]);
-            */
+            
         }
 
         #endregion

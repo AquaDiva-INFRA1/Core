@@ -4,6 +4,8 @@ using BExIS.IO;
 using BExIS.IO.Transform.Input;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Models;
+using BExIS.Utils.Data.Upload;
+using BExIS.Utils.Upload;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,7 +45,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             //get datastuctureType
             model.DataStructureType = GetDataStructureType();
-            model.SupportedFileExtentions = UploadWizardHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
+            model.SupportedFileExtentions = UploadHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
 
             //Get StepInfo
             model.StepInfo = TaskManager.Current();
@@ -58,6 +60,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         [HttpPost]
         public ActionResult SelectAFile(object[] data)
         {
+            IOUtility iOUtility = new IOUtility();
 
             var model = new SelectFileViewModel();
 
@@ -87,7 +90,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsm"))
                                 {
                                     // open FileStream
-                                    var reader = new ExcelReader();
+                                    var reader = new ExcelReader(null, null);
                                     Stream = reader.Open(filePath);
                                     //Session["Stream"] = Stream;
 
@@ -97,6 +100,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                     {
                                         TaskManager.Current().SetValid(true);
                                         TaskManager.AddToBus(TaskManager.IS_TEMPLATE, "true");
+                                        TaskManager.AddToBus(TaskManager.FILE_READER_INFO, new ExcelFileReaderInfo()
+                                        {
+                                            Offset = 1,
+                                            Variables = 1,
+                                            Data = 13,
+                                            Decimal = DecimalCharacter.point
+                                        });
                                     }
                                     else
                                     {
@@ -115,22 +125,20 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 {
                                     TaskManager.AddToBus(TaskManager.IS_TEMPLATE, "false");
                                     // excel FileStream
-                                    if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xls"))
+                                    if (iOUtility.IsSupportedExcelFile(TaskManager.Bus[TaskManager.EXTENTION].ToString()))
                                     {
 
                                         // open FileStream
-                                        var reader = new ExcelReader();
+                                        var reader = new ExcelReader(null, null);
                                         Stream = reader.Open(filePath);
-                                        //Session["Stream"] = Stream;
                                         TaskManager.Current().SetValid(true);
-
                                         Stream.Close();
                                     }
                                     // text ór csv FileStream
-                                    else if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".csv") || TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".txt"))
+                                    else if (iOUtility.IsSupportedAsciiFile(TaskManager.Bus[TaskManager.EXTENTION].ToString()))
                                     {
                                         // open FileStream
-                                        var reader = new AsciiReader();
+                                        var reader = new AsciiReader(null, null, new IOUtility());
                                         Stream = reader.Open(filePath);
                                         //Session["Stream"] = Stream;
                                         TaskManager.Current().SetValid(true);
@@ -187,7 +195,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             model.serverFileList = GetServerFileList();
             //get datastuctureType
             model.DataStructureType = GetDataStructureType();
-            model.SupportedFileExtentions = UploadWizardHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
+            model.SupportedFileExtentions = UploadHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
 
             return PartialView(model);
         }
@@ -303,7 +311,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 var ext = taskManager.Bus[TaskManager.EXTENTION].ToString();
                 var type = (DataStructureType)taskManager.Bus[TaskManager.DATASTRUCTURE_TYPE];
 
-                if (UploadWizardHelper.GetExtentionList(type, this.Session.GetTenant()).Contains(ext.ToLower())) return true;
+                if (UploadHelper.GetExtentionList(type, this.Session.GetTenant()).Contains(ext.ToLower())) return true;
 
             }
 
