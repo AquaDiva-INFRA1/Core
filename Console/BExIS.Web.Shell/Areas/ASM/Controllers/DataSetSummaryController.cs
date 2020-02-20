@@ -593,7 +593,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         }
 
 
-        public void prepare_data_mining(string path , string path2)
+        public void prepare_data_mining(string path)
         {
             DatasetManager dm = new DatasetManager();
             DataStructureManager dsm = new DataStructureManager();
@@ -608,13 +608,10 @@ namespace BExIS.Modules.ASM.UI.Controllers
                 sw.WriteLine("var_id;var_name;data_type_id;data_type_name;data_type_systemtype;data_type_description;unit_id;unit_name;unit_desc;unit_abbrv;datasetID;dsv;title;owner;project;entity;charachteristic;table_variable_value");
             }
 
-            using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path2, System.IO.FileMode.Append)))
-            {
-                sw.WriteLine("var_id;var_name;data_type_id;data_type_name;data_type_systemtype;data_type_description;unit_id;unit_name;unit_desc;unit_abbrv;datasetID;dsv;title;owner;project;entity;charachteristic;table_variable_value");
-            }
 
             foreach (Int64 datasetID in ds_ids)
             {
+
                 DatasetVersion dsv = dm.GetDatasetLatestVersion(datasetID);
                 StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
                 DataStructure ds = dsm.AllTypesDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
@@ -627,6 +624,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     //
                     //List<AbstractTuple> dataTuples = dm.GetDatasetVersionEffectiveTuples(dsv, 0, 100);
                     //DataTable table = SearchUIHelper.ConvertPrimaryDataToDatatable(dsv, dataTuples);
+                    
                     DataTable table = dm.GetLatestDatasetVersionTuples(dsv.Dataset.Id, 0, 0, true);
 
                     //List<string> var_labels = new List<string>();
@@ -697,21 +695,21 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                                 string ch = "";
                                 ch = ch +
-                                    var_id.Replace(';', ' ') + " ; " +
-                                    var_name.Replace(';', ' ') + " ; " +
-                                    data_type_id.Replace(';', ' ') + " ; " +
-                                    data_type_name.Replace(';', ' ') + " ; " +
-                                    data_type_systemtype.Replace(';', ' ') + " ; " +
-                                    data_type_description.Replace(';', ' ') + " ; " +
-                                    unit_id.Replace(';', ' ') + " ; " +
-                                    unit_name.Replace(';', ' ') + " ; " +
-                                    unit_desc.Replace(';', ' ') + " ; " +
-                                    unit_abbrv.Replace(';', ' ') + " ; " +
-                                    datasetID.ToString().Replace(';', ' ') + " ; " +
-                                    dsv.Id.ToString().Replace(';', ' ') + " ; " +
-                                    title.Replace(';', ' ') + " ; " +
-                                    owner.Replace(';', ' ') + " ; " +
-                                    project.Replace(';', ' ') + " ; ";
+                                    var_id.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    var_name.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    data_type_id.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    data_type_name.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    data_type_systemtype.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    data_type_description.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    unit_id.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    unit_name.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    unit_desc.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    unit_abbrv.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    datasetID.ToString().Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    dsv.Id.ToString().Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    title.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    owner.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    project.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; ";
 
 
 
@@ -723,7 +721,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                 Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
                                 List<Aam_Dataset_column_annotation> all_annot = aam.get_all_dataset_column_annotation();
                                 Aam_Dataset_column_annotation annot = all_annot.FirstOrDefault(x => x.variable_id.ToString() == var_id);
-                                if (annot == null)
+                                if ((annot.characteristic_id == null)||(annot.entity_id == null))
                                 {
                                     NpgsqlCommand MyCmd = null;
                                     NpgsqlConnection MyCnx = null;
@@ -739,8 +737,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                         {
                                             if (dr["datasets_id"] != System.DBNull.Value)
                                             {
-                                                var entity = (String)dr["entity"].ToString();
-                                                var characteristic = (String)dr["characteristic"].ToString();
+                                                var entity = (String)dr["entity"].ToString().Replace("\n", String.Empty).Trim();
+                                                var characteristic = (String)dr["characteristic"].ToString().Replace("\n", String.Empty).Trim();
                                                 ch = ch + entity + " ; " + characteristic + " ; ";
                                                 b = true;
                                             }
@@ -755,13 +753,10 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                 }
                                 else
                                 {
-                                    ch = ch + annot.entity_id + " ; " + annot.characteristic_id + " ; ";
+                                    ch = ch + annot.entity_id.URI.ToString().Replace("\n", String.Empty).Trim() + " ; " + annot.characteristic_id.URI.ToString().Replace("\n", String.Empty).Trim() + " ; ";
                                 }
 
                                 //ch = annot != null ? ch + annot.entity_id + " ; " + annot.characteristic_id + " ; " : ch + "  ;  ; ";
-
-                                int train = table.Rows.Count * 70 / 100;
-                                int test = table.Rows.Count - train;
 
                                 try
                                 {
@@ -769,19 +764,12 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                     {
                                         Object obj = table.Rows[k].ItemArray[i];
                                         string copy = "";
-                                        copy = ch + obj.ToString().Replace(';', ' ') + " ; ";
-                                        if (k< train)
-                                            using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
-                                            {
-                                                sw.WriteLine(copy);
-                                                Debug.WriteLine("Processed and written " + copy);
-                                            }
-                                        else
-                                            using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path2, System.IO.FileMode.Append)))
-                                            {
-                                                sw.WriteLine(copy);
-                                                Debug.WriteLine("Processed and written " + copy);
-                                            }
+                                        copy = ch + obj.ToString().Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; ";
+                                        using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
+                                        {
+                                            sw.WriteLine(copy);
+                                            Debug.WriteLine("Processed and written " + copy);
+                                        }
                                     }
                                 }
                                 catch (Exception ex)
