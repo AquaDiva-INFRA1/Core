@@ -229,7 +229,8 @@ namespace BExIS.Xml.Helpers
 
                 IEnumerable<XElement> temp = XmlUtility.GetXElementsByAttribute(nodeNames.convertRef.ToString(), queryDic, xDoc);
 
-                string value = temp?.First().Attribute(returnType.ToString()).Value;
+                // Hamdi  : changed the condition to check if temp is empty before trying to access information from metadatadata nodes
+                string value = (temp.Count()>0) ? temp?.First().Attribute(returnType.ToString()).Value : "" ;
 
                 return value;
             }

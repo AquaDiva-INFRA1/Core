@@ -243,17 +243,17 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     for (int kk = 0; kk < va.variable_id.Count; kk++)
                     {
                         sb.AppendLine(
-                            va.dataset_id.ToString() + "," +
-                            va.owner.Replace(",", "-") + "," +
-                            va.project.Replace(",", "-") + "," +
-                            Concepts_count.ToString() + "," +
-                            va.variable_id.Count.ToString() + "," +
-                            va.variable_id[kk].ToString() + "," +
-                            va.variable_label[kk].ToString() + "," +
-                            va.variable_concept_entity[kk].ToString() + "," +
-                            va.variable_concept_caracteristic[kk].ToString() + "," +
-                            va.unit[kk].ToString() + "," +
-                            va.dataType[kk].ToString() + "," +
+                            va.dataset_id.ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.owner.Replace(",", "-").Replace("\n", String.Empty).Trim() + "," +
+                            va.project.Replace(",", "-").Replace("\n", String.Empty).Trim() + "," +
+                            Concepts_count.ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_id.Count.ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_id[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_label[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_concept_entity[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_concept_caracteristic[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.unit[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.dataType[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
                             somme);
                     }
                     //sb.AppendLine(

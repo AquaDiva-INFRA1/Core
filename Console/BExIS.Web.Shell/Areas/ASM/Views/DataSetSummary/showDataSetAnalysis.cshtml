@@ -38,13 +38,8 @@
 }
 
 
-@{
+@section head {
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
 
     <!--
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
@@ -54,7 +49,6 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
-
 
 }
 
@@ -162,13 +156,16 @@ else
     </div>
 }
 
-
-
+<script src='@Url.Content("/Scripts/chartJs/Chart.bundle.js")'></script>
+<script src='@Url.Content("/Scripts/chartJs/Chart.bundle.min.js")'></script>
+<script src='@Url.Content("/Scripts/chartJs/Chart.js")'></script>
+<script src='@Url.Content("/Scripts/chartJs/Chart.min.js")'></script>
 
 <script type="text/javascript">
 
     start();
     load_pie_charts();
+
 
     $(window).resize(function () {
         //start();
@@ -223,7 +220,7 @@ else
                     var colors = [];
                     for (var i = 0; i < xvalues.length; i++) {
                         colors.push(getRandomColor());
-                    }
+                    };
 
                     var scatterChartData = {
                         datasets:
@@ -233,6 +230,7 @@ else
                     };
                     //check which type of data chart to use :
                     var ctxSc = document.getElementById(id).getContext('2d');
+                    console.log(ctxSc);
                     var myChart = new Chart(ctxSc, {
                         type: 'bar',
                         data: {
