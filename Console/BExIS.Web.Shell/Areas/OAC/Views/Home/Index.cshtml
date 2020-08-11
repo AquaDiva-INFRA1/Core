@@ -142,9 +142,10 @@
                     <div class="form-check" style="overflow-y: scroll; height:600px; width: auto;">
                         @foreach (KeyValuePair<string, string> acc in Model.Accessions)
                         {
-                            <input name="accession_number" class="form-check-input" type="checkbox" value="@acc.Key.Split('	')[0]" id="@acc.Key.Split('	')[0]" onclick="loadView( @Html.Raw(@acc.Key.Split('	')[0]) , '@Model.SelectedMetadataStructureId' ,'@Model.SelectedDataSourceId','@Model.SelectedDataStructureId', '@Html.Raw(@acc.Key.Split('	')[1])' )">
+                            <input name="accession_number" class="form-check-input" type="checkbox" value="@acc.Key.Split('	')[0]" id="@acc.Key.Split('	')[0]" 
+                                   onclick="loadView( '@Html.Raw(@acc.Key.Split('	')[0].Split(' ')[1])' , '@Model.SelectedMetadataStructureId' ,'@Model.SelectedDataSourceId','@Model.SelectedDataStructureId', '@Html.Raw(@acc.Key.Split('	')[1])' )">
                             <label class="form-check-label" for="@acc.Key.Split('	')[0]">
-                                @acc.Key.Split('	')[0]
+                                @acc.Key.Split('	')[0].Split(' ')[1]
                             </label>
                             <br />
                         }
@@ -233,8 +234,7 @@
 <script type="text/javascript">
 
     function loadView(sample,SelectedMetadataStructureId,SelectedDataSourceId,SelectedDataStructureId,project) {
-        
-        var params_ = "?sample=" + sample.value +"&project="+project+ "&MetadataStructureId=" + SelectedMetadataStructureId + "&DataSourceId=" + SelectedDataSourceId + "&DataStructureId=" + SelectedDataStructureId;
+        var params_ = "?sample=" + sample +"&project="+project+ "&MetadataStructureId=" + SelectedMetadataStructureId + "&DataSourceId=" + SelectedDataSourceId + "&DataStructureId=" + SelectedDataStructureId;
         console.debug(params_)
         $.ajax({
             url: '/OAC/Home/LoadSamplesViewMetadata'+params_,
@@ -268,6 +268,7 @@
                 'acc': accession_number.toString()
             },
             error: function (xhr) {
+                 console.log(xhr.responseText);
                 alert('OoOoOoOppps ... error happened, come back later ...');
             },
             success: function (result) {

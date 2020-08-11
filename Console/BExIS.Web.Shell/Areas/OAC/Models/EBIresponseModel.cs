@@ -55,171 +55,194 @@ namespace BExIS.Modules.OAC.UI.Models
 
         public EBIresponseModel(JObject json)
         {
-            this.accession = json["accession"].ToString();
-            this.name = json["name"].ToString();
-            this.releaseDate = json["releaseDate"].ToString();
-            this.updateDate = json["updateDate"].ToString();
-            this.description = json["description"].ToString();
+            this.accession = json["accession"] == null ? "" : json["accession"].ToString();
+            this.name = json["name"] == null ? "" : json["name"].ToString();
+            this.releaseDate = json["releaseDate"] == null ? "" : json["releaseDate"].ToString();
+            this.updateDate = json["updateDate"] == null ? "" : json["updateDate"].ToString();
+            this.description = json["description"] == null ? "" : json["description"].ToString() ;
 
             this.geographicLocationDepth = new List<string>();
-            foreach (var x in json["characteristics"]["geographicLocationDepth"])
-            {
-                geographicLocationDepth.Add(x["text"].ToString().Replace(",","."));
-            }
+            if (json["characteristics"]["geographicLocationDepth"] != null)
+                foreach (var x in json["characteristics"]["geographicLocationDepth"])
+                {
+                    geographicLocationDepth.Add(x["text"].ToString().Replace(",","."));
+                }
 
             this.organismtext = new List<string>();
             this.organismontologyTerms = new List<string>();
-            foreach (var x in json["characteristics"]["organism"])
-            {
-                organismtext.Add(x["text"].ToString());
-                foreach (var y in x["ontologyTerms"])
-                    organismontologyTerms.Add(y.ToString());
-            }
+            if (json["characteristics"]["organism"] != null)
+                foreach (var x in json["characteristics"]["organism"])
+                {
+                    organismtext.Add(x["text"].ToString());
+                    foreach (var y in x["ontologyTerms"])
+                        organismontologyTerms.Add(y.ToString());
+                }
 
             this.environmentMaterial = new List<string>();
-            foreach (var x in json["characteristics"]["environmentMaterial"])
-            {
-                environmentMaterial.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["environmentMaterial"] != null)
+                foreach (var x in json["characteristics"]["environmentMaterial"])
+                {
+                    environmentMaterial.Add(x["text"].ToString());
+                }
 
 
             this.insdcFirstPublic = new List<string>();
-            foreach (var x in json["characteristics"]["insdcFirstPublic"])
-            {
-                insdcFirstPublic.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["environmentMaterial"] != null)
+                foreach (var x in json["characteristics"]["insdcFirstPublic"])
+                {
+                    insdcFirstPublic.Add(x["text"].ToString());
+                }
 
 
             this.enaChecklist = new List<string>();
-            foreach (var x in json["characteristics"]["enaChecklist"])
-            {
-                enaChecklist.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["enaChecklist"] != null)
+                foreach (var x in json["characteristics"]["enaChecklist"])
+                {
+                    enaChecklist.Add(x["text"].ToString());
+                }
 
 
             this.collectionDate = new List<string>();
-            foreach (var x in json["characteristics"]["collectionDate"])
-            {
-                collectionDate.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["collectionDate"] != null)
+                foreach (var x in json["characteristics"]["collectionDate"])
+                {
+                    collectionDate.Add(x["text"].ToString());
+                }
 
             this.geographicLocationLongitude = new List<string>();
-            foreach (var x in json["characteristics"]["geographicLocationLongitude"])
-            {
-                geographicLocationLongitude.Add(x["text"].ToString().Replace(",","."));
-            }
+            if (json["characteristics"]["geographicLocationLongitude"] != null)
+                foreach (var x in json["characteristics"]["geographicLocationLongitude"])
+                {
+                    geographicLocationLongitude.Add(x["text"].ToString().Replace(",","."));
+                }
 
             this.titletext = new List<string>();
-            foreach (var x in json["characteristics"]["title"])
-            {
-                titletext.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["title"] != null)
+                foreach (var x in json["characteristics"]["title"])
+                {
+                    titletext.Add(x["text"].ToString());
+                }
 
             this.geographicLocationLatitude = new List<string>();
-            foreach (var x in json["characteristics"]["geographicLocationLatitude"])
-            {
-                geographicLocationLatitude.Add(x["text"].ToString().Replace(",","."));
-            }
+            if (json["characteristics"]["geographicLocationLatitude"] != null)
+                foreach (var x in json["characteristics"]["geographicLocationLatitude"])
+                {
+                    geographicLocationLatitude.Add(x["text"].ToString().Replace(",","."));
+                }
 
             this.insdcLastUpdate = new List<string>();
-            foreach (var x in json["characteristics"]["insdcLastUpdate"])
-            {
-                insdcLastUpdate.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["insdcLastUpdate"] != null)
+                foreach (var x in json["characteristics"]["insdcLastUpdate"])
+                {
+                    insdcLastUpdate.Add(x["text"].ToString());
+                }
 
 
             this.waterEnvironmentalPackage = new List<string>();
             this.waterEnvironmentalPackageontologyTerms = new List<string>();
-            foreach (var x in json["characteristics"]["waterEnvironmentalPackage"])
-            {
-                waterEnvironmentalPackage.Add(x["text"].ToString());
-                foreach (var y in x["ontologyTerms"])
-                    waterEnvironmentalPackageontologyTerms.Add(y.ToString());
-            }
+            if (json["characteristics"]["waterEnvironmentalPackage"] != null)
+                foreach (var x in json["characteristics"]["waterEnvironmentalPackage"])
+                {
+                    waterEnvironmentalPackage.Add(x["text"].ToString());
+                    foreach (var y in x["ontologyTerms"])
+                        waterEnvironmentalPackageontologyTerms.Add(y.ToString());
+                }
 
 
             this.investigationType = new List<string>();
-            foreach (var x in json["characteristics"]["investigationType"])
-            {
-                investigationType.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["investigationType"] != null)
+                foreach (var x in json["characteristics"]["investigationType"])
+                {
+                    investigationType.Add(x["text"].ToString());
+                }
 
 
             this.synonym = new List<string>();
-            foreach (var x in json["characteristics"]["synonym"])
-            {
-                synonym.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["synonym"] != null)
+                foreach (var x in json["characteristics"]["synonym"])
+                {
+                    synonym.Add(x["text"].ToString());
+                }
 
             this.insdcStatus = new List<string>();
-            foreach (var x in json["characteristics"]["insdcStatus"])
-            {
-                insdcStatus.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["insdcStatus"] != null)
+                foreach (var x in json["characteristics"]["insdcStatus"])
+                {
+                    insdcStatus.Add(x["text"].ToString());
+                }
 
             this.sequencingMethod = new List<string>();
-            foreach (var x in json["characteristics"]["sequencingMethod"])
-            {
-                sequencingMethod.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["sequencingMethod"] != null)
+                foreach (var x in json["characteristics"]["sequencingMethod"])
+                {
+                    sequencingMethod.Add(x["text"].ToString());
+                }
 
             this.projectName = new List<string>();
-            foreach (var x in json["characteristics"]["projectName"])
-            {
-                projectName.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["projectName"] != null)
+                foreach (var x in json["characteristics"]["projectName"])
+                {
+                    projectName.Add(x["text"].ToString());
+                }
 
 
             this.sraAccession = new List<string>();
-            foreach (var x in json["characteristics"]["sraAccession"])
-            {
-                sraAccession.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["sraAccession"] != null)
+                foreach (var x in json["characteristics"]["sraAccession"])
+                {
+                    sraAccession.Add(x["text"].ToString());
+                }
 
             this.alias = new List<string>();
-            foreach (var x in json["characteristics"]["alias"])
-            {
-                alias.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["alias"] != null)
+                foreach (var x in json["characteristics"]["alias"])
+                {
+                    alias.Add(x["text"].ToString());
+                }
 
 
             this.environmentBiome = new List<string>();
-            foreach (var x in json["characteristics"]["environmentBiome"])
-            {
-                environmentBiome.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["environmentBiome"] != null)
+                foreach (var x in json["characteristics"]["environmentBiome"])
+                {
+                    environmentBiome.Add(x["text"].ToString());
+                }
 
             this.environmentFeature = new List<string>();
-            foreach (var x in json["characteristics"]["environmentFeature"])
-            {
-                environmentFeature.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["environmentFeature"] != null)
+                foreach (var x in json["characteristics"]["environmentFeature"])
+                {
+                    environmentFeature.Add(x["text"].ToString());
+                }
 
             this.insdcCenterName = new List<string>();
-            foreach (var x in json["characteristics"]["insdcCenterName"])
-            {
-                insdcCenterName.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["insdcCenterName"] != null)
+                foreach (var x in json["characteristics"]["insdcCenterName"])
+                {
+                    insdcCenterName.Add(x["text"].ToString());
+                }
 
             this.geographicLocationCountryAndOrSea = new List<string>();
-            foreach (var x in json["characteristics"]["geographicLocationCountryAndOrSea"])
-            {
-                geographicLocationCountryAndOrSea.Add(x["text"].ToString());
-            }
+            if (json["characteristics"]["geographicLocationCountryAndOrSea"] != null)
+                foreach (var x in json["characteristics"]["geographicLocationCountryAndOrSea"])
+                {
+                    geographicLocationCountryAndOrSea.Add(x["text"].ToString());
+                }
 
             this.externalReferences = new List<string>();
             this.externalReferencesacc = new List<string>();
             this.externalReferencesurl = new List<string>();
-            foreach (var x in json["externalReferences"])
-            {
-                externalReferences.Add(x["name"].ToString());
-                externalReferencesacc.Add(x["acc"].ToString());
-                externalReferencesurl.Add(x["url"].ToString());
-            }
+            if (json["externalReferences"] != null)
+                foreach (var x in json["externalReferences"])
+                {
+                    externalReferences.Add(x["name"].ToString());
+                    externalReferencesacc.Add(x["acc"].ToString());
+                    externalReferencesurl.Add(x["url"].ToString());
+                }
 
-            this._linksselfhref = json["_links"]["self"]["href"].ToString();
-            this._linkssamplehref = json["_links"]["sample"]["href"].ToString();
-            this._linksrelationshref = json["_links"]["relations"]["href"].ToString();
+            this._linksselfhref = json["_links"]["self"]["href"] == null ? "" : json["_links"]["self"]["href"].ToString();
+            this._linkssamplehref = json["_links"]["sample"]["href"] == null ? "" : json["_links"]["sample"]["href"].ToString();
+            this._linksrelationshref = json["_links"]["relations"]["href"] == null ? "" : json["_links"]["relations"]["href"].ToString();
         }
 
         public XmlDocument ConvertToXML(string jsonString)
@@ -236,15 +259,15 @@ namespace BExIS.Modules.OAC.UI.Models
             //x = "accession,name,releaseDate,updateDate,description,_linksselfhref,_linkssamplehref,_linksrelationshref,geographicLocationDepth,organismtext,organismontologyTerms,environmentMaterial,insdcFirstPublic,enaChecklist,collectionDate,geographicLocationLongitude,titletext,geographicLocationLatitude,insdcLastUpdate,waterEnvironmentalPackage,waterEnvironmentalPackageontologyTerms,investigationType,synonym,insdcStatus,sequencingMethod,projectName,sraAccession,alias,environmentBiome,environmentFeature,insdcCenterName,geographicLocationCountryAndOrSea,externalReferences,externalReferencesacc,externalReferencesurl";
             //sw.WriteLine(x);
 
-            x = model.accession + "," + model.name + "," + model.releaseDate + "," + model.updateDate + "," + model.description + "," + model._linksselfhref + "," + model._linkssamplehref + ","
-                + model._linksrelationshref + "," + string.Join("-", model.geographicLocationDepth) + "," + string.Join("-", model.organismtext) + "," + string.Join("-", model.organismontologyTerms) + ","
-                + string.Join("-", model.environmentMaterial) + "," + string.Join("-", model.insdcFirstPublic) + "," 
-                + string.Join("-", model.enaChecklist) + "," + string.Join("-", model.collectionDate) + "," + string.Join("-", model.geographicLocationLongitude) + "," + string.Join("-", model.titletext) + "," 
-                + string.Join("-", model.geographicLocationLatitude) + "," + string.Join("-", model.insdcLastUpdate) + "," + string.Join("-", model.waterEnvironmentalPackage) + "," + string.Join("-", model.waterEnvironmentalPackageontologyTerms) + ","
-                + string.Join("-", model.investigationType) + "," + string.Join("-", model.synonym) + "," + string.Join("-", model.insdcStatus) + "," + string.Join("-", model.sequencingMethod) + ","
-                + string.Join("-", model.projectName) + "," + string.Join("-", model.sraAccession) + "," + string.Join("-", model.alias) + "," 
-                + string.Join("-", model.environmentBiome) + "," + string.Join("-", model.environmentFeature) + "," + string.Join("-", model.insdcCenterName) + "," 
-                + string.Join("-", model.geographicLocationCountryAndOrSea) + "," + string.Join("-", model.externalReferences) + "," + string.Join("-", model.externalReferencesacc) + ","+ string.Join("-", model.externalReferencesurl) 
+            x = model.accession.Replace(',' , ' ').Replace(',' , ' ') + " ," + model.name.Replace(',' , ' ').Replace(',' , ' ') + " ," + model.releaseDate.Replace(',' , ' ').Replace(',' , ' ') + " ," + model.updateDate.Replace(',' , ' ').Replace(',' , ' ') + " ," + model.description.Replace(',' , ' ').Replace(',' , ' ') + " ," + model._linksselfhref.Replace(',' , ' ').Replace(',' , ' ') + " ," + model._linkssamplehref.Replace(',' , ' ').Replace(',' , ' ') + ","
+                + model._linksrelationshref.Replace(',' , ' ').Replace(',' , ' ') + " ," + string.Join("-", model.geographicLocationDepth).Replace(',' , ' ').Replace(',' , ' ') + " ," + string.Join("-", model.organismtext).Replace(',' , ' ').Replace(',' , ' ') + " ," + string.Join("-", model.organismontologyTerms).Replace(',' , ' ') + ","
+                + string.Join("-", model.environmentMaterial).Replace(',' , ' ') + " ," + string.Join("-", model.insdcFirstPublic).Replace(',' , ' ') + "," 
+                + string.Join("-", model.enaChecklist).Replace(',' , ' ') + " ," + string.Join("-", model.collectionDate).Replace(',' , ' ') + " ," + string.Join("-", model.geographicLocationLongitude).Replace(',' , ' ') + " ," + string.Join("-", model.titletext).Replace(',' , ' ') + "," 
+                + string.Join("-", model.geographicLocationLatitude).Replace(',' , ' ') + " ," + string.Join("-", model.insdcLastUpdate).Replace(',' , ' ') + " ," + string.Join("-", model.waterEnvironmentalPackage).Replace(',' , ' ') + " ," + string.Join("-", model.waterEnvironmentalPackageontologyTerms).Replace(',' , ' ') + ","
+                + string.Join("-", model.investigationType).Replace(',' , ' ') + " ," + string.Join("-", model.synonym).Replace(',' , ' ') + " ," + string.Join("-", model.insdcStatus).Replace(',' , ' ') + " ," + string.Join("-", model.sequencingMethod).Replace(',' , ' ') + ","
+                + string.Join("-", model.projectName).Replace(',' , ' ') + " ," + string.Join("-", model.sraAccession).Replace(',' , ' ') + " ," + string.Join("-", model.alias).Replace(',' , ' ') + "," 
+                + string.Join("-", model.environmentBiome).Replace(',' , ' ') + " ," + string.Join("-", model.environmentFeature).Replace(',' , ' ') + " ," + string.Join("-", model.insdcCenterName).Replace(',' , ' ') + "," 
+                + string.Join("-", model.geographicLocationCountryAndOrSea).Replace(',' , ' ') + " ," + string.Join("-", model.externalReferences).Replace(',' , ' ') + " ," + string.Join("-", model.externalReferencesacc).Replace(',' , ' ') + ","+ string.Join("-", model.externalReferencesurl) 
                 ;
 
             if (tempfile != "")
