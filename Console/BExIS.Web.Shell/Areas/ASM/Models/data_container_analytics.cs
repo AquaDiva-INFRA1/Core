@@ -20,6 +20,9 @@ namespace BExIS.Modules.Asm.UI.Models
         public List<DataType> DataType_in_use = new List<DataType>();
         public List<DataType> DataType_non_use = new List<DataType>();
 
+        public List<DataStructureResultStruct> DataStruct_in_use = new List<DataStructureResultStruct>();
+        public List<DataStructureResultStruct> DataStruc_non_use = new List<DataStructureResultStruct>();
+
         public Data_container_analytics()
         {
             this.fill_lists();
@@ -61,7 +64,15 @@ namespace BExIS.Modules.Asm.UI.Models
             {
                 dataTypeManager.Dispose();
             }
+
+            List < DataStructureResultStruct> datastruct_list = new DataStructureResultsModel(null, "").dataStructureResults;
+            foreach (DataStructureResultStruct ds in datastruct_list)
+            {
+                if (ds.inUse) this.DataStruct_in_use.Add(ds);
+                else this.DataStruc_non_use.Add(ds);
+            }
+
         }
-        
+
     }
 }

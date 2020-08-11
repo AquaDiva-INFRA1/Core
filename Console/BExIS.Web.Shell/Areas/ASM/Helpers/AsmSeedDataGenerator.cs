@@ -49,9 +49,16 @@ namespace BExIS.Modules.Asm.UI.Helpers
                     f.Parent.Id.Equals(ASM.Id));
                 if (summary == null) summary = featureManager.Create("Dataset Summary", "Dataset Summary", ASM);
 
+                Feature classification = features.FirstOrDefault(f =>
+                    f.Name.Equals("Dataset Classification") &&
+                    f.Parent != null &&
+                    f.Parent.Id.Equals(ASM.Id));
+                if (classification == null) classification = featureManager.Create("Dataset Classification", "Dataset Classification", ASM);
+
                 //security
                 operationManager.Create("ASM", "PortalStatistics", "*", portalstatistics);
                 operationManager.Create("ASM", "DataSetSummary", "*", summary);
+                operationManager.Create("ASM", "DataSetSummary", "classification", classification);
 
             }
             finally
