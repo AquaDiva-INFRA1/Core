@@ -42,6 +42,7 @@ using BExIS.Security.Services.Utilities;
 using System.Configuration;
 using System.Text;
 using BExIS.IO.Transform.Validation.Exceptions;
+using Vaiona.Entities.Common;
 
 namespace BExIS.Modules.OAC.UI.Controllers
 {
@@ -145,6 +146,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
                 model.project = All_Accessions[0].Split('	')[1].ToString();
                 Session["All_Accessions"] = All_Accessions;
                 List<string> Accessions = new List<string>();
+                int index = 0;
                 foreach (string s in All_Accessions)
                 {
                     string sample_Url = "https://www.ebi.ac.uk/biosamples/api/samples/" + s.Split('	')[0];
@@ -154,7 +156,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
                     string DownloadedData = new WebClient().DownloadString(sample_Url).Trim();
 
                     #endregion
-                    model.Accessions.Add(s, DownloadedData);
+                    model.Accessions.Add(index.ToString() + " " + s, DownloadedData);
+                    index++;
                 }
                 #endregion
 
@@ -198,7 +201,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
         public ActionResult LoadSamplesViewMetadata(string sample, string project)
         {
             string x = "";
-            model.Accessions.TryGetValue(sample + "	" + project, out x);
+            //model.Accessions.TryGetValue(sample + "	" + project, out x);
+            x = model.Accessions.FirstOrDefault( xx => xx.Key.Contains (sample)).Value;
             EBIresponseModel EBIresponseModel = new EBIresponseModel(JObject.Parse(x));
             return PartialView("View" , EBIresponseModel);
         }
@@ -215,7 +219,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
             return ds.Id;
         }
 
-        public Dataset AddProjectsdataset(Dictionary<string, string> xx )
+        public Dataset AddProjectsdataset(Dictionary<string, string> xx)
         {
             DataStructureManager dsm = new DataStructureManager();
             DatasetManager dm = new DatasetManager();
@@ -223,11 +227,12 @@ namespace BExIS.Modules.OAC.UI.Controllers
             Dataset ds = new Dataset() ;
             XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
             DataStructure dataStruct = (DataStructure)dsm.AllTypesDataStructureRepo.Get().FirstOrDefault(x => x.Name == "none");
-            StructuredDataStructure dataStruct_ = (StructuredDataStructure)dsm.StructuredDataStructureRepo.Get().FirstOrDefault(x => x.Name == "Sequence Data");
+            StructuredDataStructure dataStruct_ = (StructuredDataStructure)dsm.StructuredDataStructureRepo.Get().FirstOrDefault(x => x.Name.ToLower() == "sequence data");
             MetadataStructureManager msm = new MetadataStructureManager();
             ResearchPlanManager rpm = new ResearchPlanManager();
             EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
             List<Error> temp = new List<Error>();
+            string temp_file_path = "";
             try
             {
                 #region create empty dataset to be filled
@@ -235,111 +240,82 @@ namespace BExIS.Modules.OAC.UI.Controllers
                 ResearchPlan rp = rpm.Repo.Get().First();
                 MetadataStructure metadataStructure = msm.Repo.Get().FirstOrDefault(x => x.Name.ToLower() == "basic abcd");
                 ds = dm.CreateEmptyDataset(dataStruct_, rp, metadataStructure);
-                
-                #endregion
 
-                #region Aquadiva: permissions for PIs
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+
+            try
+            {
+                // add security
                 if (GetUsernameOrDefault() != "DEFAULT")
                 {
-                    
-                    //Full permissions for the user
-                    entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
-
-                    UserPiManager upm = new UserPiManager();
-
-                    //Get PIs of the current user
-                    List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
-                    foreach (User pi in piList)
+                    foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
                     {
-                        //Full permissions for the pis
-                        entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
-
-                        //Get all users with the same pi
-                        List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
-                        //Give view and download rights to the members
-                        foreach (User piMember in piMembers)
+                        //The user gets full permissions
+                        // add security
+                        if (GetUsernameOrDefault() != "DEFAULT")
                         {
-                            entityPermissionManager.Create<User> (GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                            entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                         }
                     }
                 }
-                #endregion
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
 
 
-                #region submit metadata
-                if (dm.IsDatasetCheckedOutFor(ds.Id, GetUsernameOrDefault()) || dm.CheckOutDataset(ds.Id, GetUsernameOrDefault()))
-                {
-                    DatasetVersion dsv = dm.GetDatasetWorkingCopy(ds.Id);
-                    XmlDocument Metadata;
-                    string DownloadedData = new WebClient().DownloadString(EBI_study_metadata + model.project + "&display=xml").Trim();
-                    if (DownloadedData.StartsWith("{") || DownloadedData.StartsWith("[")) // it's json
-                    {
-                        Metadata = JsonStringToXML("{\"root\":" + DownloadedData + "}"); // the root element is only allowed to have one property
-                    }
-                    else // it's xml
-                    {
-                        Metadata = new XmlDocument();
-                        Metadata.LoadXml(DownloadedData);
-                    }
-                    ConvertXMLItemKeys(Metadata, Metadata);
-                    XmlDocument Mapped = ConvertOmicsToBExIS(model.SelectedMetadataStructureId, Metadata, (DataSource)model.SelectedDataSourceId);
-                    dsv.Metadata = Mapped;
-                    try
-                    {
-                        dsv.Metadata = xmlDatasetHelper.SetInformation(dsv, Mapped, NameAttributeValues.title, model.project);
-                        
-                    }
-                    catch (NullReferenceException ex)
-                    {
-                        //Reference of the title node is missing
-                        throw new NullReferenceException("The extra-field of this metadata-structure is missing the title-node-reference!");
-                    }
-                    dm.EditDatasetVersion(dsv, null, null, null);
-                }
-                #endregion
-
+            string json = "";
+            try {
                 #region save primary data in csv format and temporary csv file
                 var json_array_data = new List<string[]>();
-                string temp_file_path = temp_file_to_save_json_as_csv + ds.Id + ".csv";
+                temp_file_path = temp_file_to_save_json_as_csv + ds.Id + ".csv";
 
                 string data_csv = new EBIresponseModel().Initialise_header(temp_file_path);
                 json_array_data.Add(data_csv.Split(','));
 
-                foreach (KeyValuePair<string,string> kvp in xx)
+                foreach (KeyValuePair<string, string> kvp in xx)
                 {
                     EBIresponseModel EBIresponseModel = new EBIresponseModel(JObject.Parse(kvp.Value));
                     data_csv = data_csv + EBIresponseModel.ConvertTocsv(EBIresponseModel, temp_file_path);
-                    json_array_data.Add(EBIresponseModel.ConvertTocsv(EBIresponseModel,"").Split(','));
+                    json_array_data.Add(EBIresponseModel.ConvertTocsv(EBIresponseModel, "").Split(','));
                 }
-                string json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(json_array_data);
-                #endregion
+                json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(json_array_data);
+            }
+            #endregion
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
 
-                #region creating data tuples
+            #region creating data tuples 
 
-                if (!dm.IsDatasetCheckedOutFor(ds.Id, GetUsernameOrDefault()))
-                {
-                    throw new Exception(string.Format("Not able to checkout dataset '{0}' for  user '{1}'!", ds.Id, GetUsernameOrDefault()));
-                }
+            DataTuple[] rows = null;
+            int packageSize = 10000;
+            int counter = 0;
+            counter++;
+            List<string> selectedDataAreaJsonArray = new List<string>() { "[1 , 0 ," + xx.Count.ToString() + "," + (typeof(EBIresponseModel).GetProperties().Count() - 1).ToString() + "]" };
+            string selectedHeaderAreaJsonArray = string.Join(" ,", new List<string>() { "[0, 0, 0, " + (typeof(EBIresponseModel).GetProperties().Count() - 1).ToString() + "]" });
+            List<int[]> areaDataValuesList = new List<int[]>();
+            foreach (string area in selectedDataAreaJsonArray)
+            {
+                areaDataValuesList.Add(JsonConvert.DeserializeObject<int[]>(area));
+            }
+            int[] areaHeaderValues = JsonConvert.DeserializeObject<int[]>(selectedHeaderAreaJsonArray);
+            Orientation orientation = Orientation.columnwise;
+            String worksheetUri = temp_file_path;
+            int batchSize = (new Object()).GetUnitOfWork().PersistenceManager.PreferredPushSize;
+            int batchnr = 1;
+
+            //try {
+                dm.CheckOutDataset(ds.Id, GetUsernameOrDefault());
                 DatasetVersion workingCopy = dm.GetDatasetWorkingCopy(ds.Id);
 
-                DataTuple[] rows = null;
-                int packageSize = 10000;
-                int counter = 0;
-                counter++;
-
-
-                List<string> selectedDataAreaJsonArray = new List<string>() { "[1 , 0 ,"+ xx.Count.ToString() + ","+ (typeof(EBIresponseModel).GetProperties().Count() - 1).ToString() + "]" };
-                string selectedHeaderAreaJsonArray = string.Join(" ,", new List<string>() { "[0, 0, 0, " + (typeof(EBIresponseModel).GetProperties().Count()-1).ToString() + "]" });
-                List<int[]> areaDataValuesList = new List<int[]>();
-                foreach (string area in selectedDataAreaJsonArray)
-                {
-                    areaDataValuesList.Add(JsonConvert.DeserializeObject<int[]>(area));
-                }
-                int[] areaHeaderValues = JsonConvert.DeserializeObject<int[]>(selectedHeaderAreaJsonArray);
-                Orientation orientation = Orientation.columnwise;
-                String worksheetUri = temp_file_path;
-                int batchSize = (new Object()).GetUnitOfWork().PersistenceManager.PreferredPushSize;
-                int batchnr = 1;
                 foreach (int[] areaDataValues in areaDataValuesList)
                 {
                     //First batch starts at the start of the current data area
@@ -351,24 +327,24 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
                         //Set the indices for the reader
                         EasyUploadFileReaderInfo fri = new EasyUploadFileReaderInfo
-                        {
-                            DataStartRow = currentBatchStartRow,
-                            //End row is either at the end of the batch or the end of the marked area
-                            //DataEndRow = (currentBatchEndRow > areaDataValues[2] + 1) ? areaDataValues[2] + 1 : currentBatchEndRow,
-                            DataEndRow = Math.Min(currentBatchEndRow, areaDataValues[2] + 1),
-                            //Column indices as marked in a previous step
-                            DataStartColumn = areaDataValues[1] + 1,
-                            DataEndColumn = areaDataValues[3] + 1,
+                            {
+                                DataStartRow = currentBatchStartRow,
+                                //End row is either at the end of the batch or the end of the marked area
+                                //DataEndRow = (currentBatchEndRow > areaDataValues[2] + 1) ? areaDataValues[2] + 1 : currentBatchEndRow,
+                                DataEndRow = Math.Min(currentBatchEndRow, areaDataValues[2] + 1),
+                                //Column indices as marked in a previous step
+                                DataStartColumn = areaDataValues[1] + 1,
+                                DataEndColumn = areaDataValues[3] + 1,
 
-                            //Header area as marked in a previous step
-                            VariablesStartRow = areaHeaderValues[0] + 1,
-                            VariablesStartColumn = areaHeaderValues[1] + 1,
-                            VariablesEndRow = areaHeaderValues[2] + 1,
-                            VariablesEndColumn = areaHeaderValues[3] + 1,
+                                //Header area as marked in a previous step
+                                VariablesStartRow = areaHeaderValues[0] + 1,
+                                VariablesStartColumn = areaHeaderValues[1] + 1,
+                                VariablesEndRow = areaHeaderValues[2] + 1,
+                                VariablesEndColumn = areaHeaderValues[3] + 1,
 
-                            Offset = areaDataValues[1],
-                            Orientation = orientation
-                        };
+                                Offset = areaDataValues[1],
+                                Orientation = orientation
+                            };
 
 
                         #region csv / txt parsing to get data tuples and variables
@@ -380,19 +356,17 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
                         AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload(dataStruct_, afri);
                         FileStream Stream = reader_.Open(temp_file_path);
-                        //rows = reader_.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(), ds.Id).ToArray();
                         rows = reader_.ReadFile(Stream, System.IO.Path.GetFileName(temp_file_path), Json_table_, afri, dataStruct_, ds.Id, packageSize, fri);
                         Stream.Close();
-
-                        if (reader_.ErrorMessages.Count > 0)
+                        if (rows != null)
                         {
-                            foreach (var err in reader_.ErrorMessages)
-                            {
-                                temp.Add(new Error(ErrorType.Dataset, err.GetMessage()));
-                            }
-                            //return temp;
+                            dm.EditDatasetVersion(workingCopy, rows.ToList(), null, null);
                         }
 
+                        //Close the Stream so the next ExcelReader can open it again
+                        Stream.Close();
+
+                        //Debug information
                         int lines = (areaDataValues[2] + 1) - (areaDataValues[0] + 1);
                         int batches = lines / batchSize;
                         batchnr++;
@@ -403,18 +377,20 @@ namespace BExIS.Modules.OAC.UI.Controllers
                         #endregion csv parsing to get data tuples and variables 
                     }
                 }
-                if (rows != null) dm.EditDatasetVersion(workingCopy, rows.ToList(), null, null);
-                dm.CheckInDataset(ds.Id, "Data was Uploaded", GetUsernameOrDefault(), ViewCreationBehavior.Create);
-                // if errors persist of type couldnt insert date/time bcz of date range , just change the format of postgres sql dates SHOW datestyle; SET datestyle = "ISO, DMY";
 
-                #endregion
+                dm.EditDatasetVersion(workingCopy, null, null, null);
 
-                System.IO.File.Delete(temp_file_path);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
+                dm.CheckInDataset(ds.Id, "Import data ", GetUsernameOrDefault());
+
+            //}
+            //catch (Exception e)
+            //{
+            //    throw (e);
+            //}
+            #endregion
+
+            //System.IO.File.Delete(temp_file_path);
+            dm.CheckInDataset(ds.Id, "Import data ", GetUsernameOrDefault());
 
             dsm.Dispose();
             dm.Dispose();
