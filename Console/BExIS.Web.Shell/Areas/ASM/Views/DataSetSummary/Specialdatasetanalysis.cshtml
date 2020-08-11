@@ -37,7 +37,9 @@
 }
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href='@Url.Content("/Scripts/leaflet/leaflet.css")' />
+    <link rel="stylesheet" href='@Url.Content("/Scripts/leaflet/popup_table_summary.css")' />
+    <script src='@Url.Content("/Scripts/leaflet/leaflet.js")'></script>
 
     <style type="text/css">
         /* Always set the map height explicitly to define the size of the div
@@ -51,25 +53,46 @@
             display: table;
             margin: auto;
         }
+
+        .popup .popuptext {
+            visibility: hidden;
+            width: 160px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -80px;
+        }
     </style>
 
-
     <!--
-    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
-            integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
-            crossorigin="">
-    </script>
+        <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+                integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+                crossorigin=""></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+              integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+              crossorigin="" />
 
-    <link rel="stylesheet" href="http://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
-       integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-       crossorigin=""/>
-    <script src="http://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
-       integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
-       crossorigin="">
-    </script>
+
+
+        <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+                integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+                crossorigin="">
+        </script>
+
+        <link rel="stylesheet" href="http://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+           integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+           crossorigin=""/>
+        <script src="http://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+           integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+           crossorigin="">
+        </script>
     -->
-
-
 </head>
 
 
@@ -77,6 +100,13 @@
 <div class="modal-body row" id="modal-body-row">
     <div class="row">
         <div class="col-md-2" id="form" align="left">
+            <div class="form-group">
+                <label for="locationFilter">Filter type</label>
+                <ul id="locationFilter">
+                    <li><input type="checkbox" name="locationFilter_li" id="locationFilter_li" class="locationFilter_li" value="Hainich" checked>Hainich CZE</li>
+                    <li><input type="checkbox" name="locationFilter_li" id="locationFilter_li" class="locationFilter_li" value="Sandsteinplatte" checked>Sandsteinplatte CZE</li>
+                </ul>
+            </div>
             <div class="form-group">
                 <label for="YearFIlter">Year</label>
 
@@ -137,51 +167,99 @@
                     }
                 </ul>
             </div>
-            <div class="form-group">
-                <label for="FIlterFIlter">Filter type</label>
-                <ul id="FIlterFIlter">
-                    <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="unspecified"> none</li>
-                    <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="0.1um"> 0.1</li>
-                    <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="0.2um"> 0.2</li>
-                </ul>
-            </div>
+            @*
+                <div class="form-group">
+                    <label for="FIlterFIlter">Filter type</label>
+                    <ul id="FIlterFIlter">
+                        <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="unspecified"> none</li>
+                        <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="0.1um"> 0.1</li>
+                        <li><input type="checkbox" name="FIlterFIlter_li" id="FIlterFIlter_li" class="FIlterFIlter_li" value="0.2um"> 0.2</li>
+                    </ul>
+                </div>
+            *@
             <button type="button" class="btn btn-primary" id="clear" onclick="clear(this)">Clear</button>
         </div>
 
         <div class="col-md-8">
             <!-- map version3 using leaflet js-->
-            <div class="centerBlock">
+            <div class="centerBlock" id="mappp">
                 <div id="map-container">
                     <div id="mapid"></div>
-                </div>
-            </div>
-            <div class="centerBlock">
-                <div id="summary" align="center">
-
-                </div>
-            </div>
-            <div class="centerBlock">
-                <br /><br />
-                <div id="spinner_loader" hidden="true">
-                    <center><i class="fa fa-spinner fa-spin" style="font-size:100px" id="spinner"></i></center>
-                </div>
-                </br></br>
-                <div id="table_result" class="table_result">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <td>No data Yet</td>
-                            </tr>
-                        </thead>
-                    </table>
                 </div>
             </div>
             <br />
         </div>
     </div>
+
+    <div class="row" id="dataaa">
+        <div class="centerBlock">
+            <br /><br />
+            <div id="spinner_loader" hidden="true">
+                <center><i class="fa fa-spinner fa-spin" style="font-size:100px" id="spinner"></i></center>
+            </div>
+            </br></br>
+        </div>
+        <div class="centerBlock">
+            <div id="summary" align="center">
+            </div>
+        </div>
+        <div class="centerBlock">
+            <div id="hashtags" class="float-sm-right"></div><br /><br />
+            <div id="table_result" class="table_result">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td>No data Yet</td>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div id="pnk_notif_id" hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <!--data-toggle="tooltip" title="Close this pannel !"-->
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Sampling Campaigns</h5>
+                        </div>
+                        <div class="modal-body" id="pnks_list_id">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="datasets_list" hidden="true">
+            </div>
+            <!--
+            <div class="modal" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle"><h1 class="display-4">Related Datasets</h1> </h5>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Related Datasets</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="results">error occured, please contact the administrator!</div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            -->
+        </div>
+    </div>
 </div>
 
+@*
+    <script src='@Url.Content("/Scripts/chartJs/leaflet.js")'></script>
+*@
 <script type="text/javascript">
+
+    $('div[data-toggle="tooltip"]').tooltip({
+        animated: 'fade',
+        placement: 'bottom',
+    });
 
     $(document).ready(function () {
         onMapClick();
@@ -194,23 +272,286 @@
 
     $("#clear").click(function () {
         $('input[type="checkbox"]').each(function () {
-            $('#modal-body-row').find('input[type=checkbox]:checked').removeAttr('checked');
+            $('#modal-body-row').find('input[type=checkbox]:checked:not("#locationFilter_li")').click().removeAttr('checked');
         });
-
+        document.getElementById('pnk_notif_id').setAttribute('hidden', true);
+        document.getElementById('datasets_list').setAttribute('hidden', true);
         var elements = document.getElementsByClassName('NameList_Ul')
         //alert(elements);
         for (var i = 0; i < elements.length; i++) {
             elements[i].setAttribute("hidden", true);
         }
+        $("#locationFilter li").click();
         onMapClick();
+        
+    });
+
+    map_coordinates = [50.911870, 10.866840];
+    var zoom = 10;
+    $("#locationFilter li").click(function () {
+        var listItems = document.getElementById("locationFilter").getElementsByTagName("li");
+        var locationFilter = [];
+        $.each($("input[name='locationFilter_li']:checked"), function () {
+            locationFilter.push($(this).val());
+        });
+        if (locationFilter.length == 0) {
+            alert("please choose a location ! ");
+            $.each($("input[name='locationFilter_li']"), function () {
+                $(this).click();
+            });
+            return;
+        }
+        else if (locationFilter.length == 2) {
+            map_coordinates = [50.911870, 10.866840];
+            zoom = 10;
+        }
+        else {
+            for (var i = 0; i < locationFilter.length; i++) {
+                if (locationFilter[i] == "Hainich") {
+                    // [51.114878, 10.433303]; 14
+                    map_coordinates = [51.114878, 10.433303];
+                    zoom = 14;
+                }
+                if (locationFilter[i] == "Sandsteinplatte") {
+                    // [51.174413, 11.792140];  20
+                    map_coordinates = [50.771410, 11.558188];
+                    zoom = 14;
+                }
+            }
+        }
+        document.getElementById('map-container').innerHTML = "<div id=\"mapid\" style= \"  \"></div>";
+        $("#mapid").width(($(window).width()) - $("form").width() - 350).height(500);
+        init_map();
     });
 
     $('li').click(function () {
+        document.getElementById('pnk_notif_id').setAttribute('hidden', true);
+        document.getElementById('datasets_list').setAttribute('hidden', true);
         onMapClick();
     });
 
+    function close_() {
+        console.log("close : " + document.getElementById('pnk_notif_id'));
+        document.getElementById('pnk_notif_id').setAttribute('hidden', true);
+    }
+
+    function get_pnk(row, column) {
+        document.getElementById("pnk_notif_id").setAttribute("hidden", true);
+        document.getElementById("datasets_list").setAttribute("hidden", true);
+
+        var x = document.getElementById("aaaa").getElementsByTagName("td");
+        for (var i = 0; i < x.length; i++) {
+            x[i].style.backgroundColor = "";
+            x[i].removeAttribute("bgcolor");
+        }
+        //$('#aaaa').on('click','td', function () {
+        //    $(this).css('backgroundColor', '#DDDDDD');
+        //});
+
+        var seasonFIlter = {};
+        var YearFIlter = [];
+        $.each($("input[name='YearFIlter_li_']:checked"), function () {
+            YearFIlter.push($(this).val());
+            var tete = $(this).val();
+            var ide = 'SeasonFIlter_li_' + tete;
+            var text = "";
+            $.each($("input[class='" + ide + "']:checked"), function () {
+                console.log($(this).val());
+                text = $(this).val() + ' , ' + text;
+            });
+            text = text.substring(0, text.length - 3);
+            console.log("results of seasons : " + text);
+            seasonFIlter[tete] = (text);
+        });
+
+
+        var GroupFIlter = [];
+        $.each($("input[name='GroupFIlter_li_']:checked"), function () {
+            GroupFIlter.push($(this).val());
+        });
+
+        var FilterFilter = [];
+        $.each($("input[name='FIlterFIlter_li']:checked"), function () {
+            FilterFilter.push($(this).val());
+        });
+
+        var NameFIlter = [];
+        $.each($("input[name='NameFIlter_li']:checked"), function () {
+            NameFIlter.push($(this).val());
+        });
+
+        document.getElementById("spinner_loader").removeAttribute("hidden");
+        var welllocation;
+
+        function sortByKey(jsObj) {
+            var sortedArray = [];
+
+            // Push each JSON Object entry in array by [key, value]
+            for (var i in jsObj) {
+                sortedArray.push([i, jsObj[i]]);
+            }
+
+            // Run native sort function and returns sorted array.
+            return sortedArray.sort();
+        }
+        console.log("row selected : " + row);
+        console.log("column selected : " + column);
+
+        $.ajax({
+            url: '/ASM/DataSetSummary/Filter_Apply',
+            type: 'POST',
+            data: {
+                'welllocation': welllocation, 'year': YearFIlter.toString(), 'filtersize': FilterFilter.toString(), 'GroupName': GroupFIlter.toString(),
+                'NameFIlter': NameFIlter.toString().replace('ü', 'u').replace('ö', 'o').replace('ä', 'a'), 'Season_dict': JSON.stringify(seasonFIlter),
+                'column': column, 'row': row, 'flag': 'true'
+            },
+            error: function (xhr) {
+                alert('Error occured, please contact your administrator');
+                document.getElementById("spinner_loader").setAttribute("hidden", true);
+            },
+            success: function (result) {
+                console.log("results : " + result);
+                document.getElementById("spinner_loader").setAttribute("hidden", true);
+                if (result != "") {
+                    document.getElementById("pnk_notif_id").removeAttribute("hidden");
+
+                    var jsonObject = JSON.parse(result);
+                    const ordered = {};
+                    Object.keys(jsonObject).sort().forEach(function (key) {
+                        ordered[key] = jsonObject[key];
+                    });
+                    console.log(ordered);
+                    //console.log(ordered[Object.keys(ordered)[row]]);
+                    header = ordered[Object.keys(ordered)[Object.keys(ordered).length - 1]]
+                    //xx = ordered[Object.keys(ordered)[row-1]];
+                    bodz = ordered[Object.keys(ordered)[0]];
+                    //console.log(bodz);
+                    //console.log(xx);
+                    samples = "";
+                    for (var i = 0; i < bodz.length; i++) {
+                        if (bodz[i] != "0") {
+                            //console.log(xx[i]);
+                            samples = samples + " <button onclick=\"show_dataset_pnk(\'" + header[i] + "\') ; \" type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\"  data-target=\"#exampleModalLong\" > "
+                                + bodz[i] + " <span class=\"badge\">" + header[i] + "</span></button> ";
+                            //samples = samples + header[i] + " - ";
+                        }
+                    }
+                    samples = samples.substring(0, samples.length - 2);
+                    //$("#pnks_list_id").html(samples);
+                    var popuptext = document.getElementById("pnks_list_id");
+                    //console.log(popuptext.innerHTML);
+                    popuptext.innerHTML = samples;
+                    //console.log(popuptext.innerHTML);
+                    //$('#pnks_list_id').html(samples);
+                    //$('#pnks_list_id').show();
+                    console.log($('#pnks_list_id'));
+                }
+                else {
+                    samples = "No Samples Yet";
+                    var popuptext = document.getElementById("pnks_list_id");
+                    //console.log(popuptext.innerHTML);
+                    popuptext.innerHTML = samples;
+                    //console.log(popuptext.innerHTML);
+                    //$('#pnks_list_id').html(samples);
+                    //$('#pnks_list_id').show();
+                }
+            }
+        });
+    }
+
+    function show_dataset_pnk(xx) {
+        document.getElementById("spinner_loader").removeAttribute("hidden");
+        document.getElementById("datasets_list").setAttribute("hidden", true);
+
+        $.ajax({
+            url: '/ASM/DataSetSummary/get_datasets_from_pnk',
+            type: 'POST',
+            data: {
+                'pnk': xx
+            },
+            error: function (xhr) {
+                alert('Error occured, please contact your administrator');
+                document.getElementById("spinner_loader").setAttribute("hidden", true);
+            },
+            success: function (result) {
+                console.log("results : " + result);
+                var res = "datasets related to " + xx + " : ";
+                if (result != "") {
+                    var jsonObject = JSON.parse(result);
+                    const ordered = {};
+                    Object.keys(jsonObject).sort().forEach(function (key) {
+                        ordered[key] = jsonObject[key];
+                    });
+                    //<p></p>
+                    for (var key of Object.keys(ordered)) {
+                        console.log(key + " -> " + ordered[key])
+                        //res = res + ordered[key];// "<i class=\"fa fa - folder - open - o\" aria-hidden=\"true\" onclick='onclickDataset(\'"+ ordered[key] +"\') >"+ ordered[key] +"</i>";
+                        res = res + "<a id=\"" + ordered[key] + "\" onclick=\"onclickDataset(this)\" class=\"mylink\" > <span class=\"badge badge-pill badge-warning\"> " + ordered[key] + "</span></a> ";
+                    }
+                }
+                else {
+                    res = "<span class=\"badge badge-pill badge-warning\">No datasets are generated from this sampling yet</span>";
+                }
+                $('#datasets_list').html(res);
+            },
+            complete: function () {
+                document.getElementById("spinner_loader").setAttribute("hidden", true);
+                //document.getElementById("results").removeAttribute("hidden");
+                //$('#results').show();
+                document.getElementById("datasets_list").removeAttribute("hidden");
+                //$('#papers').show();
+            },
+        });
+    }
+
+    function onclickDataset(e) {
+        //checked
+        var id = e.getAttribute("id");
+
+        console.log(" id  of dataset" + id)
+        var data = {
+            id: id
+        }
+
+        $.ajax({
+            url: '/DDM/Data/IsDatasetCheckedIn',
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            error: function (xhr) {
+                alert('Error: ' + xhr.statusText);
+
+            },
+            success: function (result) {
+                if (result) {
+                    window.open("/ddm/Data/Show/" + id, "_blank");
+                } else {
+                    alert("Dataset is locked. Please try again later.");
+                }
+            }
+        });
+    }
 
     function onMapClick(e) {
+        document.getElementById("pnk_notif_id").setAttribute("hidden", true);
+        document.getElementById("datasets_list").setAttribute("hidden", true);
+
+        var locationFilter = [];
+        $.each($("input[name='locationFilter_li']:checked"), function () {
+            locationFilter.push($(this).val());
+        });
+
+        //if (locationFilter.length == 0) {
+        //    alert("please check a location : ");
+        //    document.getElementById('mappp').setAttribute('hidden', true);
+        //    document.getElementById('dataaa').setAttribute('hidden', true);
+        //    return;
+        //}
+        //else {
+        //    document.getElementById("mappp").removeAttribute("hidden");
+        //    document.getElementById("dataaa").removeAttribute("hidden");
+        //}
 
         var seasonFIlter = {};
         var YearFIlter = [];
@@ -248,16 +589,14 @@
         var welllocation;
         if (e) {
             welllocation = e.latlng.toString();
-            popup.setLatLng(e.latlng)
-                .setContent("please wait to retreive datasets collected from this site")
-                .openOn(mymap);
+            //popup.setLatLng(e.latlng).setContent("please wait to retreive datasets collected from this site").openOn(mymap);
         }
 
         data = 'welllocation ' + welllocation + ' year ' + YearFIlter.toString() + ' filtersize ' + FilterFilter.toString() +
             ' GroupName ' + GroupFIlter.toString() + ' NameFIlter ' + NameFIlter + 'Season_dict' + JSON.stringify(seasonFIlter);
         console.log(" -> " + data);
 
-        summary = "<br><h3> <b>The table</b> represents the <b>percentage</b> of each analysis in <b>relation to the wells</b>. <br>The summary results in ";
+        summary = "<br><h3> <b>The table</b> represents the <b>Count</b> of each analysis in <b>relation to the wells</b>. <br>The summary results in ";
 
         if (YearFIlter.length == 0) summary = summary + "<b> all years </b> and <b> all seasons </b>  ";
         else {
@@ -281,9 +620,19 @@
         if (NameFIlter.length == 0) summary = summary + "<b> all Project Investigators </b> ";
         else summary = summary + " <b> " + NameFIlter.toString() + " </b> </h3>";
 
-
-
         $("#summary").html(summary);
+
+        function sortByKey(jsObj) {
+            var sortedArray = [];
+
+            // Push each JSON Object entry in array by [key, value]
+            for (var i in jsObj) {
+                sortedArray.push([i, jsObj[i]]);
+            }
+
+            // Run native sort function and returns sorted array.
+            return sortedArray.sort();
+        }
 
         $.ajax({
             url: '/ASM/DataSetSummary/Filter_Apply',
@@ -305,33 +654,118 @@
                 else {
                     document.getElementById("spinner_loader").setAttribute("hidden", true);
                     var jsonObject = JSON.parse(result);
-                    var html = "<table class=\"table\"> <tbody> ";
-                    console.log(jsonObject);
+                    const ordered = {};
+                    Object.keys(jsonObject).sort().forEach(function (key) {
+                        ordered[key] = jsonObject[key];
+                    });
+                    console.log(ordered);
+                    //var html = "<table class=\"table\" id =\"aaaa\"> <thead> <tr> ";
+                    //var column = 0;
+                    //for (var key in ordered) {
+                    //    id = "chk" + column;
+                    //    html = html + "<th> <input id=" + id + " type=\"checkbox\" /> <th>  ";
+                    //    column * column + 1;
+                    //}
+                    //html = html + " </tr></thead> <tbody>"
+                    html = " <table class=\"table\" id =\"aaaa\"> <tbody>"
                     var b = true;
-                    for (var key in jsonObject) {
-                        if (jsonObject.hasOwnProperty(key)) {
+                    var row = 0;
+                    var col = 0;
+                    for (var key in ordered) {
+                        if (ordered.hasOwnProperty(key)) {
                             console.log(key);
-                            html = html + " <tr> <td > <b> " + key + " </b> </td>";
-                            vals = String(jsonObject[key])
+                            vals = String(ordered[key]);
+                            vals = vals.replace('basic hydrochemistry, physicochemistry', 'basic hydrochemistry- physicochemistry');
                             var elems = vals.split(",");
-                            for (i = 0; i < elems.length; i++) {
-                                if (b == true) {
-                                    html = html + "<td><b>" + elems[i] + "</b> </td> ";
+                            var column = 0;
+                            if (row == 0) {
+                                if (column == 0)
+                                    html = html + " <tr> <td  class=" + column + " > <b> " + key + " </b> </td>";
+                                else
+                                    html = html + " <tr> <td onclick='show_hide(this, " + column + ", \" " + key + " \" , \"add\" )'  class=" + column + " > <b> " + key + " </b> </td>";
+                                for (i = 0; i < elems.length; i++) {
+                                    column = column + 1;
+                                    if (b == true) {
+                                        html = html + "<td onclick='show_hide(this, " + column + ", \" " + elems[i] + " \" , \"add\")'  class=" + column + "> <b>" + elems[i] + "</b> </td> ";
+                                    }
+                                    else html = html + "<td class=" + column + ">" + elems[i] + " </td> ";
                                 }
-                                else html = html + "<td>" + elems[i] + " % </td> ";
-
                             }
+                            else {
+                                html = html + " <tr> <td class=" + column + " > <b> " + key + " </b> </td>";
+                                for (i = 0; i < elems.length; i++) {
+                                    column = column + 1;
+                                    if (b == true) {
+                                        html = html + "<td class=" + column + " ><b>" + elems[i] + "</b> </td> ";
+                                    }
+                                    else html = html + "<td class=" + column + " onclick = 'get_pnk(" + row + "," + column + " ); this.bgColor=\"#88C9E8\" ;'>" +
+                                        //"<div class=\"popup\"   ><span class=\"popuptext\" id=\"myPopup\" > <div id=\"xxxx\">*</div></span> " +
+                                        elems[i] + " </td> ";
+
+                                }
+                            }
+                            col = column;
                             b = false;
                             html = html + "</tr> ";
+
                         }
+                        row = row + 1;
                     }
-                    html = html + " </tbody> </table> "
+                    html = html + " </tbody> </table> <br/> <center>number of analysis: " + col + " distributed on " + row + " wells</center> "
                     //console.log(" -> " + html);
                     $("#table_result").html(html);
                     //window.location.reload();
                 }
             }
         });
+    }
+
+    function show_hide(x, id, key, behaviour) {
+        console.log(" elem check box : " + x);
+        console.log(" class check box : " + id);
+        console.log(" behaviour  " + behaviour);
+        console.log(" key  " + key);
+        var target = document.getElementById('hashtags');
+        var old_content = document.getElementById('hashtags').innerHTML;
+        console.log(" old content : " + old_content);
+        if (behaviour == "remove") {
+            $("td[class='" + id + "']").show();
+            button_id = "button_" + id;
+            var element = document.getElementById(button_id);
+            element.parentNode.removeChild(element);
+            //s = "<button type=\"button\" class=\"btn btn-primary\" onclick=\"show_hide(this," + id + " , &quot; " + key + " &quot; , &quot;remove&quot; )\">  " + key + "  <span class=\"badge\">" + id + "</span></button> ";
+            //s= "<button type=\"button\" class=\"btn btn-primary\" onclick=\"show_hide(this," + id + " , &quot;" + key + "&quot; , &quot;remove&quot; )\" id=\""+button_id+"\"> "+ key + " <span class=\"badge\">" + id + "</span></button>";
+            //console.log(" to be deleted : " + s);
+            //index = old_content.indexOf(s);
+            //console.log(" index : " + index);
+            //if (index != -1) {
+            //    new_html = old_content.replace(s, "")
+            //    $("#hashtags").html(new_html);
+            //    console.log(" new  content : " + new_html);
+            //}
+        }
+        if (behaviour == "add") {
+            var r = confirm("Do you want to hide this column ?");
+            if (r == true) {
+                $("td[class='" + id + "']").hide();
+                if (key != "") {
+                    s = "<span class=\"badge\">" + id + "</span>";
+                    index = old_content.indexOf(s);
+                    console.log(" index : " + index);
+                    button_id = "button_" + id;
+                    if (index == -1) {
+                        html_tag = old_content
+                            + " <button  type=\"button\" class=\"btn btn-primary\" onclick='show_hide(this, " + id + ", \"" + key + "\" , \"remove\" )'  id= " + button_id + "> "
+                            + key + " <span class=\"badge\">" + id + "</span></button> ";
+                        $("#hashtags").html(html_tag);
+                        console.log(" new  content : " + html_tag);
+                    }
+
+                }
+            }
+        }
+        $("#hashtags").load();
+
     }
 
     function fillchildren(x, child, classname) {
@@ -364,7 +798,6 @@
         }
     }
 
-
     function child_click(x, child, classname, li_input_class) {
         //var query = $('#NameList_Ul_' + x);
         //child = 'NameList_Ul_' + x;
@@ -386,68 +819,67 @@
         }
     }
 
-</script>
+    function init_map() {
 
+        var mymap = new L.map('mapid');
+        mymap.setView(map_coordinates, zoom);
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            //maxZoom: 13,
+            //minZoom:14,
+            id: 'mapbox.streets',
+            accessToken: 'pk.eyJ1IjoiaGFtZGkxOTkyIiwiYSI6ImNqaGtmbGllejJzYzUzZG03dHdqOXoya3YifQ.pivL63h1QhfDBe7EQBKfXg'
+        }).addTo(mymap);
 
+        $.ajax({
+            url: '/ASM/DataSetSummary/parse_Json_location',
+            type: 'POST',
+            data: { 'location_coordinates': "" },
+            error: function (xhr) {
+                alert('OoOoOoOppps ... error happened, come back later ...');
+            },
+            success: function (result) {
+                jsonObject = JSON.parse(result);
 
-<script type="text/javascript">
-    var mymap = L.map('mapid').setView([51.114878, 10.433303], 14);
+                for (i = 0; i < jsonObject.length; i++) {
+                    if ((jsonObject[i].Lat != null) && (jsonObject[i].Lon != null)) {
 
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        //maxZoom: 13,
-        //minZoom:14,
-        id: 'mapbox.streets',
-        accessToken: 'pk.eyJ1IjoiaGFtZGkxOTkyIiwiYSI6ImNqaGtmbGllejJzYzUzZG03dHdqOXoya3YifQ.pivL63h1QhfDBe7EQBKfXg'
-    }).addTo(mymap);
+                        var lat = parseFloat(jsonObject[i].Lat);
+                        var lon = parseFloat(jsonObject[i].Lon);
 
-    $.ajax({
-        url: '/ASM/DataSetSummary/parse_Json_location',
-        type: 'POST',
-        data: { 'location_coordinates': "" },
-        error: function (xhr) {
-            alert('OoOoOoOppps ... error happened, come back later ...');
-        },
-        success: function (result) {
-            jsonObject = JSON.parse(result);
+                        var lat = jsonObject[i].Lat;
+                        var lon = jsonObject[i].Lon;
 
-            for (i = 0; i < jsonObject.length; i++) {
-                if ((jsonObject[i].Lat != null) && (jsonObject[i].Lon != null)) {
+                        var marker = L.marker([lat, lon]).addTo(mymap).on('click', onMapClick);
 
-                    var lat = parseFloat(jsonObject[i].Lat);
-                    var lon = parseFloat(jsonObject[i].Lon);
+                        marker.on('mouseover', function (e) {
+                            $.ajax({
+                                url: '/ASM/DataSetSummary/parse_Json_location',
+                                type: 'POST',
+                                data: { 'location_coordinates': e.latlng.toString() },
+                                error: function (xhr) {
+                                    alert('OoOoOoOppps ... error happened, come back later ...');
+                                },
+                                success: function (result) {
+                                    var popup = L.popup()
+                                        .setLatLng(e.latlng)
+                                        .setContent(result)
+                                        .openOn(mymap);
+                                }
+                            });
 
-                    var lat = jsonObject[i].Lat;
-                    var lon = jsonObject[i].Lon;
-
-                    var marker = L.marker([lat, lon]).addTo(mymap).on('click', onMapClick);
-
-                    marker.on('mouseover', function (e) {
-                        $.ajax({
-                            url: '/ASM/DataSetSummary/parse_Json_location',
-                            type: 'POST',
-                            data: { 'location_coordinates': e.latlng.toString() },
-                            error: function (xhr) {
-                                alert('OoOoOoOppps ... error happened, come back later ...');
-                            },
-                            success: function (result) {
-                                var popup = L.popup()
-                                    .setLatLng(e.latlng)
-                                    .setContent(result)
-                                    .openOn(mymap);
-                            }
                         });
-
-                    });
+                    }
                 }
+                mymap.invalidateSize();
             }
-            mymap.invalidateSize()
-        }
-    });
+        });
 
-    var popup = L.popup();
+        var popup = L.popup();
+    }
 
-
+    init_map();
 
 </script>
+
 <!-- end of map version3-->

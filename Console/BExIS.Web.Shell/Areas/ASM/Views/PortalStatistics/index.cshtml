@@ -82,6 +82,25 @@
         </tbody>
     </table>
 
+    <h3> Data Structure Report</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Data Structure in use</th>
+                <th scope="col">Data Structure not used</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataStruct_in_use.Count</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataStruc_non_use.Count</td>
+
+            </tr>
+
+        </tbody>
+    </table>
+
 
     <h3> General Report related to semantic coverage ofthe portal</h3>
     <table>
@@ -144,6 +163,7 @@
         <thead class="thead-dark">
             <tr>
                 <th scope="col">Dataset id</th>
+                <th scope="col">Data Structure id</th>
                 <th scope="col">Dataset Owner</th>
                 <th scope="col">Project</th>
                 <th scope="col">Semantic Coverage</th>
@@ -184,6 +204,7 @@
 
                         <tr>
                             <td rowspan="@va.variable_id.Count">@va.dataset_id</td>
+                            <td rowspan="@va.variable_id.Count">@va.datastructure_id</td>
                             <td rowspan="@va.variable_id.Count">@va.owner</td>
                             <td rowspan="@va.variable_id.Count">@va.project</td>
                             <td rowspan="@va.variable_id.Count">Concept Coverage : @Concepts_count/@va.variable_id.Count <br /> Characteristics Coverage : @Caracteristics_count/@va.variable_id.Count</td>

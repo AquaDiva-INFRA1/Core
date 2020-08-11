@@ -54,140 +54,143 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
             foreach (long id in ds_ids)
             {
-
-                List<string> variable_id = new List<string>();
-                List<string> variable_label = new List<string>();
-                List<string> dataType = new List<string>();
-                List<string> unit = new List<string>();
-                List<string> variable_concept_entity = new List<string>();
-                List<string> variable_concept_caracteristic = new List<string>();
-
-                #region metadata extraction
-                //get the owner of the dataset
-                DatasetManager dm = new DatasetManager();
-                XmlDocument xmlDoc = dm.GetDatasetLatestMetadataVersion(id);
-                XmlNode root = xmlDoc.DocumentElement;
-                string idMetadata = root.Attributes["id"].Value;
-
-                string owner = "";
-                string project = "";
-
-                if (idMetadata == "1")
+                if (DM.GetDataset(id).Status == DatasetStatus.CheckedIn)
                 {
-                    XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Givenname/Name");
-                    XmlNodeList nodeList_Surname = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Surname/Name");
-                    owner = nodeList_givenName[0].InnerText + " " + nodeList_Surname[0].InnerText;
-                    XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Title/Title");
-                    XmlNodeList nodeList_Personnelgivenname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelgivenname/Name");
-                    XmlNodeList nodeList_Personnelsurname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelsurname/Name");
-                    project = nodeList_Title[0].InnerText + "/" + nodeList_Personnelgivenname[0].InnerText + " " + nodeList_Personnelsurname[0].InnerText;
-                }
-                else if (idMetadata == "2")
-                {
-                    XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Owner/Owner/FullName/Name");
-                    owner = nodeList_givenName[0].InnerText;
-                    XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Owner/Owner/Role/Role");
-                    XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceInstitutionID/Id");
-                    XmlNodeList nodeList_SourceID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceID/Id");
-                    XmlNodeList nodeList_UnitID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/UnitID/Id");
-                    project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText + " - " + nodeList_SourceID[0].InnerText + " - " + nodeList_UnitID[0].InnerText;
-                }
-                else if (idMetadata == "3")
-                {
-                    XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Person/PersonName/FullName/FullNameType");
-                    foreach (XmlElement node in nodeList_givenName)
+                    List<string> variable_id = new List<string>();
+                    List<string> variable_label = new List<string>();
+                    List<string> dataType = new List<string>();
+                    List<string> unit = new List<string>();
+                    List<string> variable_concept_entity = new List<string>();
+                    List<string> variable_concept_caracteristic = new List<string>();
+
+                    #region metadata extraction
+                    //get the owner of the dataset
+                    DatasetManager dm = new DatasetManager();
+                    XmlDocument xmlDoc = dm.GetDatasetLatestMetadataVersion(id);
+                    XmlNode root = xmlDoc.DocumentElement;
+                    string idMetadata = root.Attributes["id"].Value;
+
+                    string datastructure_id = DM.GetDataset(id).DataStructure.Id.ToString();
+                    string owner = "";
+                    string project = "";
+
+                    if (idMetadata == "1")
                     {
-                        owner = node.InnerText + " - " + owner;
+                        XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Givenname/Name");
+                        XmlNodeList nodeList_Surname = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Surname/Name");
+                        owner = nodeList_givenName[0].InnerText + " " + nodeList_Surname[0].InnerText;
+                        XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Title/Title");
+                        XmlNodeList nodeList_Personnelgivenname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelgivenname/Name");
+                        XmlNodeList nodeList_Personnelsurname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelsurname/Name");
+                        project = nodeList_Title[0].InnerText + "/" + nodeList_Personnelgivenname[0].InnerText + " " + nodeList_Personnelsurname[0].InnerText;
                     }
-                    //owner = nodeList_givenName[0].InnerText;
-                    XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/Name/Label/Representation/RepresentationType/Text/TextType");
-                    XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/OrgUnits/OrgUnitsType/OrgUnit/OrgUnitType");
-                    project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText;
-                }
-
-                foreach (string proj in project_list_names)
-                {
-                    if (project.Contains(proj))
-                        project = proj;
-                }
-                #endregion
-
-                //Construct a HttpClient for the search-Server
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(DatastructAPI);
-                //Set the searchTerm as query-String
-                String param = HttpUtility.UrlEncode(id.ToString());
-                 
-                try
-                {
-                    HttpResponseMessage response = client.GetAsync(param).Result;  
-                    if (response.IsSuccessStatusCode)
+                    else if (idMetadata == "2")
                     {
-                        JObject json_ds_struct = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-                        JArray json_variables = JArray.Parse(json_ds_struct["Variables"].ToString());
-
-                        foreach (JObject json_variable in json_variables)
+                        XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Owner/Owner/FullName/Name");
+                        owner = nodeList_givenName[0].InnerText;
+                        XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Owner/Owner/Role/Role");
+                        XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceInstitutionID/Id");
+                        XmlNodeList nodeList_SourceID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceID/Id");
+                        XmlNodeList nodeList_UnitID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/UnitID/Id");
+                        project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText + " - " + nodeList_SourceID[0].InnerText + " - " + nodeList_UnitID[0].InnerText;
+                    }
+                    else if (idMetadata == "3")
+                    {
+                        XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Person/PersonName/FullName/FullNameType");
+                        foreach (XmlElement node in nodeList_givenName)
                         {
-                            variable_id.Add(json_variable["Id"].ToString());
-                            variable_label.Add(json_variable["Label"].ToString());
-                            dataType.Add(json_variable["DataType"].ToString());
-                            unit.Add(json_variable["Unit"].ToString());
-                            
-                            string select = "SELECT datasets_id, variable_id, entity , characteristic FROM dataset_column_annotation WHERE datasets_id= \'" +
-                                id + "\' AND variable_id = \'" + json_variable["Id"].ToString() + "\'";
-                            NpgsqlCommand MyCmd = null;
-                            NpgsqlConnection MyCnx = null;
-                            MyCnx = new NpgsqlConnection(Conx);
-                            MyCnx.Open();
-                            MyCmd = new NpgsqlCommand(select, MyCnx);
+                            owner = node.InnerText + " - " + owner;
+                        }
+                        //owner = nodeList_givenName[0].InnerText;
+                        XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/Name/Label/Representation/RepresentationType/Text/TextType");
+                        XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/OrgUnits/OrgUnitsType/OrgUnit/OrgUnitType");
+                        project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText;
+                    }
 
-                            NpgsqlDataReader dr = MyCmd.ExecuteReader();
-                            if (dr != null)
+                    foreach (string proj in project_list_names)
+                    {
+                        if (project.Contains(proj))
+                            project = proj;
+                    }
+                    #endregion
+
+                    //Construct a HttpClient for the search-Server
+                    HttpClient client = new HttpClient();
+                    client.BaseAddress = new Uri(DatastructAPI);
+                    //Set the searchTerm as query-String
+                    String param = HttpUtility.UrlEncode(datastructure_id);
+                 
+                    try
+                    {
+                        HttpResponseMessage response = client.GetAsync(param).Result;  
+                        if (response.IsSuccessStatusCode)
+                        {
+                            JObject json_ds_struct = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                            JArray json_variables = JArray.Parse(json_ds_struct["Variables"].ToString());
+
+                            foreach (JObject json_variable in json_variables)
                             {
-                                while (dr.Read())
-                                {
-                                    if ((dr["datasets_id"] != System.DBNull.Value) && ((dr["variable_id"] != System.DBNull.Value)))
-                                    {
-                                        if (dr["entity"].ToString() == "")
-                                        {
-                                            variable_concept_entity.Add("No Annotation");
-                                        }
-                                        else
-                                        {
-                                            variable_concept_entity.Add(dr["entity"].ToString());
-                                        }
+                                variable_id.Add(json_variable["Id"].ToString());
+                                variable_label.Add(json_variable["Label"].ToString());
+                                dataType.Add(json_variable["DataType"].ToString());
+                                unit.Add(json_variable["Unit"].ToString());
+                            
+                                string select = "SELECT datasets_id, variable_id, entity , characteristic FROM dataset_column_annotation WHERE datasets_id= \'" +
+                                    id + "\' AND variable_id = \'" + json_variable["Id"].ToString() + "\'";
+                                NpgsqlCommand MyCmd = null;
+                                NpgsqlConnection MyCnx = null;
+                                MyCnx = new NpgsqlConnection(Conx);
+                                MyCnx.Open();
+                                MyCmd = new NpgsqlCommand(select, MyCnx);
 
-                                        if (dr["characteristic"].ToString() == "")
+                                NpgsqlDataReader dr = MyCmd.ExecuteReader();
+                                if (dr != null)
+                                {
+                                    while (dr.Read())
+                                    {
+                                        if ((dr["datasets_id"] != System.DBNull.Value) && ((dr["variable_id"] != System.DBNull.Value)))
                                         {
-                                            variable_concept_caracteristic.Add("No Annotation");
-                                        }
-                                        else
-                                        {
-                                            variable_concept_caracteristic.Add(dr["characteristic"].ToString());
+                                            if (dr["entity"].ToString() == "")
+                                            {
+                                                variable_concept_entity.Add("No Annotation");
+                                            }
+                                            else
+                                            {
+                                                variable_concept_entity.Add(dr["entity"].ToString());
+                                            }
+
+                                            if (dr["characteristic"].ToString() == "")
+                                            {
+                                                variable_concept_caracteristic.Add("No Annotation");
+                                            }
+                                            else
+                                            {
+                                                variable_concept_caracteristic.Add(dr["characteristic"].ToString());
+                                            }
                                         }
                                     }
+                                    if (dr.HasRows == false)
+                                    {
+                                        variable_concept_entity.Add("No Annotation");
+                                        variable_concept_caracteristic.Add("No Annotation");
+                                    }
                                 }
-                                if (dr.HasRows == false)
-                                {
-                                    variable_concept_entity.Add("No Annotation");
-                                    variable_concept_caracteristic.Add("No Annotation");
-                                }
+                                MyCnx.Close();
                             }
-                            MyCnx.Close();
+                            // create a new instance of variable analytics
+                            Variable_analytics VA = new Variable_analytics(id, datastructure_id, owner, project, variable_id, variable_label, variable_concept_entity, variable_concept_caracteristic, dataType, unit);
+                            VA_list.Add(VA);
                         }
-                        // create a new instance of variable analytics
-                        Variable_analytics VA = new Variable_analytics(id, owner, project, variable_id, variable_label, variable_concept_entity, variable_concept_caracteristic, dataType, unit);
-                        VA_list.Add(VA);
                     }
-                }
-                catch (Exception e)
-                {
-                    using (StreamWriter sw = System.IO.File.AppendText(debugFile))
+                    catch (Exception e)
                     {
-                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : analysis summary called : dataset " + id + " has an error : " + e.ToString());
+                        using (StreamWriter sw = System.IO.File.AppendText(debugFile))
+                        {
+                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : analysis summary called : dataset " + id + " has an error : " + e.ToString());
+                        }
+                        Debug.WriteLine(e.ToString());
                     }
-                    Debug.WriteLine(e.ToString());
-                }
+                 }
             }
             
             Data_container_analytics datacontaineranalytics = new Data_container_analytics();
@@ -208,7 +211,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         public ActionResult Download_Report()
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            sb.AppendLine("dataset_id ,owner, project,Semantic Coverage, variable_id,variable_label,variable_concept_entity,variable_concept_caracteristic,dataType,unit,data points");
+            sb.AppendLine("dataset_id , datastructure_id ,owner, project,Semantic Coverage, variable_id,variable_label,variable_concept_entity,variable_concept_caracteristic,dataType,unit,data points");
 
             DatasetManager dm = new DatasetManager();
             
@@ -243,17 +246,18 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     for (int kk = 0; kk < va.variable_id.Count; kk++)
                     {
                         sb.AppendLine(
-                            va.dataset_id.ToString() + "," +
-                            va.owner.Replace(",", "-") + "," +
-                            va.project.Replace(",", "-") + "," +
-                            Concepts_count.ToString() + "," +
-                            va.variable_id.Count.ToString() + "," +
-                            va.variable_id[kk].ToString() + "," +
-                            va.variable_label[kk].ToString() + "," +
-                            va.variable_concept_entity[kk].ToString() + "," +
-                            va.variable_concept_caracteristic[kk].ToString() + "," +
-                            va.unit[kk].ToString() + "," +
-                            va.dataType[kk].ToString() + "," +
+                            va.dataset_id.ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.datastructure_id.ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.owner.Replace(",", "-").Replace("\n", String.Empty).Trim() + "," +
+                            va.project.Replace(",", "-").Replace("\n", String.Empty).Trim() + "," +
+                            Concepts_count.ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_id.Count.ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_id[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_label[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_concept_entity[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.variable_concept_caracteristic[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.unit[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
+                            va.dataType[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
                             somme);
                     }
                     //sb.AppendLine(
