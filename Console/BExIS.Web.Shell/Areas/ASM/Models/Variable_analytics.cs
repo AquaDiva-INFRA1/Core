@@ -9,6 +9,7 @@ namespace BExIS.Modules.Asm.UI.Models
     {
         public long dataset_id;
         public string owner;
+        public string datastructure_id;
         public string project;
         public List<string> variable_id;
         public List<string> variable_label;
@@ -17,9 +18,10 @@ namespace BExIS.Modules.Asm.UI.Models
         public List<string> dataType;
         public List<string> unit;
 
-        public Variable_analytics(long dataset_id, string owner, string project, List<string> variable_id, List<string> variable_label, List<string> variable_concept_entity, List<string> variable_concept_caracteristic, List<string> dataType, List<string> unit)
+        public Variable_analytics(long dataset_id, string datastructure_id, string owner, string project, List<string> variable_id, List<string> variable_label, List<string> variable_concept_entity, List<string> variable_concept_caracteristic, List<string> dataType, List<string> unit)
         {
             this.dataset_id = dataset_id;
+            this.datastructure_id = datastructure_id;
             this.owner = owner;
             this.project = project;
             this.variable_id = variable_id;
