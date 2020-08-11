@@ -142,8 +142,8 @@
 
 <!-- Modal -->
 <div id="papers">
-    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" style="padding-top: 3cm;">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"  style="padding-top: 3cm;">
+        <div class="modal-dialog" tabindex="-1" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLongTitle"><h1 class="display-4">RELATED SEMEDICO PUBLICATIONS</h1> </h5>
@@ -161,10 +161,10 @@
 
                 <div class="modal-footer">
                     <!--<button type="button" class="btn btn-secondary" data-dismiss="modal" id="Close_button">Close</button>-->
-                    <button id="previous" type="button" style="float: left" onclick="get_dataset_related_papers_by_ID('','nextpage')">
+                    <button id="previous" type="button" style="float: right" onclick="get_dataset_related_papers_by_ID('','nextpage')">
                         <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Next
                     </button>
-                    <button id="previous" type="button" style="float: right" onclick="get_dataset_related_papers_by_ID('','prevpage')">
+                    <button id="next" type="button" style="float: left" onclick="get_dataset_related_papers_by_ID('','prevpage')">
                         <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Previous
                     </button>
                 </div>
@@ -288,6 +288,17 @@
                     return true;
                 }
                 try {
+                    l = result.split('\n')[0];
+                    console.log(l);
+                    result = result.substring(result.indexOf('\n') + 1);
+                    console.log(result)
+                    if ( l == 0) {
+                        $('#next').prop('disabled',true );
+                    }
+                    else {
+                        $('#previous').prop('disabled', false);
+						$('#next').prop('disabled', false);
+                    }
                     res = JSON.parse(result);
                     if (result.length == 0) {
                         var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
@@ -299,7 +310,7 @@
                             text = text + "<li><strong><b>" + res.bibliographylist[i].articleTitle + "</b></strong></li>";
 
                             text = text + "<a id=\"_abstract" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>ABSTRACT</b></h5> </a>";
-                            text = text +"<div id=\"abstract"+i+"\"  hidden=\"true\"> ";
+                            text = text + "<div id=\"abstract" + i + "\"  hidden=\"true\"> ";
                             text = text + "<h5><p align=\"justify\">" + res.bibliographylist[i].abstractText + "</p></h5>";
                             text = text + "</div>";
 
@@ -309,21 +320,21 @@
                             //text = text + "<h5><p align=\"justify\"> Volume: " + res.bibliographylist[i].publication.volume + "</p></h5>";
                             //text = text + "<h5><p align=\"justify\"> Issue : " + res.bibliographylist[i].publication.issue + "</p></h5>";
                             //text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].publication.pages + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].docId + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].pmid + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].pmcid + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> DocId: " + res.bibliographylist[i].docId + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pmid: " + res.bibliographylist[i].pmid + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pmcid: " + res.bibliographylist[i].pmcid + "</p></h5>";
                             text = text + "<h5><p align=\"justify\"> Date: " + res.bibliographylist[i].publication.date + "</p></h5>";
                             text = text + "</div>";
 
 
-                            text = text + "<a id=\"_authors" + i +"\" href=\"#\"  onclick='show_region(this,i)'> <h5><b>AUTHORS</b></h5> </a>";
-                            text = text + "<div id=\"authors" + i +"\" hidden=\"true\" >";
+                            text = text + "<a id=\"_authors" + i + "\" href=\"#\"  onclick='show_region(this,i)'> <h5><b>AUTHORS</b></h5> </a>";
+                            text = text + "<div id=\"authors" + i + "\" hidden=\"true\" >";
                             text = text + "<ul>";
                             for (j = 0; j < res.bibliographylist[i].authors.length; j++) {
                                 text = text + "<li>" + res.bibliographylist[i].authors[j].firstname + " " + res.bibliographylist[i].authors[j].lastname + "</li>";
                             }
                             text = text + "</ul></div><br>";
-                            
+
                             console.log("Article => " + res.bibliographylist[i].articleTitle);
                         }
                         text = text + "</ol>";
@@ -333,8 +344,9 @@
                 }
                 catch (er) {
                     console.log("ERROR => " + er);
-                    var text = "<h3> Dataset might not be semantically covered for this search </h3> <h4>Please a report to the Admin</h4>";
+                    var text = "<h3> Error </h3> <h4>Please a report the error</h4>";
                     $('#results').html(text);
+                    document.getElementById("spinner_").setAttribute("hidden", true);
                 }
             },
             complete: function () {
@@ -342,7 +354,6 @@
                 $('#Close_button').prop('disabled', false);
                 document.getElementById("spinner_").setAttribute("hidden", true);
                 $('#button').prop('disabled', true);
-
                 $('#papers').show();
             },
         });

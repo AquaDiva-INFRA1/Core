@@ -135,10 +135,10 @@
                 </div>
                 <div class="modal-footer">
                     <!--<button type="button" class="btn btn-secondary" data-dismiss="modal" id="Close_button">Close</button>-->
-                    <button id="previous" type="button" style="float: left" onclick="get_dataset_related_papers_by_ID('','nextpage')">
+                    <button id="previous" type="button" style="float: right" onclick="get_dataset_related_papers_by_ID('','nextpage')">
                         <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Next
                     </button>
-                    <button id="previous" type="button" style="float: right" onclick="get_dataset_related_papers_by_ID('','prevpage')">
+                    <button id="next" type="button" style="float: left" onclick="get_dataset_related_papers_by_ID('','prevpage')">
                         <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Previous
                     </button>
                 </div>
@@ -231,12 +231,15 @@
 
     function get_dataset_related_papers_by_ID(e, behaviour) {
 
-        document.getElementById("spinner_loader").removeAttribute("hidden");
+        document.getElementById("spinner_").removeAttribute("hidden");
 
         document.addEventListener("click", handler, true);
         
         $('#button').prop('disabled', true);
         $('#Close_button').prop('disabled', true);
+
+        //$('#previous').prop('disabled', true);
+        //$('#next').prop('disabled', true);
 
         $('#results').hide();
 
@@ -255,9 +258,22 @@
                     var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
                     $('#results').html(text);
                     console.log("check the labes or annotations table that are sent to the semedico server !!");
+                    $('#next').prop('disabled', true);
+                    $('#previous').prop('disabled',true );
                     return true;
                 }
                 try {
+                    l = result.split('\n')[0];
+                    console.log(l);
+                    result = result.substring(result.indexOf('\n') + 1);
+                    console.log(result)
+                    if ( l == 0) {
+                        $('#next').prop('disabled',true );
+                    }
+                    else {
+                        $('#previous').prop('disabled', false);
+						$('#next').prop('disabled', false);
+                    }
                     res = JSON.parse(result);
                     if (result.length == 0) {
                         var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
@@ -279,9 +295,9 @@
                             //text = text + "<h5><p align=\"justify\"> Volume: " + res.bibliographylist[i].publication.volume + "</p></h5>";
                             //text = text + "<h5><p align=\"justify\"> Issue : " + res.bibliographylist[i].publication.issue + "</p></h5>";
                             //text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].publication.pages + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].docId + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].pmid + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].pmcid + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> DocId: " + res.bibliographylist[i].docId + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pmid: " + res.bibliographylist[i].pmid + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pmcid: " + res.bibliographylist[i].pmcid + "</p></h5>";
                             text = text + "<h5><p align=\"justify\"> Date: " + res.bibliographylist[i].publication.date + "</p></h5>";
                             text = text + "</div>";
 
@@ -305,15 +321,14 @@
                     console.log("ERROR => " + er);
                     var text = "<h3> Error </h3> <h4>Please a report the error</h4>";
                     $('#results').html(text);
-                    document.getElementById("spinner_loader").setAttribute("hidden", true);
+                    document.getElementById("spinner_").setAttribute("hidden", true);
                 }
             },
             complete: function () {
                 $('#results').show();
                 $('#Close_button').prop('disabled', false);
-                document.getElementById("spinner_loader").setAttribute("hidden", true);
+                document.getElementById("spinner_").setAttribute("hidden", true);
                 $('#button').prop('disabled', true);
-                
                 $('#papers').show();
             },
         });

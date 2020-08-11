@@ -35,7 +35,7 @@
 
 
 
-<div id="showData">
+
        <div id="showData">
         <h1>@Model.Title</h1>
 
@@ -130,13 +130,13 @@
                                       .Items(tabs =>
                                       {
 
-                          //ToDo Recator Modularity -> load metadata from from dcm
+                                          //ToDo Recator Modularity -> load metadata from from dcm
 
-                                         tabs.Add()
-                                            .Text("Metadata")
-                                            .LoadContentFrom("ShowMetadata", "Data", new { area = "ddm", entityId = @Model.Id, title = @Model.Title, metadatastructureId = @Model.MetadataStructureId, datastructureId = @Model.DataStructureId, researchplanId = @Model.ResearchPlanId, sessionKeyForMetadata = "ShowDataMetadata", latest = Model.LatestVersion, isValid = ViewBag.isValid })
-                                            .HtmlAttributes(new { id = "metadata" })
-                                            .Enabled(false);
+                                          tabs.Add()
+                                             .Text("Metadata")
+                                             .LoadContentFrom("ShowMetadata", "Data", new { area = "ddm", entityId = @Model.Id, title = @Model.Title, metadatastructureId = @Model.MetadataStructureId, datastructureId = @Model.DataStructureId, researchplanId = @Model.ResearchPlanId, sessionKeyForMetadata = "ShowDataMetadata", latest = Model.LatestVersion, isValid = ViewBag.isValid })
+                                             .HtmlAttributes(new { id = "metadata" })
+                                             .Enabled(false);
 
                                           tabs.Add()
                                               .Text("Primary Data")
@@ -145,17 +145,17 @@
                                               .HtmlAttributes(new { id = "primarydata" })
                                               .Enabled(false);
 
-                          tabs.Add()
-                              .Text("Data Structure")
-                              .LoadContentFrom("ShowPreviewDataStructure", "Data", new { area = "ddm", datasetID = @Model.Id })
-                              .HtmlAttributes(new { id = "datastructure" })
-                              .Enabled(false);
+                                          tabs.Add()
+                                              .Text("Data Structure")
+                                              .LoadContentFrom("ShowPreviewDataStructure", "Data", new { area = "ddm", datasetID = @Model.Id })
+                                              .HtmlAttributes(new { id = "datastructure" })
+                                              .Enabled(false);
 
-                          tabs.Add()
-                              .Text("Summary")
-                              .LoadContentFrom("CategoralAnalysis", "DataSetSummary", new { area = "asm", id = @Model.Id })
-                              .HtmlAttributes(new { id = "analysis" })
-                              .Enabled(false);
+                                          tabs.Add()
+                                              .Text("Summary")
+                                              .LoadContentFrom("Summary", "DataSetSummary", new { area = "asm", id = @Model.Id })
+                                              .HtmlAttributes(new { id = "Summary" })
+                                              .Enabled(false);
 
                                           tabs.Add()
                                               .Text("Links")
@@ -182,7 +182,7 @@
                                               .HtmlAttributes(new { id = "attachements" });
 
                                       })
-                                      .ClientEvents(e => e.OnSelect("OnSelectShowDataTabStrip")))
+                    .ClientEvents(e => e.OnSelect("OnSelectShowDataTabStrip")))
             }
             else
             {
@@ -252,7 +252,7 @@
 				$("li#prepare").removeClass("t-state-disabled");
 				$("li#attachements").removeClass("t-state-disabled");
                 $("li#showreferences").removeClass("t-state-disabled");
-                $("li#analysis").removeClass("t-state-disabled");
+                $("li#Summary").removeClass("t-state-disabled");
 			}
 
 			if (grantAccess === "True") {
@@ -318,7 +318,9 @@
 
 		$("#preloaderContainer").removePreloader();
 
-	}
+    }
+
+    
 
 	$("#sendRequestBt").click(function() {
 

@@ -295,6 +295,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                     if (iOUtility.IsSupportedExcelFile(TaskManager.Bus[TaskManager.EXTENTION].ToString()))
                                     {
                                         rows = reader.ReadFile(Stream, TaskManager.Bus[TaskManager.FILENAME].ToString(), (int)id, packageSize);
+                                        //rows = reader.ReadFile(Stream, TaskManager.Bus[TaskManager.FILENAME].ToString(), (int)id);
                                     }
                                     else
                                     {
@@ -338,7 +339,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                                     //count rows
                                     numberOfRows += rows.Count();
-                                } while (rows.Count() > 0 && rows.Count() == packageSize);
+                                }
+                                while (rows.Count() > 0 && rows.Count() >= packageSize );
                             }
 
                             #endregion excel reader
@@ -427,7 +429,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                                         //count rows
                                         numberOfRows += rows.Count();
-                                    } while ((rows.Count() > 0 && rows.Count() == packageSize) || inputWasAltered == true);
+                                    } while ((rows.Count() > 0 && rows.Count() >= packageSize) || inputWasAltered == true);
 
                                     totalTime.Stop();
                                     Debug.WriteLine(" Total Time " + totalTime.Elapsed.TotalSeconds.ToString());

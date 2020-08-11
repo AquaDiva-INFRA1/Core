@@ -523,7 +523,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 //Give view and download rights to the members
                                 foreach (User piMember in piMembers)
                                 {
-                                    entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                                    entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                                 }
                             }
                             #endregion
