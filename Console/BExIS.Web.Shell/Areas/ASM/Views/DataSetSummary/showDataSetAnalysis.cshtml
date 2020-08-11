@@ -24,6 +24,10 @@
     List<List<KeyValuePair<int, object>>> data_ranges = (List<List<KeyValuePair<int, object>>>)ViewData["data_ranges"];
     List<double> nullsCount = (List<double>)ViewData["nullsCount"];
 
+    string id_for_class = (string)ViewData["id"];
+
+
+
     string error = (string)ViewData["error"];
     if (error.Length > 1)
     {
@@ -50,6 +54,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
 
+    <link href='@Url.Content("~/Scripts/vis/vis-network.min.css")' rel="stylesheet" type="text/css" />
+
 }
 
 
@@ -59,7 +65,21 @@
         This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.<br />
         <small class="text-muted">It reflects the distribution of the categoral attributes and its values within the dataset.</small>
     </h3>
+    <div id="spinner_" hidden="true">
+        <center><i class="fa fa-spinner fa-spin" style="font-size:50px" id="spinner_"></i></center>
+    </div>
 </div>
+
+<div id="classification">
+</div>
+
+@*
+    @{
+    Html.RenderAction("classification", "DataSetSummary", new { ds = id_for_class });
+}
+*@
+
+
 
 <div class="jumbotron">
     @{
@@ -113,15 +133,7 @@
     }
 </div>
 
-<!--
-<br /><br />
-<div id="spinner">
-    <div class="spinner-border" role="status">
-        <span class="sr-only">Loading...</span>
-    </div>
-</div>
-<br /><br />
--->
+
 
 @if (number_of_graphs < 1)
 {
@@ -156,6 +168,9 @@ else
     </div>
 }
 
+
+
+
 <script src='@Url.Content("/Scripts/chartJs/Chart.bundle.js")'></script>
 <script src='@Url.Content("/Scripts/chartJs/Chart.bundle.min.js")'></script>
 <script src='@Url.Content("/Scripts/chartJs/Chart.js")'></script>
@@ -165,17 +180,12 @@ else
 
     start();
     load_pie_charts();
+    classification();
 
 
     $(window).resize(function () {
         //start();
     });
-    //  spinner show / hide
-    //var spinner = document.getElementById("spinner");
-    //if (spinner.style.display === "none") {
-    //    spinner.style.display = "block";
-    //}
-    //  end of spinner show / hide
 
     //  numerical distribution show / hide
     function myFunction() {
@@ -189,13 +199,17 @@ else
     };
     //  end of numerical distribution show / hide
 
+    function classification(){
+        document.getElementById("spinner_").removeAttribute("hidden");
+        @*$('#classification').load('@Url.Action("classification", new { ds = id_for_class })');*@
+        document.getElementById("spinner_").setAttribute("hidden", true);
+    }
+
     function start() {
         $.ajax({
             url: '/asm/DataSetSummary/getGraphData',
             type: 'POST',
             success: function (resp) {
-                //spinner = document.getElementById("spinner");
-                //spinner.style.display = "none";
                 var myJSON = JSON.parse(resp);
 
                 Object.keys(myJSON).forEach(function (entry) {
@@ -280,9 +294,12 @@ else
 
                     //}
                 });
+
             },
             error: function (e) {
                 alert('Error: ' + e);
+            },
+            complete: function () {
             }
         });
     }
@@ -326,7 +343,6 @@ else
     }
 
 
-
     function getRandomColor() {
         var letters = '0123456789ABCDEF';
         var color = '#';
@@ -336,88 +352,5 @@ else
         return color;
     }
 
-
-    function Show_numerical_distribution() {
-        $.ajax({
-            url: '/asm/PortalStatistics/getGraphData',
-            type: 'POST',
-            success: function (resp) {
-                //spinner = document.getElementById("spinner");
-                //spinner.style.display = "none";
-                var myJSON = JSON.parse(resp);
-
-                Object.keys(myJSON).forEach(function (entry) {
-
-                    var element = myJSON[entry];
-
-                    var xdata = element[0];
-                    var xlabel = xdata[0];
-                    var xvalues = xdata[1].replace('[', '').replace(']', '').split(",");
-
-                    var ydata = element[1];
-                    var ylabel = ydata[0];
-                    var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
-
-                    //if (xlabel != ylabel){
-                    var data_ = [];
-                    for (var z = 0; z < yvalues.length; z++) {
-                        data_.push({ x: xvalues[z], y: yvalues[z] });
-                    }
-                    var id = "myChart_" + entry;
-
-                    var scatterChartData = {
-                        datasets:
-                            [{
-                                data: data_
-                            }]
-                    };
-
-                    var ctxSc = document.getElementById(id).getContext('2d');
-                    var config1 = new Chart.Scatter(ctxSc, {
-                        type: 'Line',
-                        data: scatterChartData,
-                        options: {
-                            title: {
-                                display: true,
-                                text: ylabel + " || " + xlabel,
-                            },
-                            scales: {
-                                xAxes: [{
-                                    position: 'bottom',
-                                    title: xlabel
-                                }],
-                                yAxes: [{
-                                    stacked: true,
-                                    title: ylabel
-                                }]
-                            },
-                            legend: {
-                                display: false
-                            },
-                            pan: {
-                                enabled: true,
-                                mode: 'xy',
-                                speed: 0.5
-                            },
-                            zoom: {
-                                enabled: true,
-                                mode: 'xy',
-                                speed: 0.5
-                            }
-                        }
-                    });
-
-                    //}
-                });
-            },
-            error: function (e) {
-                alert('Error: ' + e);
-            }
-        });
-    }
+    
 </script>
-
-
-
-
-

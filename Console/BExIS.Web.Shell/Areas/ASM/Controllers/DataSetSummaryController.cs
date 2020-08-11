@@ -34,6 +34,8 @@ using BExIS.Aam.Entities.Mapping;
 using Deedle;
 using CenterSpace.NMath.Core;
 using CenterSpace.NMath.Stats;
+using System.IO.Compression;
+using Ionic.Zip;
 
 namespace BExIS.Modules.ASM.UI.Controllers
 {
@@ -45,6 +47,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
         private static String username = "hamdihamed";
         private static String password = "hamdi1992";
         private static string FTPAddress = "ftp://10.35.14.52:21";
+
+        public static Dictionary<string, List<string>> dict_ = new Dictionary<string, List<string>>();
 
         static Dictionary<string, List<string>> project_list_names_ = new Dictionary<string, List<string>> {
             {"A01", new List<string> { "Wick", "Antonis Chatzinotas" } },
@@ -70,6 +74,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         static string python_path = Path.GetFullPath(WebConfigurationManager.AppSettings["python_path"]);
         static string python_script = Path.GetFullPath(WebConfigurationManager.AppSettings["python_script"]);
         static string output_Folder = Path.GetFullPath(WebConfigurationManager.AppSettings["output_Folder"]);
+        static string datapath = Path.GetFullPath(WebConfigurationManager.AppSettings["DataPath"]);
 
         string[] allowed_extention = new string[] { ".csv", ".xlsx", ".xls" };
 
@@ -78,10 +83,18 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
         static String datasetsepcial = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "dataset361.csv");
         static String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
+        static String dataset_pnk = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "PNK dataset_links.csv");
 
+        static List<Input> classification_results = new List<Input>();
+
+        public ActionResult Summary(long id)
+        {
+            return PartialView("Summary" ,  id );
+        }
         public ActionResult CategoralAnalysis(long id)
         {
             //debugging file
+            ViewData["id"] = id.ToString();
             using (StreamWriter sw = System.IO.File.AppendText(debugFile))
             {
                 sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Data Summary scalled: CategoralAnalysis2 for dataset id : "+id );
@@ -261,11 +274,11 @@ namespace BExIS.Modules.ASM.UI.Controllers
             ViewData["header"] = new List<string>();
             ViewData["data_lines"] = new List<List<string>>();
             ViewData["error"] = "No categoral information was extracted";
-            ViewData["table"] = new List<List<string>>() ;
+            ViewData["table"] = new List<List<string>>();
+            
 
             return PartialView("showDataSetAnalysis");
         }
-
         
         public ActionResult Specialdatasetanalysis()
         {
@@ -273,48 +286,184 @@ namespace BExIS.Modules.ASM.UI.Controllers
             return PartialView("Specialdatasetanalysis");
         }
 
+        //string should be under this form 42; 155 where dataset ids should be sepearated by ; semicolon
+        
+        public ActionResult classification(string ds , string flag = "" )
+        {
+            List<string> nodes = new List<string>();
+            List<List<int>> paths = new List<List<int>>();
+            ViewData["id"] = ds;
+            if (flag == "")
+            {
+                Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
+                List<Aam_Dataset_column_annotation> annots = aam.get_all_dataset_column_annotation();
+                classification_results = new List<Input>();
+                prepare_for_classification(datapath+ Path.DirectorySeparatorChar+"tmp_" +ds.Replace(';','_').Trim()+".txt", ds);
+                string results = UploadFiletoAnalysis(datapath + Path.DirectorySeparatorChar + "tmp_" + ds.Replace(';', '_').Trim() + ".txt", "/predict?").ToString();
+                dynamic json_class= ((dynamic)Newtonsoft.Json.JsonConvert.DeserializeObject(results));
+            
+                int index = 0;
+                foreach (JProperty xx in json_class)
+                {
+                    Input inp = JsonConvert.DeserializeObject<Input>(JObject.Parse(xx.Value.ToString())["input"].ToString());
+                    inp.onto_match = JsonConvert.DeserializeObject<List<string>>(JObject.Parse(xx.Value.ToString())["onto_match"].ToString());
+                    inp.db_match = JsonConvert.DeserializeObject<List<string>>(JObject.Parse(xx.Value.ToString())["db_match"].ToString());
+                    inp.db_no_node = JsonConvert.DeserializeObject<List<string>>(JObject.Parse(xx.Value.ToString())["db_no_node"].ToString());
+                    inp.onto_no_node = JsonConvert.DeserializeObject<List<string>>(JObject.Parse(xx.Value.ToString())["onto_no_node"].ToString());
+                    inp.onto_no_path = JsonConvert.DeserializeObject<List<string>>(JObject.Parse(xx.Value.ToString())["onto_no_path"].ToString());
+                    inp.onto_target_file = JsonConvert.DeserializeObject<List<string>>(JObject.Parse(xx.Value.ToString())["onto_target_file"].ToString());
+                    inp.predicted_class = JObject.Parse(xx.Value.ToString())["predicted_class"].ToString();
+                    inp.db_no_path = JsonConvert.DeserializeObject<List<string>>(JObject.Parse(xx.Value.ToString())["db_no_path"].ToString());
+                    classification_results.Add( inp);
+                    index ++ ;
+                }
+
+                ViewData["id"] = ds;
+                ViewData["label"] = "";
+                return PartialView(classification_results);
+            }
+            foreach (Input inp in classification_results)
+            {
+                foreach (string s in inp.db_match)
+                {
+                    List<int> path = new List<int>();
+                    foreach (string el in s.Replace("[", "").Replace("]", "").Replace("'", "").Replace("\"", "").Replace(" ", "").Split(','))
+                    {
+                        if (el.Contains("http"))
+                        {
+                            if (nodes.FindAll(x => x == el).Count == 0)
+                                nodes.Add(el);
+                            int index_in_list = nodes.FindIndex(x => x == el);
+                            path.Add(index_in_list);
+                        }
+                    }
+                    if (path.Count() > 0) paths.Add(path);
+                }
+                foreach (string s in inp.onto_match)
+                {
+                    List<int> path = new List<int>();
+                    foreach (string el in s.Replace("[", "").Replace("]", "").Replace("'", "").Replace("\"", "").Replace(" ", "").Split(','))
+                    {
+                        if (el.Contains("http"))
+                        {
+                            if (nodes.FindAll(x => x == el).Count == 0)
+                                nodes.Add(el); int index_in_list = nodes.FindIndex(x => x == el);
+                            path.Add(index_in_list);
+                        }
+                    }
+                    if (path.Count() > 0) paths.Add(path);
+                }
+            }
+            var json = new JavaScriptSerializer().Serialize(new
+            {
+                nodes = nodes,
+                links = paths
+            });
+            //ViewData["datasets"] = datasets;
+            //ViewData["nodes"] = nodes;
+            //return View("classification", classification_results);
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult get_datasets_from_annot(string annot)
+        {
+            List<long> datasets = new List<long>();
+            Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
+            List<Aam_Dataset_column_annotation> annots = aam.get_all_dataset_column_annotation();
+            foreach (Aam_Dataset_column_annotation aa in annots.FindAll(x => x.entity_id.URI == annot.Trim()))
+            {
+                datasets.Add(aa.Dataset.Id);
+            }
+            foreach (Aam_Dataset_column_annotation aa in annots.FindAll(x => x.characteristic_id.URI == annot.Trim()))
+            {
+                if (!datasets.Contains(aa.Dataset.Id))
+                    datasets.Add(aa.Dataset.Id);
+            }
+            ViewData["label"] = "No Label for URI";
+            try
+            {
+                if (annots.Find(x => x.entity_id.URI == annot.Trim()).entity_id.label != "")
+                    ViewData["label"] = annots.Find(x => x.entity_id.URI == annot.Trim()).entity_id.label;
+            }
+            catch (Exception ex)
+            {
+
+            }
+            try
+            {
+                if (annots.Find(x => x.characteristic_id.URI == annot.Trim()).characteristic_id.label != "")
+                    ViewData["label"] = annots.Find(x => x.characteristic_id.URI == annot.Trim()).characteristic_id.label;
+            }
+            catch (Exception ex)
+            {
+
+            }
+            string sJSONResponse = JsonConvert.SerializeObject(datasets);
+            Dictionary<string, string> json = new Dictionary<string, string>();
+            json.Add((string)ViewData["label"], sJSONResponse);
+            return Json(JsonConvert.SerializeObject(json), JsonRequestBehavior.AllowGet);
+        }
 
         [HttpPost]
-        public String Filter_Apply(string welllocation = "", string year = "", string filtersize = "", string GroupName = "", string NameFIlter="", String Season_dict="")
+        public String Filter_Apply(string welllocation = "", string year = "", string filtersize = "", string GroupName = "", string NameFIlter="", 
+            String Season_dict="" , string column = "-1" , string row = "-1" , Boolean flag = false)
         {
-            string param ="?year=" + year + "&filtersize=" + filtersize + "&GroupName=" + GroupName + "&Season_dict=" + Season_dict;
+            string row_ = "";
+            dict_ = dict_.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+            if (row != "-1")
+                row_ = dict_.ElementAt(dict_.Count - Int32.Parse(row)-1).Key;
+            string col = "";
+            if (column != "-1")
+                col = dict_.ElementAt(dict_.Count - 1).Value[Int32.Parse(column) - 1];
+            string param ="?year=" + year + "&filtersize=" + filtersize + "&GroupName=" + GroupName + "&Season_dict=" + Season_dict + "&column=" + col + "&row=" + row_;
             if (welllocation != "")
                 param = param + "&welllocation=" + parse_Json_location(welllocation);
             if (NameFIlter != "")
                 param = param + "&PIName=" + NameFIlter;
             string results = UploadFiletoAnalysis(datasetsepcial, "/getvalue"+ param).ToString();
-            try
+            if (column == "-1") results = results.Split('\n')[0];
+            if (column != "-1") results = results.Split('\n')[1];
+            if (results.Length > 10)
             {
-                results = results.Substring(3, results.Length - 8);
-                List<string> results_rows = results.Split(new string[] { "}, {" }, StringSplitOptions.None).ToList<string>();
-
-                Dictionary<string, List<string>> dict_ = new Dictionary<string, List<string>>();
-                foreach (string s in results_rows)
+                try
                 {
-                    var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>("{" + s + "}");
-                    foreach (KeyValuePair<string, string> kvp in dict)
+                    results = results.Substring(3, results.Length - 8);
+                    List<string> results_rows = results.Split(new string[] { "}, {" }, StringSplitOptions.None).ToList<string>();
+                    Dictionary<string, List<string>> backup_dict_ = new Dictionary<string, List<string>>();
+                    if (flag == true)
+                        backup_dict_ = dict_;
+                    dict_ = new Dictionary<string, List<string>>();
+                    foreach (string s in results_rows)
                     {
-                        if (!dict_.ContainsKey(kvp.Key))
+                        var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>("{" + s + "}");
+                        foreach (KeyValuePair<string, string> kvp in dict)
                         {
-                            dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
+                            if (!dict_.ContainsKey(kvp.Key))
+                            {
+                                dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
+                            }
+                            List<string> value = new List<string>();
+                            dict_.TryGetValue(kvp.Key, out value);
+                            value.Add(kvp.Value);
+                            dict_[kvp.Key] = value;
                         }
-                        List<string> value = new List<string>();
-                        dict_.TryGetValue(kvp.Key, out value);
-                        value.Add(kvp.Value.Replace(',', ' '));
-                        dict_[kvp.Key] = value;
                     }
+                    dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
+                    string ss = JsonConvert.SerializeObject(dict_);
+                    if (flag == true)
+                        dict_ = backup_dict_;
+                    ViewData["project_list_names"] = project_list_names_;
+                    return ss;
                 }
-                dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
-                ViewData["project_list_names"] = project_list_names_;
-                return JsonConvert.SerializeObject(dict_); ;
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    ViewData["project_list_names"] = project_list_names_;
+                    return ("");
+                }
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                ViewData["project_list_names"] = project_list_names_;
-                return ("");
-            }
-            
+            ViewData["project_list_names"] = project_list_names_;
+            return ("");
         }
 
         // this method parses the JSON file containing the well names and their coordinates to get the well name from the coordinates.
@@ -355,6 +504,40 @@ namespace BExIS.Modules.ASM.UI.Controllers
             return "";
         }
 
+        public string get_datasets_from_pnk(string pnk)
+        {
+            List<string> datasets_ids = new List<string>();
+            //dataset_pnk
+            try
+            {
+                using (var reader = new StreamReader(dataset_pnk))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        List<string> tmp = line.Split(',').ToList<string>();
+                        if (tmp.Count > 1)
+                        {
+                            if (tmp[0].ToLower().Trim() == pnk.ToLower().Trim())
+                            {
+                                for (int i = 1; i < tmp.Count; i++)
+                                {
+                                    if (tmp[i] != "") datasets_ids.Add(tmp[i]);
+                                    i++;
+                                }
+                            }
+                        }  
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("The File could not be read:");
+                Console.WriteLine(e.Message);
+            }
+            string output = new JavaScriptSerializer().Serialize(datasets_ids);
+            return output;
+        }
 
         public string UploadFiletoAnalysis(string filePath , string api_action="" )
         {
@@ -397,7 +580,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
             }
 
             // upload the file to analyse
-            WebRequest request = WebRequest.Create(FTPAddress + "/" + name + "/" + filename);
+            WebRequest request =  WebRequest.Create(FTPAddress + "/" + name + "/" + filename);
             request.Credentials = new NetworkCredential(username, password);
             request.Method = WebRequestMethods.Ftp.UploadFile;
 
@@ -457,10 +640,12 @@ namespace BExIS.Modules.ASM.UI.Controllers
             StringBuilder paramBuilder = new StringBuilder();
             paramBuilder.Append(" ");
             String param = HttpUtility.UrlEncode(paramBuilder.ToString().Replace(" ", ""));
+            client.Timeout = TimeSpan.FromMinutes(30);
             string output = "";
             try
             {
-                HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
+                HttpResponseMessage response =  client.GetAsync(param).Result;
+                // Blocking call!
                 if (response.IsSuccessStatusCode)
                 {
                     // Get the response body. Blocking!
@@ -474,19 +659,29 @@ namespace BExIS.Modules.ASM.UI.Controllers
             return output;
         }
 
-        public void prepare_for_classification()
+        //this is using the AAM module - ids mostly instead of string content of variables without unit / data type 
+        public void prepare_for_classification(string path, string datasetids)
         {
-            string path = output_Folder + "prepare_for_classification.csv";
-            using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
+            //path = path + "/prepare_for_classification.csv";
+            using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Create)))
             {
-                sw.WriteLine("Dataset_id;Datasetversion_id;variable_id;entity_id;charachteristic_id;standard_id;dataset_title;owner;project;variable_id_from_table;variable_value");
+                sw.WriteLine("datasetID;Datasetversion_id;variable_id;unit;type;entity_id;entity;charachteristic_id;charachteristic;standard_id;standard;dataset_title;owner;project;variable_id_from_table;variable_value");
             }
 
             DataStructureManager dsm = new DataStructureManager();
             DatasetManager dm = new DatasetManager();
             Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
             List<Aam_Dataset_column_annotation> all_annot = aam.get_all_dataset_column_annotation();
-            foreach(Aam_Dataset_column_annotation annot in all_annot)
+            try
+            {
+                List<Int64> req_ds = datasetids.Split(';').ToList<string>().Select(Int64.Parse).ToList();
+                if (req_ds.Count > 0) all_annot = (List<Aam_Dataset_column_annotation>)all_annot.FindAll(x => req_ds.Contains(x.Dataset.Id));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            foreach (Aam_Dataset_column_annotation annot in all_annot)
             {
                 string ch = "";
                 string title = xmlDatasetHelper.GetInformationFromVersion(annot.DatasetVersion.Id, NameAttributeValues.title) != "" ? xmlDatasetHelper.GetInformationFromVersion(annot.DatasetVersion.Id, NameAttributeValues.title) : "No title";
@@ -494,9 +689,14 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     annot.Dataset.Id + ";" +
                     annot.DatasetVersion.Id + ";" +
                     annot.variable_id.Id + ";" +
+                    annot.variable_id.Unit.Name + ";" +
+                    annot.variable_id.DataAttribute.DataType.Name + ";" +
                     annot.entity_id.Id + ";" +
+                    annot.entity_id.URI + ";" +
                     annot.characteristic_id.Id + ";" +
-                    annot.standard_id.Id + ";"+
+                    annot.characteristic_id.URI + ";" +
+                    annot.standard_id.Id + ";" +
+                    annot.standard_id.URI + ";" +
                     title.Replace(';', ' ') + ";" ;
 
                 StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(annot.Dataset.DataStructure.Id);
@@ -557,44 +757,68 @@ namespace BExIS.Modules.ASM.UI.Controllers
                         XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/OrgUnits/OrgUnitsType/OrgUnit/OrgUnitType");
                     }
                     ch = ch + owner.Replace(';',' ') + " ; " + project.Replace(';', ' ') + " ; ";
-
-
+                    
                     for (int i = 0; i < table.Columns.Count; i++)
                     {
                         DataColumn column = table.Columns[i];
                         string col_name = column.ColumnName.ToString().Replace("var", "");
                         string var_label = column.Caption != "" ? column.Caption : "NO Label";
-                        ch = ch + var_label.Replace(';', ' ') + " ; " ;
-                        try
+                        if (col_name == annot.variable_id.Id.ToString() )
                         {
-                            foreach (Object obj in table.Rows[i].ItemArray)
+                            string values = "";
+                            int n = 0;
+                            foreach (DataRow obj in table.Rows)
                             {
-                                //label_values.Add(obj.ToString());
-                                string copy = "";
-                                copy = ch + obj.ToString().Replace(';', ' ') + " ; ";
-                                using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
+                                try
                                 {
-                                    sw.WriteLine(copy);
+                                    string elem = obj.ItemArray[i].ToString();
+                                    //label_values.Add(obj.ToString());
+                                    //copy = ch2 + elem.ToString().Replace(';', ' ') + " ; ";
+                                    if (elem.ToString().Replace(';', ' ').Trim().Length !=0)
+                                    {
+                                        if (!(values.Contains(elem.ToString().Replace(';', ' ').Trim()))) {
+                                            values = values + elem.ToString().Replace(';', ' ').Trim() + "-";
+                                            n = n + 1;
+                                        }
+                                    }
+                                    //using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
+                                    //{
+                                    //    sw.WriteLine(copy);
+                                    //}
+                                }
+                                catch (Exception exc)
+                                {
+                                    Debug.WriteLine(exc.Message);
+                                    //using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
+                                    //{
+                                    //    sw.WriteLine(ch + " *** " + " ;");
+                                    //}
+                                    //values = values +" *** " + " ___ ";
+                                }
+                                if (n % 30 == 0)
+                                {
+                                    using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
+                                    {
+                                        sw.WriteLine(ch + var_label.Replace(';', ' ') + " ; " + values + " ; ");
+                                    }
+                                    values = "";
                                 }
                             }
-                        }
-                        catch (Exception exc)
-                        {
-                            Debug.WriteLine(exc.Message);
-                            ch = ch + " *** " + " ;";
-                            using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
-                            {
-                                sw.WriteLine(ch);
-                            }
+                            if (values !="")
+                                using (StreamWriter sw = new StreamWriter(System.IO.File.Open(path, System.IO.FileMode.Append)))
+                                {
+                                    sw.WriteLine(ch + var_label.Replace(';', ' ') + " ; " + values + " ; ");
+                                }
                         }
                     }
                 }
             }
         }
 
-
-        public void prepare_data_mining(string path)
+        //this is using the dataset_column_annotation table - strings mostly instead of ids of variables with unit / data type 
+        public void prepare_data_mining(string path, string datasetids)
         {
+            //string errors = "";
             DatasetManager dm = new DatasetManager();
             DataStructureManager dsm = new DataStructureManager();
 
@@ -607,15 +831,23 @@ namespace BExIS.Modules.ASM.UI.Controllers
             {
                 sw.WriteLine("var_id;var_name;data_type_id;data_type_name;data_type_systemtype;data_type_description;unit_id;unit_name;unit_desc;unit_abbrv;datasetID;dsv;title;owner;project;entity;charachteristic;table_variable_value");
             }
-
-
+            //errors = errors + " -- header written \n  ";
+            try
+            {
+                List<Int64> req_ds = datasetids.Split(';').ToList<string>().Select(Int64.Parse).ToList();
+                if (req_ds.Count > 0) ds_ids = req_ds;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
             foreach (Int64 datasetID in ds_ids)
             {
-
+                //errors = errors + " -- dataset id"+ datasetID +"  \n  " ;
                 DatasetVersion dsv = dm.GetDatasetLatestVersion(datasetID);
                 StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
-                DataStructure ds = dsm.AllTypesDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
 
+                DataStructure ds = dsm.AllTypesDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
                 string title = xmlDatasetHelper.GetInformationFromVersion(dsv.Id, NameAttributeValues.title);
 
                 if (ds.Self.GetType() == typeof(StructuredDataStructure))
@@ -625,7 +857,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     //List<AbstractTuple> dataTuples = dm.GetDatasetVersionEffectiveTuples(dsv, 0, 100);
                     //DataTable table = SearchUIHelper.ConvertPrimaryDataToDatatable(dsv, dataTuples);
                     
-                    DataTable table = dm.GetLatestDatasetVersionTuples(dsv.Dataset.Id, 0, 0, true);
+                   
 
                     //List<string> var_labels = new List<string>();
                     //List<string> var_ids = new List<string>();
@@ -635,10 +867,14 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     Debug.WriteLine("Structred dataset to be processed  " + datasetID);
                     DatasetManager dsm_ = new DatasetManager();
                     XmlDocument xmlDoc = dsm_.GetDatasetLatestMetadataVersion(datasetID);
+                    dsm_.Dispose();
+
                     XmlNode root = xmlDoc.DocumentElement;
                     string idMetadata = root.Attributes["id"].Value;
                     string owner = "none";
                     string project = "none";
+
+                    //errors = errors + " - Metadata and datastructure " + idMetadata + "  \n  ";
 
                     if (idMetadata == "1")
                     {
@@ -674,6 +910,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                     try
                     {
+                        DataTable table = dm.GetLatestDatasetVersionTuples(datasetID, 0, 0, true);
+                        //errors = errors + " - DataTable rows count " + table.Rows.Count + "  \n  ";
                         for (int i = 0; i < table.Columns.Count; i++)
                         {
                             DataColumn column = table.Columns[i];
@@ -693,26 +931,36 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                 string unit_abbrv = (var.DataAttribute != null) ? var.DataAttribute.Unit.Abbreviation : "";
                                 string unit_id = (var.DataAttribute != null) ? var.DataAttribute.Unit.Id.ToString() : "";
 
+                                data_type_id = (data_type_id != null) ? var.DataAttribute.DataType.Id.ToString() : "";
+                                data_type_name = (data_type_name != null) ? var.DataAttribute.DataType.Name : "";
+                                data_type_systemtype = (data_type_systemtype != null) ? var.DataAttribute.DataType.SystemType : "";
+                                data_type_description = (data_type_description  != null) ? var.DataAttribute.DataType.Description : "";
+
+                                unit_desc = (unit_desc != null) ? var.DataAttribute.Unit.Description : "";
+                                unit_name = (unit_name != null) ? var.DataAttribute.Unit.Name : "";
+                                unit_abbrv = (unit_abbrv != null) ? var.DataAttribute.Unit.Abbreviation : "";
+                                unit_id = (unit_id != null) ? var.DataAttribute.Unit.Id.ToString() : "";
+
                                 string ch = "";
                                 ch = ch +
-                                    var_id.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    var_name.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    data_type_id.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    data_type_name.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    data_type_systemtype.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    data_type_description.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    unit_id.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    unit_name.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    unit_desc.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    unit_abbrv.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    datasetID.ToString().Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    dsv.Id.ToString().Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    title.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
-                                    owner.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; " +
+                                    var_id.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    var_name.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    data_type_id.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    data_type_name.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    data_type_systemtype.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    data_type_description.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    unit_id.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    unit_name.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    unit_desc.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    unit_abbrv.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    datasetID.ToString().Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    dsv.Id.ToString().Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    title.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
+                                    owner.Replace(';', ' ').Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " +
                                     project.Replace(';', ' ').Replace("\n", String.Empty).Trim() + " ; ";
 
 
-
+                                //errors = errors + " - data extracted so far metadata and datas truct \n " + ch + "  \n  ";
                                 //var_labels.Add(var_name);
                                 //var_ids.Add(var_id.Replace("var",""));
 
@@ -721,7 +969,44 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                 Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
                                 List<Aam_Dataset_column_annotation> all_annot = aam.get_all_dataset_column_annotation();
                                 Aam_Dataset_column_annotation annot = all_annot.FirstOrDefault(x => x.variable_id.ToString() == var_id);
-                                if ((annot.characteristic_id == null)||(annot.entity_id == null))
+                                if (annot != null)
+                                {
+                                    if ((annot.characteristic_id == null) || (annot.entity_id == null))
+                                    {
+                                        NpgsqlCommand MyCmd = null;
+                                        NpgsqlConnection MyCnx = null;
+                                        MyCnx = new NpgsqlConnection(Conx);
+                                        MyCnx.Open();
+                                        string select = "SELECT * FROM \"dataset_column_annotation\" WHERE (datasets_id=" + datasetID + " and variable_id='" + var_id + "' );";
+                                        MyCmd = new NpgsqlCommand(select, MyCnx);
+                                        NpgsqlDataReader dr = MyCmd.ExecuteReader();
+                                        Boolean b = false;
+                                        if (dr != null)
+                                        {
+                                            while (dr.Read())
+                                            {
+                                                if (dr["datasets_id"] != System.DBNull.Value)
+                                                {
+                                                    var entity = (String)dr["entity"].ToString().Replace("\n", String.Empty).Trim();
+                                                    var characteristic = (String)dr["characteristic"].ToString().Replace("\n", String.Empty).Trim();
+                                                    ch = ch + entity + " ; " + characteristic + " ; ";
+                                                    b = true;
+                                                }
+                                            }
+                                        }
+                                        if (!b)
+                                        {
+                                            ch = ch + " *** ; *** ;";
+                                        }
+                                        MyCnx.Close();
+
+                                    }
+                                    else
+                                    {
+                                        ch = ch + annot.entity_id.URI.ToString().Replace(Environment.NewLine, String.Empty).Replace(",", String.Empty).Trim() + " ; " + annot.characteristic_id.URI.ToString().Replace("\n", String.Empty).Trim() + " ; ";
+                                    }
+                                } 
+                                else
                                 {
                                     NpgsqlCommand MyCmd = null;
                                     NpgsqlConnection MyCnx = null;
@@ -749,15 +1034,10 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                         ch = ch + " *** ; *** ;";
                                     }
                                     MyCnx.Close();
-
-                                }
-                                else
-                                {
-                                    ch = ch + annot.entity_id.URI.ToString().Replace("\n", String.Empty).Trim() + " ; " + annot.characteristic_id.URI.ToString().Replace("\n", String.Empty).Trim() + " ; ";
                                 }
 
                                 //ch = annot != null ? ch + annot.entity_id + " ; " + annot.characteristic_id + " ; " : ch + "  ;  ; ";
-
+                                //errors = errors + " - data extracted so far annotations \n " + ch + "  \n  ";
                                 try
                                 {
                                     for (int k = 0; k < table.Rows.Count; k++)
@@ -769,6 +1049,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                         {
                                             sw.WriteLine(copy);
                                             Debug.WriteLine("Processed and written " + copy);
+                                            //errors = errors + " - data extracted so far variables \n " + ch + "  \n  ";
                                         }
                                     }
                                 }
@@ -781,7 +1062,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                     {
                                         sw.WriteLine(ch);
                                     }
-                                }
+                                    //errors = errors + " -error : \n " + ex.Message + "  \n  ";
+                                };
                             }
 
                         }
@@ -789,6 +1071,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     }
                     catch (Exception ex)
                     {
+                        //errors = errors + " -error : \n " + ex.Message + "  \n  ";
                         Debug.WriteLine(ex.Message);
                     }
                     
@@ -798,16 +1081,61 @@ namespace BExIS.Modules.ASM.UI.Controllers
             dm.Dispose();
             dsm.Dispose();
             // end of looping through the datasets
+            //return "";
         }
 
+        //generates a graph from the annotations we used on the portal to create a small knowledge graph from datasets and annotations
+        public void get_all_annotations_as_graph_from_entity(string ent)
+        {
+            DataStructureManager dsm = new DataStructureManager();
+            DatasetManager dm = new DatasetManager();
+            List<Int64> ds_ids = dm.GetDatasetLatestIds();
+            Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
+            List<Aam_Dataset_column_annotation> all_annot = aam.get_all_dataset_column_annotation();
+            foreach (Aam_Dataset_column_annotation annot in all_annot)
+            {
+                Int64 datasetID = annot.Dataset.Id;
+                DatasetVersion dsv = dm.GetDatasetLatestVersion(datasetID);
+
+            }
+
+        }
+
+        //downloads all datasets in csv format 
+        public ActionResult prepare_for_neural_net(string path)
+        {
+            //string errors = "";
+            DatasetManager dm = new DatasetManager();
+            OutputDataManager odm = new OutputDataManager();
 
 
-        /// <summary>
-        /// //////////////////////////////////////////////////////////////////////////////////
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public ActionResult CategoralAnalysis_(long id)
+            using ( FileStream fileStream = new FileStream(@"C:\Data\Temp\tmp.zip", FileMode.Create))
+            {
+                using (ZipArchive archive = new ZipArchive(fileStream, ZipArchiveMode.Create, true))
+                {
+                    foreach (long id in dm.GetDatasetLatestIds())
+                    {
+                        try
+                        {
+                            string fileName = odm.GenerateAsciiFile(id, id.ToString(), "text/csv", false);
+                            ZipArchiveEntry readmeEntry = archive.CreateEntry(id.ToString()+".csv");
+                            using (StreamWriter writer = new StreamWriter(readmeEntry.Open()))
+                            {
+                                writer.Write( string.Join( System.Environment.NewLine,System.IO.File.ReadAllLines(fileName)));
+                            }
+                            //var zipArchiveEntry = archive.CreateEntry(File(fileName, "text/csv", id.ToString()).ToString(), CompressionLevel.Fastest);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                        }
+                    }
+                }
+            }
+            return File(@"C:\Data\Temp\tmp.zip", "text/csv", "datasets.zip");
+        }
+
+         public ActionResult CategoralAnalysis_(long id)
         {
             System.IO.File.AppendAllText(debugFile, "CategoralAnalysis started "+ DateTime.Now + Environment.NewLine);
             ViewData["error"] = "";
@@ -982,11 +1310,6 @@ namespace BExIS.Modules.ASM.UI.Controllers
             return jObject;
         }
 
-        /// <summary>
-        /// //////////////////////////////// not needed for now
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
         public ActionResult NumericalAnalysis(long id)
         {
             DatasetManager datasetManager = new DatasetManager();
@@ -1080,7 +1403,6 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
         }
 
-
         public ActionResult DistributionAnalysis(long id)
         {
             DatasetManager datasetManager = new DatasetManager();
@@ -1167,7 +1489,6 @@ namespace BExIS.Modules.ASM.UI.Controllers
             }
             return PartialView("showDataSetAnalysis");
         }
-
 
         // this class is made for the Deserialization of the JSON object of the JSON file containing the coordinates and well names.
         public class coordinates_GPS

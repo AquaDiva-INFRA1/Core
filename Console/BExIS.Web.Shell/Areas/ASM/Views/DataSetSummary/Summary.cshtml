@@ -1,0 +1,38 @@
+﻿@using Telerik.Web.Mvc.UI
+@using System.Linq;
+@model Int64
+
+@{ 
+    Int64 id =  Model ;
+}
+@(Html.Telerik().TabStrip()
+    .Name("SummaryTab")
+    .SelectedIndex(0)
+    .Items(tabs =>
+    {
+        tabs.Add()
+            .Selected(true)
+            .Text("Categoral Analysis")
+            .LoadContentFrom("CategoralAnalysis", "DataSetSummary", new { area = "asm", id = id })
+            .HtmlAttributes(new { id = "CategoralAnalysis" });
+
+        tabs.Add()
+            .Text("Semantic Analysis")
+            .LoadContentFrom("classification", "DataSetSummary", new { area = "asm", ds = id })
+            .HtmlAttributes(new { id = "classification" });
+
+    })
+    .ClientEvents(e => e.OnSelect("OnSelectShowDataTabStrip")))
+
+<script type="text/javascript">
+    	function OnSelectShowDataTabStrip(e) {
+		    $("#preloaderContainer").preloader(20, "Loading...");
+
+		    if (e.item.id == "prepare") {
+
+			    var tabStrip = $("#SummaryTab").data("tTabStrip");
+			    tabStrip.reload($("#" + e.item.id));
+            }
+            $("#preloaderContainer").removePreloader();
+	}
+</script>

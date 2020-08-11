@@ -298,6 +298,7 @@
     <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\System.Diagnostics.DiagnosticSource.4.0.0\lib\portable-net45+win8+wpa81\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -575,6 +576,7 @@
     <Compile Include="Controllers\DataSetSummaryController.cs" />
     <Compile Include="Controllers\PortalStatisticsController.cs" />
     <Compile Include="Helpers\AsmSeedDataGenerator.cs" />
+    <Compile Include="Models\Classification.cs" />
     <Compile Include="Models\Data_container_analytics.cs" />
     <Compile Include="Models\Variable_analytics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -640,9 +642,42 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\leaflet\images\layers-2x.png" />
+    <Content Include="Scripts\leaflet\images\layers.png" />
+    <Content Include="Scripts\leaflet\images\marker-icon-2x.png" />
+    <Content Include="Scripts\leaflet\images\marker-icon.png" />
+    <Content Include="Scripts\leaflet\images\marker-shadow.png" />
+    <Content Include="Scripts\leaflet\leaflet-src.esm.js" />
+    <Content Include="Scripts\leaflet\leaflet-src.js" />
+    <Content Include="Scripts\leaflet\leaflet.css" />
+    <Content Include="Scripts\leaflet\leaflet.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\vis\img\network\acceptDeleteIcon.png" />
+    <Content Include="Scripts\vis\img\network\addNodeIcon.png" />
+    <Content Include="Scripts\vis\img\network\backIcon.png" />
+    <Content Include="Scripts\vis\img\network\connectIcon.png" />
+    <Content Include="Scripts\vis\img\network\cross.png" />
+    <Content Include="Scripts\vis\img\network\cross2.png" />
+    <Content Include="Scripts\vis\img\network\deleteIcon.png" />
+    <Content Include="Scripts\vis\img\network\downArrow.png" />
+    <Content Include="Scripts\vis\img\network\editIcon.png" />
+    <Content Include="Scripts\vis\img\network\leftArrow.png" />
+    <Content Include="Scripts\vis\img\network\minus.png" />
+    <Content Include="Scripts\vis\img\network\plus.png" />
+    <Content Include="Scripts\vis\img\network\rightArrow.png" />
+    <Content Include="Scripts\vis\img\network\upArrow.png" />
+    <Content Include="Scripts\vis\img\network\zoomExtends.png" />
+    <Content Include="Scripts\vis\vis-graph3d.min.js" />
+    <Content Include="Scripts\vis\vis-network.min.css" />
+    <Content Include="Scripts\vis\vis-network.min.js" />
+    <Content Include="Scripts\vis\vis-timeline-graph2d.min.css" />
+    <Content Include="Scripts\vis\vis-timeline-graph2d.min.js" />
+    <Content Include="Scripts\vis\vis.css" />
+    <Content Include="Scripts\vis\vis.js" />
+    <Content Include="Scripts\vis\vis.min.css" />
+    <Content Include="Scripts\vis\vis.min.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Views\Web.config">
       <SubType>Designer</SubType>
@@ -660,6 +695,13 @@
     <Content Include="Views\PortalStatistics\EditUnitModel_list.cshtml" />
     <Content Include="Views\PortalStatistics\index.cshtml" />
     <Content Include="Views\PortalStatistics\showDataSetAnalysis.cshtml" />
+    <Content Include="Scripts\leaflet\leaflet-src.esm.js.map" />
+    <Content Include="Scripts\leaflet\leaflet-src.js.map" />
+    <Content Include="Scripts\leaflet\leaflet.js.map" />
+    <Content Include="Views\DataSetSummary\classification.cshtml" />
+    <Content Include="Scripts\vis\vis.js.map" />
+    <Content Include="Scripts\vis\vis.map" />
+    <Content Include="Views\DataSetSummary\Summary.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
