@@ -135,10 +135,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
                         //Give view and download rights to the members
                         foreach (User piMember in piMembers)
                         {
-                            entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
-                                        RightType.Read,
-                                        RightType.Download
-                                    });
+                            entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                         }
                     }
                     #endregion
