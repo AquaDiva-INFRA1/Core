@@ -797,8 +797,11 @@ namespace BExIS.IO.Transform.Input
                     }//end if cell value
                     else
                     {
-                        int index = cellReferencAsInterger - offset - 1;
-                        rowAsStringArray[index] = "";
+                        if (cellReferencAsInterger >= startColumn && cellReferencAsInterger <= endColumn)
+                        {
+                            int index = cellReferencAsInterger - offset - 1;
+                            rowAsStringArray[index] = "";
+                        }
                     }
                 }//end if cell null
             }//for

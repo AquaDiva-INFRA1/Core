@@ -891,6 +891,15 @@
     <Content Include="Scripts\jquery-2.1.4.min.js" />
     <Content Include="Scripts\jquery-migrate-1.2.1.js" />
     <Content Include="Scripts\jquery-migrate-1.2.1.min.js" />
+    <Content Include="Scripts\leaflet\images\layers-2x.png" />
+    <Content Include="Scripts\leaflet\images\layers.png" />
+    <Content Include="Scripts\leaflet\images\marker-icon-2x.png" />
+    <Content Include="Scripts\leaflet\images\marker-icon.png" />
+    <Content Include="Scripts\leaflet\images\marker-shadow.png" />
+    <Content Include="Scripts\leaflet\leaflet-src.esm.js" />
+    <Content Include="Scripts\leaflet\leaflet-src.js" />
+    <Content Include="Scripts\leaflet\leaflet.css" />
+    <Content Include="Scripts\leaflet\leaflet.js" />
     <Content Include="Scripts\minimap\minimap.js" />
     <Content Include="Scripts\minimap\minimap.min.css" />
     <Content Include="Scripts\minimap\minimap.min.js" />
@@ -901,6 +910,35 @@
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\session.warning.js" />
     <Content Include="Shell.Manifest.xml" />
+    <Content Include="Themes\AquaDivaCustom\Layouts\_Layout.xml" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\css\font-awesome.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\css\font-awesome.min.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-custom-style.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-datatables-net.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-elements.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-font-awesome-extension.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-jquery-ui.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-metadata.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-telerik.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Copy of telerik.default.min.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\editor.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\imagebrowser.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\infoicon.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\loading.gif" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\preloader.GIF" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\slider-h.gif" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\slider-v.gif" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\sprite-vertical.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\sprite.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\treeview-line.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\treeview-nodes-rtl.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\treeview-nodes.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\emptyPng.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\images.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\search.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\telerik.default.min.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\wizard.css" />
     <Content Include="Themes\Aquadiva\Layouts\_Layout.xml" />
     <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.css" />
     <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.min.css" />
@@ -1215,6 +1253,30 @@
     <Content Include="Themes\Windows7\Styles\Windows7\sprite-vertical.png" />
     <Content Include="Themes\Windows7\Styles\Windows7\sprite.png" />
     <Content Include="Global.asax" />
+    <Content Include="vis\img\network\acceptDeleteIcon.png" />
+    <Content Include="vis\img\network\addNodeIcon.png" />
+    <Content Include="vis\img\network\backIcon.png" />
+    <Content Include="vis\img\network\connectIcon.png" />
+    <Content Include="vis\img\network\cross.png" />
+    <Content Include="vis\img\network\cross2.png" />
+    <Content Include="vis\img\network\deleteIcon.png" />
+    <Content Include="vis\img\network\downArrow.png" />
+    <Content Include="vis\img\network\editIcon.png" />
+    <Content Include="vis\img\network\leftArrow.png" />
+    <Content Include="vis\img\network\minus.png" />
+    <Content Include="vis\img\network\plus.png" />
+    <Content Include="vis\img\network\rightArrow.png" />
+    <Content Include="vis\img\network\upArrow.png" />
+    <Content Include="vis\img\network\zoomExtends.png" />
+    <Content Include="vis\vis-graph3d.min.js" />
+    <Content Include="vis\vis-network.min.css" />
+    <Content Include="vis\vis-network.min.js" />
+    <Content Include="vis\vis-timeline-graph2d.min.css" />
+    <Content Include="vis\vis-timeline-graph2d.min.js" />
+    <Content Include="vis\vis.css" />
+    <Content Include="vis\vis.js" />
+    <Content Include="vis\vis.min.css" />
+    <Content Include="vis\vis.min.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -1294,6 +1356,24 @@
     <Content Include="Views\Account\Profile.cshtml" />
     <Content Include="Views\Error\NotFound.cshtml" />
     <Content Include="Views\Shared\SessionTimeout.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Layouts\_Layout.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Breadcrumb.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Footer.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Header.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Information.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_LogOnStatus.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Menu.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_ThemeSelector.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="Scripts\leaflet\leaflet-src.esm.js.map" />
+    <Content Include="Scripts\leaflet\leaflet-src.js.map" />
+    <Content Include="Scripts\leaflet\leaflet.js.map" />
+    <Content Include="vis\vis.map" />
+    <Content Include="vis\vis.js.map" />
     <None Include="Web.TestServerRelease.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -1603,7 +1683,8 @@
 C:\Windows\System32\xcopy "$(ProjectDir)Db\Settings" "$(SolutionDir)Console\Workspace\General\Db\Settings" /E /C /Y /I
 C:\Windows\System32\xcopy "$(ProjectDir)General.Settings.xml" "$(SolutionDir)Console\Workspace\General" /C /Y /I
 rmdir /S /Q  "$(SolutionDir)Console\Workspace\Components\Vaiona"
-C:\Windows\System32\xcopy "$(SolutionDir)Libraries\Vaiona\Workspace\Components\Vaiona" "$(SolutionDir)Console\Workspace\Components\Vaiona\" /E /C /Y /I --> </PostBuildEvent>
+C:\Windows\System32\xcopy "$(SolutionDir)Libraries\Vaiona\Workspace\Components\Vaiona" "$(SolutionDir)Console\Workspace\Components\Vaiona\" /E /C /Y /I -->
+    </PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

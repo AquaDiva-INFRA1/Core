@@ -177,19 +177,61 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
                 foreach (var id in ids)
                 {
-                    // test case added to index only checked in datasets since it throws an exception
-                    // if the dataset is not materialized/materialized view not populated.
-                    //if (dm.GetDataset(Int64.Parse(id.ToString())).Status.Equals(DatasetStatus.CheckedIn))
+                    //added by Hamdi : Some datasets are too big and materialiyed views are generated manually 
+                    //check the size and threshold
+                    //Boolean Synched = true;
+                    //var dataset = this.GetUnitOfWork().GetReadOnlyRepository<Dataset>().Get(Int64.Parse(id.ToString()));
+                    //long numberOfTuples = dm.GetDatasetLatestVersionEffectiveTupleCount(Int64.Parse(id.ToString())); // this.getDatasetVersionEffectiveTupleCount(latestVersion);
+                    //int numberOfVariables = ((StructuredDataStructure)dataset.DataStructure.Self).Variables.Count();
+                    //long size = numberOfTuples * numberOfVariables;
+                    //if ( size > 200000*51)
+                    //{
+                    //    Synched = false;
+                    //}
+
+                    DataTable dt = null;
+                    Boolean Synched = false;
                     try
                     {
-                        if (mvh.Retrieve(Int64.Parse(id.ToString())) != null)
-                            writeBexisIndex(id, dm.GetDatasetLatestMetadataVersion(id));
-                        //GC.Collect();
+                        dt = mvh.Retrieve(Int64.Parse(id.ToString()));
+                        Synched = true;
                     }
-                    catch (Exception ex)
+                    catch (Exception EX)
                     {
-                        errors.Add(string.Format("Enountered a probelm indexing dataset '{0}'. Details: {1}", id, ex.Message));
+                        Debug.WriteLine(EX.Message);
                     }
+                    if (Synched)
+                    {
+                        try
+                        {
+                            if (dt != null)
+                            {
+                                dm = new DatasetManager();
+                                XmlDocument doc = dm.GetDatasetLatestMetadataVersion(id);
+                                writeBexisIndex(id, doc);
+                                dm.Dispose();
+                                GC.Collect();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            errors.Add(string.Format("Enountered a probelm indexing dataset '{0}'. Details: {1}", id, ex.Message));
+                        }
+                    }
+
+                    //// test case added to index only checked in datasets since it throws an exception
+                    //// if the dataset is not materialized/materialized view not populated.
+                    ////if (dm.GetDataset(Int64.Parse(id.ToString())).Status.Equals(DatasetStatus.CheckedIn))
+                    //try
+                    //{
+                    //    if (mvh.Retrieve(Int64.Parse(id.ToString())) != null)
+                    //        writeBexisIndex(id, dm.GetDatasetLatestMetadataVersion(id));
+                    //    //GC.Collect();
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    errors.Add(string.Format("Enountered a probelm indexing dataset '{0}'. Details: {1}", id, ex.Message));
+                    //}
                 }
                 //GC.Collect();
 
@@ -203,6 +245,9 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 }
                 if (errors.Count > 0)
                     throw new Exception(string.Join("\n\r", errors));
+            }
+            catch (Exception exc) {
+                Debug.WriteLine(exc.Message);
             }
             finally
             {
@@ -402,21 +447,24 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     List<string> list = new List<string>();
                     foreach (string s in metadataElementName_group)
                     {
-                        Debug.WriteLine("partial node : " + s);
-                        try
+                        if (s != "")
                         {
-                            XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
-                            for (int i = 0; i < elemList_.Count; i++)
+                            Debug.WriteLine("partial node : " + s);
+                            try
                             {
-                                Debug.WriteLine("Value node : " + elemList_[i].InnerText);
-                                concatenated_values = concatenated_values + " " + elemList_[i].InnerText;
-                                list.Add(elemList_[i].InnerText);
+                                XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
+                                for (int i = 0; i < elemList_.Count; i++)
+                                {
+                                    Debug.WriteLine("Value node : " + elemList_[i].InnerText);
+                                    concatenated_values = concatenated_values + " " + elemList_[i].InnerText;
+                                    list.Add(elemList_[i].InnerText);
+                                }
+                                list.Add(Environment.NewLine + Environment.NewLine);
                             }
-                            list.Add(Environment.NewLine + Environment.NewLine );
-                        }
-                        catch ( Exception exc)
-                        {
-                            Debug.WriteLine(exc.ToString()+" ==> "+id+" ==> node ==> " + s);
+                            catch (Exception exc)
+                            {
+                                Debug.WriteLine(exc.ToString() + " ==> " + id + " ==> node ==> " + s);
+                            }
                         }
                     }
                     try
