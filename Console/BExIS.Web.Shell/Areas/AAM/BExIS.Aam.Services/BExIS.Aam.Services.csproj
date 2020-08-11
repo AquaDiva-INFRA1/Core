@@ -97,10 +97,6 @@
       <Project>{252F7872-A69C-43A6-84B4-4D2ABDBDD9AB}</Project>
       <Name>BExIS.Xml.Helpers</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\Modules\DCM\BExIS.Dcm.UploadWizard\BExIS.Dcm.UploadWizard.csproj">
-      <Project>{2C846721-A221-4AE5-A671-4B86DE4D3805}</Project>
-      <Name>BExIS.Dcm.UploadWizard</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\Modules\DIM\BExIS.Dim.Entities\BExIS.Dim.Entities.csproj">
       <Project>{34CAD2A2-6928-458B-B8DC-AF71D55F20CC}</Project>
       <Name>BExIS.Dim.Entities</Name>
