@@ -100,7 +100,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                return View();
+                return View(new Aam_Observation_Context_Model());
             }
         }
 

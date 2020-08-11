@@ -7,7 +7,6 @@ using System.Diagnostics.Contracts;
 using BExIS.Dlm.Entities.DataStructure;
 using VDS.RDF;
 using VDS.RDF.Query;
-using BExIS.Dcm.UploadWizard;
 using BExIS.Security.Services.Authorization;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Services.Data;
@@ -20,6 +19,22 @@ using F23.StringSimilarity;
 
 namespace BExIS.Aam.Services
 {
+
+    public class ItemEqualityComparer : IEqualityComparer<Aam_Dataset_column_annotation>
+    {
+        public bool Equals(Aam_Dataset_column_annotation x, Aam_Dataset_column_annotation y)
+        {
+            // Two items are equal if their keys are equal.
+            return x.entity_id == y.entity_id;
+        }
+
+        public int GetHashCode(Aam_Dataset_column_annotation obj)
+        {
+            return obj.entity_id.GetHashCode();
+        }
+    }
+
+
     public class Aam_Dataset_column_annotationManager : IDisposable
     {
 
@@ -164,6 +179,72 @@ namespace BExIS.Aam.Services
             }
         }
 
+        public List<Aam_Dataset_column_annotation> get_all_dataset_column_annotationBy_Variable_measures(String variableLabel)
+        {
+            List<Aam_Dataset_column_annotation> annotation_suggestion = new List<Aam_Dataset_column_annotation>();
+            if (this.get_all_dataset_column_annotationByVariableLabel(variableLabel).Count > 0) annotation_suggestion.AddRange((List<Aam_Dataset_column_annotation>)this.get_all_dataset_column_annotationByVariableLabel(variableLabel));
+            if (this.get_all_dataset_column_annotationByVariable_DataStructure(variableLabel).Count > 0) annotation_suggestion.AddRange((List<Aam_Dataset_column_annotation>)this.get_all_dataset_column_annotationByVariable_DataStructure(variableLabel));
+            if (this.get_all_dataset_column_annotationByVariable_Unit(variableLabel).Count > 0) annotation_suggestion.AddRange((List<Aam_Dataset_column_annotation>)this.get_all_dataset_column_annotationByVariable_Unit(variableLabel));
+            return annotation_suggestion;
+        }
+        public List<Aam_Dataset_column_annotation> get_all_dataset_column_annotationByVariable_DataStructure(String variableLabel)
+        {
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                DataStructureManager dsm = new DataStructureManager();
+                IRepository<Aam_Dataset_column_annotation> repo = uow.GetRepository<Aam_Dataset_column_annotation>();
+                List<Variable> variables = (List<Variable>)dsm.VariableRepo.Get().ToList<Variable>().Where(x => x.Label.ToLower() == variableLabel.ToLower()).ToList<Variable>();
+
+                List<Aam_Dataset_column_annotation> List = new List<Aam_Dataset_column_annotation>();
+                foreach (Variable v in variables)
+                {
+                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)repo.Get().Where(an => an.variable_id.DataStructure == v.DataStructure).ToList();
+                    l.ForEach(x => List.Add(x));
+                }
+                dsm.Dispose();
+                return List;
+            }
+        }
+
+        public List<Aam_Dataset_column_annotation> get_all_dataset_column_annotationByVariable_Unit(String variableLabel)
+        {
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                DataStructureManager dsm = new DataStructureManager();
+                IRepository<Aam_Dataset_column_annotation> repo = uow.GetRepository<Aam_Dataset_column_annotation>();
+                List<Variable> variables = (List<Variable>)dsm.VariableRepo.Get().ToList<Variable>().Where(x => x.Label.ToLower() == variableLabel.ToLower()).ToList<Variable>();
+
+                List<Aam_Dataset_column_annotation> List = new List<Aam_Dataset_column_annotation>();
+                foreach (Variable v in variables)
+                {
+                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)repo.Get().Where(an => an.variable_id.DataAttribute.Unit == v.DataAttribute.Unit).ToList();
+                    l.ForEach(x => List.Add(x));
+                }
+                dsm.Dispose();
+                return List;
+            }
+        }
+
+        public Dictionary<Aam_Uri, double> get_all_dataset_column_annotationByVariable_label_matching(String variableLabel)
+        {
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                IRepository<Aam_Uri> repo = uow.GetRepository<Aam_Uri>();
+                Dictionary<Aam_Uri, double> measures = new Dictionary<Aam_Uri, double>();
+                foreach(Aam_Uri uri in repo.Get())
+                {
+                    double d = calculate_similarity(variableLabel.ToLower(), uri.label.ToLower());
+                    List<Aam_Uri> l = new List<Aam_Uri>();
+                    if ( d > 0.4)
+                    {
+                        measures.Add(uri, d);
+                    }
+                }
+                return measures;
+            }
+        }
+
+
         public double calculate_similarity ( string a, string b )
         {
             if ((a != null) && (b != null))
@@ -218,6 +299,31 @@ namespace BExIS.Aam.Services
                 res.Substring(0, res.IndexOf("@"));
 
             return res;
+        }
+
+        private double Similarity(string a, string b)
+        {
+            if ((a != null) && (b != null))
+            {
+                List<double> similarities = new List<double>();
+                double output = 0.0;
+
+                var l = new NormalizedLevenshtein();
+                similarities.Add(l.Similarity(a, b));
+                var jw = new JaroWinkler();
+                similarities.Add(jw.Similarity(a, b));
+                var jac = new Jaccard();
+                similarities.Add(jac.Similarity(a, b));
+
+                foreach (double sim in similarities)
+                {
+                    output += sim;
+                }
+
+                return output / similarities.Count;
+            }
+            else return Int64.Parse("0");
+
         }
 
 
