@@ -33,6 +33,7 @@ using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Aam.Services;
+using BExIS.Aam.Entities.Mapping;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -1126,50 +1127,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         
         private String get_observations_contextualized_contextualizing(String id)
         {
-            //debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_observations_contextualized_contextualizing is called ");
-            }
 
             String request_string = " ";
+
+            Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
+            //List<Aam_Dataset_column_annotation> annots = (List < Aam_Dataset_column_annotation > ) aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id));
+            foreach (Aam_Dataset_column_annotation ann in aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id)))
+                request_string = request_string + clean_labels(ann.characteristic_id.label) + clean_labels(ann.entity_id.label) + ",";
             
-            NpgsqlCommand MyCmd = null;
-            NpgsqlConnection MyCnx = null;
-
-            MyCnx = new NpgsqlConnection(Conx);
-            MyCnx.Open();
-            string select = "SELECT * FROM \"dataset_column_annotation\" WHERE datasets_id=" + id;
-            MyCmd = new NpgsqlCommand(select, MyCnx);
-
-            NpgsqlDataReader dr = MyCmd.ExecuteReader();
-            int line = 0;
-            if (dr != null)
-            {
-                while (dr.Read())
-                {
-                    if (dr["variable_id"] != System.DBNull.Value)
-                    {
-                        var Datasetref = dr["datasets_id"].ToSafeString();
-                        //var contextualized_entity = (String)dr["contextualized_entity"].ToSafeString();
-                        //var contextualizing_entity = (String)dr["contextualizing_entity"].ToSafeString();
-                        //var contextualized_entity_label = (String)dr["contextualized_entity_label"].ToSafeString();
-                        //var contextualizing_entity_label = (String)dr["contextualizing_entity_label"].ToSafeString();
-                        var entity_label = (String)dr["entity_label"].ToSafeString();
-                        var characteristic_label = (String)dr["characteristic_label"].ToSafeString();
-                        if ((entity_label) != "" )
-                            request_string = request_string + clean_labels(characteristic_label) + clean_labels(entity_label) + ",";
-                        Debug.WriteLine("Row processed  number : " + line); line++;
-                        Debug.WriteLine(request_string);
-                        //debugging file
-                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                        {
-                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_observations_contextualized_contextualizing request_string to get the annotations : "+request_string);
-                        }
-                    }
-                }
-            }
-            MyCnx.Close();
             return request_string.Substring(0, request_string.Length - 1);
         }
 
@@ -1244,7 +1209,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     Semedico_Result = consumeSemedicoREST_v2(model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 10);
                 }
             }
-
+            ViewData["page"] = model.resultListComponent.subsetstart;
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Debug.WriteLine("Execution time (millisecondes) for DDM/get_dataset_related_papers_by_ID ==> " +elapsedMs);
@@ -1256,7 +1221,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             }
 
             Debug.WriteLine("====> Semedico result " + Semedico_Result);
-            return Semedico_Result;
+            return model.resultListComponent.subsetstart + "\n" +  Semedico_Result;
 
         }
 
@@ -1386,30 +1351,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             if (label.Contains("@"))
             {
-                // debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_labels called : " + k + " ==> "+ label.Substring(0, label.IndexOf("@")));
-                }
                 return label.Substring(0, label.IndexOf("@"));
             }
-
-            else if (label.ToLower().IndexOf("no label found") > -1)
+            if (label.Contains("#"))
             {
-                // debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_labels called : " + k + " ==> " + " (empty string)");
-                }
-                return "";
+                return label.Substring(label.IndexOf("@"), label.Length -1);
             }
             else
             {
-                // debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_labels called : " + k + " ==> " +label);
-                }
                 return label;
             }
 
@@ -1611,7 +1560,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     string labelOutput = "";
                     foreach (SparqlResult res in results.Results)
                     {
-                        String s = clean_labels(res["label"].ToString());
+                        string label = res["label"].ToString();
+
+                        String s = clean_labels(label);
+                        if (s == "" )  s = clean_labels(uri);
 
                         //Remove the ^^xsd:String
                         if (s.Contains("^^"))
@@ -1629,7 +1581,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         }
                     }
                     if (labelOutput.Equals(""))
-                        labelOutput = "No label found!";
+                        labelOutput = "";
                     
                     labelList.Add(labelOutput);
                 }

@@ -92,6 +92,8 @@ namespace BExIS.Modules.Dcm.UI.Models
                             ValidateDatastructure(String.Join(",", vars.ToArray()), seperator);
                     }
 
+                    convertAndAddToSubmitedVariableIdentifier();
+
                     for (int i = Var_StartRow; i <= Var_EndRow; i++)
                     {
                         string[] cells = Json_table[i];
@@ -117,31 +119,17 @@ namespace BExIS.Modules.Dcm.UI.Models
             /// <param name="variablesRow"></param>
             private void convertAndAddToSubmitedVariableIdentifier()
             {
-                if (VariableIdentifierRows != null)
-                {
-                    foreach (List<string> l in VariableIdentifierRows)
-                    {
-                        //create headerVariables
-                        if (SubmitedVariableIdentifiers.Count == 0)
-                        {
+                List<VariableIdentifier> temp_list = new List<VariableIdentifier>();
+                if (this.SubmitedVariableIdentifiers.Count == 0)
+                    if (VariableIdentifierRows != null)
+                        foreach (List<string> l in VariableIdentifierRows)
                             foreach (string s in l)
                             {
                                 VariableIdentifier hv = new VariableIdentifier();
                                 hv.name = s;
-                                SubmitedVariableIdentifiers.Add(hv);
+                                temp_list.Add(hv);
                             }
-                        }
-                        else
-                        {
-                            foreach (string s in l)
-                            {
-                                int id = Convert.ToInt32(s);
-                                int index = l.IndexOf(s);
-                                SubmitedVariableIdentifiers.ElementAt(index).id = id;
-                            }
-                        }
-                    }
-                }
+                this.SubmitedVariableIdentifiers = temp_list.Count > 0 ? temp_list : this.SubmitedVariableIdentifiers;
             }
 
 

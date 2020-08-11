@@ -310,6 +310,22 @@
         <script src="@Url.Content("~/ddm/Data/getFile/?id=" + Model.DatasetId)" type="text/javascript"></script>
     }
 
+
+    <script type="text/javascript">
+        function start_folded() {
+            x = document.getElementsByClassName("contentContainer");
+            //.style.display = "none";
+            console.log(x);
+            var i;
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            //showHideClick(x);
+        }
+        start_folded();
+    </script>
+
+
     <script>
 
     $("#MetadataEditor")
