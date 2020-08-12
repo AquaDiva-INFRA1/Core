@@ -1,40 +1,56 @@
-﻿using System;
+﻿using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Services.Data;
+using BExIS.IO.Transform.Validation.DSValidation;
+using BExIS.IO.Transform.Validation.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Timers;
-using BExIS.IO.Transform.Validation.DSValidation;
-using BExIS.IO.Transform.Validation.Exceptions;
-using BExIS.Dlm.Entities.Data;
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Dlm.Services.Data;
+using System.Text;
 using Vaiona.Logging.Aspects;
 
 /// <summary>
 ///
-/// </summary>        
+/// </summary>
 namespace BExIS.IO.Transform.Input
 {
     /// <summary>
     /// this class is used to read and validate ascii files
     /// </summary>
-    /// <remarks></remarks>        
-    public class AsciiReader:DataReader
+    /// <remarks></remarks>
+    public class AsciiReader : DataReader
     {
+        private Encoding encoding = Encoding.Default;
+
         public AsciiReader(StructuredDataStructure structuredDatastructure, AsciiFileReaderInfo fileReaderInfo) : base(structuredDatastructure, fileReaderInfo)
         {
-
         }
 
         public AsciiReader(StructuredDataStructure structuredDatastructure, AsciiFileReaderInfo fileReaderInfo, IOUtility iOUtility) : base(structuredDatastructure, fileReaderInfo, iOUtility)
         {
-
         }
 
         public AsciiReader(StructuredDataStructure structuredDatastructure, AsciiFileReaderInfo fileReaderInfo, IOUtility iOUtility, DatasetManager datasetManager) : base(structuredDatastructure, fileReaderInfo, iOUtility, datasetManager)
         {
+        }
 
+        /// <summary>
+        /// If FileStream exist open a FileStream
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref="File"/>
+        /// <param ="fileName">Full path of the FileStream</param>
+        public override FileStream Open(string fileName)
+        {
+            // get Encoding first
+            setEncoding(fileName);
+
+            if (File.Exists(fileName))
+                return File.Open(fileName, FileMode.Open, FileAccess.Read);
+            else
+                return null;
         }
 
         public List<List<string>> ReadFile(Stream file)
@@ -43,7 +59,7 @@ namespace BExIS.IO.Transform.Input
 
             this.FileStream = file;
             AsciiFileReaderInfo fri = (AsciiFileReaderInfo)Info;
-                
+
             // Check params
             if (this.FileStream == null)
             {
@@ -64,8 +80,7 @@ namespace BExIS.IO.Transform.Input
 
             if (this.ErrorMessages.Count == 0)
             {
-
-                using (StreamReader streamReader = new StreamReader(file))
+                using (StreamReader streamReader = new StreamReader(file, encoding))
                 {
                     string line;
                     int index = fri.Variables;
@@ -76,11 +91,11 @@ namespace BExIS.IO.Transform.Input
                         if (index >= Info.Data)
                         {
                             // return List of VariablesValues, and error messages
-                            tmp.Add(rowToList(line, seperator));
+                            if (!isEmpty(line, seperator))
+                                tmp.Add(rowToList(line, seperator));
                         }
 
                         index++;
-
                     }
                 }
             }
@@ -89,7 +104,7 @@ namespace BExIS.IO.Transform.Input
         }
 
         /// <summary>
-        /// Read the whole FileStream line by line until no more come. 
+        /// Read the whole FileStream line by line until no more come.
         /// Convert the lines into a datatuple based on the datastructure.
         /// Return value is a list of datatuples
         /// </summary>
@@ -130,8 +145,7 @@ namespace BExIS.IO.Transform.Input
 
             if (this.ErrorMessages.Count == 0)
             {
-
-                using (StreamReader streamReader = new StreamReader(file))
+                using (StreamReader streamReader = new StreamReader(file, encoding))
                 {
                     string line;
                     int index = fri.Variables;
@@ -139,21 +153,19 @@ namespace BExIS.IO.Transform.Input
 
                     while ((line = streamReader.ReadLine()) != null)
                     {
-
                         if (index == this.Info.Variables)
                         {
-                            VariableIdentifierRows.Add(rowToList(line, seperator));
-                            convertAndAddToSubmitedVariableIdentifier();
+                            ValidateDatastructure(line, seperator);
                         }
 
                         if (index >= this.Info.Data)
                         {
                             // return List of VariablesValues, and error messages
-                            this.DataTuples.Add(ReadRow(rowToList(line, seperator), index));
+                            if (!isEmpty(line, seperator))
+                                this.DataTuples.Add(ReadRow(rowToList(line, seperator), index));
                         }
 
                         index++;
-
                     }
                 }
             }
@@ -161,9 +173,8 @@ namespace BExIS.IO.Transform.Input
             return this.DataTuples;
         }
 
-
         /// <summary>
-        /// Read line by line based on a packageSize. 
+        /// Read line by line based on a packageSize.
         /// Convert the lines into a datatuple based on the datastructure.
         /// Return value is a list of datatuples
         /// </summary>
@@ -181,7 +192,6 @@ namespace BExIS.IO.Transform.Input
         [MeasurePerformance]
         public List<DataTuple> ReadFile(Stream file, string fileName, long datasetId, int packageSize)
         {
-
             // clear list of datatuples
             this.DataTuples = new List<DataTuple>();
             this.VariableIdentifierRows = new List<List<string>>();
@@ -212,8 +222,7 @@ namespace BExIS.IO.Transform.Input
 
             if (this.ErrorMessages.Count == 0)
             {
-                
-                using (StreamReader streamReader = new StreamReader(file))
+                using (StreamReader streamReader = new StreamReader(file, encoding))
                 {
                     string line;
                     int index = 1;
@@ -230,56 +239,55 @@ namespace BExIS.IO.Transform.Input
 
                     Stopwatch _timer = Stopwatch.StartNew();
 
-
                     /// <summary>
                     /// go to current position is reached at the line
                     /// </summary>
-                    /// <remarks></remarks>        
+                    /// <remarks></remarks>
                     for (int i = 1; i < Position; i++)
                     {
                         string l = streamReader.ReadLine();
 
                         if (i == this.Info.Variables)
                         {
-                            VariableIdentifierRows.Add(rowToList(l, seperator));
-                            convertAndAddToSubmitedVariableIdentifier();
+                            // validate the structure
+                            // + create validationmanagers for the variables
+                            // + identifer List
+                            ValidateDatastructure(l, seperator);
                         }
                     }
 
                     _timer.Stop();
-                    Debug.WriteLine(" ");
-                    Debug.WriteLine("*****************************************************************");
-                    Debug.WriteLine(" position : " + Position+"    -->  Timer: "+ _timer.Elapsed.TotalSeconds.ToString() );
+                    //Debug.WriteLine(" ");
+                    //Debug.WriteLine("*****************************************************************");
+                    //Debug.WriteLine(" position : " + Position + "    -->  Timer: " + _timer.Elapsed.TotalSeconds.ToString());
 
                     _timer = Stopwatch.StartNew();
 
-                        /// <summary>
-                        /// read each line as long as the packet size is not reached
-                        /// generating a datatuple from the line
-                        /// </summary>
-                        /// <remarks></remarks>        
-                        while ((line = streamReader.ReadLine()) != null && items <= packageSize-1)
+                    /// <summary>
+                    /// read each line as long as the packet size is not reached
+                    /// generating a datatuple from the line
+                    /// </summary>
+                    /// <remarks></remarks>
+                    while ((line = streamReader.ReadLine()) != null && line.Trim().Count() > 0 && items <= packageSize - 1)
+                    {
+                        if (Position >= this.Info.Data)
                         {
-                            if (Position >= this.Info.Data)
-                            {
-                                // return List of VariablesValues, and error messages
-                                this.DataTuples.Add(ReadRow(rowToList(line, seperator), index));
-                            }
-
-                            Position++;
-                            index++;
-                            items++;
+                            // return List of VariablesValues, and error messages
+                            if (!isEmpty(line, seperator))
+                            this.DataTuples.Add(ReadRow(rowToList(line, seperator), index));
                         }
 
-                        _timer.Stop();
+                        Position++;
+                        index++;
+                        items++;
+                    }
 
-                        Debug.WriteLine(" created datatuples : " + _timer.Elapsed.TotalSeconds.ToString());
-                        
+                    _timer.Stop();
 
+                    //Debug.WriteLine(" created datatuples : " + _timer.Elapsed.TotalSeconds.ToString());
                 }
             }
 
-            
             return this.DataTuples;
         }
 
@@ -329,7 +337,7 @@ namespace BExIS.IO.Transform.Input
             {
                 Stopwatch totalTime = Stopwatch.StartNew();
 
-                using (StreamReader streamReader = new StreamReader(file))
+                using (StreamReader streamReader = new StreamReader(file, encoding))
                 {
                     string line;
                     //int index = fri.Variables;
@@ -347,11 +355,10 @@ namespace BExIS.IO.Transform.Input
 
                     Stopwatch _timer = Stopwatch.StartNew();
 
-
                     /// <summary>
                     /// go to current position is reached at the line
                     /// </summary>
-                    /// <remarks></remarks>        
+                    /// <remarks></remarks>
                     for (int i = 1; i < Position; i++)
                     {
                         string l = streamReader.ReadLine();
@@ -363,11 +370,9 @@ namespace BExIS.IO.Transform.Input
                         }
                     }
 
-
                     // go to every line
                     while ((line = streamReader.ReadLine()) != null && items <= packageSize - 1)
                     {
-
                         //// is position of datastructure?
                         //if (index == this.info.Variables)
                         //{
@@ -384,22 +389,21 @@ namespace BExIS.IO.Transform.Input
                             listOfSelectedvalues.Add(GetValuesFromRow(rowToList(line, seperator), index, variableList));
 
                             rowTime.Stop();
-                            //Debug.WriteLine("index : "+index+"   ---- Total Time of primary key check " + rowTime.Elapsed.TotalSeconds.ToString());
+                            ////Debug.WriteLine("index : "+index+"   ---- Total Time of primary key check " + rowTime.Elapsed.TotalSeconds.ToString());
                         }
 
                         Position++;
                         index++;
                         items++;
-
                     }
 
                     _timer.Stop();
 
-                    Debug.WriteLine(" get values for primary key check datatuples : " + _timer.Elapsed.TotalSeconds.ToString());
+                    //Debug.WriteLine(" get values for primary key check datatuples : " + _timer.Elapsed.TotalSeconds.ToString());
                 }
 
                 totalTime.Stop();
-                Debug.WriteLine(" Total Time of primary key check " + totalTime.Elapsed.TotalSeconds.ToString());
+                //Debug.WriteLine(" Total Time of primary key check " + totalTime.Elapsed.TotalSeconds.ToString());
             }
 
             return listOfSelectedvalues;
@@ -408,7 +412,7 @@ namespace BExIS.IO.Transform.Input
         #region validate
 
         /// <summary>
-        /// Validate the whole FileStream line by line until no more come. 
+        /// Validate the whole FileStream line by line until no more come.
         /// Convert the lines into a datatuple based on the datastructure.
         /// Return value is a list of datatuples
         /// </summary>
@@ -448,7 +452,7 @@ namespace BExIS.IO.Transform.Input
 
             if (this.ErrorMessages.Count == 0)
             {
-                using (StreamReader streamReader = new StreamReader(file))
+                using (StreamReader streamReader = new StreamReader(file, encoding))
                 {
                     string line;
                     int index = 1;
@@ -457,13 +461,15 @@ namespace BExIS.IO.Transform.Input
 
                     while ((line = streamReader.ReadLine()) != null)
                     {
-
                         if (index == this.Info.Variables)
                         {
                             dsdIsOk = ValidateDatastructure(line, seperator);
+
+                            // if data is not in the correct order, create a dictionary with the new position
+
                         }
 
-                        if (dsdIsOk && index >= this.Info.Data && !string.IsNullOrEmpty(line))
+                        if (dsdIsOk && index >= this.Info.Data && !string.IsNullOrEmpty(line) && !isEmpty(line,seperator))
                         {
                             this.ErrorMessages = this.ErrorMessages.Union(ValidateRow(rowToList(line, seperator), index)).ToList();
                         }
@@ -475,38 +481,34 @@ namespace BExIS.IO.Transform.Input
             }
         }
 
-
         /// <summary>
         /// Validate the datastructure
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref="TextSeparator"/>
-        /// <param name="line">line which include the datastructure as names</param>       
-        /// <param name="sep">TextSeparator as Character</param>       
-        protected bool ValidateDatastructure(string line, char sep )
+        /// <param name="line">line which include the datastructure as names</param>
+        /// <param name="sep">TextSeparator as Character</param>
+        protected bool ValidateDatastructure(string line, char sep)
         {
-
             /// <summary>
             /// the incoming line should be the datastructure line from a FileStream
-            /// this line converted into a list of strings which incluide the variable names 
+            /// this line converted into a list of strings which incluide the variable names
             /// </summary>
-            /// <remarks></remarks>        
+            /// <remarks></remarks>
             VariableIdentifierRows.Add(rowToList(line, sep));
 
             /// <summary>
-            /// Convert a list of variable names to 
-            /// VariableIdentifiers 
+            /// Convert a list of variable names to
+            /// VariableIdentifiers
             /// </summary>
-            /// <remarks>SubmitedVariableIdentifiers is the list</remarks>  
+            /// <remarks>SubmitedVariableIdentifiers is the list</remarks>
             convertAndAddToSubmitedVariableIdentifier();
 
-
             /// <summary>
-            /// Validate datastructure with the SubmitedVariableIdentifiers from FileStream 
+            /// Validate datastructure with the SubmitedVariableIdentifiers from FileStream
             /// </summary>
-            /// <remarks></remarks>        
+            /// <remarks></remarks>
             List<Error> ecList = ValidateComparisonWithDatatsructure(SubmitedVariableIdentifiers);
-
 
             if (ecList != null)
             {
@@ -521,14 +523,13 @@ namespace BExIS.IO.Transform.Input
         }
 
         /// <summary>
-        /// Convert a list of variable names to 
+        /// Convert a list of variable names to
         /// VariableIdentifiers
         /// </summary>
         /// <seealso cref="VariableIdentifier"/>
         /// <param name="variablesRow"></param>
         private void convertAndAddToSubmitedVariableIdentifier()
         {
-            
             if (VariableIdentifierRows != null)
             {
                 foreach (List<string> l in VariableIdentifierRows)
@@ -556,7 +557,7 @@ namespace BExIS.IO.Transform.Input
             }
         }
 
-        #endregion
+        #endregion validate
 
         #region helper methods
 
@@ -568,81 +569,83 @@ namespace BExIS.IO.Transform.Input
         /// <param name="line">Row as a string</param>
         /// <param name="seperator">Character used as TextSeparator</param>
         /// <returns>List of values</returns>
-        private List<string> rowToList(string line, char seperator)
+        public List<string> rowToList(string line, char seperator)
         {
-            //if (this.info != null)
-            //{
-            //    AsciiFileReaderInfo fileReaderInfo = (AsciiFileReaderInfo)this.info;
-            //    if (fileReaderInfo != null)
-            //    {
-            //        List<string> temp = new List<string>();
-            //        temp = TextMarkerHandling(line, seperator, AsciiFileReaderInfo.GetTextMarker(fileReaderInfo.TextMarker));
-            //        return temp;
-
-            //    }
-            //    else return line.Split(seperator).ToList();
-            //}
-            //else 
+            if (this.Info != null)
+            {
+                AsciiFileReaderInfo fileReaderInfo = (AsciiFileReaderInfo)this.Info;
+                if (fileReaderInfo != null)
+                {
+                    List<string> temp = new List<string>();
+                    temp = TextMarkerHandling(line, seperator, AsciiFileReaderInfo.GetTextMarker(fileReaderInfo.TextMarker));
+                    return temp;
+                }
+                else return line.Split(seperator).ToList();
+            }
 
             return line.Split(seperator).ToList();
         }
 
-
         /// <summary>
-        /// If a seperator is present in a text which is highlighted with highlighter (bsp quotes), 
+        /// If a seperator is present in a text which is highlighted with highlighter (bsp quotes),
         /// which is a special case which is treated in this function
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref="TextSeparator"/>
         /// <seealso cref="TextMarker"/>
-        /// <param name="row">a row that needs to be checked </param>       
-        /// <param name="separator">Character as Delimeter for the line (TextSeparator)</param>       
-        /// <param name="textmarker">Character as TextMarker for the line</param>       
+        /// <param name="row">a row that needs to be checked </param>
+        /// <param name="separator">Character as Delimeter for the line (TextSeparator)</param>
+        /// <param name="textmarker">Character as TextMarker for the line</param>
         /// <returns>List of values as a string list</returns>
-        private List<string> textMarkerHandling(string row, char separator, char textmarker)
+        public List<string> TextMarkerHandling(string row, char separator, char textmarker)
         {
             List<string> values = row.Split(separator).ToList();
 
             /// <summary>
             /// check if the row contains a textmarker
             /// </summary>
-            /// <remarks></remarks>        
+            /// <remarks></remarks>
             if (row.Contains(textmarker))
             {
                 string tempValue = "";
                 bool startText = false;
-                
+
                 List<string> temp = new List<string>();
 
                 foreach (string v in values)
                 {
-
                     /// <summary>
                     /// check if the value v contains a textmarker
                     /// and generate a new string which include all values between
                     /// the first Text marker and the last TextMarker
                     /// </summar>
-                    /// <remarks></remarks>    
+                    /// <remarks></remarks>
                     if (v.Contains(textmarker))
                     {
-
-                        if (v.ToCharArray().First().Equals(textmarker))
+                        //if the qoutest are in one value - first and last character
+                        if (v.ToCharArray().First().Equals(textmarker) && v.ToCharArray().Last().Equals(textmarker))
                         {
-                            tempValue = v;
-                            startText = true;
+                            temp.Add(v.Trim(textmarker));
                         }
-
-                        if (v.ToCharArray().Last().Equals(textmarker))
+                        else
                         {
-                            tempValue += separator+v;
-                            temp.Add(tempValue.Trim(textmarker));
-                            startText = false;
-                        }
+                            if (v.ToCharArray().First().Equals(textmarker))
+                            {
+                                tempValue = v;
+                                startText = true;
+                            }
 
+                            if (v.ToCharArray().Last().Equals(textmarker))
+                            {
+                                tempValue += separator + v;
+                                temp.Add(tempValue.Trim(textmarker));
+                                startText = false;
+                            }
+                        }
                     }
                     else
                     {
-                        if (startText) 
+                        if (startText)
                             tempValue += separator + v;
                         else temp.Add(v);
                     }
@@ -654,9 +657,38 @@ namespace BExIS.IO.Transform.Input
             return values;
         }
 
-  
+        private bool isEmpty(string line, char seperator)
+        {
+            string tmp = line.Replace(seperator,' ');
+
+            if (string.IsNullOrWhiteSpace(tmp))
+            { 
+                NumberOSkippedfRows++;
+                Debug.WriteLine(tmp);
+                Debug.WriteLine("NumberOSkippedfRows"+ NumberOSkippedfRows);
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion helper methods
+
+        #region encoding
+
+        private void setEncoding(string path)
+        {
+            using (var reader = new StreamReader(path, Encoding.Default, true))
+            {
+                if (reader.Peek() >= 0) // you need this!
+                    reader.Read();
+
+                encoding = reader.CurrentEncoding;
+                reader.Close();
+            }
+
+        }
 
         #endregion
-
     }
 }
