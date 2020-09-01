@@ -9,18 +9,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C48DCFC5-DF47-4486-A682-5C648F970318}</ProjectGuid>
+    <ProjectGuid>{C8A05313-B960-406E-92EC-C1E5B3F47FCD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BExIS.Ext.Orm.NH</RootNamespace>
-    <AssemblyName>BExIS.Ext.Orm.NH</AssemblyName>
+    <RootNamespace>BExIS.IO.Transform.Validation</RootNamespace>
+    <AssemblyName>BExIS.IO.Transform.Validation</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
-    <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>
@@ -34,6 +34,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -42,6 +43,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'TestServerRelease|AnyCPU'">
     <OutputPath>bin\TestServerRelease\</OutputPath>
@@ -52,10 +54,6 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="saxon9he-api, Version=9.6.0.8, Culture=neutral, PublicKeyToken=e1fdd002d5083fe6, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Saxon-HE.9.6.0.8\lib\net40\saxon9he-api.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -65,9 +63,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DSValidation\DatastructureOrderCheck.cs" />
+    <Compile Include="DSValidation\DatastructureMatchCheck.cs" />
+    <Compile Include="DSValidation\VariableIdentifier.cs" />
+    <Compile Include="Exceptions\Error.cs" />
+    <Compile Include="IDataStructureValidation.cs" />
+    <Compile Include="IValueCheck.cs" />
+    <Compile Include="IValueValidation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ValueCheck\DataTypeCheck.cs" />
+    <Compile Include="ValueCheck\MissingValueCheck.cs" />
+    <Compile Include="ValueCheck\OptionalCheck.cs" />
+    <Compile Include="ValueValidationManager.cs" />
+    <Compile Include="ValueValidation\DomainValidation.cs" />
+    <Compile Include="ValueValidation\PatternValidation.cs" />
+    <Compile Include="ValueValidation\RangeValidation.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Components\DLM\BExIS.Dlm.Entities\BExIS.Dlm.Entities.csproj">
+      <Project>{b4e7b1bf-01b4-40af-8d19-b8f362167261}</Project>
+      <Name>BExIS.Dlm.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Components\DLM\BExIS.Dlm.Services\BExIS.Dlm.Services.csproj">
+      <Project>{c4ca0a99-0af3-4372-a9b7-b9073599bd8b}</Project>
+      <Name>BExIS.Dlm.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BExIS.IO\BExIS.IO.csproj">
+      <Project>{e4795f06-20c2-4c4c-a720-9a79896384df}</Project>
+      <Name>BExIS.IO</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
