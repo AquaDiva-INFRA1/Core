@@ -7,7 +7,14 @@ namespace BExIS.Modules.Asm.UI.Models
 {
     public class Classification
     {
-        public Input var_name; 
+        //public Input var_name;
+        public List<Input> class_results;
+        public List<string> keywords;
+        public Classification()
+        {
+            this.class_results = new List<Input>();
+            this.keywords = new List<string>();
+        }
     }
 
     public class Input

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Vaiona.Entities.Common;
+using System.Linq;
 
 /// <summary>
 ///

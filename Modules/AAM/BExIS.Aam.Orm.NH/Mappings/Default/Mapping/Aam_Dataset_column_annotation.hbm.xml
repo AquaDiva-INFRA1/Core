@@ -9,6 +9,10 @@
       <generator class="native" />
     </id>
 
+    <version name="VersionNo" type="Int32">
+      <column name="VersionNo" />
+    </version>
+
     <many-to-one name="Dataset" column="datasets_id" class="BExIS.Dlm.Entities.Data.Dataset"></many-to-one>
     
     <many-to-one name="DatasetVersion" column="version_id" class="BExIS.Dlm.Entities.Data.DatasetVersion"></many-to-one>

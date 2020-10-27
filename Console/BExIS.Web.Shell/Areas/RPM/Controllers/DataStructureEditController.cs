@@ -131,7 +131,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
             try
             {
                 missingValueManager = new MissingValueManager();
-                List<MissingValue> missingValues = missingValueManager.Repo.Get().Where(mv => mv.Variable.Id.Equals(variableId)).ToList();
+                List<MissingValue> missingValues = missingValueManager.Repo.Query(mv => mv.Variable.Id.Equals(variableId)).ToList();
                 foreach(MissingValue mv in missingValues)
                 {
                     if (mv.DisplayName == missingValue.DisplayName && mv.Id != missingValue.Id)
@@ -148,13 +148,9 @@ namespace BExIS.Modules.Rpm.UI.Controllers
         [HttpPost]
         public bool _checkMissingValuePlaceholder(long variableId, MissingValueStruct missingValue)
         {
-            MissingValueManager missingValueManager = null;
-            DataStructureManager dataStructureManager = null;
-
-            try
+            using (MissingValueManager missingValueManager = new MissingValueManager())
+            using (DataStructureManager dataStructureManager = new DataStructureManager())
             {
-                missingValueManager = new MissingValueManager();
-                dataStructureManager = new DataStructureManager();
 
                 Variable variable = dataStructureManager.VariableRepo.Get(variableId);
                 TypeCode typecode = new TypeCode();
@@ -168,10 +164,6 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                     }
                 }
                 return missingValueManager.ValidatePlaceholder(typecode, missingValue.Placeholder, missingValue.Id);
-            }
-            finally
-            {
-                missingValueManager.Dispose();
             }
         }
 
@@ -199,7 +191,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                         DataStructureIO.deleteTemplate(structuredDataStructure.Id);
                         foreach (Variable v in structuredDataStructure.Variables)
                         {
-                            List<MissingValue> missingValues = missingValueManager.Repo.Get().Where(mv => mv.Variable.Id.Equals(v.Id)).ToList();
+                            List<MissingValue> missingValues = missingValueManager.Repo.Query(mv => mv.Variable.Id.Equals(v.Id)).ToList();
                             foreach (MissingValue mv in missingValues)
                             {
                                 missingValueManager.Delete(mv);
@@ -263,7 +255,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                     return PartialView("_messageWindow", messageModel);
                 }
 
-                if (variables != null && variables.Count() > 0)
+                if (variables != null && variables.Any())
                 {
                     Variable variable = new Variable();
                     List<long> order = new List<long>();
@@ -272,7 +264,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                     {
                         if (!variables.Select(svs => svs.Id).ToList().Contains(v.Id))
                         {
-                            List<MissingValue> missingValues = missingValueManager.Repo.Get().Where(mv => mv.Variable.Id.Equals(v.Id)).ToList();
+                            List<MissingValue> missingValues = missingValueManager.Repo.Query(mv => mv.Variable.Id.Equals(v.Id)).ToList();
                             foreach (MissingValue mv in missingValues)
                             {
                                 missingValueManager.Delete(mv);
@@ -336,7 +328,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                             variable.IsValueOptional = svs.isOptional;
 
                             
-                            List<MissingValue> missingValues = missingValueManager.Repo.Get().Where(mv => mv.Variable.Id.Equals(svs.Id)).ToList();
+                            List<MissingValue> missingValues = missingValueManager.Repo.Query(mv => mv.Variable.Id.Equals(svs.Id)).ToList();
                             foreach (MissingValue mv in missingValues)
                             {
                                 if (!svs.MissingValues.Select(mvs => mvs.Id).Contains(mv.Id))
@@ -376,7 +368,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                 {
                     foreach (Variable v in dataStructure.Variables)
                     {
-                        List<MissingValue> missingValues = missingValueManager.Repo.Get().Where(mv => mv.Variable.Id.Equals(v.Id)).ToList();
+                        List<MissingValue> missingValues = missingValueManager.Repo.Query(mv => mv.Variable.Id.Equals(v.Id)).ToList();
                         foreach (MissingValue mv in missingValues)
                         {
                             missingValueManager.Delete(mv);
@@ -776,7 +768,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                 if (constraintModel.Terms != null && constraintModel.Terms.Trim() != "")
                     items = createDomainItems(constraintModel.Terms.Trim());
 
-                if (items.Count > 0)
+                if (items.Any())
                 {
                     if (constraintModel.Id == 0)
                     {

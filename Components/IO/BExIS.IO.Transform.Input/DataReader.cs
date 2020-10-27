@@ -9,6 +9,7 @@ using BExIS.IO.Transform.Validation.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -43,6 +44,7 @@ namespace BExIS.IO.Transform.Input
         //public bool EndOfFile { get; protected set; }
 
         public int NumberOfRows { get; set; }
+        public int NumberOSkippedfRows { get; set; }
 
         #endregion public
 
@@ -133,6 +135,7 @@ namespace BExIS.IO.Transform.Input
         #region private
 
         private IList<Variable> variableList;
+        private bool sameOrderLikeStructure = false;
 
         #endregion private
 
@@ -155,12 +158,6 @@ namespace BExIS.IO.Transform.Input
             StructuredDataStructure = structuredDatastructure;
             Info = fileReaderInfo;
             ErrorMessages = new List<Error>();
-            Position = 1;
-        }
-
-        public DataReader()
-        {
-            this.ErrorMessages = new List<Error>();
             Position = 1;
         }
 
@@ -200,6 +197,7 @@ namespace BExIS.IO.Transform.Input
             for (int i = 0; i < row.Count(); i++)
             {
                 VariableIdentifier variableIdentifier = this.SubmitedVariableIdentifiers.ElementAt(i);
+
                 long variableId = 0;
                 if (variableIdentifier.id > 0)
                     variableId = this.SubmitedVariableIdentifiers.ElementAt(i).id;
@@ -252,6 +250,7 @@ namespace BExIS.IO.Transform.Input
                         }
                     }
                 }
+
                 dt.VariableValues.Add(DatasetManager.CreateVariableValue(value, "", DateTime.Now, DateTime.Now, new ObtainingMethod(), variableId, new List<ParameterValue>()));
             }
 
@@ -322,6 +321,7 @@ namespace BExIS.IO.Transform.Input
         /// <returns>List of errors or null</returns>
         public List<Error> ValidateRow(List<string> row, int indexOfRow)
         {
+            
             List<Error> errors = new List<Error>();
 
             // number of variables in datastructure
@@ -388,6 +388,7 @@ namespace BExIS.IO.Transform.Input
 
             NumberOfRows++;
 
+
             return errors;
         }
 
@@ -400,20 +401,34 @@ namespace BExIS.IO.Transform.Input
         /// <returns></returns>
         public List<Error> ValidateComparisonWithDatatsructure(List<VariableIdentifier> variableIdentifers)
         {
+            List<Error> matchErrors = new List<Error>();
+            List<Error> orderErrors = new List<Error>();
             List<Error> errors = new List<Error>();
+
 
             try
             {
                 List<VariableIdentifier> source = getDatastructureVariableIdentifiers();
 
+                //check if all variables exist in the incoming and the existing datastructure
                 DatastructureMatchCheck dmc = new DatastructureMatchCheck();
-                errors = dmc.Execute(SubmitedVariableIdentifiers, source, this.StructuredDataStructure.Name);
+                matchErrors = dmc.Execute(SubmitedVariableIdentifiers, source, this.StructuredDataStructure.Name);
+
+                // check the equivalent order of the strutcures
+                DatastructureOrderCheck dso = new DatastructureOrderCheck();
+                orderErrors = dso.Execute(SubmitedVariableIdentifiers, source, this.StructuredDataStructure.Name);
+
+                sameOrderLikeStructure = orderErrors == null ? true : false ;
+
+                if (matchErrors != null) errors.AddRange(matchErrors);
+                if (orderErrors != null) errors.AddRange(orderErrors);
+
             }
             catch
             {
             }
 
-            if (errors == null)
+            if (!errors.Any())
             {
                 for (int i = 0; i < variableIdentifers.Count; i++)
                 {
@@ -468,7 +483,7 @@ namespace BExIS.IO.Transform.Input
                 if (displayPattern != null) pattern = displayPattern.StringPattern;
             }
 
-            ValueValidationManager vvm = new ValueValidationManager(varName, dataType, optional, Info.Decimal, pattern, variable.MissingValues);
+            ValueValidationManager vvm = new ValueValidationManager(varName, dataType, optional, Info.Decimal, pattern, variable.MissingValues, CultureInfo.CurrentCulture);
 
             return vvm;
         }

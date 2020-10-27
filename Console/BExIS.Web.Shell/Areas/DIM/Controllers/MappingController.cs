@@ -1,4 +1,5 @@
 ﻿using BExIS.Dim.Entities.Mapping;
+using BExIS.Dim.Helpers.Mapping;
 using BExIS.Dim.Services;
 using BExIS.Modules.Dim.UI.Helper;
 using BExIS.Modules.Dim.UI.Models.Mapping;
@@ -14,11 +15,9 @@ namespace BExIS.Modules.Dim.UI.Controllers
         // GET: DIM/Mapping
         public ActionResult Index(long sourceId = 1, long targetId = 0, LinkElementType type = LinkElementType.System)
         {
-            MappingManager mappingManager = new MappingManager();
-
-
-            try
+            using (MappingManager mappingManager = new MappingManager())
             {
+
                 MappingMainModel model = new MappingMainModel();
                 // load from mds example
                 model.Source = MappingHelper.LoadFromMetadataStructure(sourceId, LinkElementPostion.Source, mappingManager);
@@ -63,10 +62,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
                 return View(model);
             }
-            finally
-            {
-                mappingManager.Dispose();
-            }
+ 
         }
 
         public ActionResult Mapping(long sourceId = 1, long targetId = 0,
@@ -335,6 +331,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
             finally
             {
                 mappingManager.Dispose();
+                MappingUtils.Clear();
             }
         }
 
@@ -347,18 +344,22 @@ namespace BExIS.Modules.Dim.UI.Controllers
         {
             try
             {
-                MappingManager mappingManager = new MappingManager();
+                using (MappingManager mappingManager = new MappingManager())
+                {
+                    MappingHelper.DeleteMapping(id, mappingManager);
 
-                MappingHelper.DeleteMapping(id, mappingManager);
-
-                //ToDo delete also all simple mappings that are belonging to the complex mapping
-
-                return Json(true);
+                    //ToDo delete also all simple mappings that are belonging to the complex mapping
+                    return Json(true);
+                }
             }
             catch (Exception ex)
             {
 
                 return Json(ex.Message);
+            }
+            finally
+            {
+                MappingUtils.Clear();
             }
         }
 

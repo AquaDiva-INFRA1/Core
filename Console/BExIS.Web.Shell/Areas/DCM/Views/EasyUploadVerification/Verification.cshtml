@@ -13,7 +13,7 @@
         </div>
 
         <div class="uploadWizardStep_Description stepper">
-
+          
         </div>
 
         <div class="uploadWizardStep_Content stepper" style="height: inherit; width: 800px;">
@@ -65,8 +65,8 @@
 <style>
 
     .first-header {
-        min-width: 150px;
-        border-bottom: none;
+        min-width:150px;
+        border-bottom:none;
     }
 
     .second-header {
@@ -167,7 +167,7 @@
 
     function change(e){
 
-
+   
             var index = 0;
             var selectedUnit = 0;
             var selectedDataType = 0;
@@ -186,20 +186,20 @@
             var dataTypeContainer = $(parent).find('select.datatype');
             var unitContainer = $(parent).find('select.unit');
             var dataAttrContainer = $(parent).find('select.dataattribute');
-            var entityContainer = $(parent).find('select.entity');
-            var charachteristicContainer = $(parent).find('select.charachteristic');
-            var lastSelection = $(e).attr("name");
+        var entityContainer = $(parent).find('select.entity');
+        var charachteristicContainer = $(parent).find('select.charachteristic');
+        var lastSelection = $(e).attr("name");
 
             selectedDataType = $($(dataTypeContainer).find(":selected")[0]).val();
             selectedUnit = $($(unitContainer).find(":selected")[0]).val();
             selectedAttribute = $($(dataAttrContainer).find(":selected")[0]).val();
-            selectedEntity = $($(entityContainer).find(":selected")[0]).val();
-            selectedCharachteristic = $($(charachteristicContainer).find(":selected")[0]).val();
-            varName = $($(parent).find(".name")[0]).attr("varName");
+        selectedEntity = $($(entityContainer).find(":selected")[0]).val();
+        selectedCharachteristic = $($(charachteristicContainer).find(":selected")[0]).val();
+        varName = $($(parent).find(".name")[0]).attr("varName");
             index = $($(parent).find(".name")[0]).attr("index");
 
             //console.log(selectedDataType);
-            console.log(selectedUnit);
+            //console.log(selectedUnit);
             //console.log(selectedAttribute);
             //console.log(varName);
             //console.log(index);

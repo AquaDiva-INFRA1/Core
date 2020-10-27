@@ -14,7 +14,7 @@ namespace BExIS.Modules.Dcm.UI.Helpers
         public Boolean show;
 
         public string datatypeDescription;
-        public string conceptAnnotation ;
+        public string conceptAnnotation;
         public string characteristicAnnotation;
 
         public EasyUploadSuggestion(long Id, string attributeName, long unitID, long dataTypeID, Boolean show)
@@ -36,7 +36,7 @@ namespace BExIS.Modules.Dcm.UI.Helpers
             this.show = show;
         }
 
-        public void finish_suggestion_block(string desc,string concept, string charac)
+        public void finish_suggestion_block(string desc, string concept, string charac)
         {
             this.conceptAnnotation = concept;
             this.characteristicAnnotation = charac;

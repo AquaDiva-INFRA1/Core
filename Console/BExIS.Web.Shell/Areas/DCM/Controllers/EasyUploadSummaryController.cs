@@ -1,4 +1,6 @@
-﻿using BExIS.Dcm.UploadWizard;
+﻿using BExIS.Aam.Entities.Mapping;
+using BExIS.Aam.Services;
+using BExIS.Dcm.UploadWizard;
 using BExIS.Dlm.Entities.Administration;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
@@ -29,10 +31,6 @@ using Vaiona.Entities.Common;
 using Vaiona.Persistence.Api;
 using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Modularity;
-using BExIS.IO;
-using BExIS.Aam.Services;
-using BExIS.Aam.Entities.Mapping;
-using System.Diagnostics;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
 {
@@ -272,7 +270,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     List<RowModel> headers = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
 
                     //For some reason, MappedHeaders might be in a different order in this list than what's indicated by its IDs - to prevent mismatching, sort the headers
-                    headers.Sort((m1, m2) => m1.Index.CompareTo(m2.Index)); 
+                    headers.Sort((m1, m2) => m1.Index.CompareTo(m2.Index));
 
                     List<StructuredDataStructure> allDatastructures = dsm.StructuredDataStructureRepo.Get().ToList();
                     foreach (StructuredDataStructure existingStructure in allDatastructures)
@@ -316,7 +314,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     }
 
                     if (!foundReusableDataStructure)
-                        sds = dsm.CreateStructuredDataStructure(title, title + " " + timestamp, "", "", DataStructureCategory.Generic);
+                        sds = dsm.CreateStructuredDataStructure(title+ "_" + timestamp, title + " " + timestamp, "", "", DataStructureCategory.Generic);
 
                     TaskManager.AddToBus(EasyUploadTaskManager.DATASTRUCTURE_ID, sds.Id);
                     TaskManager.AddToBus(EasyUploadTaskManager.DATASTRUCTURE_TITLE, title + " " + timestamp);
@@ -444,6 +442,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         try
                         {
                             dsv.Metadata = xmlDatasetHelper.SetInformation(dsv, metadataXml, NameAttributeValues.title, title);
+                            dsv.Title = title;
                         }
                         catch (NullReferenceException ex)
                         {
@@ -473,7 +472,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     #region excel and csv reader
 
-                    int packageSize = 10000;
+                    int packageSize = 100000;
                     int numberOfRows = 0;
                     //HACK ?
                     TaskManager.Bus[EasyUploadTaskManager.CURRENTPACKAGESIZE] = packageSize;
@@ -599,7 +598,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 //Read the rows and convert them to DataTuples
                                 rows = reader.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(), fri, (int)datasetId, worksheetUri);
                             }
-                            
+
 
                             //After reading the rows, add them to the dataset
                             if (rows != null)
@@ -635,24 +634,25 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     dm.CheckInDataset(ds.Id, "Import " + numberOfRows + " rows", GetUsernameOrDefault());
 
-                    //Reindex search
-                    if (this.IsAccessible("DDM", "SearchIndex", "ReIndexSingle"))
-                    {
-                        this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", datasetId } });
-                    }
 
-                    TaskManager.AddToBus(EasyUploadTaskManager.DATASET_ID, ds.Id);
 
-                    // create the annotations
+                    //Reindex search and create the annotations
                     try
                     {
+                        if (this.IsAccessible("DDM", "SearchIndex", "ReIndexSingle"))
+                        {
+                            this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", datasetId } });
+                        }
+
+                        TaskManager.AddToBus(EasyUploadTaskManager.DATASET_ID, ds.Id);
+
                         Aam_Dataset_column_annotationManager aam_manag = new Aam_Dataset_column_annotationManager();
                         Aam_Uri charac = (Aam_Uri)TaskManager.Bus[EasyUploadTaskManager.ANNOTATION_CHARACHTERISTIC];
                         Aam_Uri entity = (Aam_Uri)TaskManager.Bus[EasyUploadTaskManager.ANNOTATION_ENTITY];
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine(ex.Message);
+                        throw;
                     }
                     return temp;
                 }

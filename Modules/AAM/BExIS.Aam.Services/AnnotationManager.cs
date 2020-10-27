@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Vaiona.Persistence.Api;
 using BExIS.Aam.Entities.Mapping;
 using System.Diagnostics.Contracts;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
-using VDS;
-using VDS.RDF;
-using VDS.RDF.Query;
 using System.IO;
 using Vaiona.Utils.Cfg;
+using VDS.RDF;
+using VDS.RDF.Query;
 
 namespace BExIS.Aam.Services
 {

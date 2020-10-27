@@ -3,8 +3,6 @@
 @using System;
 @using System.Web.Configuration;
 @using BExIS.Modules.Dcm.UI.Models;
-@using BExIS.IO;
-
 
 @{
 
@@ -41,10 +39,8 @@
             <p>Please select a data file to be uploaded to the system.</p>
             <p>Note:  Large data files may take several minutes or hours to transfer, depending on your network speed. The system is freezed until the file has been transfered completely. Please be patient! </p>
             <p>For multiple large files you may use the "Push Big Data to Server" option before entering this Upload Wizard.</p>
-            <p>
-                Supported file formats: @{foreach (string s in @Model.SupportedFileExtentions)
-                    {<b>(*@s) </b>} }
-            </p>
+            <p>Supported file formats: @{foreach (string s in @Model.SupportedFileExtentions)
+                {<b>(*@s) </b>} }</p>
             <p>Maximum file size: @mbMax MB</p>
         </div>
 
@@ -55,19 +51,19 @@
 
                     <td>
                         @(Html.Telerik().Upload()
-                .Name("SelectFileUploader")
-                .Multiple(false)
-                .ShowFileList(false)
-                .HtmlAttributes(new { title = "Browse" })
-                .ClientEvents(events =>
-                    events.OnSelect("SelectFileProcess_OnSelect")
-                            .OnRemove("SelectFileProcess_OnRemove")
-                            .OnSuccess("SelectFileProcess_OnSuccess")
+                                .Name("SelectFileUploader")
+                                .Multiple(false)
+                                .ShowFileList(false)
+                                .HtmlAttributes(new { title = "Browse" })
+                                .ClientEvents(events =>
+                                    events.OnSelect("SelectFileProcess_OnSelect")
+                                            .OnRemove("SelectFileProcess_OnRemove")
+                                            .OnSuccess("SelectFileProcess_OnSuccess")
 
-                )
-                .Async(async => async
-                    .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName, new { area = "DCM" })
-                    .AutoUpload(true))
+                                )
+                                .Async(async => async
+                                    .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName, new { area = "DCM" })
+                                    .AutoUpload(true))
 
                         )
                     </td>
@@ -84,20 +80,18 @@
                                     .Name("SelectedServerFileName")
                                     .BindTo(new SelectList(Model.serverFileList))
                                     .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
-
                         @*@Html.DropDownListFor(m => m.SelectedServerFileName, new SelectList(Model.serverFileList), "Select")*@@*, new { disabled = "disabled" })*@
                     </td>
                     <td>
                         Select a data file previously uploaded to the server.
                     </td>
                 </tr>
-
             </table>
             <div id="CsvDelimiter" style="display: @displayCsvDelimiterInput">
                 <!--
-            <input type="text" class="form-control" placeholder="CSV file delimiter" value="@Model.csvDelimiter"
-                aria-describedby="sizing-addon1" id="csv_delimiter_text_box" onchange="selectedDelimiter(this)">
-                    -->
+        <input type="text" class="form-control" placeholder="CSV file delimiter" value="@Model.csvDelimiter"
+            aria-describedby="sizing-addon1" id="csv_delimiter_text_box" onchange="selectedDelimiter(this)">
+                -->
                 <select name="delimiter" size="1" id="delimiter" onchange="selectedDelimiter(this)">
                     <option>Choose the delimiter here </option>
                     <option value=";">semicolon   ";"</option>
@@ -111,25 +105,21 @@
     </div>
 
     <div class="uploadWizardStep_Success stepper">
-        <div id="fileNameDiv">
-            <!--Display the filename if it's not empty and there are no errors (because of overlapping)-->
-            @if(Model.SelectedFileName != "" && (Model.ErrorList == null || !Model.ErrorList.Any()) )
-                {@Model.SelectedFileName}
+        <div id="fileNameDiv">@if (Model.SelectedFileName != "")
+        {@Model.SelectedFileName}</div>
     </div>
-</div>
 
-<div class="uploadWizardStep_Error stepper">
-    @if (Model != null && Model.ErrorList != null && Model.ErrorList.Count != 0)
-    {
-        <ul>
-            @foreach (BExIS.IO.Transform.Validation.Exceptions.Error s in @Model.ErrorList)
-            {
-                <li>@s.ToString()</li>
-            }
-        </ul>
-    }
-</div>
-
+    <div class="uploadWizardStep_Error stepper">
+        @if (Model != null && Model.ErrorList != null && Model.ErrorList.Count != 0)
+        {
+            <ul>
+                @foreach (BExIS.IO.Transform.Validation.Exceptions.Error s in @Model.ErrorList)
+                {
+                    <li>@s.ToString()</li>
+                }
+            </ul>
+        }
+    </div>
 
 </div>
 
@@ -155,7 +145,7 @@
                 e.preventDefault();
                 return false;
             }
-            if ((file.extension == ".csv") || (file.extension == ".txt") ) {
+            if ((file.extension == ".csv") || (file.extension == ".txt")) {
                 $('#CsvDelimiter').show();
             }
             else {
@@ -196,6 +186,7 @@
 
     function SelectedServerFileName_onChange()
     {
+
         var value = $(this).val();
         if ((value.indexOf(".csv") > 0) || (value.indexOf(".txt") > 0)) {
             //document.getElementById("CsvDelimiter").removeAttribute("hidden");
@@ -205,7 +196,7 @@
             $('#CsvDelimiter').hide();
         }
 
-        $.post('@Url.Action("SelectFileFromServerProcess", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })',{ fileName: value }, function (response)
+        $.post('@Url.Action("SelectFileFromServerProcess", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })', { fileName: value }, function (response)
         {
             $('.uploadWizardStep_Error').empty();
             $('#fileNameDiv').text(value);
@@ -226,5 +217,4 @@
 
         })
     }
-
 </script>

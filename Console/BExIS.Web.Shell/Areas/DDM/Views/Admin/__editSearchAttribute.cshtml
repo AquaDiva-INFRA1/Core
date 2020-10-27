@@ -1,4 +1,6 @@
-﻿@model SearchAttributeViewModel
+﻿@*added on Bexis*@
+
+@model SearchAttributeViewModel
 
 @using BExIS.Modules.Ddm.UI.Models;
 @using BExIS.Utils.Models;
@@ -78,8 +80,8 @@
     new AjaxOptions
     {
         HttpMethod = "Post",
-        //UpdateTargetId = "searchAttributeForm",
-        OnSuccess = "Submit",
+//UpdateTargetId = "searchAttributeForm",
+OnSuccess = "Submit",
         OnFailure = "OnFailure"
     },
     new { id = "Form_Edit_search" }
@@ -448,7 +450,7 @@
         //    }
         //
         //});
-        
+
         //var inputs = [];
         //$('#Form_Edit_search input').each(
         //    function (index) {
@@ -467,7 +469,7 @@
 
         console.log("form data  : " + formData);
         console.log("results :  " + JSON.stringify(metadatanodes));
-        
+
         $.ajax({
             url: '/DDM/Admin/save_new',
             data: { 'form': JSON.stringify(metadatanodes), 'inputs': formData },

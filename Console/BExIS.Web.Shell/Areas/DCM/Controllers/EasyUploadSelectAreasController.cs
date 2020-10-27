@@ -4,16 +4,16 @@ using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Models;
 using BExIS.UI.Helpers;
 using BExIS.Utils.Models;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Vaiona.Logging;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
-using System.Text.RegularExpressions;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
 {
@@ -34,17 +34,19 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 // remove if existing
                 TaskManager.RemoveExecutedStep(TaskManager.Current());
             }
-            
+
             //Use the given file and the given sheet format to create a json-table
             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
             FileStream fis = null;
+            string jsonTable = "[]";
             List<String[]> Json_table = new List<string[]>();
 
             SelectAreasModel model = new SelectAreasModel();
+
             try
             {
                 string fileExt = System.IO.Path.GetExtension(filePath);
-                if ( (fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("txt")))
+                if ((fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("txt")))
                 {
                     //fis = new FileStream(Parse_csv_to_xlsx(filePath), FileMode.Open, FileAccess.Read);
                     // generating the JSONTABLEARRAY to select areas
@@ -70,7 +72,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     //Save the worksheet uris to the model
                     Dictionary<Uri, string> _dict = new Dictionary<Uri, string>();
-                    _dict.Add(new Uri(filePath),"Sheet");
+                    _dict.Add(new Uri(filePath), "Sheet");
                     model.SheetUriDictionary = _dict;
 
                     TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, JsonConvert.SerializeObject(Json_table.ToArray()));
@@ -82,6 +84,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 {
                     //FileStream for the users file
                     fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
                     //Grab the sheet format from the bus
                     string sheetFormatString = Convert.ToString(TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT]);
                     SheetFormat CurrentSheetFormat = 0;
@@ -100,16 +103,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     {
                         activeWorksheet = TaskManager.Bus[EasyUploadTaskManager.ACTIVE_WOKSHEET_URI].ToString();
                     }
+                    //Generate the table for the active worksheet
+                    jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
 
-                //Save the worksheet uris to the model
-                model.SheetUriDictionary = EUEReader.GetWorksheetUris();
+                    //Save the worksheet uris to the model
+                    model.SheetUriDictionary = EUEReader.GetWorksheetUris();
 
-                //Generate the table for the active worksheet
-                string jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);  
-                if (!String.IsNullOrEmpty(jsonTable))
-                {
-                    TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, jsonTable);
-                }
+                    if (!String.IsNullOrEmpty(jsonTable))
+                    {
+                        TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, jsonTable);
+                    }
 
                     //Add uri of the active sheet to the model to be able to preselect the correct option in the dropdown
                     model.activeSheetUri = activeWorksheet;
@@ -141,7 +144,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             return PartialView(model);
         }
-        
+
         [HttpPost]
         public ActionResult SelectAreas(object[] data)
         {
@@ -266,7 +269,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             #region Generate table for selected sheet
 
             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
-            
+
             string fileExt = System.IO.Path.GetExtension(filePath);
             if ((fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("txt")))
             {
@@ -392,15 +395,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             if (headerArea != null)
             {
                 TaskManager.AddToBus(EasyUploadTaskManager.SHEET_HEADER_AREA, headerArea);
-
-                #region Reset selected units, datatypes, suggestions and annotations
-                TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_AVAILABLEUNITS);
-                TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_HEADERFIELDS);
-                TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS);
-                TaskManager.Bus.Remove(EasyUploadTaskManager.VERIFICATION_ATTRIBUTESUGGESTIONS);
-                TaskManager.Bus.Remove(EasyUploadTaskManager.ANNOTATIONMAPPING);
-                #endregion
-
                 model.HeaderArea = headerArea;
             }
 
@@ -427,7 +421,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     //Get the worksheet uris and save them to the model
                     model.SheetUriDictionary = EUEReader.GetWorksheetUris();
                 }
-                                
+
             }
             catch (Exception ex)
             {
@@ -444,13 +438,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             Session["TaskManager"] = TaskManager;
 
             model.StepInfo = TaskManager.Current();
-            
+
             return PartialView("SelectAreas", model);
 
         }
-        
 
-        private string Parse_csv_to_xlsx(string filePath )
+        /////////////////////////////////
+        private string Parse_csv_to_xlsx(string filePath)
         {
             String output_path = Path.GetDirectoryName(filePath) +
                     Path.DirectorySeparatorChar +
@@ -496,7 +490,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 };
 
                 var workingSheet = ((WorksheetPart)wbPart.GetPartById(sheet.Id)).Worksheet;
-                
+
                 String[] all_lines = System.IO.File.ReadAllLines(filePath);
 
                 int rowindex = 1;
@@ -504,7 +498,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 {
                     DocumentFormat.OpenXml.Spreadsheet.Row row_ = new DocumentFormat.OpenXml.Spreadsheet.Row();
                     row_.RowIndex = (UInt32)rowindex;
-                    
+
                     String[] tabs = line.Split(';');
                     foreach (string tab in tabs)
                     {
@@ -533,6 +527,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             c1.AppendChild(inlineString);
 
             return c1;
+
         }
     }
 }

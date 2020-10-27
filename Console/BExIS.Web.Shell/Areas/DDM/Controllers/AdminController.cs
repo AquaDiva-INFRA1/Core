@@ -5,9 +5,7 @@ using BExIS.Utils.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Telerik.Web.Mvc;
@@ -125,20 +123,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         public ActionResult Save(SearchAttributeViewModel model)
         {
-            /*
-            if (ModelState.IsValid)
-            {
-                return Json(true);
-            }
-            else
-            {
-                ViewData["windowVisible"] = true;
-                return Json(false);
-            }
 
             //setluceneName
 
-            */
+
             if (ModelState.IsValid)
             {
                 //if (submit != null)
@@ -175,7 +163,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return Json(false);
             //return View("SearchDesigner", (List<SearchAttributeViewModel>)Session["searchAttributeList"]);
-            
         }
 
         #endregion
@@ -394,10 +381,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 return PartialView("_metadataNode" +
                     "", "0");
             }
-            return PartialView("_metadataNode", (Int64.Parse(count.ToString())+1).ToString());
+            return PartialView("_metadataNode", (Int64.Parse(count.ToString()) + 1).ToString());
         }
 
-        
+
         public ActionResult save_new(String form, String inputs)
         {
             try
@@ -406,14 +393,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     return Json(false);
             }
             catch (Exception e)
-            {
-                Debug.WriteLine("exception : " + e.ToString());
+            {               
                 return Json(false);
             }
-            
+
             Dictionary<string, string> form_name_value = new Dictionary<string, string>();
             string[] form_data = inputs.Split('&');
-            foreach(string s in form_data)
+            foreach (string s in form_data)
             {
                 string name = s.Split('=')[0];
                 string value = s.Split('=')[1];
@@ -423,7 +409,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 }
             }
 
-            if ((form_name_value.Count > 0)&&(ModelState.IsValid))
+            if ((form_name_value.Count > 0) && (ModelState.IsValid))
             {
                 SearchAttributeViewModel sa = new SearchAttributeViewModel();
                 string out_var;
@@ -450,9 +436,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     if (root.Count > 1)
                     {
                         string composed_node = "";
-                        foreach(JValue elem in root)
+                        foreach (JValue elem in root)
                         {
-                            composed_node = composed_node + elem.Value.ToString() +";";
+                            composed_node = composed_node + elem.Value.ToString() + ";";
                         }
                         composed_node = composed_node.Substring(0, composed_node.Length - 1);
                         sa.metadataNames.Add(composed_node);
@@ -507,5 +493,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
         }
+
     }
 }

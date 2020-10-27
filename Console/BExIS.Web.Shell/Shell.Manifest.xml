@@ -30,16 +30,6 @@
             title="Help" description="Help" icon=""
             controller="" action=""
             extends="./lunchbarRoot" />
-    
-    <!--Aquadiva Links-->
-    <Export tag="lunchbar" id="ADHowTo" order="98"
-            title="Aquadiva Wiki" description="Aquadiva Wiki" icon=""
-            controller="home" action="redirectToWiki"
-            extends="./lunchbarRoot/help" />
-    <Export tag="lunchbar" id="ADBugtracker" order="99"
-            title="Report a Bug" description="Aquadiva Bugtracker" icon=""
-            controller="home" action="redirectToBugtracker"
-            extends="./lunchbarRoot/help" />
 
     <!--<Export tag="settings" id="settingsRoot" order="2"
             title="" description="" icon=""
@@ -47,7 +37,7 @@
             extends="."
             />-->
 
-    <Export tag="settings" id="settingsRoot" order="2"
+    <Export tag="settings" id="settingsRoot" order=""
             title="Settings" description="Settings, configuration, and Management" icon="settings.icon"
             controller="" action=""
             extends="." />
@@ -57,10 +47,10 @@
             controller="" action=""
             extends="." />
     
-    <!--FAQ
+    <!--FAQ-->
     <Export tag="lunchbar" id="helpDdm" order="1"
             title="FAQ" description="Link to the faq page" icon=""
             controller="help" action="faq"
-            extends="./lunchbarRoot/help" />-->
+            extends="./lunchbarRoot/help" />
   </Exports>
 </Manifest>

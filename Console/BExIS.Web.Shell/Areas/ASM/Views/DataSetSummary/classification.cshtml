@@ -1,5 +1,5 @@
-﻿@model List<BExIS.Modules.Asm.UI.Models.Input>
-    @using BExIS.Modules.Asm.UI.Models;
+﻿@model BExIS.Modules.Asm.UI.Models.Classification
+@using BExIS.Modules.Asm.UI.Models;
 
     @{
         string id_for_class = (string)ViewData["id"];
@@ -8,7 +8,8 @@
         List<string> domains = new List<string>() { "Sites", "BioGeoChemichals", "Cycles", "Matter Cycles",
             "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways" };
         List<int> predictions = new List<int>();
-        foreach (Input inp in Model)
+        List<Input> class_results = (List<Input>)Model.class_results;
+        foreach (Input inp in class_results)
         {
             foreach (string ss in inp.predicted_class.Split(';'))
             {
@@ -18,6 +19,9 @@
                 }
             }
         }
+
+        List<string> keywords = (List<string>)Model.keywords;
+        
     }
 
 
@@ -180,12 +184,23 @@
     </head>
 
     <div class="row">
+        connected terminologies :
         @foreach (Int32 inp in predictions)
         {
             <span class="badge badge-light"> #@domains[inp] </span>
         }
+        
+    </div>
+    <br />
+    <div class="row">
+        Matched terms : 
+        @foreach (string inp in keywords)
+        {
+            <span class="badge badge-light"> @inp </span>
+        }
         <br />
     </div>
+    <br />
     <div class="row">
         <div id="map">
             <center>

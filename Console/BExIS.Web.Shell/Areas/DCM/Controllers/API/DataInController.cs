@@ -5,6 +5,7 @@ using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.IO.Transform.Input;
+using BExIS.IO.Transform.Output;
 using BExIS.IO.Transform.Validation.DSValidation;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Models.API;
@@ -20,17 +21,18 @@ using BExIS.Xml.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
-using Vaiona.Entities.Common;
 using BExIS.Utils.Route;
-
+using Vaiona.Entities.Common;
 
 namespace BExIS.Modules.Dcm.UI.Controllers
 {
@@ -73,7 +75,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             List<DataTuple> rows = new List<DataTuple>();
 
             //load from apiConfig
-            int cellLimit = 10000;
+            int cellLimit = 100000;
             if (apiHelper != null && apiHelper.Settings.ContainsKey(ApiConfigurator.CELLS))
             {
                 Int32.TryParse(apiHelper.Settings[ApiConfigurator.CELLS], out cellLimit);
@@ -102,7 +104,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     if (d == null)
                         return Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed, "the dataset with the id (" + data.DatasetId + ") does not exist.");
 
-                    if (!entityPermissionManager.HasEffectiveRight(user.Name, "Dataset", typeof(Dataset), data.DatasetId, RightType.Write))
+                    if (!entityPermissionManager.HasEffectiveRight(user.Name, typeof(Dataset), data.DatasetId, RightType.Write))
                         return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "The token is not authorized to write into the dataset.");
                 }
 
@@ -128,8 +130,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "Dataset not exist.");
                 }
 
-                XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
-                string title = xmlDatasetHelper.GetInformation(dataset, NameAttributeValues.title);
+                DatasetVersion dsv = datasetManager.GetDatasetLatestVersion(dataset);
+                string title = dsv.Title;
 
                 if ((data.Data.Count() * data.Columns.Count()) > cellLimit)
                 {
@@ -262,6 +264,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 entityPermissionManager.Dispose();
                 dataStructureManager.Dispose();
                 userManager.Dispose();
+                request.Dispose();
             }
         }
 
@@ -316,7 +319,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     if (d == null)
                         return Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed, "the dataset with the id (" + data.DatasetId + ") does not exist.");
 
-                    if (!entityPermissionManager.HasEffectiveRight(user.Name, "Dataset", typeof(Dataset), data.DatasetId, RightType.Write))
+                    if (!entityPermissionManager.HasEffectiveRight(user.Name, typeof(Dataset), data.DatasetId, RightType.Write))
                         return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "The token is not authorized to write into the dataset.");
                 }
 
@@ -342,8 +345,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 if (dataset == null)
                     return Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed, "Dataset not exist.");
 
-                XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
-                string title = xmlDatasetHelper.GetInformation(dataset, NameAttributeValues.title);
+                DatasetVersion dsv = datasetManager.GetDatasetLatestVersion(dataset);
+                string title = dsv.Title;
 
                 if ((data.Data.Count() * data.Columns.Count()) > cellLimit)
                 {
@@ -528,6 +531,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 entityPermissionManager.Dispose();
                 dataStructureManager.Dispose();
                 userManager.Dispose();
+                request.Dispose();
             }
         }
 

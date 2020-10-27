@@ -3,36 +3,20 @@ using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Vaiona.Utils.Cfg;
 using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Ddm.UI.Helpers
 {
     public class DdmSeedDataGenerator : IModuleSeedDataGenerator
     {
-        static String DebugFilePath = System.IO.Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Debug.txt");
-
         public void GenerateSeedData()
         {
-            FeatureManager featureManager = new FeatureManager();
-            OperationManager operationManager = new OperationManager();
-            
-            try
+            using (FeatureManager featureManager = new FeatureManager())
+            using (OperationManager operationManager = new OperationManager())
+            using (var featurePermissionManager = new FeaturePermissionManager())
             {
-                #region debug for semantic search and Semedico
-                //debugging file
-                if (!System.IO.File.Exists(DebugFilePath))
-                {
-                    // Create a file to write to.
-                    using (StreamWriter sw = System.IO.File.CreateText(DebugFilePath))
-                    {
-                    }
-                }
-                #endregion
 
                 #region SECURITY
                 //workflows = größere sachen, vielen operation
@@ -65,11 +49,7 @@ namespace BExIS.Modules.Ddm.UI.Helpers
 
                 if (Dashboard == null) Dashboard = featureManager.Create("Dashboard", "Dashboard", DataDiscovery);
 
-                Feature InteractiveSearch = features.FirstOrDefault(f =>
-                    f.Name.Equals("Interactive Search") &&
-                    f.Parent != null &&
-                    f.Parent.Id.Equals(DataDiscovery.Id));
-                if (InteractiveSearch == null) Dashboard = featureManager.Create("Interactive Search", "Interactive Search", DataDiscovery);
+
 
                 //worklfows -> create dataset ->
                 //WorkflowManager workflowManager = new WorkflowManager();
@@ -101,13 +81,13 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 // I had to remove the feature to get dashboard running without DDM feature permissions.
                 // We have to think about how we can fix it in a long run. Maybe "DDM/Home" is not the proper
                 // place for dashboard!?
-                operationManager.Create("DDM", "PublicSearch", "*");
+                operationManager.Create("DDM", "PublicSearch", "*"); 
+                operationManager.Create("DDM", "LandingPage", "*");
                 operationManager.Create("DDM", "Home", "*", SearchFeature);
                 operationManager.Create("DDM", "Data", "*", SearchFeature);
-                operationManager.Create("DDM", "SemanticSearch", "*", SearchFeature);
-                operationManager.Create("DDM", "InteractiveSearch", "*", SearchFeature);
+                
 
-                var featurePermissionManager = new FeaturePermissionManager();
+
 
                 if (!featurePermissionManager.Exists(null, SearchFeature.Id, PermissionType.Grant))
                     featurePermissionManager.Create(null, SearchFeature.Id, PermissionType.Grant);
@@ -128,11 +108,8 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 #endregion
 
                 #endregion
-            }
-            finally
-            {
-                featureManager.Dispose();
-                operationManager.Dispose();
+                
+
             }
 
         }

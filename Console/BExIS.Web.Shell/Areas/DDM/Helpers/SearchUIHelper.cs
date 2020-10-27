@@ -30,18 +30,19 @@ namespace BExIS.Modules.Ddm.UI.Helpers
             if (m != null)
             {
 
-                StringReader stringReader = new StringReader(m);
-                XmlReader xmlReader = XmlReader.Create(stringReader);
+                using (StringReader stringReader = new StringReader(m))
+                using (XmlReader xmlReader = XmlReader.Create(stringReader))
+                using (StringWriter stringWriter = new StringWriter())
+                {
+                    XslCompiledTransform xslt = new XslCompiledTransform(true);
+                    XsltSettings xsltSettings = new XsltSettings(true, false);
+                    xslt.Load(url, xsltSettings, new XmlUrlResolver());
 
-                XslCompiledTransform xslt = new XslCompiledTransform(true);
-                XsltSettings xsltSettings = new XsltSettings(true, false);
-                xslt.Load(url, xsltSettings, new XmlUrlResolver());
+                    XsltArgumentList xsltArgumentList = new XsltArgumentList();
 
-                XsltArgumentList xsltArgumentList = new XsltArgumentList();
-
-                StringWriter stringWriter = new StringWriter();
-                xslt.Transform(xmlReader, xsltArgumentList, stringWriter);
-                return stringWriter.ToString().Replace("bgc:", "");
+                    xslt.Transform(xmlReader, xsltArgumentList, stringWriter);
+                    return stringWriter.ToString().Replace("bgc:", "");
+                }
             }
 
             return "";
@@ -384,13 +385,13 @@ namespace BExIS.Modules.Ddm.UI.Helpers
 
             dt.TableName = "DataStruture";
             dt.Columns.Add("VariableName");
-            dt.Columns.Add("Optional");
-            dt.Columns.Add("VariableId");
-            dt.Columns.Add("ShortName");
-            //dt.Columns.Add("Parameters");
             dt.Columns.Add("Description");
             dt.Columns.Add("Unit");
+            //dt.Columns.Add("Parameters");      
             dt.Columns.Add("DataType");
+            dt.Columns.Add("Category");
+            dt.Columns.Add("Optional");
+            dt.Columns.Add("VariableId");
 
             using (var uow = this.GetUnitOfWork())
             {
@@ -417,9 +418,9 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                             dr["VariableId"] = "n/a";
 
                         if (sdvu.DataAttribute.DataType != null)
-                            dr["ShortName"] = sdvu.DataAttribute.ShortName;
+                            dr["Category"] = sdvu.DataAttribute.ShortName;
                         else
-                            dr["ShortName"] = "n/a";
+                            dr["Category"] = "n/a";
 
                         //if (sdvu.Parameters.Count > 0) dr["Parameters"] = "current not shown";
                         //else dr["Parameters"] = "n/a";

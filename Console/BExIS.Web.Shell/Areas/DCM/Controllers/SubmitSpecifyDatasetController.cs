@@ -49,7 +49,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 if (datasetId > 0)
                 {
                     // add title to model
-                    model.DatasetTitle = TaskManager.Bus[TaskManager.DATASET_TITLE].ToString();
+                    if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_TITLE) && TaskManager.Bus[TaskManager.DATASET_TITLE] != null)
+                    { 
+                        model.DatasetTitle = TaskManager.Bus[TaskManager.DATASET_TITLE].ToString();
+                    }
                     // add seleted dataset id to model
                     model.SelectedDatasetId = Convert.ToInt32(TaskManager.Bus[TaskManager.DATASET_ID]);
                     // add informations of dataset to Bus 
@@ -155,8 +158,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 model.StepInfo = TaskManager.Current();
                 if ((List<ListViewItem>)Session["DatasetVersionViewList"] != null) model.DatasetsViewList = (List<ListViewItem>)Session["DatasetVersionViewList"];
 
-                if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_TITLE))
+                if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_TITLE) && TaskManager.Bus[TaskManager.DATASET_TITLE] != null)
+                {
                     model.DatasetTitle = TaskManager.Bus[TaskManager.DATASET_TITLE].ToString();
+                }
                 model.SelectedDatasetId = Convert.ToInt32(id);
                 return PartialView("SpecifyDataset", model);
             }
@@ -187,11 +192,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
         private void addSelectedDatasetToBus(long datasetId)
         {
-            DatasetManager datasetManager = new DatasetManager();
-
-            try
-            {
-
+            using (DatasetManager datasetManager = new DatasetManager())
+            using (ResearchPlanManager rpm = new ResearchPlanManager())
+            { 
                 TaskManager = (TaskManager)Session["TaskManager"];
 
                 if (datasetManager.GetDatasetVersionEffectiveTupleCount(datasetManager.GetDatasetLatestVersion(datasetId)) > 0)
@@ -207,18 +210,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 //Add Metadata to Bus
                 //TITLE
-                TaskManager.AddToBus(TaskManager.DATASET_TITLE, xmlDatasetHelper.GetInformationFromVersion(datasetVersion.Id, NameAttributeValues.title));
+                TaskManager.AddToBus(TaskManager.DATASET_TITLE, datasetVersion.Title);
 
-                ResearchPlanManager rpm = new ResearchPlanManager();
                 ResearchPlan rp = rpm.Repo.Get(datasetVersion.Dataset.ResearchPlan.Id);
                 TaskManager.AddToBus(TaskManager.RESEARCHPLAN_ID, rp.Id);
                 TaskManager.AddToBus(TaskManager.RESEARCHPLAN_TITLE, rp.Title);
             }
-            finally
-            {
-                datasetManager.Dispose();
-            }
-
         }
 
         #endregion

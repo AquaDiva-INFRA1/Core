@@ -95,7 +95,7 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                     XmlDatasetHelper helper = new XmlDatasetHelper();
                     row["Title"] = helper.GetInformation(ds_id, NameAttributeValues.title);
                     row["Datasetdescription"] = helper.GetInformation(ds_id, NameAttributeValues.description); ;
-                    row["Ownername"] = helper.GetInformation(ds_id, NameAttributeValues.owner);
+                    //row["Ownername"] = helper.GetInformation(ds_id, NameAttributeValues.owner);
 
                     m.Rows.Add(row);
 
@@ -419,8 +419,8 @@ namespace BExIS.Modules.UDAM.UI.Controllers
                 if (dm.IsDatasetCheckedIn(datasetID))
                 {
                     // TODO: refactor Download Right not existing, so i set it to read
-                    bool downloadAccess = entityPermissionManager.HasEffectiveRight(HttpContext.User.Identity.Name,
-                        "Dataset", typeof(Dataset), datasetID, RightType.Read);
+                    bool downloadAccess = entityPermissionManager.HasEffectiveRight
+                        (HttpContext.User.Identity.Name, typeof(Dataset), datasetID, RightType.Read);
                     return downloadAccess;
                 }
                 else

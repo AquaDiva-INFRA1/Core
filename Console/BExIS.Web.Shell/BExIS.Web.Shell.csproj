@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props" Condition="Exists('..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" />
+  <Import Project="..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props')" />
+  <Import Project="..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props" Condition="Exists('..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props')" />
+  <Import Project="..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props" Condition="Exists('..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props')" />
+  <Import Project="..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props" Condition="Exists('..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -27,8 +31,10 @@
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
     <IISExpressSSLPort>44345</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
-    <IISExpressWindowsAuthentication>disabled</IISExpressWindowsAuthentication>
+    <IISExpressAnonymousAuthentication>
+    </IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>
+    </IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -72,18 +78,8 @@
     <Reference Include="DataAnnotationsExtensions.ClientValidation">
       <HintPath>..\..\packages\DataAnnotationsExtensions.MVC3.1.1.0.0\lib\NETFramework40\DataAnnotationsExtensions.ClientValidation.dll</HintPath>
     </Reference>
-    <Reference Include="Deedle, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Deedle.2.1.0\lib\net45\Deedle.dll</HintPath>
-    </Reference>
-    <Reference Include="Deedle.Excel, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Deedle.Excel.2.1.0\lib\net45\Deedle.Excel.dll</HintPath>
-    </Reference>
     <Reference Include="DocumentFormat.OpenXml">
       <HintPath>..\..\Libraries\DocumentFormat.OpenXml.dll</HintPath>
-    </Reference>
-    <Reference Include="ExcelApi, Version=1.7.3.0, Culture=neutral, PublicKeyToken=26cf6d85ba68fa54, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NetOffice.Excel.1.7.4.4\lib\net45\ExcelApi.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="FluentBootstrap, Version=3.3.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FluentBootstrap.3.3.5.1\lib\net40\FluentBootstrap.dll</HintPath>
@@ -92,9 +88,6 @@
     <Reference Include="FluentBootstrap.Mvc, Version=3.3.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FluentBootstrap.Mvc.3.3.5.1\lib\net40\FluentBootstrap.Mvc.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FSharp.Core.4.5.2\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="Glimpse.AspNet, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Glimpse.AspNet.1.8.0\lib\net45\Glimpse.AspNet.dll</HintPath>
@@ -108,8 +101,9 @@
       <HintPath>..\..\packages\Glimpse.Mvc5.1.5.3\lib\net45\Glimpse.Mvc5.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="HtmlAgilityPack, Version=1.6.0.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\HtmlAgilityPack.1.6.0\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Iesi.Collections, Version=4.0.0.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -163,9 +157,6 @@
       <HintPath>..\..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Solver.Foundation, Version=3.0.2.10889, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Solver.Foundation.3.1.0\lib\Microsoft.Solver.Foundation.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebHelpers.3.2.3\lib\net45\Microsoft.Web.Helpers.dll</HintPath>
       <Private>True</Private>
@@ -176,31 +167,12 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NetOffice, Version=1.7.3.0, Culture=neutral, PublicKeyToken=acf636d62c39f8f5, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NetOffice.Core.1.7.4.4\lib\net45\NetOffice.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="NHibernate, Version=4.1.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <HintPath>..\..\packages\NHibernate.4.1.1.4000\lib\net40\NHibernate.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NMath, Version=6.2.0.57, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CenterSpace.NMath.6.2.0.57\lib\net40\NMath.dll</HintPath>
-    </Reference>
-    <Reference Include="NMathStats, Version=4.2.0.57, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CenterSpace.NMath.Stats.4.2.0.57\lib\net40\NMathStats.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=3.2.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Npgsql.3.2.5\lib\net451\Npgsql.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="OfficeApi, Version=1.7.3.0, Culture=neutral, PublicKeyToken=7c1c3e9d16cace88, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NetOffice.Core.1.7.4.4\lib\net45\OfficeApi.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
@@ -215,6 +187,7 @@
     </Reference>
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="System.IO" />
     <Reference Include="System.Linq.Dynamic, Version=1.0.6132.35681, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Linq.Dynamic.1.0.7\lib\net40\System.Linq.Dynamic.dll</HintPath>
       <Private>True</Private>
@@ -222,7 +195,6 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Threading.Tasks.Extensions.4.4.0\lib\portable-net45+win8+wp8+wpa81\System.Threading.Tasks.Extensions.dll</HintPath>
@@ -234,11 +206,9 @@
     </Reference>
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
@@ -337,10 +307,6 @@
     <Reference Include="Vaiona.Web.Mvc.Modularity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Vaiona\Vaiona.Web.Mvc.Modularity.dll</HintPath>
-    </Reference>
-    <Reference Include="VBIDEApi, Version=1.7.3.0, Culture=neutral, PublicKeyToken=a3637beacf571e8a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NetOffice.Core.1.7.4.4\lib\net45\VBIDEApi.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="WebActivator">
       <HintPath>..\..\packages\WebActivator.1.2.0.0\lib\NETFramework40\WebActivator.dll</HintPath>
@@ -457,6 +423,7 @@
     <Compile Include="Models\EntitySelectorModel.cs" />
     <Compile Include="Models\ManageModels.cs" />
     <Compile Include="Models\UiTestModel.cs" />
+    <Compile Include="Models\VersionModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -632,8 +599,6 @@
     <Content Include="Content\handsontable\handsontable.full.css" />
     <Content Include="Content\handsontable\handsontable.full.min.css" />
     <Content Include="Content\handsontable\handsontable.min.css" />
-    <Content Include="Content\Images\aquadiva-favicon.ico" />
-    <Content Include="Content\Images\aquadiva-logo.png" />
     <Content Include="Content\Images\dfg_logo.gif" />
     <Content Include="Content\bootstrap-combobox.css" />
     <Content Include="Content\bootstrap.css" />
@@ -761,20 +726,8 @@
     <Content Include="Scripts\DataTables\extensions\Buttons\Readme.md" />
     <Content Include="Scripts\DataTables\extensions\AutoFill\Readme.md" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
-    <None Include="Properties\PublishProfiles\SITE.pubxml" />
-    <Content Include="HomePage\Content\bootstrap-grid.css.map" />
-    <Content Include="HomePage\Content\bootstrap-grid.min.css.map" />
-    <Content Include="HomePage\Content\bootstrap-reboot.css.map" />
-    <Content Include="HomePage\Content\bootstrap-reboot.min.css.map" />
-    <Content Include="HomePage\Content\bootstrap.css.map" />
-    <Content Include="HomePage\Content\bootstrap.min.css.map" />
-    <Content Include="HomePage\Scripts\bootstrap.bundle.js.map" />
-    <Content Include="HomePage\Scripts\bootstrap.bundle.min.js.map" />
-    <Content Include="HomePage\Scripts\bootstrap.js.map" />
-    <Content Include="HomePage\Scripts\bootstrap.min.js.map" />
-    <Content Include="HomePage\Scripts\jquery-2.1.4.min.map" />
-    <Content Include="HomePage\Scripts\jquery.min.map" />
-    <Content Include="HomePage\Scripts\jquery.slim.min.map" />
+    <None Include="Properties\PublishProfiles\TestServer_release.pubxml" />
+    <None Include="Properties\PublishProfiles\TestServer_dev.pubxml" />
     <None Include="Properties\PublishProfiles\TestServer.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <EmbeddedResource Include="Scripts\custom-swagger.js" />
@@ -801,88 +754,6 @@
     <Content Include="Scripts\handsontable\handsontable.full.min.js" />
     <Content Include="Scripts\handsontable\handsontable.js" />
     <Content Include="Scripts\handsontable\handsontable.min.js" />
-    <Content Include="HomePage\Content\bootstrap-grid.css" />
-    <Content Include="HomePage\Content\bootstrap-grid.min.css" />
-    <Content Include="HomePage\Content\bootstrap-reboot.css" />
-    <Content Include="HomePage\Content\bootstrap-reboot.min.css" />
-    <Content Include="HomePage\Content\bootstrap-theme.css" />
-    <Content Include="HomePage\Content\bootstrap-theme.min.css" />
-    <Content Include="HomePage\Content\bootstrap.css" />
-    <Content Include="HomePage\Content\bootstrap.min.css" />
-    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171037.png" />
-    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171336.png" />
-    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171445.png" />
-    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171548.png" />
-    <Content Include="HomePage\Content\Images\binary-code.png" />
-    <Content Include="HomePage\Content\Images\D01.png" />
-    <Content Include="HomePage\Content\Images\dataset.png" />
-    <Content Include="HomePage\Content\Images\graphics.png" />
-    <Content Include="HomePage\Content\Images\Lehmann-Hainich004.jpg" />
-    <Content Include="HomePage\Content\Images\squares.png" />
-    <Content Include="HomePage\Content\Images\water-drop.jpg" />
-    <Content Include="HomePage\Content\Images\water-drop2.jpg" />
-    <Content Include="HomePage\Content\modern-business.css" />
-    <Content Include="HomePage\Scripts\2013.2.611\jquery-1.7.1.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\jquery.validate.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.all.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.autocomplete.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.calendar.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.chart.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.combobox.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.common.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.datepicker.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.datetimepicker.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.draganddrop.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.editor.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.editing.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.filtering.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.grouping.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.reordering.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.resizing.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.imagebrowser.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.list.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.menu.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.panelbar.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.slider.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.splitter.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.tabstrip.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.textbox.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.timepicker.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.treeview.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.upload.min.js" />
-    <Content Include="HomePage\Scripts\2013.2.611\telerik.window.min.js" />
-    <Content Include="HomePage\Scripts\bootstrap.bundle.js" />
-    <Content Include="HomePage\Scripts\bootstrap.bundle.min.js" />
-    <Content Include="HomePage\Scripts\bootstrap.js" />
-    <Content Include="HomePage\Scripts\bootstrap.min.js" />
-    <Content Include="HomePage\Scripts\contact_me.js" />
-    <Content Include="HomePage\Scripts\draggabilly.pkgd.js" />
-    <Content Include="HomePage\Scripts\draggabilly.pkgd.min.js" />
-    <Content Include="HomePage\Scripts\isotope.pkgd.min.js" />
-    <Content Include="HomePage\Scripts\jqBootstrapValidation.js" />
-    <None Include="HomePage\Scripts\jquery-2.1.3.intellisense.js" />
-    <None Include="HomePage\Scripts\jquery-2.1.4.intellisense.js" />
-    <Content Include="HomePage\Scripts\jquery-2.1.4.js" />
-    <Content Include="HomePage\Scripts\jquery-2.1.4.min.js" />
-    <Content Include="HomePage\Scripts\jquery-migrate-1.2.1.js" />
-    <Content Include="HomePage\Scripts\jquery-migrate-1.2.1.min.js" />
-    <Content Include="HomePage\Scripts\jquery.js" />
-    <Content Include="HomePage\Scripts\jquery.min.js" />
-    <Content Include="HomePage\Scripts\jquery.slim.js" />
-    <Content Include="HomePage\Scripts\jquery.slim.min.js" />
-    <None Include="HomePage\Scripts\jquery.validate-vsdoc.js" />
-    <Content Include="HomePage\Scripts\jquery.validate.js" />
-    <Content Include="HomePage\Scripts\jquery.validate.min.js" />
-    <Content Include="HomePage\Scripts\jquery.validate.unobtrusive.js" />
-    <Content Include="HomePage\Scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="HomePage\Scripts\main.js" />
-    <Content Include="HomePage\Scripts\modernizr-2.8.3.js" />
-    <Content Include="HomePage\Scripts\packery.pkgd.bexis.min.js" />
-    <Content Include="HomePage\Scripts\packery.pkgd.js" />
-    <Content Include="HomePage\Scripts\packery.pkgd.min.js" />
-    <Content Include="HomePage\Scripts\respond.js" />
-    <Content Include="HomePage\Scripts\respond.min.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
@@ -891,15 +762,6 @@
     <Content Include="Scripts\jquery-2.1.4.min.js" />
     <Content Include="Scripts\jquery-migrate-1.2.1.js" />
     <Content Include="Scripts\jquery-migrate-1.2.1.min.js" />
-    <Content Include="Scripts\leaflet\images\layers-2x.png" />
-    <Content Include="Scripts\leaflet\images\layers.png" />
-    <Content Include="Scripts\leaflet\images\marker-icon-2x.png" />
-    <Content Include="Scripts\leaflet\images\marker-icon.png" />
-    <Content Include="Scripts\leaflet\images\marker-shadow.png" />
-    <Content Include="Scripts\leaflet\leaflet-src.esm.js" />
-    <Content Include="Scripts\leaflet\leaflet-src.js" />
-    <Content Include="Scripts\leaflet\leaflet.css" />
-    <Content Include="Scripts\leaflet\leaflet.js" />
     <Content Include="Scripts\minimap\minimap.js" />
     <Content Include="Scripts\minimap\minimap.min.css" />
     <Content Include="Scripts\minimap\minimap.min.js" />
@@ -1253,30 +1115,6 @@
     <Content Include="Themes\Windows7\Styles\Windows7\sprite-vertical.png" />
     <Content Include="Themes\Windows7\Styles\Windows7\sprite.png" />
     <Content Include="Global.asax" />
-    <Content Include="vis\img\network\acceptDeleteIcon.png" />
-    <Content Include="vis\img\network\addNodeIcon.png" />
-    <Content Include="vis\img\network\backIcon.png" />
-    <Content Include="vis\img\network\connectIcon.png" />
-    <Content Include="vis\img\network\cross.png" />
-    <Content Include="vis\img\network\cross2.png" />
-    <Content Include="vis\img\network\deleteIcon.png" />
-    <Content Include="vis\img\network\downArrow.png" />
-    <Content Include="vis\img\network\editIcon.png" />
-    <Content Include="vis\img\network\leftArrow.png" />
-    <Content Include="vis\img\network\minus.png" />
-    <Content Include="vis\img\network\plus.png" />
-    <Content Include="vis\img\network\rightArrow.png" />
-    <Content Include="vis\img\network\upArrow.png" />
-    <Content Include="vis\img\network\zoomExtends.png" />
-    <Content Include="vis\vis-graph3d.min.js" />
-    <Content Include="vis\vis-network.min.css" />
-    <Content Include="vis\vis-network.min.js" />
-    <Content Include="vis\vis-timeline-graph2d.min.css" />
-    <Content Include="vis\vis-timeline-graph2d.min.js" />
-    <Content Include="vis\vis.css" />
-    <Content Include="vis\vis.js" />
-    <Content Include="vis\vis.min.css" />
-    <Content Include="vis\vis.min.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -1336,19 +1174,6 @@
     <Content Include="Views\Shared\Info.cshtml" />
     <Content Include="Views\Shared\NotAuthorized.cshtml" />
     <Content Include="Views\Error\AccessDenied.cshtml" />
-    <Content Include="Themes\Aquadiva\Layouts\_Layout.cshtml" />
-    <Content Include="Themes\Aquadiva\Partials\_Breadcrumb.cshtml" />
-    <Content Include="Themes\Aquadiva\Partials\_Footer.cshtml" />
-    <Content Include="Themes\Aquadiva\Partials\_Header.cshtml" />
-    <Content Include="Themes\Aquadiva\Partials\_Information.cshtml" />
-    <Content Include="Themes\Aquadiva\Partials\_LogOnStatus.cshtml" />
-    <Content Include="Themes\Aquadiva\Partials\_ThemeSelector.cshtml" />
-    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.eot" />
-    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.ttf" />
-    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff" />
-    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff2" />
-    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\FontAwesome.otf" />
-    <Content Include="Themes\Aquadiva\Partials\_Menu.cshtml" />
     <Content Include="Views\Ldap\Login.cshtml" />
     <Content Include="Views\TermsAndConditions\Index.cshtml" />
     <Content Include="Views\PrivacyPolicy\Index.cshtml" />
@@ -1356,6 +1181,7 @@
     <Content Include="Views\Account\Profile.cshtml" />
     <Content Include="Views\Error\NotFound.cshtml" />
     <Content Include="Views\Shared\SessionTimeout.cshtml" />
+    <Content Include="Views\Home\Version.cshtml" />
     <Content Include="Themes\AquaDivaCustom\Layouts\_Layout.cshtml" />
     <Content Include="Themes\AquaDivaCustom\Partials\_Breadcrumb.cshtml" />
     <Content Include="Themes\AquaDivaCustom\Partials\_Footer.cshtml" />
@@ -1369,11 +1195,19 @@
     <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.woff" />
     <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.woff2" />
     <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\FontAwesome.otf" />
-    <Content Include="Scripts\leaflet\leaflet-src.esm.js.map" />
-    <Content Include="Scripts\leaflet\leaflet-src.js.map" />
-    <Content Include="Scripts\leaflet\leaflet.js.map" />
-    <Content Include="vis\vis.map" />
-    <Content Include="vis\vis.js.map" />
+    <Content Include="Themes\Aquadiva\Layouts\_Layout.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Breadcrumb.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Footer.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Header.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Information.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_LogOnStatus.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Menu.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_ThemeSelector.cshtml" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\FontAwesome.otf" />
     <None Include="Web.TestServerRelease.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -1634,6 +1468,17 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.VersionCheckAnalyzer.resources.dll" />
+    <Analyzer Include="..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
+    <Analyzer Include="..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\analyzers\dotnet\cs\Humanizer.dll" />
+    <Analyzer Include="..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.CodeQuality.Analyzers.dll" />
+    <Analyzer Include="..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.CodeQuality.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetCore.Analyzers.dll" />
+    <Analyzer Include="..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetCore.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
+    <Analyzer Include="..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -1645,7 +1490,6 @@
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
@@ -1663,7 +1507,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>False</UseIIS>
+          <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>5412</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
@@ -1679,11 +1523,6 @@
   </ProjectExtensions>
   <PropertyGroup>
     <PostBuildEvent>
-      <!-- rmdir /S /Q  "$(SolutionDir)Console\Workspace\General\Db\Settings"
-C:\Windows\System32\xcopy "$(ProjectDir)Db\Settings" "$(SolutionDir)Console\Workspace\General\Db\Settings" /E /C /Y /I
-C:\Windows\System32\xcopy "$(ProjectDir)General.Settings.xml" "$(SolutionDir)Console\Workspace\General" /C /Y /I
-rmdir /S /Q  "$(SolutionDir)Console\Workspace\Components\Vaiona"
-C:\Windows\System32\xcopy "$(SolutionDir)Libraries\Vaiona\Workspace\Components\Vaiona" "$(SolutionDir)Console\Workspace\Components\Vaiona\" /E /C /Y /I -->
     </PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
@@ -1691,13 +1530,15 @@ C:\Windows\System32\xcopy "$(SolutionDir)Libraries\Vaiona\Workspace\Components\V
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
-    <Error Condition="!Exists('..\..\packages\CenterSpace.NMath.6.2.0.57\build\CenterSpace.NMath.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\CenterSpace.NMath.6.2.0.57\build\CenterSpace.NMath.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props'))" />
   </Target>
   <Import Project="..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets" Condition="Exists('..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" />
   <Target Name="EnsurePostSharpImported" BeforeTargets="BeforeBuild" Condition="'$(PostSharp30Imported)' == ''">
     <Error Condition="!Exists('..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://www.postsharp.net/links/nuget-restore." />
     <Error Condition="Exists('..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://www.postsharp.net/links/nuget-restore." />
   </Target>
-  <Import Project="..\..\packages\CenterSpace.NMath.6.2.0.57\build\CenterSpace.NMath.targets" Condition="Exists('..\..\packages\CenterSpace.NMath.6.2.0.57\build\CenterSpace.NMath.targets')" />
 </Project>
