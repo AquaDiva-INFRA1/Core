@@ -44,8 +44,6 @@ namespace BExIS.Modules.Sam.UI.Controllers
             return View(new List<FolderModel>() { fileManger.TreeRoot });
         }
 
-       
-
         public ActionResult FolderContent(string path)
         {
             return PartialView( "_FolderContent", path);

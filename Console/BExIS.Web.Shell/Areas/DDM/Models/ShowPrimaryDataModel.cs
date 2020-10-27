@@ -11,6 +11,8 @@ using BExIS.IO;
 using BExIS.IO.DataType.DisplayPattern;
 using BExIS.Dlm.Services.DataStructure;
 using System.Text;
+using BExIS.Dlm.Services.TypeSystem;
+using System.Globalization;
 
 namespace BExIS.Modules.Ddm.UI.Models
 {
@@ -38,9 +40,11 @@ namespace BExIS.Modules.Ddm.UI.Models
 
         public bool DownloadAccess { get; set; }
 
+        public bool HasEditRight { get; set; }
+
         public Dictionary<string, string> AsciiFileDownloadSupport { get; set; }
 
-        public static ShowPrimaryDataModel Convert(long datasetId, int versionId, string title, DataStructure dataStructure, DataTable data, bool downloadAccess, Dictionary<string, string> supportedAsciiFileTypes, bool latestVersion)
+        public static ShowPrimaryDataModel Convert(long datasetId, int versionId, string title, DataStructure dataStructure, DataTable data, bool downloadAccess, Dictionary<string, string> supportedAsciiFileTypes, bool latestVersion, bool hasEditRights)
         {
             ShowPrimaryDataModel model = new ShowPrimaryDataModel();
             model.Data = data;
@@ -54,11 +58,12 @@ namespace BExIS.Modules.Ddm.UI.Models
             model.DisplayFormats = getDisplayFormatObjects(dataStructure as StructuredDataStructure);
             model.AsciiFileDownloadSupport = supportedAsciiFileTypes;
             model.LatestVersion = latestVersion;
+            model.HasEditRight = hasEditRights;
 
             return model;
         }
 
-        public static ShowPrimaryDataModel Convert(long datasetId, int versionId, string title, DataStructure dataStructure, List<ContentDescriptor> dataFileList, bool downloadAccess, Dictionary<string, string> asciiFileDownloadSupport, bool latestVersion)
+        public static ShowPrimaryDataModel Convert(long datasetId, int versionId, string title, DataStructure dataStructure, List<ContentDescriptor> dataFileList, bool downloadAccess, Dictionary<string, string> asciiFileDownloadSupport, bool latestVersion, bool hasEditRights)
         {
             ShowPrimaryDataModel model = new ShowPrimaryDataModel();
             model.FileList = ConvertContentDiscriptorsToFileInfos(dataFileList);
@@ -71,6 +76,8 @@ namespace BExIS.Modules.Ddm.UI.Models
             model.DownloadAccess = downloadAccess;
             model.AsciiFileDownloadSupport = asciiFileDownloadSupport;
             model.LatestVersion = latestVersion;
+            model.HasEditRight = hasEditRights;
+
 
             return model;
         }
@@ -113,7 +120,21 @@ namespace BExIS.Modules.Ddm.UI.Models
                     StringBuilder sb = new StringBuilder();
                     foreach (var missingValue in variable.MissingValues)
                     {
-                        sb.Append(missingValue.DisplayName + "|" + missingValue.Placeholder + "#");
+
+                        if (DataTypeUtility.GetTypeCode(variable.DataAttribute.DataType.SystemType) == DataTypeCode.DateTime && DataTypeDisplayPattern.Materialize(variable.DataAttribute.DataType.Extra) != null)
+                        {
+                            DataTypeDisplayPattern ddp = DataTypeDisplayPattern.Materialize(variable.DataAttribute.DataType.Extra);
+                            DateTime dateTime;
+                            if (DateTime.TryParse(missingValue.Placeholder, new CultureInfo("en-US", false), DateTimeStyles.NoCurrentDateDefault, out dateTime))
+                            {
+                                sb.Append(missingValue.DisplayName + "|" + dateTime.ToString(ddp.StringPattern) + "#"); ;
+                            }
+
+                        }
+                        else
+                        {
+                            sb.Append(missingValue.DisplayName + "|" + missingValue.Placeholder + "#");
+                        }
                     }
 
                     //add also the case of the optional field

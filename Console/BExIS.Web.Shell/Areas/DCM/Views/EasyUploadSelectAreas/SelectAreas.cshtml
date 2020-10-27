@@ -119,7 +119,7 @@
                         {
                             fileExt = System.IO.Path.GetExtension(Model.activeSheetUri.ToString());
                         }
-                        if ( (fileExt.ToLower().Contains(".csv")) || (fileExt.ToLower().Contains(".txt")) )
+                        if ((fileExt.ToLower().Contains(".csv")) || (fileExt.ToLower().Contains(".txt")))
                         {
                             foreach (KeyValuePair<Uri, String> worksheetIdentifier in Model.SheetUriDictionary)
                             {
@@ -146,7 +146,6 @@
                                 };
                                 listItems.Add(tmp);
                             }
-
                         }
                     }
                     @Html.DropDownList("Sheet Select", listItems, "Select", new { @class = "buttonsRight bx-dropdown", @id = "sheetSelect" })
@@ -396,7 +395,6 @@
         });
 
         //Trigger the initial loading of the table
-        console.log("Hello");
         $('#changeWorksheet').click();
     });
 

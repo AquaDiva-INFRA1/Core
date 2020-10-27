@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Security;
-using BExIS.Security.Entities.Subjects;
+﻿using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authentication;
 using BExIS.Security.Services.Subjects;
 using BExIS.Web.Shell.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
+using System;
+using System.Configuration;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Mvc;
 
 namespace BExIS.Web.Shell.Controllers
 {
@@ -49,13 +46,11 @@ namespace BExIS.Web.Shell.Controllers
                             return View("Confirm", LoginConfirmModel.Convert(user));
                         }
 
-                        /*
                         if (!await identityUserService.IsEmailConfirmedAsync(user.Id))
                         {
                             ViewBag.ErrorMessage = "You must have a confirmed email address to log in.";
                             return View("Error");
                         }
-                        */ 
 
                         SignInStatus result = ldapAuthenticationManager.ValidateUser(model.UserName, model.Password);
                         switch (result)
@@ -66,13 +61,13 @@ namespace BExIS.Web.Shell.Controllers
                                 return RedirectToLocal(returnUrl);
 
                             default:
-                                ModelState.AddModelError("", "Invalid login attempt. Invalid credentials.");
+                                ModelState.AddModelError("", "Invalid login attempt.");
                                 return View(model);
                         }
                     }
                     else
                     {
-                        ModelState.AddModelError("", "Invalid login attempt. Entry in Logins table not found! Please contact your system administrator to register an account.");
+                        ModelState.AddModelError("", "Invalid login attempt.");
                         return View(model);
                     }
                 }
@@ -82,8 +77,7 @@ namespace BExIS.Web.Shell.Controllers
                     switch (result)
                     {
                         case SignInStatus.Success:
-
-                            var ldapUser = new User() {Name = model.UserName, SecurityStamp = Guid.NewGuid().ToString()};
+                            var ldapUser = new User() { Name = model.UserName, SecurityStamp = Guid.NewGuid().ToString() };
                             await userManager.CreateAsync(ldapUser);
                             await userManager.AddLoginAsync(ldapUser, new UserLoginInfo("Ldap", ""));
 
@@ -101,6 +95,7 @@ namespace BExIS.Web.Shell.Controllers
                 ldapAuthenticationManager.Dispose();
                 userManager.Dispose();
                 signInManager.Dispose();
+                identityUserService.Dispose();
             }
         }
 
@@ -148,6 +143,7 @@ namespace BExIS.Web.Shell.Controllers
             finally
             {
                 userManager.Dispose();
+                identityUserService.Dispose();
             }
         }
 

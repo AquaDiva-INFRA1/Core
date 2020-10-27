@@ -36,6 +36,7 @@ using CenterSpace.NMath.Core;
 using CenterSpace.NMath.Stats;
 using System.IO.Compression;
 using Ionic.Zip;
+using F23.StringSimilarity;
 
 namespace BExIS.Modules.ASM.UI.Controllers
 {
@@ -69,6 +70,10 @@ namespace BExIS.Modules.ASM.UI.Controllers
             {"D03", new List<string> { "Totsche", "Kusel" } }
         };
 
+        List<string> domains = new List<string>() { "Sites", "BioGeoChemichals", "Cycles", "Matter Cycles",
+            "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways" };
+
+
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
 
         static string python_path = Path.GetFullPath(WebConfigurationManager.AppSettings["python_path"]);
@@ -84,6 +89,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
         static String datasetsepcial = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "dataset361.csv");
         static String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
         static String dataset_pnk = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "PNK dataset_links.csv");
+
+        static String projectTerminolgies = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Project-terminologies.csv");
 
         static List<Input> classification_results = new List<Input>();
 
@@ -116,7 +123,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
                                                 datasetVersion.Id);
-                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv",true);
+                path = ioOutputDataManager.GenerateAsciiFile(id, "text/csv",true);
                 
                 LoggerFactory.LogCustom(message);
 
@@ -292,6 +299,10 @@ namespace BExIS.Modules.ASM.UI.Controllers
         {
             List<string> nodes = new List<string>();
             List<List<int>> paths = new List<List<int>>();
+            List<string> terminologies = new List<string>();
+            List<string> predictions = new List<string>();
+            List<string> keywords = new List<string>();
+            Classification result = new Classification();
             ViewData["id"] = ds;
             if (flag == "")
             {
@@ -314,13 +325,65 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     inp.onto_target_file = JsonConvert.DeserializeObject<List<string>>(JObject.Parse(xx.Value.ToString())["onto_target_file"].ToString());
                     inp.predicted_class = JObject.Parse(xx.Value.ToString())["predicted_class"].ToString();
                     inp.db_no_path = JsonConvert.DeserializeObject<List<string>>(JObject.Parse(xx.Value.ToString())["db_no_path"].ToString());
+                    
                     classification_results.Add( inp);
+                    foreach (string ss in inp.predicted_class.Split(';'))
+                    {
+                        if ((ss != " ") && (!predictions.Contains(domains[Int32.Parse(ss)])))
+                        {
+                            predictions.Add(domains[Int32.Parse(ss)]);
+                        }
+                    }
                     index ++ ;
                 }
 
+                try
+                {
+                    DatasetManager dm = new DatasetManager();
+                    DataTable table = dm.GetLatestDatasetVersionTuples(Int64.Parse(ds), 0, 0, true);
+                    dm.Dispose();
+                
+                    foreach (string pred in predictions)
+                    {
+                        using (var reader = new StreamReader(projectTerminolgies))
+                        {
+                            string line;
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                List<string> tmp = line.Split(',').ToList<string>();
+                                if (tmp.Count > 1)
+                                {
+                                    if (tmp[1].Trim() == pred.Trim())
+                                    {
+                                        foreach (string keyword in tmp[2].Replace("  "," ").Split('"'))
+                                        {
+                                            foreach (DataColumn dc in table.Columns)
+                                            {
+                                                if((!keywords.Contains(keyword.Replace("\"", "").Trim())) && (similarity(dc.Caption.Trim(),keyword.Replace("\"","").Trim()) > 0.5))
+                                                {
+                                                    keywords.Add(keyword.Replace("\"", "").Trim());
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("The File could not be read:");
+                    Console.WriteLine(e.Message);
+                }
                 ViewData["id"] = ds;
                 ViewData["label"] = "";
-                return PartialView(classification_results);
+                ViewData["keywords"] = keywords;
+                result.keywords = keywords;
+                result.class_results = classification_results;
+                return PartialView(result);
             }
             foreach (Input inp in classification_results)
             {
@@ -1117,7 +1180,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     {
                         try
                         {
-                            string fileName = odm.GenerateAsciiFile(id, id.ToString(), "text/csv", false);
+                            string fileName = odm.GenerateAsciiFile(id, "text/csv", false);
                             ZipArchiveEntry readmeEntry = archive.CreateEntry(id.ToString()+".csv");
                             using (StreamWriter writer = new StreamWriter(readmeEntry.Open()))
                             {
@@ -1150,7 +1213,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
                                                 datasetVersion.Id);
-                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv",true);
+                path = ioOutputDataManager.GenerateAsciiFile(id, "text/csv",true);
 
                 LoggerFactory.LogCustom(message);
 
@@ -1323,7 +1386,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
                                                 datasetVersion.Id);
-                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv",true);
+                path = ioOutputDataManager.GenerateAsciiFile(id, "text/csv",true);
 
                 LoggerFactory.LogCustom(message);
 
@@ -1416,7 +1479,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 string message = string.Format("dataset {0} version {1} was downloaded as txt.", id,
                                                 datasetVersion.Id);
-                path = ioOutputDataManager.GenerateAsciiFile(id, title, "text/csv",true);
+                path = ioOutputDataManager.GenerateAsciiFile(id, "text/csv",true);
 
                 LoggerFactory.LogCustom(message);
 
@@ -1490,6 +1553,25 @@ namespace BExIS.Modules.ASM.UI.Controllers
             return PartialView("showDataSetAnalysis");
         }
 
+        private double similarity(string a, string b)
+        {
+            List<double> similarities = new List<double>();
+            double output = 0.0;
+
+            var l = new NormalizedLevenshtein();
+            similarities.Add(l.Similarity(a, b));
+            var jw = new JaroWinkler();
+            similarities.Add(jw.Similarity(a, b));
+            var jac = new Jaccard();
+            similarities.Add(jac.Similarity(a, b));
+
+            foreach (double sim in similarities)
+            {
+                output += sim;
+            }
+
+            return output / similarities.Count;
+        }
         // this class is made for the Deserialization of the JSON object of the JSON file containing the coordinates and well names.
         public class coordinates_GPS
         {

@@ -60,22 +60,21 @@ namespace BExIS.IO.Transform.Input
         public ExcelReader(StructuredDataStructure structuredDatastructure, ExcelFileReaderInfo fileReaderInfo) : base(structuredDatastructure, fileReaderInfo)
         {
             NumberOfRows = 0;
+            NumberOSkippedfRows = 0;
+
         }
 
         public ExcelReader(StructuredDataStructure structuredDatastructure, ExcelFileReaderInfo fileReaderInfo, IOUtility iOUtility) : base(structuredDatastructure, fileReaderInfo, iOUtility)
         {
+            NumberOSkippedfRows = 0;
             NumberOfRows = 0;
         }
 
         public ExcelReader(StructuredDataStructure structuredDatastructure, ExcelFileReaderInfo fileReaderInfo, IOUtility iOUtility, DatasetManager datasetManager) : base(structuredDatastructure, fileReaderInfo, iOUtility, datasetManager)
         {
             NumberOfRows = 0;
-        }
+            NumberOSkippedfRows = 0;
 
-        public ExcelReader()
-        {
-            this.Info = new ExcelFileReaderInfo();
-            NumberOfRows = 0;
         }
 
         public override FileStream Open(string fileName)
@@ -125,22 +124,30 @@ namespace BExIS.IO.Transform.Input
 
         private void loadProperties(Stream file)
         {
-            this.FileStream = file;
-
-            // open excel file
-            spreadsheetDocument = SpreadsheetDocument.Open(this.FileStream, false);
-
-            if (spreadsheetDocument != null)
+            try
             {
-                if (spreadsheetDocument.ExtendedFilePropertiesPart.Properties.Application != null)
-                {
-                    Application = spreadsheetDocument.ExtendedFilePropertiesPart.Properties.Application.InnerText;
-                }
+                this.FileStream = file;
 
-                if (spreadsheetDocument.ExtendedFilePropertiesPart.Properties.ApplicationVersion != null)
+                // open excel file
+                spreadsheetDocument = SpreadsheetDocument.Open(this.FileStream, false);
+
+                if (spreadsheetDocument != null)
                 {
-                    ApplicationVersion = spreadsheetDocument.ExtendedFilePropertiesPart.Properties.ApplicationVersion.InnerText;
+                    if (spreadsheetDocument.ExtendedFilePropertiesPart.Properties.Application != null)
+                    {
+                        Application = spreadsheetDocument.ExtendedFilePropertiesPart.Properties.Application.InnerText;
+                    }
+
+                    if (spreadsheetDocument.ExtendedFilePropertiesPart.Properties.ApplicationVersion != null)
+                    {
+                        ApplicationVersion = spreadsheetDocument.ExtendedFilePropertiesPart.Properties.ApplicationVersion.InnerText;
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                this.FileStream.Close();
+                throw new NotSupportedException("This Excel file is not created by common programs. Please open the file in Excel, save it and try again.");
             }
         }
 
@@ -268,10 +275,8 @@ namespace BExIS.IO.Transform.Input
             {
                 Position = this._areaOfData.StartRow;
             }
-            else
-                Position++;
 
-            int endPosition = Position + packageSize;
+            int endPosition = (Position + packageSize)-1;
 
             if (endPosition > this._areaOfData.EndRow)
                 endPosition = this._areaOfData.EndRow;
@@ -362,10 +367,10 @@ namespace BExIS.IO.Transform.Input
                 {
                     Position = fri.DataStartRow;
                 }
-                else
-                    Position++;
+                //else
+                //    Position++;
 
-                int endPosition = Position + packageSize;
+                int endPosition = (Position + packageSize) - 1;
 
                 if (endPosition > endRowData)
                     endPosition = endRowData;
@@ -441,7 +446,7 @@ namespace BExIS.IO.Transform.Input
 
             if (GetSubmitedVariableIdentifier(worksheetPart, this._areaOfVariables.StartRow, this._areaOfVariables.EndRow) != null)
             {
-                listOfSelectedvalues = GetValuesFromRows(worksheetPart, variableList, Position, Position + packageSize);
+                listOfSelectedvalues = GetValuesFromRows(worksheetPart, variableList, Position, (Position + packageSize)-1);
                 Position += packageSize;
             }
 
@@ -462,43 +467,45 @@ namespace BExIS.IO.Transform.Input
         {
             List<List<string>> temp = new List<List<string>>();
 
-            OpenXmlReader reader = OpenXmlReader.Create(worksheetPart);
-            int count = 0;
-            int rowNum = 0;
-
-            while (reader.Read())
+            using (OpenXmlReader reader = OpenXmlReader.Create(worksheetPart))
             {
-                if (reader.ElementType == typeof(Row))
+                int count = 0;
+                int rowNum = 0;
+
+                while (reader.Read())
                 {
-                    do
+                    if (reader.ElementType == typeof(Row))
                     {
-                        if (reader.HasAttributes)
-                            rowNum = Convert.ToInt32(reader.Attributes.First(a => a.LocalName == "r").Value);
-
-                        if (endRow == 0)
+                        do
                         {
-                            if (rowNum >= startRow)
+                            if (reader.HasAttributes)
+                                rowNum = Convert.ToInt32(reader.Attributes.First(a => a.LocalName == "r").Value);
+
+                            if (endRow == 0)
                             {
-                                Row row = (Row)reader.LoadCurrentElement();
+                                if (rowNum >= startRow)
+                                {
+                                    Row row = (Row)reader.LoadCurrentElement();
 
-                                temp.Add(RowToList(row, variableList));
+                                    temp.Add(RowToList(row, variableList));
 
-                                count++;
+                                    count++;
+                                }
                             }
-                        }
-                        else
-                        {
-                            if (rowNum >= startRow && rowNum <= endRow)
+                            else
                             {
-                                Row row = (Row)reader.LoadCurrentElement();
+                                if (rowNum >= startRow && rowNum <= endRow)
+                                {
+                                    Row row = (Row)reader.LoadCurrentElement();
 
-                                temp.Add(RowToList(row, variableList));
-                                count++;
+                                    temp.Add(RowToList(row, variableList));
+                                    count++;
+                                }
                             }
-                        }
-                    } while (reader.ReadNextSibling()); // Skip to the next row
+                        } while (reader.ReadNextSibling()); // Skip to the next row
 
-                    break;
+                        break;
+                    }
                 }
             }
 
@@ -515,49 +522,40 @@ namespace BExIS.IO.Transform.Input
         /// <param name="endRow">end row</param>
         protected void ReadRows(WorksheetPart worksheetPart, int startRow, int endRow)
         {
-            OpenXmlReader reader = OpenXmlReader.Create(worksheetPart);
-            int count = 0;
-            int rowNum = 0;
-
-            while (reader.Read())
+            using (OpenXmlReader reader = OpenXmlReader.Create(worksheetPart))
             {
-                if (reader.ElementType == typeof(Row))
+                int count = 0;
+                int rowNum = 0;
+
+                while (reader.Read())
                 {
-                    do
+                    if (reader.ElementType == typeof(Row))
                     {
-                        if (reader.HasAttributes)
-                            rowNum = Convert.ToInt32(reader.Attributes.First(a => a.LocalName == "r").Value);
-
-                        if (endRow == 0)
+                        do
                         {
-                            if (rowNum >= startRow)
-                            {
-                                Row row = (Row)reader.LoadCurrentElement();
+                            if (reader.HasAttributes)
+                                rowNum = Convert.ToInt32(reader.Attributes.First(a => a.LocalName == "r").Value);
 
-                                //this.errorMessages = this.errorMessages.Union(Validate(RowToList(row), Convert.ToInt32(row.RowIndex.ToString()))).ToList();
-                                this.DataTuples.Add(ReadRow(RowToList(row), Convert.ToInt32(row.RowIndex.ToString())));
-                                count++;
-                            }
-                        }
-                        else
-                        {
-                            if (rowNum >= startRow && rowNum <= endRow)
+                            if (rowNum >= startRow && ((rowNum <= endRow) || (endRow == 0)))
                             {
                                 Row row = (Row)reader.LoadCurrentElement();
 
                                 if (!IsEmpty(row))
                                 {
                                     this.DataTuples.Add(ReadRow(RowToList(row), Convert.ToInt32(row.RowIndex.ToString())));
+                                    count++;
                                 }
-
-                                //this.errorMessages = this.errorMessages.Union(Validate(RowToList(row), Convert.ToInt32(row.RowIndex.ToString()))).ToList();
-                                count++;
                             }
-                        }
-                    } while (reader.ReadNextSibling()); // Skip to the next row
 
-                    break;
+                        } while (reader.ReadNextSibling()); // Skip to the next row
+
+                        break;
+                    }
                 }
+                // (12 - 2) - 10 = 0
+                NumberOSkippedfRows += ((endRow + 1) - startRow) - count;
+                Debug.WriteLine("NumberOSkippedfRows += ((endRow+1) - startRow) - count");
+                Debug.WriteLine(NumberOSkippedfRows + " += (" + endRow + 1 + " - " + startRow + ") - " + count + ");");
             }
         }
 
@@ -694,7 +692,7 @@ namespace BExIS.IO.Transform.Input
 
             if (errorList != null)
             {
-                if (errorList.Count > 0)
+                if (errorList.Distinct().ToList().Count > 0)
                 {
                     this.ErrorMessages = this.ErrorMessages.Concat(errorList).ToList();
                     return false;
@@ -716,29 +714,31 @@ namespace BExIS.IO.Transform.Input
         {
             //NEW OPENXMLREADER
 
-            OpenXmlReader reader = OpenXmlReader.Create(worksheetPart);
-            int count = 0;
-            int rowNum = 0;
-
-            while (reader.Read())
+            using (OpenXmlReader reader = OpenXmlReader.Create(worksheetPart))
             {
-                if (reader.ElementType == typeof(Row))
+                int count = 0;
+                int rowNum = 0;
+
+                while (reader.Read())
                 {
-                    do
+                    if (reader.ElementType == typeof(Row))
                     {
-                        if (reader.HasAttributes)
-                            rowNum = Convert.ToInt32(reader.Attributes.First(a => a.LocalName == "r").Value);
-
-                        if (rowNum >= startRow && rowNum <= endRow)
+                        do
                         {
-                            Row row = (Row)reader.LoadCurrentElement();
+                            if (reader.HasAttributes)
+                                rowNum = Convert.ToInt32(reader.Attributes.First(a => a.LocalName == "r").Value);
 
-                            this.ErrorMessages = this.ErrorMessages.Union(ValidateRow(RowToList(row), rowNum)).ToList();
-                            count++;
-                        }
-                    } while (reader.ReadNextSibling()); // Skip to the next row
+                            if (rowNum >= startRow && rowNum <= endRow)
+                            {
+                                Row row = (Row)reader.LoadCurrentElement();
 
-                    break;
+                                this.ErrorMessages = this.ErrorMessages.Union(ValidateRow(RowToList(row), rowNum)).ToList();
+                                count++;
+                            }
+                        } while (reader.ReadNextSibling()); // Skip to the next row
+
+                        break;
+                    }
                 }
             }
         }
@@ -955,57 +955,59 @@ namespace BExIS.IO.Transform.Input
             //NEW OPENXMLREADER
             if (this.SubmitedVariableIdentifiers == null || this.SubmitedVariableIdentifiers.Count == 0)
             {
-                OpenXmlReader reader = OpenXmlReader.Create(worksheetPart);
-                int rowNum = 0;
-
-                // read variable rows to get name and id from area variable
-                while (reader.Read())
+                using (OpenXmlReader reader = OpenXmlReader.Create(worksheetPart))
                 {
-                    if (reader.ElementType == typeof(Row))
+                    int rowNum = 0;
+
+                    // read variable rows to get name and id from area variable
+                    while (reader.Read())
                     {
-                        do
+                        if (reader.ElementType == typeof(Row))
                         {
-                            if (reader.HasAttributes)
-                                rowNum = Convert.ToInt32(reader.Attributes.First(a => a.LocalName == "r").Value);
-
-                            if (rowNum >= startRow && rowNum <= endRow)
+                            do
                             {
-                                Row row = (Row)reader.LoadCurrentElement();
+                                if (reader.HasAttributes)
+                                    rowNum = Convert.ToInt32(reader.Attributes.First(a => a.LocalName == "r").Value);
 
-                                if (row.Hidden == null) VariableIdentifierRows.Add(RowToList(row));
-                                else if (row.Hidden != true) VariableIdentifierRows.Add(RowToList(row));
-                            }
-                        } while (reader.ReadNextSibling() && rowNum < endRow); // Skip to the next row
-                        break;
-                    }
-                }
-
-                // convert variable rows to VariableIdentifiers
-                if (VariableIdentifierRows != null)
-                {
-                    foreach (List<string> l in VariableIdentifierRows)
-                    {
-                        //create headerVariables
-                        if (SubmitedVariableIdentifiers.Count == 0)
-                        {
-                            foreach (string s in l)
-                            {
-                                VariableIdentifier hv = new VariableIdentifier();
-                                hv.name = s;
-                                SubmitedVariableIdentifiers.Add(hv);
-                            }
-                        }
-                        else
-                        {
-                            foreach (string s in l)
-                            {
-                                if (!string.IsNullOrEmpty(s))
+                                if (rowNum >= startRow && rowNum <= endRow)
                                 {
-                                    int id = 0;
-                                    if (int.TryParse(s, out id))
+                                    Row row = (Row)reader.LoadCurrentElement();
+
+                                    if (row.Hidden == null) VariableIdentifierRows.Add(RowToList(row));
+                                    else if (row.Hidden != true) VariableIdentifierRows.Add(RowToList(row));
+                                }
+                            } while (reader.ReadNextSibling() && rowNum < endRow); // Skip to the next row
+                            break;
+                        }
+                    }
+
+                    // convert variable rows to VariableIdentifiers
+                    if (VariableIdentifierRows != null)
+                    {
+                        foreach (List<string> l in VariableIdentifierRows)
+                        {
+                            //create headerVariables
+                            if (SubmitedVariableIdentifiers.Count == 0)
+                            {
+                                foreach (string s in l)
+                                {
+                                    VariableIdentifier hv = new VariableIdentifier();
+                                    hv.name = s;
+                                    SubmitedVariableIdentifiers.Add(hv);
+                                }
+                            }
+                            else
+                            {
+                                foreach (string s in l)
+                                {
+                                    if (!string.IsNullOrEmpty(s))
                                     {
-                                        int index = l.IndexOf(s);
-                                        SubmitedVariableIdentifiers.ElementAt(index).id = id;
+                                        int id = 0;
+                                        if (int.TryParse(s, out id))
+                                        {
+                                            int index = l.IndexOf(s);
+                                            SubmitedVariableIdentifiers.ElementAt(index).id = id;
+                                        }
                                     }
                                 }
                             }

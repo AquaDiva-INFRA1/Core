@@ -1,20 +1,20 @@
 ﻿@model SearchAttributeViewModel
 
-@using BExIS.Modules.Ddm.UI.Models;
 @using BExIS.Utils.Models;
+@using BExIS.Modules.Ddm.UI.Models;
 
 @{
-
-    string Title = "New Search Attribute";
+    
+    string Title="New Search Attribute";
 
     if (Model.displayName != null)
     {
         Title = Model.displayName;
     }
-
+        
 
     // enums to list
-    // metadatanodes to list
+    // metadatanodes to list  
 
     List<string> SearchComponentBaseType = new List<string>();
     foreach (SearchComponentBaseType ms in Enum.GetValues(typeof(SearchComponentBaseType)))
@@ -26,8 +26,8 @@
     foreach (TypeCode ms in Enum.GetValues(typeof(TypeCode)))
     {
         DataType.Add(ms.ToString());
-    }
-
+    } 
+    
     //for properties
 
     List<string> Directions = new List<string>();
@@ -49,74 +49,69 @@
     }
 
     List<SearchMetadataNode> metadataNodes = new List<SearchMetadataNode>();
-    if (Session["metadatNodes"] != null)
+    if (Session["metadatNodes"]!=null)
     {
         metadataNodes = (List<SearchMetadataNode>)Session["metadatNodes"];
     }
+    
 
-
-}
+ }
 
 @*<div class="bx-title">@Title</div>*@
 
-@using (Ajax.BeginForm("Save", "Admin", new AjaxOptions
-{
+@using (Ajax.BeginForm("Save", "Admin", new AjaxOptions {
     HttpMethod = "Post",
     UpdateTargetId = "searchAttributeForm",
     OnSuccess = "OnSuccess",
     OnFailure = "OnFailure"
 }))
 {
-
+    
     <div id="searchAttributeForm" class="bx-content" style="height:410px; overflow:auto">
-        @{
+    @{
             <table>
                 <tr>
                     <td style="width:250px;"><h3>General</h3></td>
                 </tr>
                 <tr>
-                    <td>
+                    <td >
                         <label>Id</label>
-                        @(Html.HiddenFor(m => m.id))
+                         @(Html.HiddenFor(m => m.id))
                     </td>
                     <td>
-                        @Html.TextBoxFor(m => m.id, new { @disabled = "disabled" })
+                       @Html.TextBoxFor(m => m.id,new { @disabled = "disabled" })
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        @(Html.LabelFor(m => m.displayName))<span class="bx bx-required" title="Required">
+                         @(Html.LabelFor(m => m.displayName))<span class="bx bx-required" title="Required">
                     </td>
                     <td>
-                        @(Html.TextBoxFor(m => m.displayName, new { @class = "t-input", title = "Display name of the item in the search user interface." }))
+                        @(Html.TextBoxFor(m => m.displayName, new { @class = "t-input", title="Display name of the item in the search user interface." }))
                         @Html.ValidationMessageFor(m => m.displayName)
                     </td>
                 </tr>
-
                 @*<tr>
-                        <td>
-                             @(Html.LabelFor(m => m.sourceName))<span class="bx bx-required" title="Required">
-                        </td>
-                        <td>
-                            @(Html.TextBoxFor(m => m.sourceName, new { @class = "t-input", title="Name of the field in the lucene index." }))
+                    <td>
+                         @(Html.LabelFor(m => m.sourceName))<span class="bx bx-required" title="Required">
+                    </td>
+                    <td>
+                        @(Html.TextBoxFor(m => m.sourceName, new { @class = "t-input", title="Name of the field in the lucene index." }))
 
-                             @Html.ValidationMessageFor(m => m.sourceName)
-                        </td>
-                    </tr>
-                *@
-
-
-                    // this is the nodes display
+                         @Html.ValidationMessageFor(m => m.sourceName)
+                    </td>
+                </tr>*@
                 <tr>
                     <td style="vertical-align:top;">
                         @(Html.LabelFor(m => m.metadataNames))<span class="bx bx-required" title="Required">
                     </td>
                     <td class="listOfNodes">
+                        
+                            <div id="metadataNodes">
 
-                        <div id="metadataNodes">
-                            @if (Model.metadataNames != null && Model.metadataNames.Count > 0)
-                            {
-                                    foreach(string xpath in Model.metadataNames)
+                                @if (Model.metadataNames != null && Model.metadataNames.Count > 0)
+                                {
+                                    foreach (var xpath in Model.metadataNames)
                                     {
                                         if (xpath.Contains(";"))
                                         {
@@ -132,26 +127,27 @@
                                             //@Html.ActionLink(" ", "AddMetadataNode", null, new { id = "addNode", @class = "bx-add bx-function", title="Corresponding metadata node to be used for the Lucene index." })
 
                                         }
+                                        Html.RenderPartial("_metadataNode", xpath);
                                     }
-                                
-                            }
-                        </div>
+                                }
+
+                            </div>
+
+                            
                     </td>
-                    <br />
                     <td style="vertical-align:bottom;">
                         <div class="vcenter" style="width:55px;">
-                            @Html.ActionLink(" ", "AddMetadataNode", null, new { id = "addNode", @class = "bx-add bx-function", title = "Corresponding metadata node to be used for the Lucene index." })
-                            @Html.ValidationMessageFor(m => m.metadataNames)
+                                @Html.ActionLink(" ", "AddMetadataNode", null, new { id = "addNode", @class = "bx-add bx-function", title="Corresponding metadata node to be used for the Lucene index." })
+                                @Html.ValidationMessageFor(m => m.metadataNames)
                         </div>
                     </td>
                 </tr>
-                
                 <tr>
                     <td>
                         @(Html.LabelFor(m => m.headerItem))
                     </td>
                     <td>
-                        @Html.CheckBoxFor(m => m.headerItem, new { title = "Tick if this item should be available as a category (e.g. as a grid column)." })
+                         @Html.CheckBoxFor(m => m.headerItem, new { title="Tick if this item should be available as a category (e.g. as a grid column)." })
                     </td>
                 </tr>
                 <tr>
@@ -159,7 +155,7 @@
                         @(Html.LabelFor(m => m.defaultHeaderItem))
                     </td>
                     <td>
-                        @Html.CheckBoxFor(m => m.defaultHeaderItem, new { title = "Tick if the header item should be visible upon page load." })
+                         @Html.CheckBoxFor(m => m.defaultHeaderItem, new { title="Tick if the header item should be visible upon page load." })
                     </td>
                 </tr>
 
@@ -176,37 +172,37 @@
                 </tr>
                 <tr>
                     <td>
-                        @(Html.LabelFor(m => m.dataType))<span class="bx bx-required" title="Required">
+                       @(Html.LabelFor(m => m.dataType))<span class="bx bx-required" title="Required">
                     </td>
                     <td>
                          @Html.DropDownListFor(m => m.dataType, new SelectList(DataType, Model.dataType), "Please select", new { title="Data type to be indexed." })
                     </td>
                 </tr>
-                <tr>
-                    <td><h3>Index Parameters</h3></td>
-                </tr>
-                <tr>
-                    <td>
-                        @(Html.LabelFor(m => m.store))
-                    </td>
-                    <td>
-                        @Html.CheckBoxFor(m => m.store, new { title = "Tick to store the entire item value in addition to the index." })
-                    </td>
-                </tr>
+        <tr>
+            <td><h3>Index Parameters</h3></td>
+        </tr>
                 <tr>
                     <td>
-                        @(Html.LabelFor(m => m.multiValue))
+                       @(Html.LabelFor(m => m.store))
                     </td>
                     <td>
-                        @Html.CheckBoxFor(m => m.multiValue, new { title = "Tick if this item contains multiple values per field (e.g. Name A; Name B; Name C)." })
+                         @Html.CheckBoxFor(m => m.store, new {title="Tick to store the entire item value in addition to the index." })
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        @(Html.LabelFor(m => m.analysed))
+                       @(Html.LabelFor(m => m.multiValue))
                     </td>
                     <td>
-                        @Html.CheckBoxFor(m => m.analysed, new { title = "Tick if this item should be analyzed for the index (default)." })
+                         @Html.CheckBoxFor(m => m.multiValue, new { title="Tick if this item contains multiple values per field (e.g. Name A; Name B; Name C)." })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                       @(Html.LabelFor(m => m.analysed))
+                    </td>
+                    <td>
+                          @Html.CheckBoxFor(m => m.analysed, new { title="Tick if this item should be analyzed for the index (default)."})
                     </td>
                 </tr>
                 <tr>
@@ -214,27 +210,27 @@
                         @(Html.LabelFor(m => m.norm))
                     </td>
                     <td>
-                        @Html.CheckBoxFor(m => m.norm)
-                        <label title="....">?</label>
+                       @Html.CheckBoxFor(m => m.norm)
+                       <label title="....">?</label>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        @(Html.LabelFor(m => m.boost))
+                       @(Html.LabelFor(m => m.boost))
                     </td>
                     <td>
-                        @Html.TextBoxFor(m => m.boost, new { type = "number", min = "0.0", max = "10.0", title = "Specify the priority of this item within the search index (10=highest priority)." })
+                       @Html.TextBoxFor(m => m.boost, new { type = "number", min = "0.0" , max="10.0", title="Specify the priority of this item within the search index (10=highest priority)."})
                     </td>
                 </tr>
-                <tr>
-                    <td><h3>Property Parameters</h3></td>
-                </tr>
+        <tr>
+            <td><h3>Property Parameters</h3></td>
+        </tr>
                 <tr>
                     <td>
                         @(Html.LabelFor(m => m.uiComponent))
                     </td>
                     <td>
-                        @Html.DropDownListFor(m => m.uiComponent, new SelectList(UiComponents, Model.uiComponent), new { title = "Choose a UI component Type according to the number of options (1-3  = item, 3-15 = list, >15= range)." })
+                        @Html.DropDownListFor(m => m.uiComponent, new SelectList(UiComponents, Model.uiComponent), new { title="Choose a UI component Type according to the number of options (1-3  = item, 3-15 = list, >15= range)." })
                     </td>
                 </tr>
                 <tr>
@@ -243,7 +239,7 @@
                     </td>
                     <td>
 
-                        @Html.DropDownListFor(m => m.aggregationType, new SelectList(AggregationTypes, Model.aggregationType), new { title = "Choose a selection type based how many choices should be allowed (single, multiple)." })
+                        @Html.DropDownListFor(m => m.aggregationType, new SelectList(AggregationTypes, Model.aggregationType), new { title="Choose a selection type based how many choices should be allowed (single, multiple)."})
                     </td>
                 </tr>
                 <tr>
@@ -251,22 +247,22 @@
                         @(Html.LabelFor(m => m.direction))
                     </td>
                     <td>
-                        @Html.DropDownListFor(m => m.direction, new SelectList(Directions, Model.direction), new { title = "Default sort direction for this item (ascending, descending)." })
+                        @Html.DropDownListFor(m => m.direction, new SelectList(Directions, Model.direction), new { title="Default sort direction for this item (ascending, descending)." })
                     </td>
                 </tr>
                 @*<tr>
-                        <td>
-                            @(Html.LabelFor(m => m.dateFormat))
-                        </td>
-                        <td>
-                            bgc:format
-                        </td>
-                        <td>
-                            metadata node providing the date format
-                        </td>
-                    </tr>*@
+                    <td>
+                        @(Html.LabelFor(m => m.dateFormat))
+                    </td>
+                    <td>
+                        bgc:format
+                    </td>
+                    <td>
+                        metadata node providing the date format
+                    </td>
+                </tr>*@
             </table>
-        }
+    }
     </div>
 
 
@@ -283,11 +279,13 @@
 
     var run = false;
     $("#addNode").unbind().click(function () {
-        $.ajax({
-            url: this.href,
-            cache: false,
-            success: function (html) { $("#metadataNodes").append(html); }
-        });
+
+
+            $.ajax({
+                url: this.href,
+                cache: false,
+                success: function (html) { $("#metadataNodes").append(html); }
+            });
 
         return false;
     });
@@ -303,7 +301,7 @@
     }
 
     function OnSuccess() {
-
+        
         var window = $('#EditSearchAttribute').data('tWindow');
         window.close();
 
@@ -320,21 +318,26 @@
 
 <style type="text/css">
 
-    #searchAttributeForm {
-        padding: 5px;
-        background-color: white;
+    #searchAttributeForm
+    {
+        padding:5px;
+        background-color:white;
     }
 
-        #searchAttributeForm div {
-            padding-left: 0px;
-        }
-
-        #searchAttributeForm table,
-        #searchAttributeForm td {
-            /*border:none;*/
-        }
-
-    .searchAttributePart table, .searchAttributePart td, .searchAttributePart tr {
-        border: none;
+    #searchAttributeForm div
+    {
+        padding-left:0px;
     }
+
+    #searchAttributeForm table,
+    #searchAttributeForm td
+    {
+        /*border:none;*/
+    }
+
+    .searchAttributePart table, .searchAttributePart td,.searchAttributePart tr
+    {
+        border:none;
+    }
+
 </style>

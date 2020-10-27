@@ -30,6 +30,7 @@ namespace BExIS.Modules.Dcm.UI.Helpers
             EntityManager entityManager = new EntityManager();
             FeatureManager featureManager = new FeatureManager();
             OperationManager operationManager = new OperationManager();
+            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
 
             try
             {
@@ -210,7 +211,6 @@ namespace BExIS.Modules.Dcm.UI.Helpers
 
                 #region Add Metadata
 
-                MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
 
                 if (!metadataStructureManager.Repo.Get().Any(m => m.Name.Equals("Basic ABCD")))
                 {
@@ -243,7 +243,6 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                     ImportSchema("GBIF", "eml.xsd", "Dataset", entity.Name, entity.EntityType.FullName, titleXPath,
                         descriptionXpath);
                 }
-
                 if (!metadataStructureManager.Repo.Get().Any(m => m.Name.Equals("idiv")))
                 {
                     string titleXPath = "DatasetLevelMetadata/Dataset/Title";
@@ -254,6 +253,7 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                 //if (!metadataStructureManager.Repo.Get().Any(m => m.Name.Equals("Basic Eml")))
                 //    ImportSchema("Basic Eml", "eml-dataset.xsd", entity.Name, entity.Name, entity.EntityType.FullName);
 
+                #endregion Add Metadata
                 if (!metadataStructureManager.Repo.Get().Any(m => m.Name.Equals("EBI")))
                 {
                     string titleXPath = "accession";
@@ -261,7 +261,6 @@ namespace BExIS.Modules.Dcm.UI.Helpers
 
                     ImportSchema("ebi", "EBI.xsd", "root", entity.Name, entity.EntityType.FullName, titleXPath, descriptionXpath);
                 }
-                #endregion
             }
             catch (Exception ex)
             {
@@ -275,6 +274,7 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                 entityManager.Dispose();
                 featureManager.Dispose();
                 operationManager.Dispose();
+                metadataStructureManager.Dispose();
             }
         }
 

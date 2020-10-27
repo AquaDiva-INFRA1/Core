@@ -44,28 +44,35 @@ namespace BExIS.Security.Services.Utilities
         public void Send(string subject, string body, List<string> destinations, List<string> ccs = null, List<string> bccs = null, List<string> replyToLists = null)
         {
 
-            var mail = new MailMessage();
-
-            mail.From = new MailAddress(ConfigurationManager.AppSettings["Email_From"]);
-            mail.To.Add(string.Join(",", destinations));
-
-            if (ccs != null) mail.CC.Add(string.Join(",", ccs));
-            if (bccs != null) mail.Bcc.Add(string.Join(",", bccs));
-            if (replyToLists != null) mail.ReplyToList.Add(string.Join(",", replyToLists));
-
-            mail.Subject = AppId + subject;
-            mail.Body = body;
-            mail.IsBodyHtml = true;
-
-
-
-            try
+            using (var mail = new MailMessage())
             {
-                _smtp.Send(mail);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError(ex.Message + " smtp service is probably not configured correctly.");
+
+                mail.From = new MailAddress(ConfigurationManager.AppSettings["Email_From"]);
+                mail.To.Add(string.Join(",", destinations));
+
+                ccs = getValidEmails(ccs);
+                if (ccs != null) mail.CC.Add(string.Join(",", ccs));
+
+                bccs = getValidEmails(bccs);
+                if (bccs != null) mail.Bcc.Add(string.Join(",", bccs));
+
+                replyToLists = getValidEmails(replyToLists);
+                if (replyToLists != null) mail.ReplyToList.Add(string.Join(",", replyToLists));
+
+                mail.Subject = AppId + subject;
+                mail.Body = body;
+                mail.IsBodyHtml = true;
+
+
+
+                try
+                {
+                    _smtp.Send(mail);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError(ex.Message + " smtp service is probably not configured correctly.");
+                }
             }
         }
 
@@ -83,20 +90,21 @@ namespace BExIS.Security.Services.Utilities
                 var from = new MailAddress(ConfigurationManager.AppSettings["Email_From"]);
 
                 var to = new MailAddress(message.Destination);
-                var mail = new MailMessage(from, to)
-                {
-                    Body = message.Body,
-                    IsBodyHtml = true,
-                    Subject = message.Subject
-                };
 
-                try
+                using (var mail = new MailMessage(from, to))
                 {
-                    _smtp.Send(mail);
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError(ex.Message + " smtp service is probably not configured correctly.");
+                    mail.Body = message.Body;
+                    mail.IsBodyHtml = true;
+                    mail.Subject = message.Subject;
+
+                    try
+                    {
+                        _smtp.Send(mail);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceError(ex.Message + " smtp service is probably not configured correctly.");
+                    }
                 }
             }
         }
@@ -106,20 +114,21 @@ namespace BExIS.Security.Services.Utilities
             var from = new MailAddress(ConfigurationManager.AppSettings["Email_From"]);
 
             var to = new MailAddress(message.Destination);
-            var mail = new MailMessage(from, to)
+            using (var mail = new MailMessage(from, to))
             {
-                Body = message.Body,
-                IsBodyHtml = true,
-                Subject = AppId + message.Subject
-            };
 
-            try
-            {
-                _smtp.Send(mail);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError(ex.Message + " smtp service is probably not configured correctly.");
+                mail.Body = message.Body;
+                mail.IsBodyHtml = true;
+                mail.Subject = AppId + message.Subject;
+
+                try
+                {
+                    _smtp.Send(mail);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError(ex.Message + " smtp service is probably not configured correctly.");
+                }
             }
         }
 
@@ -133,20 +142,20 @@ namespace BExIS.Security.Services.Utilities
             var from = new MailAddress(ConfigurationManager.AppSettings["Email_From"]);
 
             var to = new MailAddress(message.Destination);
-            var mail = new MailMessage(from, to)
+            using (var mail = new MailMessage(from, to))
             {
-                Body = message.Body,
-                IsBodyHtml = true,
-                Subject = AppId + message.Subject
-            };
+                mail.Body = message.Body;
+                mail.IsBodyHtml = true;
+                mail.Subject = AppId + message.Subject;
 
-            try
-            {
-                await _smtp.SendMailAsync(mail);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError(ex.Message + " smtp service is probably not configured correctly.");
+                try
+                {
+                    await _smtp.SendMailAsync(mail);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError(ex.Message + " smtp service is probably not configured correctly.");
+                }
             }
         }
 
@@ -161,6 +170,18 @@ namespace BExIS.Security.Services.Utilities
             {
                 return false;
             }
+        }
+
+        private List<string> getValidEmails(List<string> emails)
+        {
+            if (emails == null) return emails;
+
+            for (int i = 0; i < emails.Count; i++)
+            {
+                if (!IsValidEmail(emails[i])) emails.RemoveAt(i);
+            }
+
+            return emails.Count > 0 ? emails : null ;
         }
     }
 }

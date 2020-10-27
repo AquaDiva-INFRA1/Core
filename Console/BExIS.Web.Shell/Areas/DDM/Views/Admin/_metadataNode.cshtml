@@ -1,4 +1,6 @@
-﻿@model String
+﻿@*edited on Bexis*@
+
+@model String
 @using BExIS.Modules.Ddm.UI.Helpers;
 @using BExIS.Utils.Models;
 
@@ -10,68 +12,41 @@
     }
 
     int count = int.Parse(Model);
-
-
-
-    @*
-        Int64 count;
-        if (Session["count"] != null)
-        {
-            count = int.Parse((string)Session["count"].ToString()) + 1;
-            Session["count"] = count;
-        }
-        else
-        {
-            count = 0;
-            Session["count"] = count;
-        }
-
-            int count = 0;
-            if (Model != null)
-            {
-                count = int.Parse((string)Model.ToString());
-            }
-    *@
-}
-
-
-@using (Html.BeginCollectionItem("metadataNames"))
-{
-    <div id="node_container_@count" class="node_container_@count">
-        <div id="_nodes_@count" class="_nodes_@count">
-            @Html.DropDownListFor(m => metadataNodes, new SelectList(metadataNodes, "XPath", "DisplayNameLong", " "),
-                            "Select, please", new { title = "Corresponding metadata node to be used for the Lucene index.", style = "width: 350px;" })
+    using (Html.BeginCollectionItem("metadataNames"))
+    {
+        <div id="node_container_@count" class="node_container_@count">
+            <div id="_nodes_@count" class="_nodes_@count">
+                @Html.DropDownListFor(m => metadataNodes, new SelectList(metadataNodes, "XPath", "DisplayNameLong", " "),
+                                "Select, please", new { title = "Corresponding metadata node to be used for the Lucene index.", style = "width: 350px;" })
+            </div>
+            <div class="col-lg-1 text-left vcenter">
+                <a class="removeMetadataNode " onclick="delete_node('node_container_@count')">
+                    <span class="glyphicon glyphicon-remove-circle"></span>
+                </a>
+                <a onclick="add_composed_node('_nodes_@count')" title="Add Composed Node!">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </a>
+            </div><br />
         </div>
-        <div class="col-lg-1 text-left vcenter">
-            <a class="removeMetadataNode " onclick="delete_node('node_container_@count')">
-                <span class="glyphicon glyphicon-remove-circle"></span>
-            </a>
-            <a onclick="add_composed_node('_nodes_@count')" title="Add Composed Node!">
-                <span class="glyphicon glyphicon-plus"></span>
-            </a>
-        </div><br />
-    </div>
+    }
+
+
 }
-
-
-
 @*
-
     <div class="metadataNode row">
         @using (Html.BeginCollectionItem("metadataNames"))
         {
             <div class="col-lg-10 vcenter">
-                @Html.DropDownListFor(m => m, new SelectList(metadataNodes.OrderBy(s => s.DisplayNameLong), "XPath", "DisplayNameLong", Model), "Select, please", new { title = "Corresponding metadata node to be used for the Lucene index." })
+                @Html.DropDownListFor(m => m, new SelectList(metadataNodes.OrderBy(s => s.DisplayNameLong), "XPath", "DisplayNameLong", Model), "Please select", new { title = "Corresponding metadata node to be used for the Lucene index." })
             </div>
             <div class="col-lg-1 text-left vcenter">
                 <a href="#" class="removeMetadataNode bx-trash bx-function"></a>
             </div>
             //@Html.TextBoxFor(m => m);
-        }
-    </div>
 
+            }
+            </div>
 *@
-
 <style type="text/css">
 
     .metadataNode select {
@@ -82,19 +57,4 @@
         width: 95%;
         margin: 0;
     }
-
 </style>
-
-@*
-    <script type="text/javascript">
-        $("#addPartialNode").unbind().click(function () {
-            $.ajax({
-                url: this.href,
-                cache: false,
-                success: function (html) { $("#partialNodes").append(html); }
-            });
-            return false;
-        });
-
-    </script>
-*@

@@ -55,7 +55,7 @@ namespace BExIS.IO.Transform.Output
 
         #region constants
 
-        private static char[] specialChars = new char[] { '"', ',' };
+        //private static char[] specialChars = new char[] { '"', ',' };
 
         #endregion constants
 
@@ -77,7 +77,7 @@ namespace BExIS.IO.Transform.Output
         protected override void Init(string file, long dataStructureId)
         {
             // store pointer to dataStructure
-            dataStructure = GetDataStructure(dataStructureId);
+            //dataStructure = GetDataStructure(dataStructureId);
 
             // create the file
             CreateFile(file);
@@ -250,6 +250,7 @@ namespace BExIS.IO.Transform.Output
 
                     if (vv != null && vv.Value != null)
                     {
+                        // checking for display pattern
                         string format = GetStringFormat(dataType);
                         if (!string.IsNullOrEmpty(format))
                         {
@@ -289,12 +290,26 @@ namespace BExIS.IO.Transform.Output
                 string value = row[i].ToString();
 
                 // check if the value is a missing value and should be replaced
-                var variable = dataStructure.Variables.ElementAt(i);
-                if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
-                {
-                    value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
-                }
+                Variable variable = dataStructure.Variables.ElementAt(i);
 
+                if (variable != null)
+                {
+                    //checking for display pattern
+                    Dlm.Entities.DataStructure.DataType dataType = variable.DataAttribute.DataType;
+                    string format = GetStringFormat(dataType);
+                    if (!string.IsNullOrEmpty(format))
+                    {
+                        value = GetFormatedValue(value, dataType, format);
+                    }
+                    else value = value.ToString();
+
+                    // checking for missing values
+                    if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
+                    {
+
+                        value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
+                    }
+                }
                 // add value to row
                 line[i] = escapeValue(value);
             }
@@ -316,11 +331,23 @@ namespace BExIS.IO.Transform.Output
                 var value = row[i];
                 // check if the value is a missing value and should be replaced
                 var variable = dataStructure.Variables.ElementAt(i);
-                if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
-                {
-                    value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
-                }
 
+                if (variable != null)
+                {
+                    //checking for display pattern
+                    Dlm.Entities.DataStructure.DataType dataType = variable.DataAttribute.DataType;
+                    string format = GetStringFormat(dataType);
+                    if (!string.IsNullOrEmpty(format))
+                    {
+                        value = GetFormatedValue(value, dataType, format);
+                    }
+                    else value = value.ToString();
+
+                    if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
+                    {
+                        value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
+                    }
+                }
                 newRow.Add(value);
             }
 
@@ -355,7 +382,8 @@ namespace BExIS.IO.Transform.Output
         private string escapeValue(string value)
         {
             // modify if special characters are present
-            if (value.IndexOfAny(specialChars) != -1)
+
+            if (value.IndexOfAny(AsciiHelper.GetAllSeperator().ToArray()) != -1)
             {
                 value = "\"" + value.Replace("\"", "\"\"") + "\"";
             }

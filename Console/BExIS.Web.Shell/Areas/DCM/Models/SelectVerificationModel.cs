@@ -1,8 +1,8 @@
 ﻿using BExIS.Dcm.Wizard;
 using BExIS.IO.Transform.Validation.Exceptions;
+using BExIS.Modules.Dcm.UI.Helpers;
 using System;
 using System.Collections.Generic;
-using BExIS.Modules.Dcm.UI.Helpers;
 using BExIS.Aam.Entities.Mapping;
 
 namespace BExIS.Modules.Dcm.UI.Models
@@ -15,16 +15,19 @@ namespace BExIS.Modules.Dcm.UI.Models
         public List<UnitInfo> AvailableUnits { get; set; }
         public List<EasyUploadVariableInformation> HeaderVariableInformation { get; set; }
 
-        public List<Error> ErrorList { get; set; }
+        public List<DataAttrInfo> AvailableDataAttributes { get; set; }
+        public List<Tuple<int, string, UnitInfo>> AssignedHeaderUnits { get; set; }
+
         public List<RowModel> Rows { get; set; }
 
-
+        public List<Error> ErrorList { get; set; }
 
         public SelectVerificationModel()
         {
             ErrorList = new List<Error>();
             AvailableUnits = new List<UnitInfo>();
             HeaderVariableInformation = new List<EasyUploadVariableInformation>();
+
             Rows = new List<RowModel>();
         }
     }
@@ -53,7 +56,7 @@ namespace BExIS.Modules.Dcm.UI.Models
             AvailableDataAttributes = new List<DataAttrInfo>();
         }
 
-        public RowModel(int index, string name, DataAttrInfo selectedDataAttribute, UnitInfo selectedUnit, DataTypeInfo selectedDataType,List<EasyUploadSuggestion> suggestions, List<UnitInfo> availableUnits, List<DataAttrInfo> availableDataAttributes, List<DataTypeInfo> availableDataTypes,
+        public RowModel(int index, string name, DataAttrInfo selectedDataAttribute, UnitInfo selectedUnit, DataTypeInfo selectedDataType, List<EasyUploadSuggestion> suggestions, List<UnitInfo> availableUnits, List<DataAttrInfo> availableDataAttributes, List<DataTypeInfo> availableDataTypes,
             List<Aam_Dataset_column_annotation> annotation_suggestions, Dictionary<Aam_Uri, double> annotation_suggestion_by_similarity)
         {
             Index = index;
@@ -70,7 +73,6 @@ namespace BExIS.Modules.Dcm.UI.Models
         }
 
     }
-
 
     public class UnitInfo : ICloneable
     {

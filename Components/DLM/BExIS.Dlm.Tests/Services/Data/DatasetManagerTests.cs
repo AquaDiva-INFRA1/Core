@@ -3,14 +3,19 @@ using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Administration;
 using BExIS.Dlm.Services.Data;
+using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Services.MetadataStructure;
 using BExIS.Dlm.Tests.Helpers;
 using BExIS.Utils.Config;
+using BExIS.Utils.Data.Helpers;
+using BExIS.Web.Shell;
+using BExIS.Web.Shell.Helpers;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BExIS.Dlm.Entities.Administration;
 using BExIS.Utils.NH.Querying;
 
 namespace BExIS.Dlm.Tests.Services.Data
@@ -135,7 +140,7 @@ namespace BExIS.Dlm.Tests.Services.Data
                 mds.Should().NotBeNull("Failed to meet a precondition: a metadata strcuture is required.");
 
                 Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds);
-                dataset = dsHelper.GenerateTuplesForDataset(dataset, dataStructure, numberOfTuples);
+                dataset = dsHelper.GenerateTuplesForDataset(dataset, dataStructure, numberOfTuples,"Javad");
                 dataset.Should().NotBeNull("The dataset tuple generation has failed!");
 
                 dm.CheckInDataset(dataset.Id, "for testing purposes 2", "Javad", ViewCreationBehavior.None);
@@ -195,12 +200,12 @@ namespace BExIS.Dlm.Tests.Services.Data
                     }
                 );
 
-            fex.ToSQL().Should().Be($"(({var1Name}) > (12)) AND (({var2Name}) LIKE ('%Test'))");
+            fex.ToSQL().Should().Be($"(({var1Name}) > (12)) AND (({var2Name}) ILIKE ('%Test'))");
 
             // this is to show how to apply a NOT operator on any other expression.
             // It can be applied on Numeric, String, Date, and any other type of expression
             FilterExpression notFex = UnaryFilterExpression.Not(fex);
-            notFex.ToSQL().Should().Be($"NOT ((({var1Name}) > (12)) AND (({var2Name}) LIKE ('%Test')))");
+            notFex.ToSQL().Should().Be($"NOT ((({var1Name}) > (12)) AND (({var2Name}) ILIKE ('%Test')))");
             notFex.ToSQL().Should().Be($"NOT ({fex.ToSQL()})");
 
             OrderByExpression orderByExpr = new OrderByExpression(
@@ -227,7 +232,7 @@ namespace BExIS.Dlm.Tests.Services.Data
                 mds.Should().NotBeNull("Failed to meet a precondition: a metadata strcuture is required.");
 
                 Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds);
-                dataset = dsHelper.GenerateTuplesForDataset(dataset, dataStructure, numberOfTuples);
+                dataset = dsHelper.GenerateTuplesForDataset(dataset, dataStructure, numberOfTuples, "Javad");
                 dataset.Should().NotBeNull("The dataset tuple generation has failed!");
 
                 dm.CheckInDataset(dataset.Id, "for testing purposes 2", "Javad", ViewCreationBehavior.None);
@@ -292,7 +297,7 @@ namespace BExIS.Dlm.Tests.Services.Data
                 mds.Should().NotBeNull("Failed to meet a precondition: a metadata strcuture is required.");
 
                 Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds);
-                dataset = dsHelper.GenerateTuplesForDataset(dataset, dataStructure, numberOfTuples);
+                dataset = dsHelper.GenerateTuplesForDataset(dataset, dataStructure, numberOfTuples,"Javad");
                 dataset.Should().NotBeNull("The dataset tuple generation has failed!");
 
                 dm.CheckInDataset(dataset.Id, "for testing purposes 2", "Javad", ViewCreationBehavior.None);

@@ -1,21 +1,26 @@
 ﻿using System.Web.Mvc;
 using Vaiona.Web.Mvc.Data;
 using Vaiona.Web.Mvc.Modularity;
-using BExIS.Dlm.Entities.Data;
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Dlm.Services.Data;
-using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using BExIS.Modules.Rpm.UI.Models;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
 using BExIS.Web.Shell.Helpers;
 using Vaiona.IoC;
 using BExIS.App.Bootstrap;
 using System;
+using System.Configuration;
+using System.IO;
+using System.Xml.Linq;
+using BExIS.Security.Services.Versions;
+using BExIS.Web.Shell.Models;
+using BExIS.Xml.Helpers;
+using Vaiona.Utils.Cfg;
+using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Services.Data;
+using Npgsql;
+using System.Collections.Generic;
+using System.Linq;
+using BExIS.Modules.Rpm.UI.Models;
 
 namespace BExIS.Web.Shell.Controllers
 {
@@ -26,62 +31,81 @@ namespace BExIS.Web.Shell.Controllers
         [DoesNotNeedDataAccess]
         public ActionResult Index()
         {
-            DatasetManager dm = new DatasetManager();
-            List<Dataset> datasets = new List<Dataset>();
-            List<long> datasetIds = new List<long>();
-            datasets = dm.DatasetRepo.Query().OrderBy(p => p.Id).ToList();
-            datasetIds = datasets.Select(p => p.Id).ToList();
-            long somme = 0;
-            foreach (Dataset ds in datasets)
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Home", this.Session.GetTenant());
+
+            // here there are 2 cases to consider.
+            // 1.no user->landingpage
+            // 2.user logged into landingpage for users
+            Tuple<string, string, string> landingPage = null;
+            //check if user exist
+            if (!string.IsNullOrEmpty(HttpContext.User?.Identity?.Name)) //user
             {
-                long noColumns = ds.DataStructure.Self is StructuredDataStructure ? (ds.DataStructure.Self as StructuredDataStructure).Variables.Count() : 0L;
-                long noRows = ds.DataStructure.Self is StructuredDataStructure ? dm.GetDatasetLatestVersionEffectiveTupleCount(ds) : 0; // It would save time to calc the row count for all the datasets at once!
-                if (ds.Status == DatasetStatus.CheckedIn)
+                // User exist : load ladingpage for users
+                GeneralSettings generalSettings = IoCFactory.Container.Resolve<GeneralSettings>();
+                var landingPageForUsers = generalSettings.GetEntryValue("landingPageForUsers").ToString();
+
+                if (landingPageForUsers.Split(',').Length == 3)//check wheter 3 values exist for teh action
                 {
-                    somme = somme + (noRows * noColumns);
+                    landingPage = new Tuple<string, string, string>(
+                        landingPageForUsers.Split(',')[0].Trim(), //module id
+                        landingPageForUsers.Split(',')[1].Trim(), //controller
+                        landingPageForUsers.Split(',')[2].Trim());//action
                 }
             }
-            ViewData["datasetCount"] = datasets.Count;
-            ViewData["Datapoints"] = somme;
-            string select = "select count (*) from dataset_column_annotation";
-            NpgsqlCommand MyCmd = null;
-            NpgsqlConnection MyCnx = null;
-            MyCnx = new NpgsqlConnection(Conx);
-            MyCnx.Open();
-            MyCmd = new NpgsqlCommand(select, MyCnx);
+            else
+            {
+                landingPage = this.Session.GetTenant().LandingPageTuple;
+            }
 
-            Int64 count = (Int64)MyCmd.ExecuteScalar();
-            MyCnx.Close();
+            //if the landingPage not null and the action is accessable
+            if (landingPage == null || !this.IsAccessible(landingPage.Item1, landingPage.Item2, landingPage.Item3))
+                return RedirectToAction("Login","LDAP");
+            //return View();
 
-
-            DataAttributeManagerModel dam = new DataAttributeManagerModel(false);
-
-            ViewData["semantic_Coverage"] = (double)dam.DataAttributeStructs.Count / (double)count;
-
-            return PartialView();
-
-            //var result = this.Render("homepage", "homepage", "Index");
-            //return Content(result.ToHtmlString(), "text/html");
+            var result = this.Render(landingPage.Item1, landingPage.Item2, landingPage.Item3);
+            return Content(result.ToHtmlString(), "text/html");
+            //return RedirectToAction(landingPage.Item3, landingPage.Item2, new { area = landingPage.Item1 });
         }
+            
+
 
         [DoesNotNeedDataAccess]
         public ActionResult SessionTimeout()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Session Timeout", this.Session.GetTenant());
 
-            return View();
-        }
-        
-        [DoesNotNeedDataAccess]
-        public ActionResult RedirectToWiki()
-        {
-            return Redirect("https://aquadiva-trac1.inf-bb.uni-jena.de/wiki/doku.php");
+            return RedirectToAction("Index");
         }
 
         [DoesNotNeedDataAccess]
-        public ActionResult RedirectToBugtracker()
+        public ActionResult Version()
         {
-            return Redirect("https://aquadiva-trac1.inf-bb.uni-jena.de/mantis/bug_report_page.php");
+            // Site
+            var site = ConfigurationManager.AppSettings["ApplicationVersion"];
+
+            // Database
+            using (var versionManager = new VersionManager())
+            {
+                var database = versionManager.GetLatestVersion().Value;
+
+                // Workspace
+                string filePath = Path.Combine(AppConfiguration.WorkspaceGeneralRoot, "General.Settings.xml");
+                XDocument settings = XDocument.Load(filePath);
+                XElement entry = XmlUtility.GetXElementByAttribute("entry", "key", "version", settings);
+                var workspace = entry.Attribute("value")?.Value;
+
+
+                var model = new VersionModel()
+                {
+                    Site = site,
+                    Database = database,
+                    Workspace = workspace
+                };
+
+                ViewBag.Title = PresentationModel.GetViewTitleForTenant("Session Timeout", this.Session.GetTenant());
+
+                return View(model);
+            }
         }
     }
 }

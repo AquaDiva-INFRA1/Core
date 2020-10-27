@@ -1,7 +1,7 @@
-﻿@using Telerik.Web.Mvc.UI;
+﻿@*edited on Bexis*@
+
+@using Telerik.Web.Mvc.UI;
 @using BExIS.Modules.Ddm.UI.Models;
-@using BExIS.Utils;
-@using BExIS.Utils.Models;
 
 @model List<SearchAttributeViewModel>
 
@@ -59,21 +59,24 @@
 
     @if (ViewData.ModelState.IsValid)
     {
-    <div id="options" style="width:100%;">
-        <div style="float:left; display: inline-block;left:0px;">
-            @Html.ActionLink("Create Search Attribute", "Add", "Admin", new { @class = "bx-button function", @title = "Create Search Item" })
+<div id="options" style="position:relative; width:100%; height: 15px;">
+    <div style="position:absolute; left:0px;">
+        @Html.ActionLink("Create Search Attribute", "Add", "Admin", new { @class = "bx-button function", @title = "Create Search Item" })
 
-           
-        </div>
 
-        <div id="#searchDesigerOptions"  style="float:right; text-align: right">  
-            <div>@Html.ActionLink("Refresh Semantic Search Autocompletion", "buildDictionary", "SemanticSearch", new { }, new { @class = "bx-button action" })</div>
-            @Html.CheckBox("includePrimaryDataCheckBox", isPrimaryDataNodeExist) <b>include primary data</b>  
-            @Html.ActionLink("Refresh Search", "RefreshSearch", "Admin", new { @class = "bx-button action", @title = "Refresh index from search", onclick= "$('#SearchDesignerGrid').preloader(20,'Reloading index ...')" })
-        
-            @*@Html.ActionLink("Reset to last working setup", "ResetConfig", "Admin", new { @class = "bx-button function", @title = "Reset to Default" })*@
-        </div> 
     </div>
+
+    <div id="#searchDesigerOptions" style="position:absolute; right:0px;">
+        <div>
+            @Html.CheckBox("includePrimaryDataCheckBox", isPrimaryDataNodeExist) <b>include primary data</b>
+            @Html.ActionLink("Refresh Semantic Autocompletion", "buildDictionary", "SemanticSearch", new { }, new { @class = "bx-button action" })
+            @Html.ActionLink("Refresh Search", "RefreshSearch", "Admin", new { @class = "bx-button action", @title = "Refresh index from search", onclick = "$('#SearchDesignerGrid').preloader(20,'Reloading index ...')" })
+
+            @*@Html.ActionLink("Reset to last working setup", "ResetConfig", "Admin", new { @class = "bx-button function", @title = "Reset to Default" })*@
+        </div>
+        <br />
+    </div>
+</div>
       
 
 
@@ -103,7 +106,7 @@
                             @{
                                 foreach (string dt in item.metadataNames)
                                 {
-                                    <span>@dt <br /></span>
+                                  <span>@dt <br/></span>
                                 }
                               }
                         </text>
@@ -130,7 +133,7 @@
 
                 )
 
-  
+
 
 
 @(Html.Telerik().Window()
@@ -200,7 +203,7 @@
 
 <style type="text/css">
     #metadataNodes {
-        max-width : 350px;
+        max-width: 350px;
     }
     #SearchDesignerGrid .t-grid-content
     {

@@ -3,7 +3,6 @@ using BExIS.Dcm.Wizard;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Models;
 using System;
-using System.Diagnostics;
 using System.Web.Mvc;
 using System.Web.Routing;
 
@@ -16,16 +15,22 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         [HttpGet]
         public ActionResult SheetDataStructure(int index)
         {
+
             /* SKIP BECAUSE ONLY ONE SELECTION IS POSSIBLE
+
             TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+
             //set current stepinfo based on index
             if (TaskManager != null)
             {
                 TaskManager.SetCurrent(index);
+
                 // remove if existing
                 TaskManager.RemoveExecutedStep(TaskManager.Current());
             }
+
             SelectSheetFormatModel model = new SelectSheetFormatModel();
+
             // when jumping back to this step
             // check if sheet format is selected
             if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.SHEET_FORMAT))
@@ -35,6 +40,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     model.SelectedSheetFormat = TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT].ToString();
                 }
             }
+
             model.StepInfo = TaskManager.Current();
             */
 
@@ -57,6 +63,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
 
             return PartialView(new SelectSheetFormatModel());
+
         }
 
         /*

@@ -79,6 +79,8 @@ namespace BExIS.Security.Services.Subjects
                         return Users.OrderBy(orderbyClause).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
                     }
 
+                    count = Users.Count();
+
                     return Users.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
                 }
             }
@@ -242,7 +244,7 @@ namespace BExIS.Security.Services.Subjects
             if (string.IsNullOrEmpty(user.UserName))
                 return Task.FromResult(0);
 
-            if (FindByNameAsync(user.UserName)?.Result == null)
+            if (FindByIdAsync(user.Id)?.Result == null)
                 return Task.FromResult(0);
 
             using (var uow = this.GetUnitOfWork())
@@ -619,16 +621,19 @@ namespace BExIS.Security.Services.Subjects
             var charSet = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
             var chars = charSet.ToCharArray();
             var data = new byte[1];
-            var crypto = new RNGCryptoServiceProvider();
-            crypto.GetNonZeroBytes(data);
-            data = new byte[size];
-            crypto.GetNonZeroBytes(data);
-            var result = new StringBuilder(size);
-            foreach (var b in data)
+
+            using (var crypto = new RNGCryptoServiceProvider())
             {
-                result.Append(chars[b % (chars.Length)]);
+                crypto.GetNonZeroBytes(data);
+                data = new byte[size];
+                crypto.GetNonZeroBytes(data);
+                var result = new StringBuilder(size);
+                foreach (var b in data)
+                {
+                    result.Append(chars[b % (chars.Length)]);
+                }
+                return result.ToString();
             }
-            return result.ToString();
         }
     }
 }

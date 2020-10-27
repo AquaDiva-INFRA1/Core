@@ -367,6 +367,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Aam.Manifest.xml" />
+    <Content Include="Aam.Settings.xml" />
     <Content Include="Content\2013.2.611\Black\editor.png" />
     <Content Include="Content\2013.2.611\Black\imagebrowser.png" />
     <Content Include="Content\2013.2.611\Black\loading.gif" />
@@ -802,6 +803,18 @@
       <Project>{252F7872-A69C-43A6-84B4-4D2ABDBDD9AB}</Project>
       <Name>BExIS.Xml.Helpers</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
+      <Project>{2b541d06-3259-4aa3-ae6a-452c8f67164d}</Project>
+      <Name>BExIS.Aam.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Orm.NH\BExIS.Aam.Orm.NH.csproj">
+      <Project>{867a1e69-2f75-4f4b-a28c-026f0f5654b1}</Project>
+      <Name>BExIS.Aam.Orm.NH</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Services\BExIS.Aam.Services.csproj">
+      <Project>{898568be-061e-44d2-a94c-04729f07ddca}</Project>
+      <Name>BExIS.Aam.Services</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\DCM\BExIS.Dcm.UploadWizard\BExIS.Dcm.UploadWizard.csproj">
       <Project>{2C846721-A221-4AE5-A671-4B86DE4D3805}</Project>
       <Name>BExIS.Dcm.UploadWizard</Name>
@@ -813,22 +826,6 @@
     <ProjectReference Include="..\DDM\BExIS.Modules.Ddm.UI.csproj">
       <Project>{44DD2A5E-0D2F-4FAB-B297-4211441030B6}</Project>
       <Name>BExIS.Modules.Ddm.UI</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RPM\BExIS.Modules.Rpm.UI.csproj">
-      <Project>{76702A4F-D6E5-416F-BD81-58447514AF05}</Project>
-      <Name>BExIS.Modules.Rpm.UI</Name>
-    </ProjectReference>
-    <ProjectReference Include="BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
-      <Project>{2b541d06-3259-4aa3-ae6a-452c8f67164d}</Project>
-      <Name>BExIS.Aam.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="BExIS.Aam.Orm.NH\BExIS.Aam.Orm.NH.csproj">
-      <Project>{867a1e69-2f75-4f4b-a28c-026f0f5654b1}</Project>
-      <Name>BExIS.Aam.Orm.NH</Name>
-    </ProjectReference>
-    <ProjectReference Include="BExIS.Aam.Services\BExIS.Aam.Services.csproj">
-      <Project>{898568be-061e-44d2-a94c-04729f07ddca}</Project>
-      <Name>BExIS.Aam.Services</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

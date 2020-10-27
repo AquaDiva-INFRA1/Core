@@ -13,22 +13,12 @@ using System.Data;
 using BExIS.Xml.Helpers;
 using VDS.RDF;
 using VDS.RDF.Query;
-using BExIS.Modules.Ddm.UI.Helpers;
 using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
 using Npgsql;
 using System.Xml;
 using System.Configuration;
-using BExIS.Dlm.Services.DataStructure;
-using BExIS.Dlm.Entities.DataStructure;
-using System.Net.Http;
-using System.Net.Sockets;
-using System.Web;
-using Newtonsoft.Json.Linq;
-using BExIS.IO.Transform.Output;
-using System.IO;
-using Vaiona.Logging;
-using BExIS.Dlm.Services.Data;
+using BExIS.Modules.Ddm.UI.Helpers;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -129,11 +119,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                                 DatasetManager dsm = new DatasetManager();
                                 try { 
+                                    /*
                                     DatasetVersion dsv = dsm.GetDatasetLatestVersion(Int64.Parse(datasets_id));
                                     List<AbstractTuple> ds_tuples = dsm.GetDatasetVersionEffectiveTuples(dsv);
                                     foreach (AbstractTuple tuple in ds_tuples)
                                     {
-                                        XmlDocument xml = tuple.XmlVariableValues;
+                                        XmlDocument xml = tuple.JsonVariableValues;
 
                                         XmlNodeList item_List = xml.GetElementsByTagName("Item");//containing the tag <Item> to be parsed one by one
                                         foreach (XmlNode item in item_List)
@@ -161,6 +152,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                             }
                                         }
                                     }
+                                    */
                                 }
                                 catch (Exception ex)
                                 {
@@ -226,7 +218,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         XmlDatasetHelper helper = new XmlDatasetHelper();
                         description = helper.GetInformation(datasetID, NameAttributeValues.description);
                         title = helper.GetInformation(datasetID, NameAttributeValues.title);
-                        owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
+                        //owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
 
                         row["Title"] = title;
                         row["Datasetdescription"] = description;
@@ -326,6 +318,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                 DatasetManager dsm = new DatasetManager();
                                 try
                                 {
+                                    /*
                                     DatasetVersion dsv = dsm.GetDatasetLatestVersion(Int64.Parse(datasets_id));
                                     List<AbstractTuple> ds_tuples = dsm.GetDatasetVersionEffectiveTuples(dsv);
                                     foreach (AbstractTuple tuple in ds_tuples)
@@ -358,6 +351,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                             }
                                         }
                                     }
+                                    */
                                 }
                                 catch (Exception ex)
                                 {
@@ -436,7 +430,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         XmlDatasetHelper helper = new XmlDatasetHelper();
                         description = helper.GetInformation(datasetID, NameAttributeValues.description);
                         title = helper.GetInformation(datasetID, NameAttributeValues.title);
-                        owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
+                        //owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
 
                         row["Title"] = title;
                         row["Datasetdescription"] = description;

@@ -3,11 +3,11 @@ using BExIS.Ddm.Providers.LuceneProvider.Helpers;
 using BExIS.Ddm.Providers.LuceneProvider.Searcher;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Dlm.Orm.NH.Utils;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
+using BExIS.Security.Services.Utilities;
 using BExIS.Utils.Models;
 using BExIS.Xml.Helpers;
 using Lucene.Net.Analysis;
@@ -17,8 +17,8 @@ using Lucene.Net.Search;
 using Lucene.Net.Store;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -129,8 +129,9 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
         private IndexWriter indexWriter;
         private IndexWriter autoCompleteIndexWriter;
-
-        XmlDocument configXML;
+        private Lucene.Net.Store.Directory pathIndex;
+        private Lucene.Net.Store.Directory autoCompleteIndex;
+        private XmlDocument configXML;
 
         private void configureBexisIndexing(bool recreateIndex)
         {
@@ -138,22 +139,28 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             configXML.Load(FileHelper.ConfigFilePath);
 
             LoadBeforeIndexing();
-            Lucene.Net.Store.Directory pathIndex = FSDirectory.Open(new DirectoryInfo(luceneIndexPath));
-            Lucene.Net.Store.Directory autoCompleteIndex = FSDirectory.Open(new DirectoryInfo(autoCompleteIndexPath));
+            pathIndex = FSDirectory.Open(new DirectoryInfo(luceneIndexPath));
+            autoCompleteIndex = FSDirectory.Open(new DirectoryInfo(autoCompleteIndexPath));
 
-            PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new BexisAnalyzer());
+           
 
-            indexWriter = new IndexWriter(pathIndex, analyzer, recreateIndex, IndexWriter.MaxFieldLength.UNLIMITED);
-            autoCompleteIndexWriter = new IndexWriter(autoCompleteIndex, new NGramAnalyzer(), recreateIndex, IndexWriter.MaxFieldLength.UNLIMITED);
-
-
-            foreach (XmlNode a in categoryXmlNodeList)
+            using (var bexisAnalyzer = new BexisAnalyzer())
+            using (var nGramAnalyzer = new NGramAnalyzer())
+            using (PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(bexisAnalyzer))
             {
-                analyzer.AddAnalyzer("ng_" + a.Attributes.GetNamedItem("lucene_name").Value, new NGramAnalyzer());
-            }
-            analyzer.AddAnalyzer("ng_all", new NGramAnalyzer());
 
-            isIndexConfigured = true;
+                indexWriter = new IndexWriter(pathIndex, analyzer, recreateIndex, IndexWriter.MaxFieldLength.UNLIMITED);
+                autoCompleteIndexWriter = new IndexWriter(autoCompleteIndex, nGramAnalyzer, recreateIndex, IndexWriter.MaxFieldLength.UNLIMITED);
+
+
+                foreach (XmlNode a in categoryXmlNodeList)
+                {
+                    analyzer.AddAnalyzer("ng_" + a.Attributes.GetNamedItem("lucene_name").Value, nGramAnalyzer);
+                }
+                analyzer.AddAnalyzer("ng_all", nGramAnalyzer);
+
+                isIndexConfigured = true;
+            }
         }
 
         /// <summary>
@@ -163,75 +170,28 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
         /// <seealso cref=""/>        
         public void Index()
         {
-
             configureBexisIndexing(true);
             // there is no need for the metadataAccess class anymore. Talked with David and deleted. 30.18.13. Javad/ compare to the previous version to see the deletions
             DatasetManager dm = new DatasetManager();
-            MaterializedViewHelper mvh = new MaterializedViewHelper();
+            List<string> errors = new List<string>();
             try
             {
-                List<string> errors = new List<string>();
+                
                 IList<long> ids = dm.GetDatasetLatestIds();
 
                 //ToDo only enitities from type dataset should be indexed in this index
 
                 foreach (var id in ids)
                 {
-                    //added by Hamdi : Some datasets are too big and materialiyed views are generated manually 
-                    //check the size and threshold
-                    //Boolean Synched = true;
-                    //var dataset = this.GetUnitOfWork().GetReadOnlyRepository<Dataset>().Get(Int64.Parse(id.ToString()));
-                    //long numberOfTuples = dm.GetDatasetLatestVersionEffectiveTupleCount(Int64.Parse(id.ToString())); // this.getDatasetVersionEffectiveTupleCount(latestVersion);
-                    //int numberOfVariables = ((StructuredDataStructure)dataset.DataStructure.Self).Variables.Count();
-                    //long size = numberOfTuples * numberOfVariables;
-                    //if ( size > 200000*51)
-                    //{
-                    //    Synched = false;
-                    //}
-
-                    DataTable dt = null;
-                    Boolean Synched = false;
                     try
                     {
-                        dt = mvh.Retrieve(Int64.Parse(id.ToString()));
-                        Synched = true;
+                        writeBexisIndex(id, dm.GetDatasetLatestMetadataVersion(id));
+                        //GC.Collect();
                     }
-                    catch (Exception EX)
+                    catch (Exception ex)
                     {
-                        Debug.WriteLine(EX.Message);
+                        errors.Add(string.Format("Enountered a probelm indexing dataset '{0}'. Details: {1}", id, ex.Message));
                     }
-                    if (Synched)
-                    {
-                        try
-                        {
-                            if (dt != null)
-                            {
-                                dm = new DatasetManager();
-                                XmlDocument doc = dm.GetDatasetLatestMetadataVersion(id);
-                                writeBexisIndex(id, doc);
-                                dm.Dispose();
-                                GC.Collect();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            errors.Add(string.Format("Enountered a probelm indexing dataset '{0}'. Details: {1}", id, ex.Message));
-                        }
-                    }
-
-                    //// test case added to index only checked in datasets since it throws an exception
-                    //// if the dataset is not materialized/materialized view not populated.
-                    ////if (dm.GetDataset(Int64.Parse(id.ToString())).Status.Equals(DatasetStatus.CheckedIn))
-                    //try
-                    //{
-                    //    if (mvh.Retrieve(Int64.Parse(id.ToString())) != null)
-                    //        writeBexisIndex(id, dm.GetDatasetLatestMetadataVersion(id));
-                    //    //GC.Collect();
-                    //}
-                    //catch (Exception ex)
-                    //{
-                    //    errors.Add(string.Format("Enountered a probelm indexing dataset '{0}'. Details: {1}", id, ex.Message));
-                    //}
                 }
                 //GC.Collect();
 
@@ -246,13 +206,21 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 if (errors.Count > 0)
                     throw new Exception(string.Join("\n\r", errors));
             }
-            catch (Exception exc) {
-                Debug.WriteLine(exc.Message);
+            catch(Exception ex)
+            {
+                throw ex;
+
             }
             finally
             {
                 dm.Dispose();
                 GC.Collect();
+
+                var es = new EmailService();
+                es.Send(MessageHelper.GetSearchReIndexHeader(),
+                    MessageHelper.GetSearchReIndexMessage(errors),
+                    ConfigurationManager.AppSettings["SystemEmail"]);
+
             }
         }
 
@@ -354,23 +322,35 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
         private List<string> getListOfValuesFromDataStructure(StructuredDataStructure structuredDataStructure)
         {
-            using (var uow = this.GetUnitOfWork())
+            List<string> tmp = new List<string>();
+
+            foreach (var variable in structuredDataStructure.Variables)
             {
-
-                List<string> tmp = new List<string>();
-
-                foreach (var variableId in structuredDataStructure.Variables.Select(v => v.Id))
-                {
-                    var variable = uow.GetReadOnlyRepository<Variable>().Get(variableId);
-
-                    tmp.Add(variable.DataAttribute.Name);
-                    tmp.Add(variable.Label);
-                    if (!string.IsNullOrEmpty(variable.DataAttribute.Description))
-                        tmp.Add(variable.DataAttribute.Description);
-                }
-
-                return tmp;
+                tmp.Add(variable.DataAttribute.Name);
+                tmp.Add(variable.Label);
+                if (!string.IsNullOrEmpty(variable.DataAttribute.Description))
+                    tmp.Add(variable.DataAttribute.Description);
             }
+
+            return tmp;
+
+            //using (var uow = this.GetUnitOfWork())
+            //{
+
+            //List<string> tmp = new List<string>();
+
+            //foreach (var variableId in structuredDataStructure.Variables.Select(v => v.Id))
+            //{
+            //    var variable = uow.GetReadOnlyRepository<Variable>().Get(variableId);
+
+            //    tmp.Add(variable.DataAttribute.Name);
+            //    tmp.Add(variable.Label);
+            //    if (!string.IsNullOrEmpty(variable.DataAttribute.Description))
+            //        tmp.Add(variable.DataAttribute.Description);
+            //}
+
+            //    return tmp;
+            //}
         }
 
         /// <summary>
@@ -384,8 +364,14 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             this.Index();
             SearchProvider.Providers.Values.Where(p => p.IsAlive).ToList().ForEach(p => ((SearchProvider)p.Target).Reload());
             IndexReader _Reader = indexWriter.GetReader().Reopen();
-            BexisIndexSearcher.searcher.IndexReader.Dispose();
-            BexisIndexSearcher.searcher.Dispose();
+
+            if (BexisIndexSearcher.searcher != null)
+            {
+                if(BexisIndexSearcher.searcher.IndexReader!=null)BexisIndexSearcher.searcher?.IndexReader?.Dispose();
+                BexisIndexSearcher.searcher.Dispose();
+            }
+
+            
             BexisIndexSearcher.searcher = new IndexSearcher(_Reader);
             BexisIndexSearcher._Reader = _Reader;
             indexWriter.GetReader().Dispose();
@@ -433,13 +419,10 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 string[] metadataElementNames = facet.Attributes.GetNamedItem("metadata_name").Value.Split(',');
                 String lucene_name = facet.Attributes.GetNamedItem("lucene_name").Value;
 
-                Debug.WriteLine(" ********** debug check : Bexis Indexer **********  for dataset : "+id);
-                Debug.WriteLine("All nodes " + metadataElementNames.ToList<string>().ToString());
                 foreach (string metadataElementName in metadataElementNames)
                 {
                     //check if the element name is mapped to a group of nodes depending on the datastructure
                     List<string> metadataElementName_group = metadataElementName.Split(';').ToList();
-                    Debug.WriteLine("Node size: " + metadataElementName_group.Where(x => x != "").ToList<string>().Count());
                     //concat all the values in one single variable to be written by the indexer
                     //each metadataElementName can provide more than one value for that node in the XML file
                     //the idea is to concat the val 1 of the xpath 1 with the val 1 of the xpath 2 and so on...
@@ -449,13 +432,11 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     {
                         if (s != "")
                         {
-                            Debug.WriteLine("partial node : " + s);
                             try
                             {
                                 XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
                                 for (int i = 0; i < elemList_.Count; i++)
                                 {
-                                    Debug.WriteLine("Value node : " + elemList_[i].InnerText);
                                     concatenated_values = concatenated_values + " " + elemList_[i].InnerText;
                                     list.Add(elemList_[i].InnerText);
                                 }
@@ -463,7 +444,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                             }
                             catch (Exception exc)
                             {
-                                Debug.WriteLine(exc.ToString() + " ==> " + id + " ==> node ==> " + s);
+                                throw;
                             }
                         }
                     }
@@ -479,7 +460,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                 {
                                     string res = "";
                                     int i = k;
-                                    while (i< list.Count())
+                                    while (i < list.Count())
                                     {
                                         res = res + " " + list[i];
                                         i = i + idx + 1;
@@ -497,9 +478,8 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     }
                     catch (Exception exc)
                     {
-                        Debug.WriteLine(exc.ToString() + " ==> " + id + " ==> node ==> " + concatenated_values);
+                        throw;
                     }
-
                 }
             }
 
@@ -526,7 +506,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     if (concatenated_values.Trim() != "")
                     {
                         String primitiveType = property.Attributes.GetNamedItem("primitive_type").Value;
-                        
+
                         if (primitiveType.ToLower().Equals("string"))
                         {
                             dataset.Add(new Field("property_" + lucene_name, concatenated_values,
@@ -583,7 +563,6 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                             writeAutoCompleteIndex(docId, "ng_all", concatenated_values);
                         }
                     }
-                    
                 }
             }
             List<XmlNode> categoryNodes = categoryXmlNodeList;
@@ -637,13 +616,13 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                             }
                             catch (Exception exc)
                             {
-                                Debug.WriteLine(exc.ToString() + " ==> " + id + " ==> node ==> " + s);
+                                throw;
                             }
                         }
                         try
                         {
                             if (!concatenated_values.Trim().Equals(""))
-                            { 
+                            {
                                 Field a = new Field("category_" + lucene_name, concatenated_values, toStore, toAnalyse);
                                 a.Boost = boosting;
                                 dataset.Add(a);
@@ -657,7 +636,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         }
                         catch (Exception exc)
                         {
-                            Debug.WriteLine(exc.ToString() + " ==> " + id + " ==> node ==> " + concatenated_values);
+                            throw;
                         }
                     }
 
@@ -719,7 +698,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         }
                         catch (Exception exc)
                         {
-                            Debug.WriteLine(exc.ToString() + " ==> " + id + " ==> node ==> " + s);
+                            throw;
                         }
                     }
                     try
@@ -736,7 +715,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     }
                     catch (Exception exc)
                     {
-                        Debug.WriteLine(exc.ToString() + " ==> " + id + " ==> node ==> " + concatenated_values);
+                        throw ;
                     }
                 }
 
@@ -749,30 +728,33 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
         {
 
 
-            DatasetManager dm = new DatasetManager();
-            DataStructureManager dsm = new DataStructureManager();
-            if (!dm.IsDatasetCheckedIn(id))
-                return;
-
-            DatasetVersion dsv = dm.GetDatasetLatestVersion(id);
-            StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
-            if (sds == null)
-                return;
-
-            indexStructureDataStructcure(sds, ref dataset, docId);
-
-            if (!includePrimaryData)
-                return;
-
-            try
+            using (DatasetManager dm = new DatasetManager())
+            using (DataStructureManager dsm = new DataStructureManager())
             {
+                if (!dm.IsDatasetCheckedIn(id))
+                    return;
+
+                DatasetVersion dsv = dm.GetDatasetLatestVersion(id);
+                StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
+                if (sds == null)
+                    return;
+
+                indexStructureDataStructcure(sds, ref dataset, docId);
+
+                if (!includePrimaryData)
+                    return;
+
+
+
+                // Javad: check if the dataset is "checked-in". If yes, then use the paging version of the GetDatasetVersionEffectiveTuples method
+                // number of tuples for the for loop is also available via GetDatasetVersionEffectiveTupleCount
+                // a proper fetch (page) size can be obtained by calling dm.PreferedBatchSize
+                int fetchSize = dm.PreferedBatchSize;
+                long tupleSize = dm.GetDatasetVersionEffectiveTupleCount(dsv);
+                long noOfFetchs = tupleSize / fetchSize + 1;
+
+                if (tupleSize > 0)
                 {
-                    // Javad: check if the dataset is "checked-in". If yes, then use the paging version of the GetDatasetVersionEffectiveTuples method
-                    // number of tuples for the for loop is also available via GetDatasetVersionEffectiveTupleCount
-                    // a proper fetch (page) size can be obtained by calling dm.PreferedBatchSize
-                    int fetchSize = dm.PreferedBatchSize;
-                    long tupleSize = dm.GetDatasetVersionEffectiveTupleCount(dsv);
-                    long noOfFetchs = tupleSize / fetchSize + 1;
                     for (int round = 0; round < noOfFetchs; round++)
                     {
                         List<string> primaryDataStringToindex = null;
@@ -799,7 +781,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                             {
                                 if (primaryDataStringToindex != null && primaryDataStringToindex.Count > 0)
                                 {
-
+                                    primaryDataStringToindex = primaryDataStringToindex.Distinct().ToList();
                                     foreach (string pDataValue in primaryDataStringToindex)
                                     // Loop through List with foreach
                                     {
@@ -820,15 +802,6 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                dm.Dispose();
-                dsm.Dispose();
             }
         }
 
@@ -868,124 +841,124 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
         /// <seealso cref=""/>        
         public void updateIndex(Dictionary<long, IndexingAction> datasetsToIndex)
         {
-
-            try
+            using (DatasetManager dm = new DatasetManager())
             {
-                if (!isIndexConfigured)
+                try
                 {
-                    this.configureBexisIndexing(false);
-                }
-                foreach (KeyValuePair<long, IndexingAction> pair in datasetsToIndex)
-                {
-                    DatasetManager dm = new DatasetManager();
-
-                    if (pair.Value == IndexingAction.CREATE)
+                    if (!isIndexConfigured)
                     {
-                        Query query = new TermQuery(new Term("doc_id", pair.Key.ToString()));
-                        TopDocs tds = BexisIndexSearcher.getIndexSearcher().Search(query, 1);
+                        this.configureBexisIndexing(false);
+                    }
+                    foreach (KeyValuePair<long, IndexingAction> pair in datasetsToIndex)
+                    {
+                        if (pair.Value == IndexingAction.CREATE)
+                        {
+                            Query query = new TermQuery(new Term("doc_id", pair.Key.ToString()));
+                            TopDocs tds = BexisIndexSearcher.getIndexSearcher().Search(query, 1);
 
-                        if (tds.TotalHits < 1) { writeBexisIndex(pair.Key, dm.GetDatasetLatestMetadataVersion(pair.Key)); }
-                        else
+                            if (tds.TotalHits < 1) { writeBexisIndex(pair.Key, dm.GetDatasetLatestMetadataVersion(pair.Key)); }
+                            else
+                            {
+                                indexWriter.DeleteDocuments(new Term("doc_id", pair.Key.ToString()));
+                                autoCompleteIndexWriter.DeleteDocuments(new Term("id", pair.Key.ToString()));
+                                writeBexisIndex(pair.Key, dm.GetDatasetLatestMetadataVersion(pair.Key));
+                            }
+                        }
+                        else if (pair.Value == IndexingAction.DELETE)
+                        {
+                            indexWriter.DeleteDocuments(new Term("doc_id", pair.Key.ToString()));
+                            autoCompleteIndexWriter.DeleteDocuments(new Term("id", pair.Key.ToString()));
+                        }
+                        else if (pair.Value == IndexingAction.UPDATE)
                         {
                             indexWriter.DeleteDocuments(new Term("doc_id", pair.Key.ToString()));
                             autoCompleteIndexWriter.DeleteDocuments(new Term("id", pair.Key.ToString()));
                             writeBexisIndex(pair.Key, dm.GetDatasetLatestMetadataVersion(pair.Key));
                         }
                     }
-                    else if (pair.Value == IndexingAction.DELETE)
-                    {
-                        indexWriter.DeleteDocuments(new Term("doc_id", pair.Key.ToString()));
-                        autoCompleteIndexWriter.DeleteDocuments(new Term("id", pair.Key.ToString()));
-                    }
-                    else if (pair.Value == IndexingAction.UPDATE)
-                    {
-                        indexWriter.DeleteDocuments(new Term("doc_id", pair.Key.ToString()));
-                        autoCompleteIndexWriter.DeleteDocuments(new Term("id", pair.Key.ToString()));
-                        writeBexisIndex(pair.Key, dm.GetDatasetLatestMetadataVersion(pair.Key));
-                    }
+                    indexWriter.Commit();
+                    autoCompleteIndexWriter.Commit();
+                    BexisIndexSearcher.searcher = new IndexSearcher(indexWriter.GetReader());
+                    BexisIndexSearcher._Reader = indexWriter.GetReader();
+                    BexisIndexSearcher.autoCompleteSearcher = new IndexSearcher(autoCompleteIndexWriter.GetReader());
+
                 }
-                indexWriter.Commit();
-                autoCompleteIndexWriter.Commit();
-                BexisIndexSearcher.searcher = new IndexSearcher(indexWriter.GetReader());
-                BexisIndexSearcher._Reader = indexWriter.GetReader();
-                BexisIndexSearcher.autoCompleteSearcher = new IndexSearcher(autoCompleteIndexWriter.GetReader());
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    autoCompleteIndexWriter.Dispose();
+                    indexWriter.Dispose();
 
-
+                    BexisIndexSearcher.searcher = new IndexSearcher(indexWriter.GetReader());
+                    BexisIndexSearcher.autoCompleteSearcher = new IndexSearcher(autoCompleteIndexWriter.GetReader());
+                }
 
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                autoCompleteIndexWriter.Dispose();
-                indexWriter.Dispose();
-
-                BexisIndexSearcher.searcher = new IndexSearcher(indexWriter.GetReader());
-                BexisIndexSearcher.autoCompleteSearcher = new IndexSearcher(autoCompleteIndexWriter.GetReader());
-            }
-
         }
 
         public void updateSingleDatasetIndex(long datasetId, IndexingAction indAction)
         {
-            try
+            using (DatasetManager dm = new DatasetManager())
             {
-
-                if (!isIndexConfigured)
+                try
                 {
-                    this.configureBexisIndexing(false);
-                }
-                DatasetManager dm = new DatasetManager();
-                if (indAction == IndexingAction.CREATE)
-                {
-                    Query query = new TermQuery(new Term("doc_id", datasetId.ToString()));
-                    TopDocs tds = BexisIndexSearcher.getIndexSearcher().Search(query, 1);
 
-                    this.includePrimaryData = false;
+                    if (!isIndexConfigured)
+                    {
+                        this.configureBexisIndexing(false);
+                    }
 
-                    if (tds.TotalHits < 1) { writeBexisIndex(datasetId, dm.GetDatasetLatestMetadataVersion(datasetId)); }
-                    else
+                    if (indAction == IndexingAction.CREATE)
+                    {
+                        Query query = new TermQuery(new Term("doc_id", datasetId.ToString()));
+                        TopDocs tds = BexisIndexSearcher.getIndexSearcher().Search(query, 1);
+
+                        this.includePrimaryData = false;
+
+                        if (tds.TotalHits < 1) { writeBexisIndex(datasetId, dm.GetDatasetLatestMetadataVersion(datasetId)); }
+                        else
+                        {
+                            indexWriter.DeleteDocuments(new Term("doc_id", datasetId.ToString()));
+                            autoCompleteIndexWriter.DeleteDocuments(new Term("id", datasetId.ToString()));
+                            writeBexisIndex(datasetId, dm.GetDatasetLatestMetadataVersion(datasetId));
+                        }
+                    }
+                    else if (indAction == IndexingAction.DELETE)
+                    {
+                        indexWriter.DeleteDocuments(new Term("doc_id", datasetId.ToString()));
+                        autoCompleteIndexWriter.DeleteDocuments(new Term("id", datasetId.ToString()));
+                    }
+                    else if (indAction == IndexingAction.UPDATE)
                     {
                         indexWriter.DeleteDocuments(new Term("doc_id", datasetId.ToString()));
                         autoCompleteIndexWriter.DeleteDocuments(new Term("id", datasetId.ToString()));
                         writeBexisIndex(datasetId, dm.GetDatasetLatestMetadataVersion(datasetId));
                     }
+
+                    indexWriter.Commit();
+                    autoCompleteIndexWriter.Commit();
+                    BexisIndexSearcher.searcher = new IndexSearcher(indexWriter.GetReader());
+                    BexisIndexSearcher._Reader = indexWriter.GetReader();
+                    BexisIndexSearcher.autoCompleteSearcher = new IndexSearcher(autoCompleteIndexWriter.GetReader());
+
+
                 }
-                else if (indAction == IndexingAction.DELETE)
+                catch (Exception ex)
                 {
-                    indexWriter.DeleteDocuments(new Term("doc_id", datasetId.ToString()));
-                    autoCompleteIndexWriter.DeleteDocuments(new Term("id", datasetId.ToString()));
+                    throw ex;
                 }
-                else if (indAction == IndexingAction.UPDATE)
+                finally
                 {
-                    indexWriter.DeleteDocuments(new Term("doc_id", datasetId.ToString()));
-                    autoCompleteIndexWriter.DeleteDocuments(new Term("id", datasetId.ToString()));
-                    writeBexisIndex(datasetId, dm.GetDatasetLatestMetadataVersion(datasetId));
+                    BexisIndexSearcher.searcher = new IndexSearcher(indexWriter.GetReader());
+                    BexisIndexSearcher.autoCompleteSearcher = new IndexSearcher(autoCompleteIndexWriter.GetReader());
+
+                    indexWriter.Dispose();
+                    autoCompleteIndexWriter.Dispose();
                 }
-
-                indexWriter.Commit();
-                autoCompleteIndexWriter.Commit();
-                BexisIndexSearcher.searcher = new IndexSearcher(indexWriter.GetReader());
-                BexisIndexSearcher._Reader = indexWriter.GetReader();
-                BexisIndexSearcher.autoCompleteSearcher = new IndexSearcher(autoCompleteIndexWriter.GetReader());
-
-
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                BexisIndexSearcher.searcher = new IndexSearcher(indexWriter.GetReader());
-                BexisIndexSearcher.autoCompleteSearcher = new IndexSearcher(autoCompleteIndexWriter.GetReader());
-
-                indexWriter.Dispose();
-                autoCompleteIndexWriter.Dispose();
-            }
-
         }
 
 
@@ -1000,11 +973,17 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
         /// <return></return>
         private void writeAutoCompleteIndex(String docId, String f, String V)
         {
+            /*
+             * this line was commented out because it is very time intensive. after tests no further problems were found
+             */
+            //autoCompleteIndexWriter.GetReader().Reopen(); 
+
             var dataset = new Document();
             dataset.Add(new Field("id", docId.ToLower(), Lucene.Net.Documents.Field.Store.NO, Field.Index.NOT_ANALYZED));
             dataset.Add(new Field("field", f.ToLower(), Lucene.Net.Documents.Field.Store.NO, Field.Index.NOT_ANALYZED));
             dataset.Add(new Field("value", V.ToLower(), Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
             autoCompleteIndexWriter.AddDocument(dataset);
+
         }
 
         /// <summary>

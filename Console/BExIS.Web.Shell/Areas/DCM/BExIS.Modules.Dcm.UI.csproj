@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="..\..\..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props" Condition="Exists('..\..\..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" />
+  <Import Project="..\..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('..\..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props')" />
+  <Import Project="..\..\..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props" Condition="Exists('..\..\..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props')" />
+  <Import Project="..\..\..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props" Condition="Exists('..\..\..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props')" />
+  <Import Project="..\..\..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props" Condition="Exists('..\..\..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -61,7 +65,7 @@
       <HintPath>..\..\..\..\packages\F23.StringSimilarity.3.0.0\lib\netstandard1.0\F23.StringSimilarity.dll</HintPath>
     </Reference>
     <Reference Include="Iesi.Collections, Version=4.0.0.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\packages\Iesi.Collections.4.0.0.4000\lib\net40\Iesi.Collections.dll</HintPath>
+      <HintPath>..\..\..\..\packages\Iesi.Collections.4.0.1.4000\lib\net40\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\..\..\..\Libraries\Ionic.Zip.dll</HintPath>
@@ -71,7 +75,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.Web.Helpers">
       <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebHelpers.3.2.3\lib\net45\Microsoft.Web.Helpers.dll</HintPath>
     </Reference>
@@ -91,10 +94,12 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.IO" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -102,8 +107,11 @@
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Web.Http, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.7\lib\net45\System.Web.Http.dll</HintPath>
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web.Routing" />
@@ -214,26 +222,25 @@
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="DcmModule.cs" />
     <Compile Include="Helpers\API\DataApiHelper.cs" />
+    <Compile Include="Helpers\DataASyncUploadHelper.cs" />
     <Compile Include="Helpers\DcmSeedDataGenerator.cs" />
     <Compile Include="Helpers\EasyUploadSuggestion.cs" />
     <Compile Include="Helpers\EntityReferenceHelper.cs" />
     <Compile Include="Helpers\FormHelper.cs" />
+    <Compile Include="Helpers\SettingsHelper.cs" />
     <Compile Include="Helpers\SystemMetadataHelper.cs" />
     <Compile Include="Helpers\UploadUIHelper.cs" />
-    <Compile Include="Helpers\JaroWinklerDistance.cs" />
-    <Compile Include="Models\EasyUploadVariableInformation.cs" />
-    <Compile Include="Models\OntologyMappingSuggestion.cs" />
-    <Compile Include="Helpers\EntityCharacteristicPair.cs" />
     <Compile Include="Models\AbstractStepModel.cs" />
     <Compile Include="Models\API\ApiModels.cs" />
+    <Compile Include="Models\AsciiReaderEasyUpload.cs" />
     <Compile Include="Models\Attachments\DatasetFileModel.cs" />
     <Compile Include="Models\ChooseDatasetViewModel.cs" />
-    <Compile Include="Models\AsciiReaderEasyUpload.cs" />
     <Compile Include="Models\CreateDatasetViewModel.cs" />
     <Compile Include="Models\CreateDataset\MetadataEditorModel.cs" />
     <Compile Include="Models\CreateDataset\SetupModel.cs" />
     <Compile Include="Models\CreateDataset\StepModelHelper.cs" />
     <Compile Include="Models\EasyUploadSummaryModel.cs" />
+    <Compile Include="Models\EasyUploadVariableInformation.cs" />
     <Compile Include="Models\EntityReference\ReferenceModels.cs" />
     <Compile Include="Models\FileInfoModel.cs" />
     <Compile Include="Models\FinishUploadModel.cs" />
@@ -248,6 +255,7 @@
     <Compile Include="Models\Metadata\MetadataCompoundAttributeModel.cs" />
     <Compile Include="Models\Metadata\MetadataInstanceModel.cs" />
     <Compile Include="Models\Metadata\MetadataPackageModel.cs" />
+    <Compile Include="Models\OntologyMappingSuggestion.cs" />
     <Compile Include="Models\PiUserModels.cs" />
     <Compile Include="Models\PrimaryKeyViewModel.cs" />
     <Compile Include="Models\Push\SendBigFilesToServerModel.cs" />
@@ -474,16 +482,12 @@
     <Content Include="Dcm.Settings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
-    <Content Include="Content\bootstrap.css.map" />
-    <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Images\DCM_SelectFileStructure\left-right.png" />
     <Content Include="Images\DCM_SelectFileStructure\matrix.png" />
     <Content Include="Images\DCM_SelectFileStructure\top-down.png" />
+    <Content Include="Scripts\bootstrap.js" />
+    <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\entity.reference.js" />
     <Content Include="Scripts\Form.js" />
     <Content Include="Scripts\minimap\minimap.js" />
@@ -559,10 +563,17 @@
     <Content Include="Views\EntityReference\Index.cshtml" />
     <Content Include="Views\EntityReference\_create.cshtml" />
     <Content Include="Views\EntityReference\Show.cshtml" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Content\bootstrap.min.css.map" />
+    <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Content\bootstrap-theme.min.css.map" />
+    <Content Include="Content\bootstrap-theme.css.map" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
-    <Content Include="Views\CreateDataset\_PiPartial.cshtml" />
-    <Content Include="Views\EasyUploadVerification\_mappingSuggestionDropdowns.cshtml" />
-    <Content Include="Views\EasyUploadVerification\rowtable.cshtml" />
+    <None Include="Properties\PublishProfiles\TestServer_release.pubxml" />
+    <None Include="Properties\PublishProfiles\TestServer_dev.pubxml" />
     <None Include="Properties\PublishProfiles\TestServer.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -627,7 +638,7 @@
       <Name>BExIS.IO.Transform.Validation</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\IO\BExIS.IO\BExIS.IO.csproj">
-      <Project>{e4795f06-20c2-4c4c-a720-9a79896384df}</Project>
+      <Project>{E4795F06-20C2-4C4C-A720-9A79896384DF}</Project>
       <Name>BExIS.IO</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\UI\BExIS.UI\BExIS.UI.csproj">
@@ -637,10 +648,6 @@
     <ProjectReference Include="..\..\..\..\Components\Utils\BExIS.Utils.Data\BExIS.Utils.Data.csproj">
       <Project>{a7fbcc13-7e29-4710-82a1-bd6d6f811fda}</Project>
       <Name>BExIS.Utils.Data</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Components\Utils\BExIS.Utils.NH\BExIS.Utils.NH.csproj">
-      <Project>{0f1ec13e-d685-4f4d-a438-52797b0e53a0}</Project>
-      <Name>BExIS.Utils.NH</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\Utils\BExIS.Utils\BExIS.Utils.csproj">
       <Project>{782b71c1-707f-4ab1-80e9-90d2880635b4}</Project>
@@ -654,9 +661,9 @@
       <Project>{C0C9F0F2-9E65-448D-8000-D311DB326460}</Project>
       <Name>BExIS.Xml.Models</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Orm.NH\BExIS.Aam.Orm.NH.csproj">
-      <Project>{867a1e69-2f75-4f4b-a28c-026f0f5654b1}</Project>
-      <Name>BExIS.Aam.Orm.NH</Name>
+    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
+      <Project>{2B541D06-3259-4AA3-AE6A-452C8F67164D}</Project>
+      <Name>BExIS.Aam.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Services\BExIS.Aam.Services.csproj">
       <Project>{898568BE-061E-44D2-A94C-04729F07DDCA}</Project>
@@ -690,32 +697,21 @@
       <Project>{e5128814-4541-45c8-a9e6-6c91a7e3d1e2}</Project>
       <Name>BExIS.Web.Shell</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AAM\BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
-      <Project>{2b541d06-3259-4aa3-ae6a-452c8f67164d}</Project>
-      <Name>BExIS.Aam.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AAM\BExIS.Aam.Services\BExIS.Aam.Services.csproj">
-      <Project>{898568be-061e-44d2-a94c-04729f07ddca}</Project>
-      <Name>BExIS.Aam.Services</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DIM\BExIS.Modules.Dim.UI.csproj">
       <Project>{9bfffd11-03c6-47df-9cc9-f458a9a49377}</Project>
       <Name>BExIS.Modules.Dim.UI</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <COMReference Include="Microsoft.Office.Core">
-      <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
-      <VersionMajor>2</VersionMajor>
-      <VersionMinor>8</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>primary</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Connected Services\" />
+    <Analyzer Include="..\..\..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.VersionCheckAnalyzer.resources.dll" />
+    <Analyzer Include="..\..\..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
+    <Analyzer Include="..\..\..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\analyzers\dotnet\cs\Humanizer.dll" />
+    <Analyzer Include="..\..\..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.CodeQuality.Analyzers.dll" />
+    <Analyzer Include="..\..\..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.CodeQuality.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\..\..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetCore.Analyzers.dll" />
+    <Analyzer Include="..\..\..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetCore.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
+    <Analyzer Include="..\..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -728,7 +724,6 @@
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
@@ -749,8 +744,11 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
-    <Error Condition="!Exists('..\..\..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\..\..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props'))" />
+    <Error Condition="!Exists('..\..\..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props'))" />
+    <Error Condition="!Exists('..\..\..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props'))" />
+    <Error Condition="!Exists('..\..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props'))" />
+    <Error Condition="!Exists('..\..\..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props'))" />
   </Target>
   <Import Project="..\..\..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets" Condition="Exists('..\..\..\..\packages\PostSharp.4.3.19\tools\PostSharp.targets')" />
   <Target Name="EnsurePostSharpImported" BeforeTargets="BeforeBuild" Condition="'$(PostSharp30Imported)' == ''">
