@@ -14,57 +14,57 @@
             }
 
             @{
-        if ((Model != null) && (Model.resultListComponent != null))
-        {
-            <ul>
-                        @{
-                    for (int id = 0; id < Model.resultListComponent.bibliographylist.Count; id++)
-                    {
-                        Bibliographylist pub = Model.resultListComponent.bibliographylist.ElementAt(id);
-                        String formattedTitle = pub.articleTitle;
-
-                        //Format the display String to F.Lastname: Title
-                        if (!(pub.authors == null) && !(pub.authors.Count <= 0))
-                        {
-                            Author firstAuthor = pub.authors.First();
-                            if (!String.IsNullOrEmpty(firstAuthor.lastname))
-                            {
-                                formattedTitle = firstAuthor.lastname + ": " + formattedTitle;
-                            }
-                            if (!String.IsNullOrEmpty(firstAuthor.firstname))
-                            {
-                                formattedTitle = firstAuthor.firstname[0] + ". " + formattedTitle;
-                            }
-                        }
-                        if (id == 0 && Model.resultListComponent.bibliographylist.Count > 1)
-                        {
-                            <a class="detailsLink" href="@Url.Action("ShowDetails", "SemanticSearch", new { id = id })">
-                                <li class="semedicoResult" id="firstSemedicoResult"><div class="resultContainer">@formattedTitle</div></li>
-                            </a>
-                    //Alternative: only text clickable
-                    //<li class="semedicoResult" id="firstSemedicoResult"><div class="resultContainer">@Html.ActionLink(pub.articleTitle, "showDetails", new { id = id })</div></li>
-                }
-                else if (id == (Model.resultListComponent.bibliographylist.Count - 1))
+                if ((Model != null) && (Model.resultListComponent != null))
                 {
-                    <a class="detailsLink" href="@Url.Action("ShowDetails", "SemanticSearch", new { id = id })">
-                        <li class="semedicoResult" id="lastSemedicoResult"><div class="resultContainer">@formattedTitle</div></li>
-                    </a>
-            //Alternative: only text clickable
-            //<li class="semedicoResult" id="lastSemedicoResult"><div class="resultContainer">@Html.ActionLink(pub.articleTitle, "showDetails", new { id = id })</div></li>
-        }
-        else
-        {
-            <a class="detailsLink" href="@Url.Action("ShowDetails", "SemanticSearch", new { id = id })">
-                <li class="semedicoResult"><div class="resultContainer">@formattedTitle</div></li>
-            </a>
-    //Alternative: only text clickable
-    //<li class="semedicoResult"><div class="resultContainer">@Html.ActionLink(pub.articleTitle, "showDetails", new { id = id })</div></li>
-}
-}
+                    <ul>
+                        @{
+                            for (int id = 0; id < Model.resultListComponent.bibliographylist.Count; id++)
+                            {
+                                Bibliographylist pub = Model.resultListComponent.bibliographylist.ElementAt(id);
+                                String formattedTitle = pub.articleTitle;
+
+                                //Format the display String to F.Lastname: Title
+                                if (!(pub.authors == null) && !(pub.authors.Count <= 0))
+                                {
+                                    Author firstAuthor = pub.authors.First();
+                                    if (!String.IsNullOrEmpty(firstAuthor.lastname))
+                                    {
+                                        formattedTitle = firstAuthor.lastname + ": " + formattedTitle;
+                                    }
+                                    if (!String.IsNullOrEmpty(firstAuthor.firstname))
+                                    {
+                                        formattedTitle = firstAuthor.firstname[0] + ". " + formattedTitle;
+                                    }
+                                }
+                                if (id == 0 && Model.resultListComponent.bibliographylist.Count > 1)
+                                {
+                                    <a class="detailsLink" href="@Url.Action("ShowDetails", "SemanticSearch", new { id = id })">
+                                        <li class="semedicoResult" id="firstSemedicoResult"><div class="resultContainer">@formattedTitle</div></li>
+                                    </a>
+                                    //Alternative: only text clickable
+                                    //<li class="semedicoResult" id="firstSemedicoResult"><div class="resultContainer">@Html.ActionLink(pub.articleTitle, "showDetails", new { id = id })</div></li>
+                                }
+                                else if (id == (Model.resultListComponent.bibliographylist.Count - 1))
+                                {
+                                    <a class="detailsLink" href="@Url.Action("ShowDetails", "SemanticSearch", new { id = id })">
+                                        <li class="semedicoResult" id="lastSemedicoResult"><div class="resultContainer">@formattedTitle</div></li>
+                                    </a>
+                                    //Alternative: only text clickable
+                                    //<li class="semedicoResult" id="lastSemedicoResult"><div class="resultContainer">@Html.ActionLink(pub.articleTitle, "showDetails", new { id = id })</div></li>
+                                }
+                                else
+                                {
+                                    <a class="detailsLink" href="@Url.Action("ShowDetails", "SemanticSearch", new { id = id })">
+                                        <li class="semedicoResult"><div class="resultContainer">@formattedTitle</div></li>
+                                    </a>
+                                    //Alternative: only text clickable
+                                    //<li class="semedicoResult"><div class="resultContainer">@Html.ActionLink(pub.articleTitle, "showDetails", new { id = id })</div></li>
+                                }
+                            }
                         }
                     </ul>
-            
-        }
+
+                }
             }
         </div>
         <div>
@@ -73,7 +73,7 @@
                     ((Model.resultListComponent.subsetstart - Model.resultListComponent.subsetsize) >= 1))
                 {
                     //Button for loading the previous results - triggers new ajax http-request
-                    <button id="prevButton" type="button" style="float: left">
+                    <button id="prevButton" type="button" style="float: left" onclick="get_dataset_related_papers_by_ID('','prevpage')">
                         <i id="spinner2" class="fa fa-spinner fa-spin" style="display:none"></i>Previous
                     </button>
                 }
@@ -82,7 +82,7 @@
                     ((Model.resultListComponent.subsetstart + Model.resultListComponent.subsetsize) < Model.resultListComponent.countallresults))
                 {
                     //Button for loading the next results - triggers new ajax http-request
-                    <button id="nextButton" type="button" style="float: right">
+                    <button id="nextButton" type="button" style="float: right" onclick="get_dataset_related_papers_by_ID('','nextpage')">
                         <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Next
                     </button>
                 }
@@ -105,47 +105,47 @@
         {
 
             @(Html.Telerik().Window().ClientEvents(ev => ev.OnClose("onCloseWindow"))
-                                                                                    .Name("Details")
-                                                                                    .Visible((bool)Session["Window"])
-                                                                                    .Content(@<text>
-                                                                                        <div id="SemedicoSearchDetailWindow" style="width:700px">
-                                                                                            <h2 style="margin-bottom : -10px">@Model.detailsComponent.Title</h2>
-                                                                                            <div>
-                                                                                                @{
-                                                                                                            foreach (String author in Model.detailsComponent.FormattedAuthors)
-                                                                                                            {
-                                                                                                        <h4>@author</h4>
-                                                                                                            }
-                                                                                                }
-                                                                                            </div>
-                                                                                            <b><a href="javascript:toggle('publishedDiv')">Published in</a></b>
-                                                                                            <div id="publishedDiv" style="display:none">
-                                                                                                @Model.detailsComponent.Publication
-                                                                                            </div>
-                                                                                            <div></div>
-                                                                                            <b><a href="javascript:toggle('abstractDiv')">Abstract</a></b>
-                                                                                            <div id="abstractDiv" style="display:none">
-                                                                                                @Model.detailsComponent.AbstractText
-                                                                                            </div>
-                                                                                            <div>
-                                                                                                @{
-                                                                                                            int i = 0;
-                                                                                                            foreach (Object o in Model.detailsComponent.Links)
-                                                                                                            {
-                                                                                                                if (i == 0)
-                                                                                                                {
-                                                                                                            <a href="javascript:toggleGroup('linkDiv')"><b>External Links</b></a>
-                                                                                                                    i++;
-                                                                                                                }
-                                                                                                        <div class="linkDiv" style="display:none"><a href=@o>@o</a></div>
-                                                                                                            }
+                 .Name("Details")
+                 .Visible((bool)Session["Window"])
+                 .Content(@<text>
+                     <div id="SemedicoSearchDetailWindow" style="width:700px">
+                         <h2 style="margin-bottom : -10px">@Model.detailsComponent.Title</h2>
+                         <div>
+                             @{
+                                         foreach (String author in Model.detailsComponent.FormattedAuthors)
+                                         {
+                                     <h4>@author</h4>
+                                         }
+                             }
+                         </div>
+                         <b><a href="javascript:toggle('publishedDiv')">Published in</a></b>
+                         <div id="publishedDiv" style="display:none">
+                             @Model.detailsComponent.Publication
+                         </div>
+                         <div></div>
+                         <b><a href="javascript:toggle('abstractDiv')">Abstract</a></b>
+                         <div id="abstractDiv" style="display:none">
+                             @Model.detailsComponent.AbstractText
+                         </div>
+                         <div>
+                             @{
+                                         int i = 0;
+                                         foreach (Object o in Model.detailsComponent.Links)
+                                         {
+                                             if (i == 0)
+                                             {
+                                         <a href="javascript:toggleGroup('linkDiv')"><b>External Links</b></a>
+                                                 i++;
+                                             }
+                                     <div class="linkDiv" style="display:none"><a href=@o>@o</a></div>
+                                         }
 
-                                                                                                }
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </text>)
-                                                                                   .Draggable(true)
-                                                                                   .Modal(true)
+                             }
+                         </div>
+                     </div>
+                 </text>)
+                .Draggable(true)
+                .Modal(true)
             )
         }
     }
@@ -159,43 +159,43 @@
 
 
 
+@*
+    <script type="text/javascript">
+        $("#nextButton").click(function () {
+            $('#spinner').show();
+            $('#nextButton').prop('disabled', true);
+            $.ajax({
+                complete: function () {
+                    $('#spinner').hide();
+                    $('#nextButton').prop('disabled', false);
+                },
+                url: "/DDM/SemanticSearch/nextPage",
+                type: "get",
+                success: function (result) {
+                    $("#semedicoSearchContentContainer").html(result);
+                }
+            });
 
-<script type="text/javascript">
-    $("#nextButton").click(function () {
-        $('#spinner').show();
-        $('#nextButton').prop('disabled', true);
-        $.ajax({
-            complete: function () {
-                $('#spinner').hide();
-                $('#nextButton').prop('disabled', false);
-            },
-            url: "/DDM/SemanticSearch/nextPage",
-            type: "get",
-            success: function (result) {
-                $("#semedicoSearchContentContainer").html(result);
-            }
-        });
-        
-    })
+        })
 
-    $("#prevButton").click(function () {
-        $('#spinner2').show();
-        $('#prevButton').prop('disabled', true);
-        $.ajax({
-            complete: function () {
-                $('#spinner2').hide();
-                $('#prevButton').prop('disabled', false);
-            },
-            url: "/DDM/SemanticSearch/prevPage",
-            type: "get",
-            success: function (result) {
-                $("#semedicoSearchContentContainer").html(result);
-            }
-        });
-    })
+        $("#prevButton").click(function () {
+            $('#spinner2').show();
+            $('#prevButton').prop('disabled', true);
+            $.ajax({
+                complete: function () {
+                    $('#spinner2').hide();
+                    $('#prevButton').prop('disabled', false);
+                },
+                url: "/DDM/SemanticSearch/prevPage",
+                type: "get",
+                success: function (result) {
+                    $("#semedicoSearchContentContainer").html(result);
+                }
+            });
+        })
 
-</script>
-
+    </script>
+*@
 <script type="text/javascript">
     function handleOnSelect(e) {
         // `this` is the DOM element of the treeview
@@ -249,7 +249,7 @@
 
     }
 
-    
+
 </script>
 
 <style>

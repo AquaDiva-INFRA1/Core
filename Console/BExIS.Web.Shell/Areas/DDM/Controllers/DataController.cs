@@ -440,6 +440,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         /// <returns>model</returns>
         public ActionResult ShowMetaData(long entityId, string title, long metadatastructureId, long datastructureId, long researchplanId, string sessionKeyForMetadata, bool latest, string isValid = "yes")
         {
+            //TEMPORARY WORKAROUND - REMOVE ASAP WHEN THE PROBLEM IS RESOLVED
+            if (GetUsernameOrDefault() == "DEFAULT")
+            {
+                return RedirectToAction("Login", "Ldap", new RouteValueDictionary { { "area", "" } });
+            }
+
             var result = this.Run("DCM", "Form", "SetAdditionalFunctions", new RouteValueDictionary() { { "actionName", "Copy" }, { "controllerName", "CreateDataset" }, { "area", "DCM" }, { "type", "copy" } });
             result = this.Run("DCM", "Form", "SetAdditionalFunctions", new RouteValueDictionary() { { "actionName", "Reset" }, { "controllerName", "Form" }, { "area", "Form" }, { "type", "reset" } });
             result = this.Run("DCM", "Form", "SetAdditionalFunctions", new RouteValueDictionary() { { "actionName", "Cancel" }, { "controllerName", "Form" }, { "area", "DCM" }, { "type", "cancel" } });
