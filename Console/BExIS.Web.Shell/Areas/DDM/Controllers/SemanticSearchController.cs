@@ -44,8 +44,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static ShowSemanticResultModel model;
         static List<HeaderItem> headerItems;
         static String semanticSearchURL = "http://localhost:2607/bexis/search/";
-        static String semedicoSearchURL = "http://semedico.org/Webservice";
-        //static String semedicoSearchURL = "http://localhost:3000";
+        static String semedicoSearchURL = "http://aquadiva-semeddev.inf-bb.uni-jena.de:8080/";
         static HeaderItem idHeader;
 
         static Dictionary<String, List<OntologyMapping>> mappingDic;
@@ -990,11 +989,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             * */
         private String consumeSemedicoREST(String searchTerm, int subsetStart = 1, int subsetSize = 10)
         {
-            //debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " consumeSemedicoREST is called ");
-            }
             #region Http-Request
             //Construct a HttpClient for the search-Server
             HttpClient client = new HttpClient();
@@ -1074,27 +1068,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
          * */
         private String consumeSemedicoREST_v2(String query_String, int subsetStart = 1, int subsetSize = 10)
         {
-
-            //debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : consumeSemedicoREST_v2 is called " );
-            }
-
             #region Http-Request
             //Construct a HttpClient for the search-Server
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(semedicoSearchURL);
             client.Timeout = TimeSpan.FromSeconds(30);
             //Set the searchTerm as query-String
-            String param = ("?inputstring=" + query_String + "&subsetstart=" + subsetStart + "&subsetsize=" + subsetSize);
+            String param = ("?request=" + query_String + "&start=" + subsetStart + "&size=" + subsetSize);
             String output = null;
-
-            //debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : consumeSemedicoREST_v2 params : "+param);
-            }
 
             try
             {
@@ -1103,21 +1084,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     // Get the response body. Blocking!
                     output = response.Content.ReadAsStringAsync().Result;
-                    //debugging file
-                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                    {
-                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : consumeSemedicoREST_v2 is successful with results : "+output);
-                    }
+                    
                 }
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.ToString());
-                //debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : consumeSemedicoREST_v2 threw an exception : "+e.Message);
-                }
                 return null;
             }
             #endregion
@@ -1133,32 +1105,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
             //List<Aam_Dataset_column_annotation> annots = (List < Aam_Dataset_column_annotation > ) aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id));
             foreach (Aam_Dataset_column_annotation ann in aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id)))
-                request_string = request_string + clean_labels(ann.characteristic_id.label) + clean_labels(ann.entity_id.label) + ",";
-            
+                //request_string = request_string + clean_labels(ann.characteristic_id.label) + clean_labels(ann.entity_id.label) + ",";
+                request_string = request_string + ann.characteristic_id.URI.ToString() +";"+ ann.entity_id.URI.ToString() + ",";
+
             return request_string.Substring(0, request_string.Length - 1);
         }
 
         public String get_dataset_related_papers_by_ID(String id,String flag)
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            /*
-            if (model.resultListComponent == null)
-            {
-                return JsonConvert.SerializeObject(null, Newtonsoft.Json.Formatting.Indented);
-            }
-            if (model.resultListComponent.searchTermString == null)
-            {
-                return JsonConvert.SerializeObject(null, Newtonsoft.Json.Formatting.Indented);
-            }
-            */
-
-            // debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_dataset_related_papers_by_ID is called ");
-            }
-
-
             String Semedico_Result ="";
             String Query_4_API;
 
@@ -1170,14 +1124,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     return "";
                 }
                 Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
-
-                // debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_dataset_related_papers_by_ID query for Semedico api : " + Query_4_API);
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : get_dataset_related_papers_by_ID calling for Semedico api : ");
-                }
-
 
                 Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
                 // to resolve the semedico API "session" problem
@@ -1210,15 +1156,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 }
             }
             ViewData["page"] = model.resultListComponent.subsetstart;
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Debug.WriteLine("Execution time (millisecondes) for DDM/get_dataset_related_papers_by_ID ==> " +elapsedMs);
-
-            // debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Execution time (millisecondes) for DDM/get_dataset_related_papers_by_ID ==> : " + elapsedMs);
-            }
 
             Debug.WriteLine("====> Semedico result " + Semedico_Result);
             return model.resultListComponent.subsetstart + "\n" +  Semedico_Result;

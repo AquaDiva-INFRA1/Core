@@ -47,7 +47,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         // GET: DataSummary
         private static String username = "hamdihamed";
         private static String password = "hamdi1992";
-        private static string FTPAddress = "ftp://10.35.14.52:21";
+        private static string FTPAddress = "ftp://aquadiva-analysis2.inf-bb.uni-jena.de:21";
 
         public static Dictionary<string, List<string>> dict_ = new Dictionary<string, List<string>>();
 
@@ -697,7 +697,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
             HttpClient client = new HttpClient();
             if (api_action == "") api_action = "/?";
             else api_action = api_action + "&";
-                client.BaseAddress = new Uri("http://10.35.14.52:5000" +
+                client.BaseAddress = new Uri("http://aquadiva-analysis2.inf-bb.uni-jena.de:8080" +
                     api_action + "file_path=" + filename + "&user_home_directory=" + name);
             //Set the searchTerm as query-String
             StringBuilder paramBuilder = new StringBuilder();
