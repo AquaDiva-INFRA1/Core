@@ -46,11 +46,11 @@ namespace BExIS.Web.Shell.Controllers
                             return View("Confirm", LoginConfirmModel.Convert(user));
                         }
 
-                        if (!await identityUserService.IsEmailConfirmedAsync(user.Id))
-                        {
-                            ViewBag.ErrorMessage = "You must have a confirmed email address to log in.";
-                            return View("Error");
-                        }
+                        //if (!await identityUserService.IsEmailConfirmedAsync(user.Id))
+                        //{
+                        //    ViewBag.ErrorMessage = "You must have a confirmed email address to log in.";
+                        //    return View("Error");
+                        //}
 
                         SignInStatus result = ldapAuthenticationManager.ValidateUser(model.UserName, model.Password);
                         switch (result)

@@ -901,11 +901,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                             XmlDatasetHelper helper = new XmlDatasetHelper();
                             description = helper.GetInformation(datasetID, NameAttributeValues.description);
                             title = helper.GetInformation(datasetID, NameAttributeValues.title);
-                            //owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
+                            owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
 
                             row["Title"] = title;
                             row["Datasetdescription"] = description;
-                            //row["Ownername"] = owner;
+                            row["Ownername"] = owner;
 
                             m.Rows.Add(row);
                         }
@@ -1074,7 +1074,17 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             client.BaseAddress = new Uri(semedicoSearchURL);
             client.Timeout = TimeSpan.FromSeconds(30);
             //Set the searchTerm as query-String
-            String param = ("?request=" + query_String + "&start=" + subsetStart + "&size=" + subsetSize);
+            string encoded_param = "";
+            foreach (string ont_pair in query_String.Split(',').ToList<string>())
+            {
+                foreach(string pair_elem in ont_pair.Split(';').ToList<string>())
+                {
+                    encoded_param = encoded_param + HttpUtility.UrlEncode(pair_elem.Trim()) + ";" ;
+                }
+                encoded_param = encoded_param.Substring(0, encoded_param.Length - 1) + ",";
+            }
+            encoded_param = encoded_param.Substring(0, encoded_param.Length - 1);
+            String param = ("?request=" + encoded_param + "&start=" + subsetStart + "&size=" + subsetSize);
             String output = null;
 
             try
