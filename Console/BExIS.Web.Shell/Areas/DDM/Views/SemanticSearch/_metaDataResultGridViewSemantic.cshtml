@@ -306,12 +306,12 @@
                     } else {
                         //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
                         var text = "<ol>";
-                        for (i = 0; i < res.bibliographylist.length; i++) {
-                            text = text + "<li><strong><b>" + res.bibliographylist[i].articleTitle + "</b></strong></li>";
+                        for (i = 0; i < res.hits.length; i++) {
+                            text = text + "<li><strong><b>" + res.hits[i].title + "</b></strong></li>";
 
                             text = text + "<a id=\"_abstract" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>ABSTRACT</b></h5> </a>";
                             text = text + "<div id=\"abstract" + i + "\"  hidden=\"true\"> ";
-                            text = text + "<h5><p align=\"justify\">" + res.bibliographylist[i].abstractText + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\">" + res.hits[i].abstract + "</p></h5>";
                             text = text + "</div>";
 
                             text = text + "<a id=\"_publication" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>PUBLICATION</b></h5> </a>";
@@ -320,22 +320,21 @@
                             //text = text + "<h5><p align=\"justify\"> Volume: " + res.bibliographylist[i].publication.volume + "</p></h5>";
                             //text = text + "<h5><p align=\"justify\"> Issue : " + res.bibliographylist[i].publication.issue + "</p></h5>";
                             //text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].publication.pages + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> DocId: " + res.bibliographylist[i].docId + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pmid: " + res.bibliographylist[i].pmid + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Pmcid: " + res.bibliographylist[i].pmcid + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> Date: " + res.bibliographylist[i].publication.date + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> DocId: " + res.hits[i].id + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Date: " + res.hits[i].year + "</p></h5>";
                             text = text + "</div>";
 
 
                             text = text + "<a id=\"_authors" + i + "\" href=\"#\"  onclick='show_region(this,i)'> <h5><b>AUTHORS</b></h5> </a>";
                             text = text + "<div id=\"authors" + i + "\" hidden=\"true\" >";
                             text = text + "<ul>";
-                            for (j = 0; j < res.bibliographylist[i].authors.length; j++) {
-                                text = text + "<li>" + res.bibliographylist[i].authors[j].firstname + " " + res.bibliographylist[i].authors[j].lastname + "</li>";
+                            console.log(res.hits[i].author)
+                            for (j = 0; j < res.hits[i].author.split(';').length; j++) {
+                                text = text + "<li>" + res.hits[i].author.split(";")[j] + "</li>";
                             }
                             text = text + "</ul></div><br>";
 
-                            console.log("Article => " + res.bibliographylist[i].articleTitle);
+                            console.log("Article => " + res.hits[i].title);
                         }
                         text = text + "</ol>";
                         console.log("text => " + text);

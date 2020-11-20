@@ -164,7 +164,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         XmlDatasetHelper helper = new XmlDatasetHelper();
                         description = helper.GetInformation(datasetID, NameAttributeValues.description);
                         title = helper.GetInformation(datasetID, NameAttributeValues.title);
-                        //owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
+                        owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
 
                         row["Title"] = title;
                         row["Datasetdescription"] = description;

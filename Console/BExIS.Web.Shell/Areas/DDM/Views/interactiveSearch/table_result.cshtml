@@ -263,7 +263,7 @@
                     $('#previous').prop('disabled',true );
                     return true;
                 }
-                try {
+                //try {
                     l = result.split('\n')[0];
                     console.log(l);
                     result = result.substring(result.indexOf('\n') + 1);
@@ -282,7 +282,7 @@
                     } else {
                         //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
                         var text = "<ol>";
-                        for (i = 0; i < res.bibliographylist.length; i++) {
+                        for (i = 0; i < res.hits.length; i++) {
                             text = text + "<li><strong><b>" + res.hits[i].title + "</b></strong></li>";
 
                             text = text + "<a id=\"_abstract" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>ABSTRACT</b></h5> </a>";
@@ -304,7 +304,8 @@
                             text = text + "<a id=\"_authors" + i + "\" href=\"#\"  onclick='show_region(this,i)'> <h5><b>AUTHORS</b></h5> </a>";
                             text = text + "<div id=\"authors" + i + "\" hidden=\"true\" >";
                             text = text + "<ul>";
-                            for (j = 0; j < res.hits[i].author.split(";"); j++) {
+                            console.log(res.hits[i].author)
+                            for (j = 0; j < res.hits[i].author.split(';').length; j++) {
                                 text = text + "<li>" + res.hits[i].author.split(";")[j] + "</li>";
                             }
                             text = text + "</ul></div><br>";
@@ -315,13 +316,13 @@
                         console.log("text => " + text);
                         $('#results').html(text);
                     }
-                }
-                catch (er) {
-                    console.log("ERROR => " + er);
-                    var text = "<h3> Error </h3> <h4>Please a report the error</h4>";
-                    $('#results').html(text);
-                    document.getElementById("spinner_").setAttribute("hidden", true);
-                }
+                //}
+                //catch (er) {
+                //    console.log("ERROR => " + er);
+                //    var text = "<h3> Error </h3> <h4>Please a report the error</h4>";
+                //    $('#results').html(text);
+                //    document.getElementById("spinner_").setAttribute("hidden", true);
+                //}
             },
             complete: function () {
                 $('#results').show();
