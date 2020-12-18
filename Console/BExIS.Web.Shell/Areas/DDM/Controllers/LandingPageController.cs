@@ -9,6 +9,8 @@ using System.Configuration;
 using System.Linq;
 using BExIS.Modules.Rpm.UI.Models;
 using Vaiona.Web.Mvc.Data;
+using BExIS.Aam.Entities.Mapping;
+using BExIS.Aam.Services;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -37,15 +39,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             dm.Dispose();
             ViewData["datasetCount"] = datasets.Count;
             ViewData["Datapoints"] = somme;
-            string select = "select count (*) from dataset_column_annotation";
-            NpgsqlCommand MyCmd = null;
-            NpgsqlConnection MyCnx = null;
-            MyCnx = new NpgsqlConnection(Conx);
-            MyCnx.Open();
-            MyCmd = new NpgsqlCommand(select, MyCnx);
 
-            Int64 count = (Int64)MyCmd.ExecuteScalar();
-            MyCnx.Close();
+            Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager();
+            Int64 count =  aam_manager.get_all_dataset_column_annotation().Count;
 
 
             DataAttributeManagerModel dam = new DataAttributeManagerModel(false);

@@ -8,7 +8,10 @@ using BExIS.IO;
 using BExIS.IO.Transform.Input;
 using BExIS.IO.Transform.Output;
 using BExIS.IO.Transform.Validation.Exceptions;
+using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Subjects;
 using BExIS.Security.Services.Utilities;
 using BExIS.Utils.Data.Upload;
 using BExIS.Utils.Models;
@@ -27,6 +30,7 @@ using Vaiona.Entities.Common;
 using Vaiona.Logging.Aspects;
 using Vaiona.Persistence.Api;
 using Vaiona.Utils.Cfg;
+using BExIS.Security.Services.Authorization;
 
 namespace BExIS.Modules.Dcm.UI.Helpers
 {
@@ -457,6 +461,7 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                     }
 
                     #endregion unstructured data
+
                 }
                 else
                 {

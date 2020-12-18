@@ -43,8 +43,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         static ShowSemanticResultModel model;
         static List<HeaderItem> headerItems;
-        static String semanticSearchURL = "http://localhost:2607/bexis/search/";
-        static String semedicoSearchURL = "http://aquadiva-semeddev.inf-bb.uni-jena.de:8080/";
+        static String semanticSearchURL = WebConfigurationManager.AppSettings["semanticSearchURL"];//"http://localhost:2607/bexis-0.1/search/";
+        static String semedicoSearchURL = WebConfigurationManager.AppSettings["semedicoSearchURL"];//"http://aquadiva-semeddev.inf-bb.uni-jena.de:8080/";
         static HeaderItem idHeader;
 
         static Dictionary<String, List<OntologyMapping>> mappingDic;
@@ -905,7 +905,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                             row["Title"] = title;
                             row["Datasetdescription"] = description;
-                            row["Ownername"] = owner;
+                            row["Owner"] = owner;
 
                             m.Rows.Add(row);
                         }
@@ -963,7 +963,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             headerItem = new HeaderItem()
             {
-                Name = "Ownername",
+                Name = "Owner",
                 DisplayName = "Owner",
                 DataType = "String"
             };
@@ -1196,7 +1196,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             );
             ALTER TABLE observation_contexts_uri_label
               OWNER TO postgres;
-        */
+        
         public void insert_into_DB_URI_Label()
         {
             DatasetManager dsm = new DatasetManager();
@@ -1268,191 +1268,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 MyCnx.Close();
             }
         }
-
-        public string clean_entity_URI_for_insert(string uri)
-        {
-            // debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_entity_URI_for_insert called : "+uri+" ==> " + uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", ""));
-            }
-            return uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", "");
-        }
-
-        public String Get_Label_from_entity_rdf(String entity, IGraph g, SparqlParameterizedString queryString)
-        {
-            SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
-            String res = "";
-            if (results.Count != 0)
-            {
-                res = results[0]["label"].ToString().Split('^')[0];
-            }
-            if (res.Contains("@"))
-                return res.Substring(0, res.IndexOf("@"));
-            return res;
-        }
-
-        public String clean_labels(String label)
-        {
-            string k = label;
-
-            if (label.Contains("@"))
-            {
-                return label.Substring(0, label.IndexOf("@"));
-            }
-            if (label.Contains("#"))
-            {
-                return label.Substring(label.IndexOf("@"), label.Length -1);
-            }
-            else
-            {
-                return label;
-            }
-
-                
-        }
-        #endregion
-
-
-        #region fill the annotation from csv file
-        public void Fill_annotations_from_csv_file()
-        {
-            //var lines = System.IO.File.ReadLines("C:/Users/admin/Desktop/AnnotationFile(4740).csv");
-            //
-            //foreach (string line in lines)
-            //{
-            //    Debug.WriteLine("This is the line : ====>   " + line);
-            //}
-            //
-
-            string filePath = Request["filePath"];// "C:/Users/admin/Desktop/CopyofAnnotationFile.xlsx";
-
-            // debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Fill_annotations_from_csv_file called : import from " + filePath);
-            }
-
-            //FileStream for the users file
-            FileStream fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            //Grab the sheet format from the bus
-            string sheetFormatString = Convert.ToString("TopDown");
-            SheetFormat CurrentSheetFormat = 0;
-            Enum.TryParse<SheetFormat>(sheetFormatString, true, out CurrentSheetFormat);
-
-            //Transforms the content of the file into a 2d-json-array
-            JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
-            //If the active worksheet was never changed, we default to the first one
-            string activeWorksheet = EUEReader.GetFirstWorksheetUri().ToString(); 
-            //Generate the table for the active worksheet
-            string jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
-            JArray textArray = JArray.Parse(jsonTable);
-
-            int index = 0;
-
-            string[] ds_id = new string[2];
-
-            for (int k = 1; k< textArray.Count; k++)
-            {
-                if (textArray[k].ToString().Length > 1)
-                {
-                    var excelline = textArray[k];
-                    JArray excellineJson = JArray.Parse(excelline.ToString());
-
-                    if (excellineJson[0].ToString().Length > 1)
-                    {
-                        ds_id = excellineJson[0].ToString().Split('.');
-                    }
-
-                    string attribute_name = excellineJson[1].ToString();
-                    string var_id = excellineJson[2].ToString();
-                    string entity_uri = clean_entity_URI_for_insert(excellineJson[3].ToString());
-                    string entity_label = clean_entity_URI_for_insert(excellineJson[4].ToString());
-                    string charac_uri = clean_entity_URI_for_insert(excellineJson[5].ToString());
-                    string charac_label = clean_entity_URI_for_insert(excellineJson[6].ToString());
-
-                    AnnotationManager AM = new AnnotationManager();
-                    Variable variable = new Variable();
-
-                    //try
-                    //{
-                    DataStructureManager dataStructureManager = new DataStructureManager();
-                    var structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
-                    StructuredDataStructure dataStructure = structureRepo.Get(new DatasetManager().GetDataset(Int64.Parse(ds_id[0])).DataStructure.Id);
-
-                    if (var_id != "")
-                    {
-                        foreach (Variable var in dataStructure.Variables)
-                        {
-                            if (var.Id == Int64.Parse(var_id)) variable = var;
-                        }
-                    }
-
-                    if (variable != null)
-                    {
-                        try
-                        {
-                            AM.CreateAnnotation(
-                                new DatasetManager().GetDataset(Int64.Parse(ds_id[0])), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(ds_id[0])),
-                                variable,
-                                entity_uri, entity_label,
-                                charac_uri, charac_label,
-                                "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
-
-                            index++;
-                        }
-                        catch (Exception exc)
-                        {
-                            Debug.WriteLine(exc.Message);
-                            // debugging file
-                            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                            {
-                                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Fill_annotations_from_csv_file  : Exception occured : " + exc.Message);
-                            }
-                        }
-
-                        if (ds_id.Length > 1)
-                        {
-                            //for (int i = Int32.Parse(ds_id[0].ToString())+1 ; i <= (Int32.Parse(ds_id[ds_id.Length - 1].ToString())); i++ )
-                            for (int i = 1; i < ds_id.Count(); i++)
-                            {
-                                string dataset_id = ds_id[i].ToString();
-
-                                try
-                                {
-                                    AM.CreateAnnotation(new DatasetManager().GetDataset(Int64.Parse(dataset_id)), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(dataset_id)), variable,
-                                        entity_uri, entity_label,
-                                        charac_uri, charac_label,
-                                        "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
-                                    index++;
-                                }
-                                catch (Exception exc)
-                                {
-                                    Debug.WriteLine(exc.Message);
-                                    // debugging file
-                                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                                    {
-                                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Fill_annotations_from_csv_file  : Exception occured : " +exc.Message);
-                                    }
-                                }
-                                
-
-                            }
-                        }
-                    }
-
-                    //}
-                    //catch (Exception ex)
-                    //{
-                    //    Debug.WriteLine(ex.ToString());
-                    //}
-
-                }
-            }
-        }
-
-        #endregion
-
 
         //Takes a JSON-Serialization of a List<String> of URIs and find the labels of these URIs in the AD-ontology
         //Result contains null entries for whitespace or null string inputs
@@ -1541,6 +1356,194 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             }
             return result;
         }
+
+        
+        */
+        public string clean_entity_URI_for_insert(string uri)
+        {
+            // debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_entity_URI_for_insert called : "+uri+" ==> " + uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", ""));
+            }
+            return uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", "");
+        }
+
+        public String Get_Label_from_entity_rdf(String entity, IGraph g, SparqlParameterizedString queryString)
+        {
+            SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+            String res = "";
+            if (results.Count != 0)
+            {
+                res = results[0]["label"].ToString().Split('^')[0];
+            }
+            if (res.Contains("@"))
+                return res.Substring(0, res.IndexOf("@"));
+            return res;
+        }
+
+        public String clean_labels(String label)
+        {
+            string k = label;
+
+            if (label.Contains("@"))
+            {
+                return label.Substring(0, label.IndexOf("@"));
+            }
+            if (label.Contains("#"))
+            {
+                return label.Substring(label.IndexOf("@"), label.Length -1);
+            }
+            else
+            {
+                return label;
+            }
+
+                
+        }
+        #endregion
+
+
+        #region fill the annotation from csv file
+        /*
+        public void Fill_annotations_from_csv_file()
+        {
+            //var lines = System.IO.File.ReadLines("C:/Users/admin/Desktop/AnnotationFile(4740).csv");
+            //
+            //foreach (string line in lines)
+            //{
+            //    Debug.WriteLine("This is the line : ====>   " + line);
+            //}
+            //
+
+            string filePath = Request["filePath"];// "C:/Users/admin/Desktop/CopyofAnnotationFile.xlsx";
+
+            // debugging file
+            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Fill_annotations_from_csv_file called : import from " + filePath);
+            }
+
+            //FileStream for the users file
+            FileStream fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            //Grab the sheet format from the bus
+            string sheetFormatString = Convert.ToString("TopDown");
+            SheetFormat CurrentSheetFormat = 0;
+            Enum.TryParse<SheetFormat>(sheetFormatString, true, out CurrentSheetFormat);
+
+            //Transforms the content of the file into a 2d-json-array
+            JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
+            //If the active worksheet was never changed, we default to the first one
+            string activeWorksheet = EUEReader.GetFirstWorksheetUri().ToString(); 
+            //Generate the table for the active worksheet
+            string jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
+            JArray textArray = JArray.Parse(jsonTable);
+
+            int index = 0;
+
+            string[] ds_id = new string[2];
+
+            for (int k = 1; k< textArray.Count; k++)
+            {
+                if (textArray[k].ToString().Length > 1)
+                {
+                    var excelline = textArray[k];
+                    JArray excellineJson = JArray.Parse(excelline.ToString());
+
+                    if (excellineJson[0].ToString().Length > 1)
+                    {
+                        ds_id = excellineJson[0].ToString().Split('.');
+                    }
+
+                    string attribute_name = excellineJson[3].ToString();
+                    string var_id = excellineJson[2].ToString();
+                    string entity_uri = clean_entity_URI_for_insert(excellineJson[6].ToString());
+                    string entity_label = clean_entity_URI_for_insert(excellineJson[4].ToString());
+                    string charac_uri = clean_entity_URI_for_insert(excellineJson[7].ToString());
+                    string charac_label = clean_entity_URI_for_insert(excellineJson[5].ToString());
+
+                    AnnotationManager AM = new AnnotationManager();
+                    Variable variable = new Variable();
+
+                    //try
+                    //{
+                    DataStructureManager dataStructureManager = new DataStructureManager();
+                    var structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
+                    StructuredDataStructure dataStructure = structureRepo.Get(new DatasetManager().GetDataset(Int64.Parse(ds_id[0])).DataStructure.Id);
+
+                    if (var_id != "")
+                    {
+                        foreach (Variable var in dataStructure.Variables)
+                        {
+                            if (var.Id == Int64.Parse(var_id)) variable = var;
+                        }
+                    }
+
+                    if (variable != null)
+                    {
+                        try
+                        {
+                            AM.CreateAnnotation(
+                                new DatasetManager().GetDataset(Int64.Parse(ds_id[0])), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(ds_id[0])),
+                                variable,
+                                entity_uri, entity_label,
+                                charac_uri, charac_label,
+                                "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
+
+                            index++;
+                        }
+                        catch (Exception exc)
+                        {
+                            Debug.WriteLine(exc.Message);
+                            // debugging file
+                            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                            {
+                                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Fill_annotations_from_csv_file  : Exception occured : " + exc.Message);
+                            }
+                        }
+
+                        if (ds_id.Length > 1)
+                        {
+                            //for (int i = Int32.Parse(ds_id[0].ToString())+1 ; i <= (Int32.Parse(ds_id[ds_id.Length - 1].ToString())); i++ )
+                            for (int i = 1; i < ds_id.Count(); i++)
+                            {
+                                string dataset_id = ds_id[i].ToString();
+
+                                try
+                                {
+                                    AM.CreateAnnotation(new DatasetManager().GetDataset(Int64.Parse(dataset_id)), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(dataset_id)), variable,
+                                        entity_uri, entity_label,
+                                        charac_uri, charac_label,
+                                        "http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "");
+                                    index++;
+                                }
+                                catch (Exception exc)
+                                {
+                                    Debug.WriteLine(exc.Message);
+                                    // debugging file
+                                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                                    {
+                                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Fill_annotations_from_csv_file  : Exception occured : " +exc.Message);
+                                    }
+                                }
+                                
+
+                            }
+                        }
+
+                    }
+
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Debug.WriteLine(ex.ToString());
+                    //}
+
+                }
+            }
+        }
+        */
+        #endregion
 
         
     }

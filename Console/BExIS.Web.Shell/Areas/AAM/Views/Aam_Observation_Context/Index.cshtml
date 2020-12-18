@@ -22,7 +22,13 @@
             @Html.DisplayNameFor(model => model.Contextualized_entity)
         </th>
         <th>
+            @Html.DisplayNameFor(model => model.Contextualized_entity.label)
+        </th>
+        <th>
             @Html.DisplayNameFor(model => model.Contextualizing_entity)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Contextualizing_entity.label)
         </th>
         <th></th>
     </tr>
@@ -34,10 +40,16 @@
                 @Html.DisplayFor(modelItem => item.Dataset.Id)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Contextualized_entity.URI )
+                @Html.DisplayFor(modelItem => item.Contextualized_entity.URI)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Contextualizing_entity.URI )
+                @Html.DisplayFor(modelItem => item.Contextualized_entity.label )
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Contextualizing_entity.URI)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Contextualizing_entity.label )
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |

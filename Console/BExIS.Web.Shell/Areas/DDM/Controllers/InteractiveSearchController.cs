@@ -168,7 +168,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                         row["Title"] = title;
                         row["Datasetdescription"] = description;
-                        row["Ownername"] = owner;
+                        row["Owner"] = owner;
 
                         m.Rows.Add(row);
                     }
@@ -283,7 +283,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             headerItem = new HeaderItem()
             {
-                Name = "Ownername",
+                Name = "Owner",
                 DisplayName = "Owner",
                 DataType = "String"
             };

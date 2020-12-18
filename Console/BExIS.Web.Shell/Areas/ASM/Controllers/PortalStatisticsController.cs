@@ -19,12 +19,15 @@ using Vaiona.Web.Mvc;
 using System.Web.Mvc;
 using BExIS.Dlm.Entities.Data;
 using System.Linq;
+using BExIS.Aam.Services;
+using BExIS.Aam.Entities.Mapping;
+using Vaiona.Persistence.Api;
 
 namespace BExIS.Modules.ASM.UI.Controllers
 {
     public class PortalStatisticsController : Controller
     {
-        static string DatastructAPI = "https://aquadiva-pub1.inf-bb.uni-jena.de/api/structures/";
+        static string DatastructAPI = "https://addp.uni-jena.de/api/structures/";
         static List<Variable_analytics> VA_list;
         static String debugFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
         static List<string> project_list_names = new List<string> { "A01", "A02", "A03", "A04", "A05", "A06", "B01", "B02", "B03", "B04", "B05", "C03", "C05", "D01", "D02", "D03", "D04" };
@@ -128,54 +131,34 @@ namespace BExIS.Modules.ASM.UI.Controllers
                             JObject json_ds_struct = JObject.Parse(response.Content.ReadAsStringAsync().Result);
                             JArray json_variables = JArray.Parse(json_ds_struct["Variables"].ToString());
 
+                            Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager();
+                            List<Aam_Dataset_column_annotation> aam_list = aam_manager.get_all_dataset_column_annotation();
+
                             foreach (JObject json_variable in json_variables)
                             {
                                 variable_id.Add(json_variable["Id"].ToString());
                                 variable_label.Add(json_variable["Label"].ToString());
                                 dataType.Add(json_variable["DataType"].ToString());
                                 unit.Add(json_variable["Unit"].ToString());
-                            
-                                string select = "SELECT datasets_id, variable_id, entity , characteristic FROM dataset_column_annotation WHERE datasets_id= \'" +
-                                    id + "\' AND variable_id = \'" + json_variable["Id"].ToString() + "\'";
-                                NpgsqlCommand MyCmd = null;
-                                NpgsqlConnection MyCnx = null;
-                                MyCnx = new NpgsqlConnection(Conx);
-                                MyCnx.Open();
-                                MyCmd = new NpgsqlCommand(select, MyCnx);
-
-                                NpgsqlDataReader dr = MyCmd.ExecuteReader();
-                                if (dr != null)
+                                Aam_Dataset_column_annotation annot = 
+                                    aam_list.Where(x => x.Dataset.Id == id && x.variable_id.Id == Int64.Parse(json_variable["Id"].ToString())).FirstOrDefault();
+                                if (annot.entity_id.URI.ToString() == "")
                                 {
-                                    while (dr.Read())
-                                    {
-                                        if ((dr["datasets_id"] != System.DBNull.Value) && ((dr["variable_id"] != System.DBNull.Value)))
-                                        {
-                                            if (dr["entity"].ToString() == "")
-                                            {
-                                                variable_concept_entity.Add("No Annotation");
-                                            }
-                                            else
-                                            {
-                                                variable_concept_entity.Add(dr["entity"].ToString());
-                                            }
-
-                                            if (dr["characteristic"].ToString() == "")
-                                            {
-                                                variable_concept_caracteristic.Add("No Annotation");
-                                            }
-                                            else
-                                            {
-                                                variable_concept_caracteristic.Add(dr["characteristic"].ToString());
-                                            }
-                                        }
-                                    }
-                                    if (dr.HasRows == false)
-                                    {
-                                        variable_concept_entity.Add("No Annotation");
-                                        variable_concept_caracteristic.Add("No Annotation");
-                                    }
+                                    variable_concept_entity.Add(annot.entity_id.label.ToString() + " - No Annotation");
                                 }
-                                MyCnx.Close();
+                                else
+                                {
+                                    variable_concept_entity.Add(annot.entity_id.label.ToString() + " - " + annot.entity_id.URI.ToString());
+                                }
+
+                                if (annot.characteristic_id.URI.ToString() == "")
+                                {
+                                    variable_concept_caracteristic.Add(annot.characteristic_id.label.ToString() + " - No Annotation");
+                                }
+                                else
+                                {
+                                    variable_concept_caracteristic.Add(annot.characteristic_id.label.ToString() + " - " + annot.characteristic_id.URI.ToString());
+                                }
                             }
                             // create a new instance of variable analytics
                             Variable_analytics VA = new Variable_analytics(id, datastructure_id, owner, project, variable_id, variable_label, variable_concept_entity, variable_concept_caracteristic, dataType, unit);
@@ -194,9 +177,15 @@ namespace BExIS.Modules.ASM.UI.Controllers
             }
             
             Data_container_analytics datacontaineranalytics = new Data_container_analytics();
-
+            
             ViewData["datacontaineranalytics"] = datacontaineranalytics;
-
+            DataStructureManager dataStructureManager = new DataStructureManager();
+            List<StructuredDataStructure> structureRepo = DStructM.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>().Get().ToList<StructuredDataStructure>();
+            int counting = 0;
+            foreach(StructuredDataStructure x in structureRepo){
+                counting = counting + x.Variables.Count;
+            }
+            ViewData["var_counts"] = counting;
             ViewData["VA_list"] = VA_list;
 
             //debugging file

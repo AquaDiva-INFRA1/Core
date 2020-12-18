@@ -12,6 +12,12 @@ using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Services.Authorization;
 using BExIS.Xml.Helpers;
 using BExIS.Modules.Aam.UI.Models;
+using System.IO;
+using BExIS.Utils.Models;
+using BExIS.UI.Helpers;
+using Newtonsoft.Json.Linq;
+using BExIS.Dlm.Entities.DataStructure;
+using Vaiona.Persistence.Api;
 
 namespace BExIS.Modules.Aam.UI.Controllers
 {
@@ -168,6 +174,103 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 dataStructureManager.Dispose();
                 dm.Dispose();
             }
+        }
+
+        public void upload_Observation_from_Excel_file(String filePath)
+        {
+            //FileStream for the users file
+            FileStream fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            //Grab the sheet format from the bus
+            string sheetFormatString = Convert.ToString("TopDown");
+            SheetFormat CurrentSheetFormat = 0;
+            Enum.TryParse<SheetFormat>(sheetFormatString, true, out CurrentSheetFormat);
+
+            //Transforms the content of the file into a 2d-json-array
+            JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
+            //If the active worksheet was never changed, we default to the first one
+            string activeWorksheet = EUEReader.GetFirstWorksheetUri().ToString();
+            //Generate the table for the active worksheet
+            string jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
+            JArray textArray = JArray.Parse(jsonTable);
+            int index = 0;
+
+            string[] ds_id = new string[2];
+            for (int k = 1; k < textArray.Count; k++)
+            {
+                if (textArray[k].ToString().Length > 1)
+                {
+                    try
+                    {
+                        var excelline = textArray[k];
+                        JArray excellineJson = JArray.Parse(excelline.ToString());
+
+                        if (excellineJson[0].ToString().Length > 1)
+                        {
+                            ds_id = excellineJson[0].ToString().Split('.');
+                        }
+
+                        string attribute_name = excellineJson[3].ToString();
+                        string var_id = excellineJson[2].ToString();
+                        string contextualised_uri = clean_entity_URI_for_insert(excellineJson[6].ToString());
+                        string contextualised_label = clean_entity_URI_for_insert(excellineJson[4].ToString());
+                        string contextualizing_uri = clean_entity_URI_for_insert(excellineJson[7].ToString());
+                        string contextualizing_label = clean_entity_URI_for_insert(excellineJson[5].ToString());
+
+                        Variable variable = new Variable();
+                        DataStructureManager dataStructureManager = new DataStructureManager();
+                        var structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
+                        StructuredDataStructure dataStructure = structureRepo.Get(new DatasetManager().GetDataset(Int64.Parse(ds_id[0])).DataStructure.Id);
+
+                        if (var_id != "")
+                        {
+                            foreach (Variable var in dataStructure.Variables)
+                            {
+                                if (var.Id == Int64.Parse(var_id)) variable = var;
+                            }
+                        }
+
+                        Aam_Observation_ContextManager aam = new Aam_Observation_ContextManager();
+                        Aam_Uri uri_M = new Aam_Uri();
+                        if (variable != null)
+                        {
+                            Aam_Uri uri = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.URI == contextualised_uri).FirstOrDefault<Aam_Uri>();
+                            Aam_Uri charac = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.URI == contextualizing_uri).FirstOrDefault<Aam_Uri>();
+                            Aam_Uri std = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.type_uri.ToLower() == "standard").FirstOrDefault<Aam_Uri>();
+                            if (uri == null)
+                            {
+                                uri = new Aam_Uri(contextualised_uri, contextualised_label, "Entity");
+                                uri = new Aam_UriManager().creeate_Aam_Uri(uri);
+                            }
+                            if (charac == null)
+                            {
+                                charac = new Aam_Uri(contextualizing_uri, contextualizing_label, "Charachteristic");
+                                charac = new Aam_UriManager().creeate_Aam_Uri(charac);
+                            }
+                            if (std == null)
+                            {
+                                std = new Aam_Uri("http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "Standard", "Standard");
+                                std = new Aam_UriManager().creeate_Aam_Uri(std);
+                            }
+                            Aam_Observation_Context an = new Aam_Observation_Context(
+                                new DatasetManager().GetDataset(Int64.Parse(ds_id[0])), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(ds_id[0])),
+                                uri, charac
+                                );
+                            if (aam.get_all_Aam_Observation_Context().Where<Aam_Observation_Context>(x => x.Dataset == an.Dataset && 
+                            x.Contextualized_entity == an.Contextualized_entity && x.Contextualizing_entity == an.Contextualizing_entity).Count() == 0)
+                                aam.creeate_Aam_Observation_Context(an);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+
+        public string clean_entity_URI_for_insert(string uri)
+        {
+            return uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", "");
         }
 
 
