@@ -27,6 +27,7 @@
     @{
         Data_container_analytics datacontaineranalytics = (Data_container_analytics)ViewData["datacontaineranalytics"];
         string temp;
+        string variables_count = (string)ViewData["variables_count"];
     }
 
     <h3> Variable Templates Report</h3>
@@ -118,27 +119,22 @@
                 List<Variable_analytics> VA_listt = (List<Variable_analytics>)ViewData["VA_list"];
 
                 int ds_count = VA_listt.Count;
-                int somme_Variables = 0;
+                List<string> somme_Variables = new List<string>();
                 int somme_Concepts = 0;
                 int somme_Caracteristics = 0;
 
                 foreach (Variable_analytics va in VA_listt)
                 {
-                    foreach (String s in va.variable_concept_entity)
+                    somme_Concepts = somme_Concepts + va.variable_concept_entity.Count;
+                    somme_Caracteristics = somme_Caracteristics + va.variable_concept_caracteristic.Count;
+                    foreach (string s in va.variable_id)
                     {
-                        if (s != "No Annotation")
+                        if (!somme_Variables.Contains(s))
                         {
-                            somme_Concepts = somme_Concepts + 1;
+                            somme_Variables.Add(s);
                         }
+
                     }
-                    foreach (String s in va.variable_concept_caracteristic)
-                    {
-                        if (s != "No Annotation")
-                        {
-                            somme_Caracteristics = somme_Caracteristics + 1;
-                        }
-                    }
-                    somme_Variables = somme_Variables + va.variable_id.Count;
                 }
 
                 <tr>
@@ -146,7 +142,7 @@
                     <td>@somme_Variables</td>
                     <td>@somme_Concepts</td>
                     <td>@somme_Caracteristics</td>
-                    <td>@somme_Concepts/ @somme_Variables</td>
+                    <td>@somme_Variables/  @datacontaineranalytics.DataAttributeStruct_list_in_use.Count </td>
                 </tr>
             }
 
@@ -154,6 +150,7 @@
     </table>
 
     <br />
+    
     <button id="downloadCsvButton" class="bx-button function" title="Csv download" onclick="download()">Download Semantic Coverage Report</button>
     <br />
 

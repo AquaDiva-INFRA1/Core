@@ -17,6 +17,7 @@ using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Subjects;
 using BExIS.Xml.Helpers;
 using Newtonsoft.Json;
 using System;
@@ -450,10 +451,35 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             throw new NullReferenceException("The extra-field of this metadata-structure is missing the title-node-reference!");
                         }
                         dm.EditDatasetVersion(dsv, null, null, null);
+                        dm.CheckInDataset(ds.Id, "Metadata Imported", GetUsernameOrDefault());
                     }
 
                     #region security
+                    if (GetUsernameOrDefault() != "DEFAULT")
+                    {
+                        UserPiManager upm = new UserPiManager();
 
+                        //Full permissions for the user
+                        entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                        //Get PIs of the current user
+                        List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
+                        foreach (User pi in piList)
+                        {
+                            //Full permissions for the pis
+                            entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                            //Get all users with the same pi
+                            List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                            //Give view and download rights to the members
+                            foreach (User piMember in piMembers)
+                            {
+                                entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
+                                        RightType.Read
+                                });
+                            }
+                        }
+                    }
                     // add security
                     if (GetUsernameOrDefault() != "DEFAULT")
                     {

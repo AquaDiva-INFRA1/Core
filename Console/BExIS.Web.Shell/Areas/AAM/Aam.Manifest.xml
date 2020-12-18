@@ -13,12 +13,12 @@
 	</Dependencies>
 	<Exports>
 		<!--add proper menu items-->
-
+    <!--
     <Export tag="settings" id="manageAnnotations" order="1"
 						title="Manage Annotations" description="" icon=""
 						controller="Annotation" action="index"
 						extends="./settingsRoot" />
-
+    -->
     <Export tag="settings" id="AnnotationBackEnd" order="1"
 						title="Annotation Back End" description="" icon=""
 						controller="Aam_Uri" action="index"

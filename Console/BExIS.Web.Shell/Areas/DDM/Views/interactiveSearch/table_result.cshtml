@@ -86,7 +86,7 @@
                                                     //Additional column with the "View Details"-Button
                                                     columns.Bound("").Width(50).ClientTemplate(
                                                                 "<div class='searchResultFunctionDiv'>" +
-                                                                "<a  id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' " +
+                                                                "<a target='_blank'  id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' " +
                                                                 "class = 'bx bx-grid-function bx-show' title = 'View details' onclick='onclickDataset(this)'></a>" +
                                                                 "</div>"
                                                                 )
@@ -205,7 +205,7 @@
             },
             success: function (result) {
                 if (result) {
-                    window.top.location = "/DDM/Data/ShowData/" + id;
+                    window.open("/DDM/Data/ShowData/" + id, '_blank');
                 } else {
 
                     alert("Dataset is locked. Please try again later.");
@@ -283,7 +283,7 @@
                         //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
                         var text = "<ol>";
                         for (i = 0; i < res.hits.length; i++) {
-                            text = text + "<li><strong><b>" + res.hits[i].title + "</b></strong></li>";
+                            text = text + "<li><strong><b> <a href='" + res.hits[i].url+"'>" + res.hits[i].title + "</a></b></strong></li>";
 
                             text = text + "<a id=\"_abstract" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>ABSTRACT</b></h5> </a>";
                             text = text + "<div id=\"abstract" + i + "\"  hidden=\"true\"> ";
@@ -292,11 +292,10 @@
 
                             text = text + "<a id=\"_publication" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>PUBLICATION</b></h5> </a>";
                             text = text + "<div id=\"publication" + i + "\"  hidden=\"true\"> ";
-                            //text = text + "<h5><p align=\"justify\"> Title: " + res.bibliographylist[i].publication.title + "</p></h5>";
-                            //text = text + "<h5><p align=\"justify\"> Volume: " + res.bibliographylist[i].publication.volume + "</p></h5>";
-                            //text = text + "<h5><p align=\"justify\"> Issue : " + res.bibliographylist[i].publication.issue + "</p></h5>";
-                            //text = text + "<h5><p align=\"justify\"> Pages: " + res.bibliographylist[i].publication.pages + "</p></h5>";
-                            text = text + "<h5><p align=\"justify\"> DocId: " + res.hits[i].id + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Title: " + res.hits[i].journal + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Volume: " + res.hits[i].volume + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Issue : " + res.hits[i].issue + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.hits[i].pages + "</p></h5>";
                             text = text + "<h5><p align=\"justify\"> Date: " + res.hits[i].year + "</p></h5>";
                             text = text + "</div>";
 

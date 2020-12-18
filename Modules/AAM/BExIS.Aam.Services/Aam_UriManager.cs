@@ -202,7 +202,8 @@ namespace BExIS.Aam.Services
                     {
                         label = label.Split('@')[0];
                     }
-                    uri_ma.creeate_Aam_Uri(new Aam_Uri(uri, label, "Charachteristic"));
+                    if (uri_ma.AnnotationRepo.Get(x => x.URI == uri).Count == 0)
+                        uri_ma.creeate_Aam_Uri(new Aam_Uri(uri, label, "Charachteristic"));
                 }
                 #endregion
 
@@ -231,7 +232,8 @@ namespace BExIS.Aam.Services
                     {
                         label = label.Split('@')[0];
                     }
-                    uri_ma.creeate_Aam_Uri(new Aam_Uri(uri, label, "Entity"));
+                    if (uri_ma.AnnotationRepo.Get(x => x.URI == uri).Count == 0)
+                        uri_ma.creeate_Aam_Uri(new Aam_Uri(uri, label, "Entity"));
                 }
                 #endregion
 
@@ -260,7 +262,8 @@ namespace BExIS.Aam.Services
                     {
                         label = label.Split('@')[0];
                     }
-                    uri_ma.creeate_Aam_Uri(new Aam_Uri(uri, label, "Standard"));
+                    if (uri_ma.AnnotationRepo.Get(x => x.URI == uri).Count == 0)
+                        uri_ma.creeate_Aam_Uri(new Aam_Uri(uri, label, "Standard"));
                 }
                 #endregion
                 return true;

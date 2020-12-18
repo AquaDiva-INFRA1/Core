@@ -103,7 +103,7 @@ namespace BExIS.Modules.Dcm.UI.Models
                         {
                             vars.Add(cells[j]);
                         }
-                    //index of the row is not needed in the method "ReadRow"
+                        //index of the row is not needed in the method "ReadRow"
                         this.DataTuples.Add(ReadRow(vars, 0));
                     }
                 }

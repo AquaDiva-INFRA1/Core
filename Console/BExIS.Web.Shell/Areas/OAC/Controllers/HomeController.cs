@@ -149,7 +149,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
                 int index = 0;
                 foreach (string s in All_Accessions)
                 {
-                    string sample_Url = "https://www.ebi.ac.uk/biosamples/api/samples/" + s.Split('	')[0];
+                    string sample_Url = "https://www.ebi.ac.uk/biosamples/api/samples/" + s.Split('	')[1];
 
                     #region download the metadata
                     // download the metadata
@@ -240,9 +240,21 @@ namespace BExIS.Modules.OAC.UI.Controllers
                 ResearchPlan rp = rpm.Repo.Get().First();
                 MetadataStructure metadataStructure = msm.Repo.Get().FirstOrDefault(x => x.Name.ToLower() == "basic abcd");
                 ds = dm.CreateEmptyDataset(dataStruct_, rp, metadataStructure);
+                if (dm.IsDatasetCheckedOutFor(ds.Id, GetUsernameOrDefault()) || dm.CheckOutDataset(ds.Id, GetUsernameOrDefault()))
+                {
+                    DatasetVersion dsv = dm.GetDatasetWorkingCopy(ds.Id);
+                    long METADATASTRUCTURE_ID = metadataStructure.Id;
+                    XmlMetadataWriter xmlMetadatWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
+                    XDocument metadataX = xmlMetadatWriter.CreateMetadataXml(METADATASTRUCTURE_ID);
+                    XmlDocument metadataXml = XmlMetadataWriter.ToXmlDocument(metadataX);
+                    dsv.Metadata = metadataXml;
+                    dm.EditDatasetVersion(dsv, null, null, null);
+                    dm.CheckInDataset(ds.Id, "Metadata Imported", GetUsernameOrDefault());
+                }
 
-                #endregion
-            }
+
+                    #endregion
+                }
             catch (Exception ex)
             {
                 throw (ex);
@@ -377,10 +389,14 @@ namespace BExIS.Modules.OAC.UI.Controllers
                         #endregion csv parsing to get data tuples and variables 
                     }
                 }
+            workingCopy.ModificationInfo = new EntityAuditInfo()
+            {
+                Performer = GetUsernameOrDefault(),
+                Comment = "Data",
+                ActionType = AuditActionType.Create
+            };
 
-                dm.EditDatasetVersion(workingCopy, null, null, null);
-
-                dm.CheckInDataset(ds.Id, "Import data ", GetUsernameOrDefault());
+            dm.CheckInDataset(ds.Id, "Import data from OMIC archives  ", GetUsernameOrDefault());
 
             //}
             //catch (Exception e)
@@ -390,7 +406,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
             #endregion
 
             //System.IO.File.Delete(temp_file_path);
-            dm.CheckInDataset(ds.Id, "Import data ", GetUsernameOrDefault());
+            //dm.CheckInDataset(ds.Id, "Import data from OMIC archives ", GetUsernameOrDefault());
 
             dsm.Dispose();
             dm.Dispose();
