@@ -47,7 +47,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
         // GET: DataSummary
         private static String username = "hamdihamed";
         private static String password = "hamdi1992";
-        private static string FTPAddress = "ftp://aquadiva-analysis2.inf-bb.uni-jena.de:21";
+        private static string FTPAddress = WebConfigurationManager.AppSettings["FTPAddress"]; //"ftp://aquadiva-analysis2.inf-bb.uni-jena.de:21";
+        private static string AnalAddress = WebConfigurationManager.AppSettings["AnalAddress"]; //"http://aquadiva-analysis2.inf-bb.uni-jena.de:8080";
 
         public static Dictionary<string, List<string>> dict_ = new Dictionary<string, List<string>>();
 
@@ -359,7 +360,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
                                         {
                                             foreach (DataColumn dc in table.Columns)
                                             {
-                                                if((!keywords.Contains(keyword.Replace("\"", "").Trim())) && (similarity(dc.Caption.Trim(),keyword.Replace("\"","").Trim()) > 0.5))
+                                                if((!keywords.Contains(keyword.Replace("\"", "").Trim())) &&
+                                                    (similarity(dc.Caption.Trim(),keyword.Replace("\"","").Trim()) > 0.5))
                                                 {
                                                     keywords.Add(keyword.Replace("\"", "").Trim());
                                                 }
@@ -385,6 +387,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                 result.class_results = classification_results;
                 return PartialView(result);
             }
+            Aam_UriManager aam_manag = new Aam_UriManager();
             foreach (Input inp in classification_results)
             {
                 foreach (string s in inp.db_match)
@@ -394,9 +397,13 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     {
                         if (el.Contains("http"))
                         {
-                            if (nodes.FindAll(x => x == el).Count == 0)
-                                nodes.Add(el);
-                            int index_in_list = nodes.FindIndex(x => x == el);
+                            Aam_Uri aam_uri = aam_manag.get_Aam_Uri_by_uri(el);
+                            string label = aam_uri != null ? aam_uri.label : el;
+                            if (nodes.FindAll(x => x == label).Count == 0)
+                            {
+                                nodes.Add(label);
+                            }
+                            int index_in_list = nodes.FindIndex(x => x == label);
                             path.Add(index_in_list);
                         }
                     }
@@ -409,8 +416,13 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     {
                         if (el.Contains("http"))
                         {
-                            if (nodes.FindAll(x => x == el).Count == 0)
-                                nodes.Add(el); int index_in_list = nodes.FindIndex(x => x == el);
+                            Aam_Uri aam_uri = aam_manag.get_Aam_Uri_by_uri(el);
+                            string label = aam_uri != null ? aam_uri.label : el;
+                            if (nodes.FindAll(x => x == label).Count == 0)
+                            {
+                                nodes.Add(label);
+                            }
+                            int index_in_list = nodes.FindIndex(x => x == label);
                             path.Add(index_in_list);
                         }
                     }
@@ -431,36 +443,56 @@ namespace BExIS.Modules.ASM.UI.Controllers
         public ActionResult get_datasets_from_annot(string annot)
         {
             List<long> datasets = new List<long>();
+            List<string> URIs = new List<string>();
             Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
+            Aam_UriManager aam_manag = new Aam_UriManager();
             List<Aam_Dataset_column_annotation> annots = aam.get_all_dataset_column_annotation();
-            foreach (Aam_Dataset_column_annotation aa in annots.FindAll(x => x.entity_id.URI == annot.Trim()))
+            if (!annot.Contains("http"))
             {
-                datasets.Add(aa.Dataset.Id);
+                foreach (Aam_Uri uri in aam_manag.get_all_Aam_Uri().FindAll(x => x.label == annot))
+                    URIs.Add(uri.URI);
             }
-            foreach (Aam_Dataset_column_annotation aa in annots.FindAll(x => x.characteristic_id.URI == annot.Trim()))
+            foreach (string uri in URIs)
             {
-                if (!datasets.Contains(aa.Dataset.Id))
-                    datasets.Add(aa.Dataset.Id);
+                foreach (Aam_Dataset_column_annotation aa in annots.FindAll(x => x.entity_id.URI == uri.Trim()))
+                {
+                    if (!datasets.Contains(aa.Dataset.Id))
+                        datasets.Add(aa.Dataset.Id);
+                }
+                foreach (Aam_Dataset_column_annotation aa in annots.FindAll(x => x.characteristic_id.URI == uri.Trim()))
+                {
+                    if (!datasets.Contains(aa.Dataset.Id))
+                        datasets.Add(aa.Dataset.Id);
+                }
             }
+            
             ViewData["label"] = "No Label for URI";
-            try
+            if (!annot.Contains("http"))
             {
-                if (annots.Find(x => x.entity_id.URI == annot.Trim()).entity_id.label != "")
-                    ViewData["label"] = annots.Find(x => x.entity_id.URI == annot.Trim()).entity_id.label;
+                ViewData["label"] = annot;
             }
-            catch (Exception ex)
+            else
             {
+                try
+                {
+                    if (annots.Find(x => x.entity_id.URI == annot.Trim()).entity_id.label != "")
+                        ViewData["label"] = annots.Find(x => x.entity_id.URI == annot.Trim()).entity_id.label;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+                try
+                {
+                    if (annots.Find(x => x.characteristic_id.URI == annot.Trim()).characteristic_id.label != "")
+                        ViewData["label"] = annots.Find(x => x.characteristic_id.URI == annot.Trim()).characteristic_id.label;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+            }
 
-            }
-            try
-            {
-                if (annots.Find(x => x.characteristic_id.URI == annot.Trim()).characteristic_id.label != "")
-                    ViewData["label"] = annots.Find(x => x.characteristic_id.URI == annot.Trim()).characteristic_id.label;
-            }
-            catch (Exception ex)
-            {
-
-            }
             string sJSONResponse = JsonConvert.SerializeObject(datasets);
             Dictionary<string, string> json = new Dictionary<string, string>();
             json.Add((string)ViewData["label"], sJSONResponse);
@@ -697,7 +729,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
             HttpClient client = new HttpClient();
             if (api_action == "") api_action = "/?";
             else api_action = api_action + "&";
-                client.BaseAddress = new Uri("http://aquadiva-analysis2.inf-bb.uni-jena.de:8080" +
+                client.BaseAddress = new Uri(AnalAddress +
                     api_action + "file_path=" + filename + "&user_home_directory=" + name);
             //Set the searchTerm as query-String
             StringBuilder paramBuilder = new StringBuilder();

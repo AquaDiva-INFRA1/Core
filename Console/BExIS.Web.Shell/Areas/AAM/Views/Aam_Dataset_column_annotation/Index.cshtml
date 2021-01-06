@@ -18,10 +18,16 @@
             @Html.DisplayNameFor(model => model.variable_id)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.entity_id)
+            @Html.DisplayNameFor(model => model.entity_id.URI)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.characteristic_id)
+            @Html.DisplayNameFor(model => model.entity_id.label)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.characteristic_id.URI)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.characteristic_id.label)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.standard_id)
@@ -43,7 +49,13 @@
                 @Html.DisplayFor(modelItem => item.entity_id.URI)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.entity_id.label)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.characteristic_id.URI)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.characteristic_id.label)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.standard_id.URI)
