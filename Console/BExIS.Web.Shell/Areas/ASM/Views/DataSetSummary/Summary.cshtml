@@ -13,12 +13,12 @@
         tabs.Add()
             .Selected(true)
             .Text("Categoral Analysis")
-            .LoadContentFrom("CategoralAnalysis", "DataSetSummary", new { area = "asm", id = id })
+            .LoadContentFrom("CategoralAnalysisAsync", "DataSetSummary", new { area = "asm", id = id })
             .HtmlAttributes(new { id = "CategoralAnalysis" });
 
         tabs.Add()
             .Text("Semantic Analysis")
-            .LoadContentFrom("classification", "DataSetSummary", new { area = "asm", ds = id })
+            .LoadContentFrom("classificationAsync", "DataSetSummary", new { area = "asm", ds = id })
             .HtmlAttributes(new { id = "classification" });
 
     })

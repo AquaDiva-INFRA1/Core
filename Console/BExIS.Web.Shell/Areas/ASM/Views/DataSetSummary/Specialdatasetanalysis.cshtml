@@ -398,7 +398,7 @@
         console.log("column selected : " + column);
 
         $.ajax({
-            url: '/ASM/DataSetSummary/Filter_Apply',
+            url: '/ASM/DataSetSummary/Filter_ApplyAsync',
             type: 'POST',
             data: {
                 'welllocation': welllocation, 'year': YearFIlter.toString(), 'filtersize': FilterFilter.toString(), 'GroupName': GroupFIlter.toString(),
@@ -635,7 +635,7 @@
         }
 
         $.ajax({
-            url: '/ASM/DataSetSummary/Filter_Apply',
+            url: '/ASM/DataSetSummary/Filter_ApplyAsync',
             type: 'POST',
             data: {
                 'welllocation': welllocation, 'year': YearFIlter.toString(), 'filtersize': FilterFilter.toString(), 'GroupName': GroupFIlter.toString(),
