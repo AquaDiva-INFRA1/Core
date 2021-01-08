@@ -85,6 +85,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         string[] allowed_extention = new string[] { ".csv", ".xlsx", ".xls" };
 
         static List<string> lines = new List<string>();
+        static dynamic XXX;
         static String debugFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
 
         static String datasetsepcial = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "dataset361.csv");
@@ -99,15 +100,10 @@ namespace BExIS.Modules.ASM.UI.Controllers
         {
             return PartialView("Summary" ,  id );
         }
-        public ActionResult CategoralAnalysis(long id)
+        public async System.Threading.Tasks.Task<ActionResult> CategoralAnalysisAsync(long id)
         {
             //debugging file
             ViewData["id"] = id.ToString();
-            using (StreamWriter sw = System.IO.File.AppendText(debugFile))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Data Summary scalled: CategoralAnalysis2 for dataset id : "+id );
-            }
-
             if (id == 361)
             {
                 return RedirectToAction("Specialdatasetanalysis");
@@ -137,31 +133,62 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 if (allowed_extention.Contains(extension))
                 {
-                    String output_ = UploadFiletoAnalysis(absolute_file_path);
-                    String output = output_.Split(new string[] { "\n\n\n" }, StringSplitOptions.None)[1];
-                    //debugging file
-                    using (StreamWriter sw = System.IO.File.AppendText(debugFile))
-                    {
-                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Data Summary scalled: results of analysis for dataset id : " + output);
-                    }
+                    String output_ = await UploadFiletoAnalysisAsync(absolute_file_path, "/categorical");
+                    String output = output_.Split(new string[] { "\n\n\n" }, StringSplitOptions.None)[0];
 
                     //string progToRun = python_script;
                     string outputFolder = output_Folder;
                     List <string> lines_ = output.Split('*').ToList();
                     lines = lines_[0].Split(Environment.NewLine.ToCharArray()).ToList();
                     int index = lines.IndexOf("Numerical");
-                    lines = lines.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+                    //lines = lines.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
 
                     List<List<string>> values = new List<List<string>>();
                     List<List<string>> labels = new List<List<string>>();
 
-                    for (int k = 0; k < lines.Count; k++)
+                    //for (int k = 0; k < lines.Count; k++)
+                    //{
+                    //    string x_label = lines[k];
+                    //    string x_values = lines[k + 1];
+                    //    string y_label = lines[k + 2];
+                    //    string y_values = lines[k + 3];
+                    //    k = k + 3;
+                    //    List<string> bocket = new List<string>();
+                    //    bocket.Add(x_label);
+                    //    bocket.Add(y_label);
+                    //    labels.Add(bocket);
+                    //    bocket = new List<string>();
+                    //    bocket.Add(x_values);
+                    //    bocket.Add(y_values);
+                    //    values.Add(bocket);
+                    //    bocket = new List<string>();
+                    //}
+
+                    XXX = JsonConvert.DeserializeObject(output);
+                    foreach (JObject item in XXX["categorical"])
                     {
-                        string x_label = lines[k];
-                        string x_values = lines[k + 1];
-                        string y_label = lines[k + 2];
-                        string y_values = lines[k + 3];
-                        k = k + 3;
+                        string x_label = item["name"].ToString().Trim();
+                        string x_values = item["values"].ToString().Replace(Environment.NewLine, "").Replace("\"", "'");
+                        string y_label = "count";
+                        string y_values = item["counts"].ToString().Trim().Replace(Environment.NewLine, "").Replace("\"", "'");
+
+                        List<string> bocket = new List<string>();
+                        bocket.Add(x_label);
+                        bocket.Add(y_label);
+                        labels.Add(bocket);
+                        bocket = new List<string>();
+                        bocket.Add(x_values);
+                        bocket.Add(y_values);
+                        values.Add(bocket);
+                        bocket = new List<string>();
+                    }
+                    foreach (JObject item in XXX["non_categorical"])
+                    {
+                        string x_label = item["name"].ToString().Trim();
+                        string x_values = item["values"].ToString().Replace(Environment.NewLine, "").Replace("\"", "'");
+                        string y_label = "count";
+                        string y_values = item["counts"].ToString().Trim().Replace(Environment.NewLine, "").Replace("\"", "'");
+
                         List<string> bocket = new List<string>();
                         bocket.Add(x_label);
                         bocket.Add(y_label);
@@ -173,10 +200,9 @@ namespace BExIS.Modules.ASM.UI.Controllers
                         bocket = new List<string>();
                     }
 
-                    var jsonSerialiser = new JavaScriptSerializer();
-                    var json = jsonSerialiser.Serialize(lines);
-
-                    var json_ = JsonConvert.SerializeObject(lines);
+                    //var jsonSerialiser = new JavaScriptSerializer();
+                    //var json = jsonSerialiser.Serialize(lines);
+                    //var json_ = JsonConvert.SerializeObject(lines);
 
                     datasetManager.Dispose();
 
@@ -190,6 +216,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                         Debug.WriteLine(exec.Message);
                     }
 
+                    output_ = await UploadFiletoAnalysisAsync(absolute_file_path, "/distrubution");
                     String table = output_.Split(new string[] { "\n\n\n" }, StringSplitOptions.None)[0];
                     List<string> result = table.Split(System.Environment.NewLine.ToCharArray()).ToList<string>();
                     result = result.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
@@ -259,11 +286,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                     //ViewData["header"] = header;
                     //ViewData["data_lines"] = data_lines;
-                    //debugging file
-                    using (StreamWriter sw = System.IO.File.AppendText(debugFile))
-                    {
-                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Data Summary scalled: results of analysis for dataset id : " + id+ " has finished");
-                    }
+                    
                     return View("showDataSetAnalysis");
                 }
                 
@@ -296,7 +319,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
         //string should be under this form 42; 155 where dataset ids should be sepearated by ; semicolon
         
-        public ActionResult classification(string ds , string flag = "" )
+        public async System.Threading.Tasks.Task<ActionResult> classificationAsync(string ds , string flag = "" )
         {
             List<string> nodes = new List<string>();
             List<List<int>> paths = new List<List<int>>();
@@ -311,7 +334,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                 List<Aam_Dataset_column_annotation> annots = aam.get_all_dataset_column_annotation();
                 classification_results = new List<Input>();
                 prepare_for_classification(datapath+ Path.DirectorySeparatorChar+"tmp_" +ds.Replace(';','_').Trim()+".txt", ds);
-                string results = UploadFiletoAnalysis(datapath + Path.DirectorySeparatorChar + "tmp_" + ds.Replace(';', '_').Trim() + ".txt", "/predict?").ToString();
+                string results = await UploadFiletoAnalysisAsync(datapath + Path.DirectorySeparatorChar + "tmp_" + ds.Replace(';', '_').Trim() + ".txt", "/predict");
                 dynamic json_class= ((dynamic)Newtonsoft.Json.JsonConvert.DeserializeObject(results));
             
                 int index = 0;
@@ -500,7 +523,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         }
 
         [HttpPost]
-        public String Filter_Apply(string welllocation = "", string year = "", string filtersize = "", string GroupName = "", string NameFIlter="", 
+        public async System.Threading.Tasks.Task<string> Filter_ApplyAsync(string welllocation = "", string year = "", string filtersize = "", string GroupName = "", string NameFIlter="", 
             String Season_dict="" , string column = "-1" , string row = "-1" , Boolean flag = false)
         {
             string row_ = "";
@@ -515,7 +538,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
                 param = param + "&welllocation=" + parse_Json_location(welllocation);
             if (NameFIlter != "")
                 param = param + "&PIName=" + NameFIlter;
-            string results = UploadFiletoAnalysis(datasetsepcial, "/getvalue"+ param).ToString();
+            String results = await UploadFiletoAnalysisAsync(datasetsepcial, "/getvalue" + param);
             if (column == "-1") results = results.Split('\n')[0];
             if (column != "-1") results = results.Split('\n')[1];
             if (results.Length > 10)
@@ -634,7 +657,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
             return output;
         }
 
-        public string UploadFiletoAnalysis(string filePath , string api_action="" )
+        public async System.Threading.Tasks.Task<string> UploadFiletoAnalysisAsync(string filePath , string api_action="" )
         {
             String filename = Path.GetFileName(filePath);
 
@@ -726,32 +749,56 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
 
             //Construct a HttpClient for the search-Server
-            HttpClient client = new HttpClient();
-            if (api_action == "") api_action = "/?";
-            else api_action = api_action + "&";
-                client.BaseAddress = new Uri(AnalAddress +
-                    api_action + "file_path=" + filename + "&user_home_directory=" + name);
-            //Set the searchTerm as query-String
-            StringBuilder paramBuilder = new StringBuilder();
-            paramBuilder.Append(" ");
-            String param = HttpUtility.UrlEncode(paramBuilder.ToString().Replace(" ", ""));
-            client.Timeout = TimeSpan.FromMinutes(30);
-            string output = "";
-            try
+            if (api_action.Contains("getvalue"))
             {
-                HttpResponseMessage response =  client.GetAsync(param).Result;
-                // Blocking call!
-                if (response.IsSuccessStatusCode)
+                HttpClient client = new HttpClient();
+                client.BaseAddress = new Uri(AnalAddress + api_action + "&file_path=" + filename + "&user_home_directory=" + name);
+
+                //Set the searchTerm as query - String
+                StringBuilder paramBuilder = new StringBuilder();
+                paramBuilder.Append(" ");
+                String param = HttpUtility.UrlEncode(paramBuilder.ToString().Replace(" ", ""));
+                client.Timeout = TimeSpan.FromMinutes(30);
+                string output = "";
+                try
                 {
-                    // Get the response body. Blocking!
-                    output = response.Content.ReadAsStringAsync().Result;
+                    HttpResponseMessage response = client.GetAsync(param).Result;
+                    // Blocking call!
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Get the response body. Blocking!
+                        output = response.Content.ReadAsStringAsync().Result;
+                    }
+                    return output.ToString();
+                }
+                catch (SocketException exx)
+                {
+                    Debug.WriteLine(exx.Message.ToString());
                 }
             }
-            catch (SocketException exx)
+            ///////////////////////////
+            HttpClient client_ = new HttpClient();
+            var Body_message = new HttpRequestMessage
             {
-                Debug.WriteLine(exx.Message.ToString());
-            }
-            return output;
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(AnalAddress + api_action),
+                Content = new StringContent(
+                    " { \"input_file_&location\"  :   \"" + filename + "\"  , " +
+                    "  \"extension\"  :  \".csv\"  , " +
+                    " \"output_location\"  : \"output/\" ," +
+                    " \"user_home_directory\"  : \"" + name + "\"  }", Encoding.UTF8, "application/json"
+                    )
+            };
+            client_.BaseAddress = new Uri(AnalAddress + api_action);
+            client_.Timeout = TimeSpan.FromMinutes(30);
+            var response_ = await client_.SendAsync(Body_message).ConfigureAwait(false);
+            response_.EnsureSuccessStatusCode();
+
+            var responseBody = await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+            client_.Dispose();
+            ////////////////////////////////////
+            
+            return responseBody.ToString();
         }
 
         //this is using the AAM module - ids mostly instead of string content of variables without unit / data type 
@@ -1385,23 +1432,39 @@ namespace BExIS.Modules.ASM.UI.Controllers
         {
             JObject jObject = new JObject();
             int k = 0;
-            for (int i = 0; i < lines.Count; i++)
+            foreach (JObject item in XXX["categorical"])
             {
                 JArray Xarray = new JArray();
-                Xarray.Add(lines[i]);
-                Xarray.Add(lines[i + 1]);
+                Xarray.Add(item["name"]);
+                Xarray.Add(item["values"].ToString().Replace(Environment.NewLine, "").Replace("\"", "'"));
 
                 JArray Yarray = new JArray();
-                Yarray.Add(lines[i + 2]);
-                Yarray.Add(lines[i + 3]);
+                Yarray.Add("count");
+                Yarray.Add(item["counts"].ToString().Trim().Replace(Environment.NewLine, "").Replace("\"", "'"));
 
                 JArray jArray = new JArray();
                 jArray.Add(Xarray);
                 jArray.Add(Yarray);
                 jObject[k.ToString()] = jArray;
                 k = k + 1;
-                i = i + 3;
             }
+            //for (int i = 0; i < lines.Count; i++)
+            //{
+            //    JArray Xarray = new JArray();
+            //    Xarray.Add(lines[i]);
+            //    Xarray.Add(lines[i + 1]);
+            //
+            //    JArray Yarray = new JArray();
+            //    Yarray.Add(lines[i + 2]);
+            //    Yarray.Add(lines[i + 3]);
+            //
+            //    JArray jArray = new JArray();
+            //    jArray.Add(Xarray);
+            //    jArray.Add(Yarray);
+            //    jObject[k.ToString()] = jArray;
+            //    k = k + 1;
+            //    i = i + 3;
+            //}
             return jObject;
         }
 
