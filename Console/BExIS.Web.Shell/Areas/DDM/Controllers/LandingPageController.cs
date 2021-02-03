@@ -11,6 +11,9 @@ using BExIS.Modules.Rpm.UI.Models;
 using Vaiona.Web.Mvc.Data;
 using BExIS.Aam.Entities.Mapping;
 using BExIS.Aam.Services;
+using System.IO;
+using Vaiona.Utils.Cfg;
+using Newtonsoft.Json.Linq;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -21,24 +24,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         [DoesNotNeedDataAccess]
         public ActionResult Index()
         {
-            DatasetManager dm = new DatasetManager();
-            List<Dataset> datasets = new List<Dataset>();
-            List<long> datasetIds = new List<long>();
-            datasets = dm.DatasetRepo.Query().OrderBy(p => p.Id).ToList();
-            datasetIds = datasets.Select(p => p.Id).ToList();
-            long somme = 0;
-            foreach (Dataset ds in datasets)
-            {
-                long noColumns = ds.DataStructure.Self is StructuredDataStructure ? (ds.DataStructure.Self as StructuredDataStructure).Variables.Count : 0L;
-                long noRows = ds.DataStructure.Self is StructuredDataStructure ? dm.GetDatasetLatestVersionEffectiveTupleCount(ds) : 0; // It would save time to calc the row count for all the datasets at once!
-                if (ds.Status == DatasetStatus.CheckedIn)
-                {
-                    somme = somme + (noRows * noColumns);
-                }
-            }
-            dm.Dispose();
-            ViewData["datasetCount"] = datasets.Count;
-            ViewData["Datapoints"] = somme;
+            String temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
+            JObject stats_obj = JObject.Parse(System.IO.File.ReadAllText(temp_file));
+            ViewData["datasetCount"] = stats_obj["dataset_count"].ToString();
+            ViewData["Datapoints"] = stats_obj["datapoints"].ToString();
 
             Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager();
             Int64 count =  aam_manager.get_all_dataset_column_annotation().Count;

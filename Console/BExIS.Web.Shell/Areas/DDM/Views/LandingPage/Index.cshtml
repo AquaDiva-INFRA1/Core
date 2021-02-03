@@ -12,8 +12,8 @@
 
 @{
     string semantic_Coverage = String.Format("{0:0.00}", (double)(ViewData["semantic_Coverage"]) * 100);
-    int datasetCount = (int)ViewData["datasetCount"];
-    Int64 Datapoints = (Int64)ViewData["Datapoints"];
+    string datasetCount = (string)ViewData["datasetCount"];
+    string Datapoints = (string)ViewData["Datapoints"];
 }
 
 
@@ -25,7 +25,7 @@
             text-align: justify;
             vertical-align: middle;
             font-family: "Times New Roman", Times, serif;
-            font-size: 30px;
+            font-size: 25px;
             margin: 35px;
             margin-right: 50rem;
             //background-color: rgba(0, 0, 0, 0.2);
@@ -70,15 +70,15 @@
     <header>
         <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
             <ol class="carousel-indicators">
-                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-                <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"  style="color: #000000;background-color: #000000;"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="1" style="color: #000000;background-color: #000000;"></li>
             </ol>
             <div class="carousel-inner" role="listbox">
                 <!-- Slide One - Set the background image for this slide in the line below -->
                 <div class="carousel-item active" style="background-image: url(@Url.Content("~/HomePage/Content/Images/Lehmann-Hainich004.jpg"))">
                     <div class="d-flex h-100 align-items-center justify-content-center">
                         <h1 class="myclass">
-                            Understanding the links between Surface and subsurface biogeosphere.
+                            Understanding the links between surface and subsurface biogeosphere.
                             The CRC AquaDiva focuses on the important roles of water (Aqua) and biodiversity (Diva) for shaping the structure, properties, and functions of the subsurface,
                             the part of the Earth's Critical Zone (CZ) that begins below the highest density of plant roots and extends down into the first aquifers.
                         </h1>
@@ -152,7 +152,7 @@
                             <div class="col-lg-12 mb-12">
                                 <div class="jumbotron" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.3) 100%), url('@Url.Content("~/HomePage/Content/Images/graphics.png")'); background-size: cover;">
                                     <h1 class="display-4">Based on AquaDiva ontology, semantically covering more than</h1>
-                                    <h2><span class="Single">@semantic_Coverage </span>% </h2>
+                                    <h2><span class="Single">80 </span>% </h2>
                                     <p class="lead">of Datasets.</p>
                                     <hr class="my-4">
                                     <p></p>
@@ -168,6 +168,7 @@
         <!-- Portfolio Section -->
 
         <hr class="my-12">
+        <h3> Services</h3>
         <div class="row">
             <div class="col-lg-4 col-sm-6 portfolio-item">
                 <div class="card h-100">
@@ -211,9 +212,9 @@
                     <a href="#"><img class="card-img-top" src="~/HomePage/Content/images/Annotation 2019-11-06 171037.png" alt=""></a>
                     <div class="card-body">
                         <h4 class="card-title">
-                            <a href="../../ddm/Data/ShowData/361">Sampling campaing data in <strong>Hainich national park</strong></a>
+                            <a href="../../ddm/Data/ShowData/361">Sampling campaing data in <strong>Hainich</strong> national park and <strong>Sandsteinplatte</strong></a>
                         </h4>
-                        <p class="card-text">This service is used to visual exploration of different samples collected with the project it its different locations</p>
+                        <p class="card-text">This service is used to visually explore different samples collected within the project and its different locations (Hainich HZE and Sandsteinplatte CZE)</p>
                     </div>
                 </div>
             </div>

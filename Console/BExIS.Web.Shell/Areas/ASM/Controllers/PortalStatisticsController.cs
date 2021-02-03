@@ -22,6 +22,7 @@ using System.Linq;
 using BExIS.Aam.Services;
 using BExIS.Aam.Entities.Mapping;
 using Vaiona.Persistence.Api;
+using System.Threading.Tasks;
 
 namespace BExIS.Modules.ASM.UI.Controllers
 {
@@ -29,7 +30,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
     {
         static string DatastructAPI = "https://addp.uni-jena.de/api/structures/";
         static List<Variable_analytics> VA_list;
-        static String debugFile = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
+        static String temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
         static List<string> project_list_names = new List<string> { "A01", "A02", "A03", "A04", "A05", "A06", "B01", "B02", "B03", "B04", "B05", "C03", "C05", "D01", "D02", "D03", "D04" };
 
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
@@ -52,6 +53,10 @@ namespace BExIS.Modules.ASM.UI.Controllers
             List <long> ds_ids = DM.GetDatasetLatestIds();
             DataStructureManager DStructM = new DataStructureManager();
             List <DataStructure> dataStructs = (List<DataStructure>) DStructM.AllTypesDataStructureRepo.Get();
+            String temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
+            JObject stats_obj = JObject.Parse(System.IO.File.ReadAllText(temp_file));
+            ViewData["datasetCount"] = stats_obj["dataset_count"].ToString();
+            ViewData["Datapoints"] = stats_obj["datapoints"].ToString();
 
             VA_list = new List<Variable_analytics>();
 
@@ -167,10 +172,6 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     }
                     catch (Exception e)
                     {
-                        using (StreamWriter sw = System.IO.File.AppendText(debugFile))
-                        {
-                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : analysis summary called : dataset " + id + " has an error : " + e.ToString());
-                        }
                         Debug.WriteLine(e.ToString());
                     }
                  }
@@ -286,6 +287,39 @@ namespace BExIS.Modules.ASM.UI.Controllers
             return File(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "REPORT.csv"), "text/csv", "REPORT.csv");
         }
 
+        public Boolean refresh_stats()
+        {
+            Task.Run(() => this.refresh_stats_async());
+            return true;
+        } 
+
+        private async Task<Boolean> refresh_stats_async()
+        {
+            DatasetManager dm = new DatasetManager();
+            List<Dataset> datasets = new List<Dataset>();
+            List<long> datasetIds = new List<long>();
+            datasets = dm.DatasetRepo.Query().OrderBy(p => p.Id).ToList();
+            datasetIds = datasets.Select(p => p.Id).ToList();
+            long somme = 0;
+            foreach (Dataset ds in datasets)
+            {
+                long noColumns = ds.DataStructure.Self is StructuredDataStructure ? (ds.DataStructure.Self as StructuredDataStructure).Variables.Count : 0L;
+                long noRows = ds.DataStructure.Self is StructuredDataStructure ? dm.GetDatasetLatestVersionEffectiveTupleCount(ds) : 0; // It would save time to calc the row count for all the datasets at once!
+                if (ds.Status == DatasetStatus.CheckedIn)
+                {
+                    somme = somme + (noRows * noColumns);
+                }
+            }
+            dm.Dispose();
+            string json = "{\"dataset_count\" : " + datasets.Count + " , \"datapoints\" : " + somme + " }";
+            using (StreamWriter sw = System.IO.File.CreateText(temp_file))
+            {
+                sw.WriteLine(json);
+            }
+            return true;
+            //The ASP.NET Session doesn't allow you to perform parallel requests from the same session.
+            //Having a RESTful API relying on session is a very bad design and IMHO should be rearchitectured so that it doesn't rely on state.
+        }
         public ActionResult DataAttributeStruct_list(List<DataAttributeStruct> DataAttributeStruct_)
         {
             ViewData["DataAttributeStruct"] = DataAttributeStruct_;
