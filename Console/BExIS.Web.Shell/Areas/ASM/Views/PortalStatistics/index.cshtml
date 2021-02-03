@@ -28,7 +28,14 @@
         Data_container_analytics datacontaineranalytics = (Data_container_analytics)ViewData["datacontaineranalytics"];
         string temp;
         string variables_count = (string)ViewData["variables_count"];
+
+        string datasetCount = (string)ViewData["datasetCount"];
+        string Datapoints = (string)ViewData["Datapoints"];
     }
+    Dataset count : @datasetCount <br />
+    Data points count : @Datapoints <br />
+    <button id="refresh_stats" class="bx-button function" title="Refresh portal stats" onclick="refresh_stats()">Refresh Portal stats (data points and datasets)</button>
+    <br />
 
     <h3> Variable Templates Report</h3>
     <table>
@@ -116,10 +123,12 @@
         </thead>
         <tbody>
             @{
-                List<Variable_analytics> VA_listt = (List<Variable_analytics>)ViewData["VA_list"];
+                List<Variable_analytics> VA_listt = new List<Variable_analytics>();
+                VA_listt = (List<Variable_analytics>)ViewData["VA_list"];
 
-                int ds_count = VA_listt.Count;
-                List<string> somme_Variables = new List<string>();
+                int ds_count = VA_listt.FindAll(x => x.dataset_id > 0).Count;
+                List<string> somme_Variables_unique = new List<string>();
+                List<string> somme_Variables_duplicated = new List<string>();
                 int somme_Concepts = 0;
                 int somme_Caracteristics = 0;
 
@@ -129,20 +138,20 @@
                     somme_Caracteristics = somme_Caracteristics + va.variable_concept_caracteristic.Count;
                     foreach (string s in va.variable_id)
                     {
-                        if (!somme_Variables.Contains(s))
+                        if (!somme_Variables_unique.Contains(s))
                         {
-                            somme_Variables.Add(s);
+                            somme_Variables_unique.Add(s);
                         }
-
+                        somme_Variables_duplicated.Add(s);
                     }
                 }
 
                 <tr>
                     <td>@ds_count</td>
-                    <td>@somme_Variables</td>
+                    <td>@somme_Variables_duplicated.Count</td>
                     <td>@somme_Concepts</td>
                     <td>@somme_Caracteristics</td>
-                    <td>@somme_Variables/  @datacontaineranalytics.DataAttributeStruct_list_in_use.Count </td>
+                    <td>@somme_Variables_duplicated.Count/  @datacontaineranalytics.DataAttributeStruct_list_in_use.Count </td>
                 </tr>
             }
 
@@ -150,7 +159,7 @@
     </table>
 
     <br />
-    
+
     <button id="downloadCsvButton" class="bx-button function" title="Csv download" onclick="download()">Download Semantic Coverage Report</button>
     <br />
 
@@ -272,6 +281,17 @@
 			        alert("We can not generate file right now, report the error please");
 			    }
 
+			}
+		})
+    }
+
+    function refresh_stats() {
+		$.ajax({
+			url: '@Url.Action("refresh_stats", "PortalStatistics", "ASM")',
+            type: "GET",
+            async: true,
+			success: function (e) {
+			    alert("Refresh in process");
 			}
 		})
     }

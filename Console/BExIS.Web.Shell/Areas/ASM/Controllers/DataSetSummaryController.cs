@@ -126,15 +126,27 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
                 string absolute_file_path = File(path, "text/csv", title + ".csv").FileName.ToString();
 
-                Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
+                String summary_file_temp = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "TEmp_categorical", Path.GetFileNameWithoutExtension(absolute_file_path));
                 string extension = Path.GetExtension(absolute_file_path);
-
-                Frame<int, string> df = Frame.ReadCsv(absolute_file_path, separators: ";");
-
                 if (allowed_extention.Contains(extension))
                 {
-                    String output_ = await UploadFiletoAnalysisAsync(absolute_file_path, "/categorical");
-                    String output = output_.Split(new string[] { "\n\n\n" }, StringSplitOptions.None)[0];
+                    if (!(System.IO.File.Exists(summary_file_temp))){
+
+                        string res = await UploadFiletoAnalysisAsync(absolute_file_path, "/categorical");
+                        using (StreamWriter sw = System.IO.File.CreateText(summary_file_temp))
+                        {
+                            sw.WriteLine(res);
+                            sw.WriteLine("***********" + System.Environment.NewLine);
+                        }
+                        res = await UploadFiletoAnalysisAsync(absolute_file_path, "/distrubution");
+                        System.IO.File.AppendAllText(summary_file_temp, res);
+                    }
+
+                    Debug.WriteLine("Dataset id : " + id + "has path : " + absolute_file_path);
+                    Frame<int, string> df = Frame.ReadCsv(absolute_file_path, separators: ";");
+
+                    string content_temp = System.IO.File.ReadAllText(summary_file_temp);
+                    String output = content_temp.Split(new string[] { "***********"+ System.Environment.NewLine }, StringSplitOptions.None)[0];
 
                     //string progToRun = python_script;
                     string outputFolder = output_Folder;
@@ -216,7 +228,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
                         Debug.WriteLine(exec.Message);
                     }
 
-                    output_ = await UploadFiletoAnalysisAsync(absolute_file_path, "/distrubution");
+
+                    string output_ = content_temp.Split(new string[] { "***********" + System.Environment.NewLine }, StringSplitOptions.None)[1];
                     String table = output_.Split(new string[] { "\n\n\n" }, StringSplitOptions.None)[0];
                     List<string> result = table.Split(System.Environment.NewLine.ToCharArray()).ToList<string>();
                     result = result.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
@@ -334,8 +347,23 @@ namespace BExIS.Modules.ASM.UI.Controllers
                 List<Aam_Dataset_column_annotation> annots = aam.get_all_dataset_column_annotation();
                 classification_results = new List<Input>();
                 prepare_for_classification(datapath+ Path.DirectorySeparatorChar+"tmp_" +ds.Replace(';','_').Trim()+".txt", ds);
-                string results = await UploadFiletoAnalysisAsync(datapath + Path.DirectorySeparatorChar + "tmp_" + ds.Replace(';', '_').Trim() + ".txt", "/predict");
-                dynamic json_class= ((dynamic)Newtonsoft.Json.JsonConvert.DeserializeObject(results));
+
+
+                string results = "";
+                String summary_file_temp = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "TEmp_Summary", Path.GetFileNameWithoutExtension("tmp_" +
+                    ds.Replace(';','_').Trim()+
+                    new DatasetManager().GetDatasetLatestVersion(long.Parse(ds)).Id.ToString()+
+                    ".txt"));
+                if (!(System.IO.File.Exists(summary_file_temp)))
+                {
+                    results = await UploadFiletoAnalysisAsync(datapath + Path.DirectorySeparatorChar + "tmp_" + ds.Replace(';', '_').Trim() + ".txt", "/predict");
+                    using (StreamWriter sw = System.IO.File.CreateText(summary_file_temp))
+                    {
+                        sw.WriteLine(results);
+                    }
+                }
+                results = System.IO.File.ReadAllText(summary_file_temp);
+                dynamic json_class = ((dynamic)Newtonsoft.Json.JsonConvert.DeserializeObject(results));
             
                 int index = 0;
                 foreach (JProperty xx in json_class)
