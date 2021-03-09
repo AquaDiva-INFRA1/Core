@@ -48,6 +48,10 @@
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
+
+<input type="text" id="myInput" placeholder="Search through the table...">
+
+
 <table class="table">
     <tr>
         <th>
@@ -61,26 +65,27 @@
         </th>
         <th></th>
     </tr>
+    <tbody id="myTable">
 
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.URI)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.label)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.type_uri)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-            </td>
-        </tr>
-    }
-
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.URI)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.label)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.type_uri)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                </td>
+            </tr>
+        }
+</tbody>
 </table>
 
 
@@ -133,4 +138,15 @@
         return false;
     }
 
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
 </script>
