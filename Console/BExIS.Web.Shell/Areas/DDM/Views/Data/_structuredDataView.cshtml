@@ -403,3 +403,16 @@
 			}
 		})}
 </script>
+
+<script>
+    $(document).ready(function () {
+        $("#PrimaryDataResultGrid table tbody tr td").each(function (index) {
+            str = $(this).text();
+            n = str.includes("http");
+            if (n) {
+                $("#PrimaryDataResultGrid table tbody tr td")[index].innerHTML = "<a href =\" " + str + " \" target=\"_blank\" >" + str + "</a>";
+                console.log($("#PrimaryDataResultGrid table tbody tr td")[index].innerHTML);
+            }
+        });
+    });
+</script>
