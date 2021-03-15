@@ -79,8 +79,9 @@ namespace BExIS.Modules.Aam.UI.Controllers
         {
             Aam_Dataset_column_annotationManager dca_ma = new Aam_Dataset_column_annotationManager();
             Aam_Dataset_column_annotation_Model dca_M = new Aam_Dataset_column_annotation_Model();
-            dca_ma.Dispose();
+            
             dca_M.datasets = dca_ma.LoadDataset_Id_Title( this.GetUsernameOrDefault());
+            dca_ma.Dispose();
 
             fill_variables(dca_M);
             fill_entites(dca_M);
