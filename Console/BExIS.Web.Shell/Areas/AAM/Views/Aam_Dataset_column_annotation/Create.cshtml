@@ -2,6 +2,8 @@
 
 @{
     ViewBag.Title = "Create";
+
+    string ds_id = (string)ViewData["ds_id"]; 
 }
 
 <h2>Create</h2>
@@ -22,7 +24,7 @@
             <div class="col-md-10">
                 @Html.DropDownListFor(model => model.datasets,
                 new SelectList(Model.datasets, "Key", "Value"),
-                new { htmlAttributes = new { @class = "form-control" } }
+                new { htmlAttributes = new { @class = "form-control" }, @onchange = "callChangefunc(this.value)"  }
                 )
                 @Html.ValidationMessageFor(model => model.datasets, "", new { @class = "text-danger" })
             </div>
@@ -51,17 +53,6 @@
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.characs, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownListFor(model => model.characs,
-                new SelectList(Model.characs, "Key", "Value"),
-                new { htmlAttributes = new { @class = "form-control" } }
-                )
-                @Html.ValidationMessageFor(model => model.characs, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
             @Html.LabelFor(model => model.standards, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.DropDownListFor(model => model.standards,
@@ -69,6 +60,17 @@
                 new { htmlAttributes = new { @class = "form-control" } }
                 )
                 @Html.ValidationMessageFor(model => model.standards, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.characs, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.characs,
+                new SelectList(Model.characs, "Key", "Value"),
+                new { htmlAttributes = new { @class = "form-control" } }
+                )
+                @Html.ValidationMessageFor(model => model.characs, "", new { @class = "text-danger" })
             </div>
         </div>
 
@@ -88,3 +90,29 @@
 <script src="~/Scripts/jquery-1.10.2.min.js"></script>
 <script src="~/Scripts/jquery.validate.min.js"></script>
 <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+<script type="text/javascript">
+
+    function callChangefunc(e) {
+        window.location = '@Url.Action("Create", "Aam_Dataset_column_annotation")?ds_id=' + e;
+        
+        //$.post('@Url.Action("Create", "Aam_Dataset_column_annotation")?ds_id=' + e,
+        //    function (response) {
+        //            console.log(e);
+        //            $(document).replaceWith(response);
+        //    }
+        //)
+    }
+    $(document).ready(function () {
+        index = '@Html.Raw(ds_id)';
+        console.log(index);
+        var mySelect = document.getElementById('datasets');
+
+        for (var i, j = 0; i = mySelect.options[j]; j++) {
+            if (i.value == index) {
+                mySelect.selectedIndex = j;
+                break;
+            }
+        }
+    });
+</script>
