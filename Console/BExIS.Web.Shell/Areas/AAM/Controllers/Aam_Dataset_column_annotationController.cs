@@ -75,17 +75,16 @@ namespace BExIS.Modules.Aam.UI.Controllers
 
 
         // GET: Aam_Dataset_column_annotation/Create
-        public ActionResult Create()
+        public ActionResult Create(string ds_id)
         {
             Aam_Dataset_column_annotationManager dca_ma = new Aam_Dataset_column_annotationManager();
             Aam_Dataset_column_annotation_Model dca_M = new Aam_Dataset_column_annotation_Model();
             
             dca_M.datasets = dca_ma.LoadDataset_Id_Title( this.GetUsernameOrDefault());
             dca_ma.Dispose();
-
-            fill_variables(dca_M);
             fill_entites(dca_M);
-
+            fill_variables(dca_M, ds_id);
+            ViewData["ds_id"] = ds_id;
             return View(dca_M);
         }
 
@@ -103,12 +102,12 @@ namespace BExIS.Modules.Aam.UI.Controllers
                         dca_M.entites.TryGetValue(uri.Id, out k);
                         if (k == null) dca_M.entites.Add(uri.Id, uri.Id + " - " + uri.URI);
                     }
-                    if (uri.type_uri.ToLower() == "standard")
+                    if (uri.type_uri.ToLower() == "charachteristic")
                     {
                         dca_M.characs.TryGetValue(uri.Id, out k);
                         if (k == null) dca_M.characs.Add(uri.Id, uri.Id + " - " + uri.URI);
                     }
-                    if (uri.type_uri.ToLower() == "charachteristic")
+                    if (uri.type_uri.ToLower() == "standard")
                     {
                         dca_M.standards.TryGetValue(uri.Id, out k);
                         if (k == null) dca_M.standards.Add(uri.Id, uri.Id + " - " + uri.URI);
@@ -123,11 +122,17 @@ namespace BExIS.Modules.Aam.UI.Controllers
             urim.Dispose();
         }
 
-        private void fill_variables(Aam_Dataset_column_annotation_Model dca_M)
+        private void fill_variables(Aam_Dataset_column_annotation_Model dca_M, string ds_id)
         {
+            DatasetManager dsmanager = new DatasetManager();
             DataStructureManager dsm = new DataStructureManager();
             List<Variable> variables =dsm.VariableRepo.Get().ToList<Variable>();
             // fill variables
+            if (ds_id != null)
+            {
+                variables = variables.Where(x => x.DataStructure.Id ==dsmanager.GetDataset(Int64.Parse(ds_id)).DataStructure.Id).ToList<Variable>();
+            }
+            dca_M.DataAttributes.Clear();
             foreach (Variable ds in variables)
             {
                 string k = null;
@@ -139,8 +144,14 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 {
                     Debug.WriteLine(ex.Message);
                 }
-                if (k == null) dca_M.DataAttributes.Add(ds.Id, ds.Id+" - "+ds.Label);
+
+                if (k == null)
+                   dca_M.DataAttributes.Add(ds.Id, ds.Id + " - " + ds.Label);
+
             }
+
+            dsmanager.Dispose();
+            dsm.Dispose();
         }
 
         // GET: Aam_Dataset_column_annotation/Edit/5
@@ -150,7 +161,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
             Aam_Dataset_column_annotation_Model oca_M = new Aam_Dataset_column_annotation_Model();
             oca_M.datasets = dca_ma.LoadDataset_Id_Title(this.GetUsernameOrDefault());
             fill_entites(oca_M);
-            fill_variables(oca_M);
+            fill_variables(oca_M, null);
 
             Aam_Dataset_column_annotation Aam_Dataset_column_annotation = dca_ma.get_dataset_column_annotation_by_id(id);
             ViewData["dataset"] = Aam_Dataset_column_annotation.Dataset.Id;
@@ -165,7 +176,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
         private void fill_vars(Aam_Dataset_column_annotation_Model oca_M)
         {
             DataStructureManager dsm = new DataStructureManager();
-            List < Variable > vars = dsm.VariableRepo.Get().ToList<Variable>();
+            List<Variable> vars = dsm.VariableRepo.Get().ToList<Variable>();
             foreach (Variable var in vars)
             {
                 string k = null;
@@ -173,6 +184,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 if (k == null) oca_M.DataAttributes.Add(var.Id, var.Id + " - " + var.Label);
             }
         }
+
 
         // POST: Aam_Dataset_column_annotation/Edit/5
         [HttpPost]
