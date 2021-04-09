@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Accord">
+      <HintPath>..\..\..\packages\Accord.3.8.0\lib\net40\Accord.dll</HintPath>
+    </Reference>
     <Reference Include="dotNetRDF">
       <HintPath>..\..\..\packages\dotNetRDF.2.0.0\lib\net40-client\dotNetRDF.dll</HintPath>
     </Reference>
