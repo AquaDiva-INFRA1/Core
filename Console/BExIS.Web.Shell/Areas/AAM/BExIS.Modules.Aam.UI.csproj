@@ -705,7 +705,6 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\bootstrap.css.map" />
     <Content Include="Content\bootstrap-theme.css.map" />
-    <None Include="packages.config" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\ai.0.15.0-build58334.js" />
     <Content Include="Scripts\ai.0.15.0-build58334.min.js" />
@@ -726,6 +725,7 @@
     <Content Include="Scripts\ai.0.22.19-build00125.min.js" />
     <Content Include="Content\AAM\Buttons-1.5.2\css\common.scss" />
     <Content Include="Content\AAM\Buttons-1.5.2\css\mixins.scss" />
+    <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\BAM-Pub.pubxml" />
     <None Include="Properties\PublishProfiles\BAM.pubxml" />
     <None Include="Properties\PublishProfiles\BAM21105.pubxml" />
@@ -750,7 +750,6 @@
     <Content Include="web.config" />
     <Content Include="Views\Help\Index.cshtml" />
     <Content Include="Views\Annotation\Index.cshtml" />
-    <Content Include="Scripts\jquery-2.1.4.min.map" />
     <Content Include="Views\Aam_Uri\Index.cshtml" />
     <Content Include="Views\Aam_Uri\Create.cshtml" />
     <Content Include="Views\Aam_Uri\Edit.cshtml" />
@@ -760,6 +759,7 @@
     <Content Include="Views\Aam_Dataset_column_annotation\Index.cshtml" />
     <Content Include="Views\Aam_Observation_Context\Edit.cshtml" />
     <Content Include="Views\Aam_Dataset_column_annotation\Edit.cshtml" />
+    <Content Include="Scripts\jquery-2.1.4.min.map" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
