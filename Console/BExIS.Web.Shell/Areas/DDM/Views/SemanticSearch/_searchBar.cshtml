@@ -21,6 +21,26 @@
                     )
                 </td>
                 <td>
+                    <label>Seamntic depth</label>
+                    @Html.DropDownList("Seamntic_depth", new List<SelectListItem>
+                    {
+                        new SelectListItem {Text = "0", Value = "0"},
+                        new SelectListItem {Text = "1", Value = "1"},
+                        new SelectListItem {Text = "2", Value = "2"},
+                        new SelectListItem {Text = "3", Value = "3"},
+                    })
+                </td>
+                <td>
+                    <label>Error distance</label>
+                    @Html.DropDownList("Error_distance", new List<SelectListItem>
+                    {
+                        new SelectListItem {Text = "0", Value = "0"},
+                        new SelectListItem {Text = "1", Value = "1"},
+                        new SelectListItem {Text = "2", Value = "2"},
+                        new SelectListItem {Text = "3", Value = "3"},
+                    })
+                </td>
+                <td>
                     <!--Search button-->
                     <button class="bx-button function" type="submit">Search</button>
                 </td>

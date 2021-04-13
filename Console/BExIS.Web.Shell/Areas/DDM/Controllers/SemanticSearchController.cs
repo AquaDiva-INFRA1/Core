@@ -88,7 +88,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             *      String searchSemantically = value of a checkBox = "on" when checked, NULL otherwise
             * */
         [HttpPost]
-        public ActionResult Index(String searchTerm)
+        public ActionResult Index(String searchTerm, string Seamntic_depth, string Error_distance)
         {
             //debugging file
             using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
@@ -119,7 +119,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 //Merge the results from the semantic search with the results from the normal bexis-search
                 //Alternative: Skip the merging: 
-                model.semanticComponent = semanticSearch(searchTerm);
+                model.semanticComponent = semanticSearch(searchTerm, Seamntic_depth,  Error_distance);
                 //model.semanticComponent = searchAndMerge(semanticSearch(searchTerm), searchTerm);
             }
 
@@ -704,7 +704,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         /* Calls the search-Server which returns DatasetIDs and VersionIDs
             * Then looks for the specified DatasetVersion and displays it
             * */
-        private System.Data.DataTable semanticSearch(String searchTerm)
+        private System.Data.DataTable semanticSearch(String searchTerm, string Seamntic_depth, string Error_distance)
         {
             //debugging file
             using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
@@ -780,6 +780,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     paramBuilder.Append("--");
                 }
             }
+            paramBuilder.Append("&params=" + Seamntic_depth + "--" + Error_distance);
             Debug.WriteLine(paramBuilder.ToString());
 
 
@@ -791,7 +792,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             client.BaseAddress = new Uri(semanticSearchURL);
 
             //Set the searchTerm as query-String
-            String param = HttpUtility.UrlEncode(paramBuilder.ToString().Replace(" ", ""));
+            //String param = HttpUtility.UrlEncode(paramBuilder.ToString().Replace(" ", " "));
+            String param = HttpUtility.UrlEncode(paramBuilder.ToString());
 
             //debugging file
             using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
@@ -802,7 +804,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             try
             {
-                HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
+                HttpResponseMessage response = client.GetAsync(paramBuilder.ToString()).Result;  // Blocking call!
                 if (response.IsSuccessStatusCode)
                 {
                     model.serachFlag = true;
