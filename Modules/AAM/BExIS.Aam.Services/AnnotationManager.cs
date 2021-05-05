@@ -11,6 +11,9 @@ using System.IO;
 using Vaiona.Utils.Cfg;
 using VDS.RDF;
 using VDS.RDF.Query;
+using Npgsql;
+using System.Configuration;
+using System.Diagnostics;
 
 namespace BExIS.Aam.Services
 {
@@ -459,6 +462,66 @@ namespace BExIS.Aam.Services
                 return changes;
             }
             return -1;
+        }
+
+        
+        public List<string> Update_semantic_API_data()
+        {
+            List<string> errors = new List<string>();
+            string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
+            NpgsqlConnection MyCnx = new NpgsqlConnection(Conx);
+            MyCnx.Open();
+
+            string cmd = "delete FROM \"observation_contexts\" " ;
+            NpgsqlCommand MyCmd = new NpgsqlCommand(cmd, MyCnx);
+            int b = MyCmd.ExecuteNonQuery();
+            cmd = "delete FROM \"dataset_column_annotation\" ";
+            MyCmd = new NpgsqlCommand(cmd, MyCnx);
+            b = MyCmd.ExecuteNonQuery();
+            int index = 0;
+            Aam_Dataset_column_annotationManager aam_manag = new Aam_Dataset_column_annotationManager();
+            DatasetManager dsm = new DatasetManager();
+            foreach (Aam_Dataset_column_annotation annot in aam_manag.get_all_dataset_column_annotation())
+            {
+                try
+                {
+                    index++;
+                    cmd = " INSERT INTO dataset_column_annotation VALUES ( " +
+                        annot.Dataset.Id + ", " + dsm.GetDatasetLatestVersion(annot.Dataset.Id).Id + " , " + annot.Dataset.VersionNo + ", \'" + annot.variable_id.Id + "\' , \' " +
+                        annot.entity_id.URI + " \' , \' " + annot.characteristic_id.URI + "\' , \' " + annot.standard_id.URI + "\' ,  " +
+                       annot.entity_id.Id + " , " + annot.characteristic_id.Id + ", " + annot.standard_id.Id + ", " + index + " ,  \'" +
+                        annot.entity_id.label + " \' ,  \' " + annot.characteristic_id.label + " \' , \' " + annot.standard_id.label + " \' )";
+                    MyCmd = new NpgsqlCommand(cmd, MyCnx);
+                    b = MyCmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    errors.Add(ex.Message);
+                }
+                
+            }
+            index = 0;
+            Aam_Observation_ContextManager aam_obs_manag = new Aam_Observation_ContextManager();
+            foreach (Aam_Observation_Context obs in aam_obs_manag.get_all_Aam_Observation_Context())
+            {
+                try{
+                    index++;
+                    cmd = "INSERT INTO observation_contexts VALUES (" +
+                    obs.Dataset.Id + ", " + dsm.GetDatasetLatestVersion(obs.Dataset.Id).Id + ",  \'" 
+                    + obs.Contextualized_entity.URI + "\' ,  \'" + obs.Contextualizing_entity.URI +"\' , " + 
+                    obs.Contextualized_entity.Id + " , " + obs.Contextualizing_entity.Id  +", " + index + " )";
+                    MyCmd = new NpgsqlCommand(cmd, MyCnx);
+                    b = MyCmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    errors.Add(ex.Message);
+                }
+            }
+            MyCnx.Close();
+            return errors;
         }
 
 
