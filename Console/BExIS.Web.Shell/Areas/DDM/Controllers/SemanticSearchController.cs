@@ -45,6 +45,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static List<HeaderItem> headerItems;
         static String semanticSearchURL = WebConfigurationManager.AppSettings["semanticSearchURL"];//"http://localhost:2607/bexis-0.1/search/";
         static String semedicoSearchURL = WebConfigurationManager.AppSettings["semedicoSearchURL"];//"http://aquadiva-semeddev.inf-bb.uni-jena.de:8080/";
+        static String semedicoSearchURLAD = WebConfigurationManager.AppSettings["semedicoSearchURLAD"];//"http://aquadiva-semeddev.inf-bb.uni-jena.de:8080/";
         static HeaderItem idHeader;
 
         static Dictionary<String, List<OntologyMapping>> mappingDic;
@@ -1068,12 +1069,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         /*
          * this is the Semedico API consumption for the preposed papers
          * */
-        private String consumeSemedicoREST_v2(String query_String, int subsetStart = 1, int subsetSize = 10)
+        private String consumeSemedicoREST_v2(string url, String query_String, int subsetStart = 0, int subsetSize = 9)
         {
             #region Http-Request
             //Construct a HttpClient for the search-Server
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(semedicoSearchURL);
+            client.BaseAddress = new Uri(url);
             client.Timeout = TimeSpan.FromSeconds(30);
             //Set the searchTerm as query-String
             string encoded_param = "";
@@ -1118,7 +1119,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             //List<Aam_Dataset_column_annotation> annots = (List < Aam_Dataset_column_annotation > ) aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id));
             foreach (Aam_Dataset_column_annotation ann in aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id)))
                 //request_string = request_string + clean_labels(ann.characteristic_id.label) + clean_labels(ann.entity_id.label) + ",";
-                request_string = request_string + ann.characteristic_id.URI.ToString() +";"+ ann.entity_id.URI.ToString() + ",";
+                request_string = request_string + ann.entity_id.URI.ToString() +";"+ ann.characteristic_id.URI.ToString() + ",";
 
             return request_string.Substring(0, request_string.Length - 1);
         }
@@ -1126,8 +1127,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         public String get_dataset_related_papers_by_ID(String id,String flag)
         {
             String Semedico_Result ="";
+            string Semedico_Result_AD = "";
+            Semedico_Result = "";
             String Query_4_API;
-
             if (id != "")
             {
                 Query_4_API = get_observations_contextualized_contextualizing(id);
@@ -1137,25 +1139,23 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 }
                 Debug.WriteLine("API Request for Dataset ID : " + id + " => " + Query_4_API);
 
-                Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
-                // to resolve the semedico API "session" problem
-                Semedico_Result = consumeSemedicoREST_v2(Query_4_API, 1, 10);
+                Semedico_Result = consumeSemedicoREST_v2(semedicoSearchURL, Query_4_API, 0, 9);
+                Semedico_Result_AD = consumeSemedicoREST_v2(semedicoSearchURLAD, Query_4_API, 0, 9);
                 if (model == null)
                 {
                     model = new ShowSemanticResultModel(CreateDataTable(makeHeader()));
-                }
-                if (model.resultListComponent == null)
-                {
                     model.resultListComponent = new SemedicoResultModel();
-                    model.resultListComponent.searchTermString = Query_4_API;
                 }
+                model.resultListComponent = new SemedicoResultModel();
+                model.resultListComponent.searchTermString = Query_4_API;
+                if (flag == null) model.resultListComponent.subsetstart = 0;
             }
             else {
                 if (flag == "nextpage")
                 {
                     model.resultListComponent.subsetstart = model.resultListComponent.subsetstart + 10;
-                    Semedico_Result = consumeSemedicoREST_v2(model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 10);
-                    
+                    Semedico_Result = consumeSemedicoREST_v2(semedicoSearchURL, model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 9);
+                    Semedico_Result_AD = consumeSemedicoREST_v2(semedicoSearchURLAD, model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 9);
                 }
                 else if (flag == "prevpage")
                 {
@@ -1164,13 +1164,21 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     {
                         model.resultListComponent.subsetstart = 0;
                     }
-                    Semedico_Result = consumeSemedicoREST_v2(model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 10);
+                    Semedico_Result = consumeSemedicoREST_v2(semedicoSearchURL, model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 9);
+                    Semedico_Result_AD = consumeSemedicoREST_v2(semedicoSearchURLAD, model.resultListComponent.searchTermString, model.resultListComponent.subsetstart, 9);
                 }
             }
             ViewData["page"] = model.resultListComponent.subsetstart;
 
-            Debug.WriteLine("====> Semedico result " + Semedico_Result);
-            return model.resultListComponent.subsetstart + "\n" +  Semedico_Result;
+            Debug.WriteLine("====> Semedico result " + Semedico_Result, Semedico_Result_AD);
+            var res = new
+            {
+                subsetstart = model.resultListComponent.subsetstart,
+                Semedico_Result = Semedico_Result,
+                Semedico_Result_AD = Semedico_Result_AD
+            };
+
+            return JsonConvert.SerializeObject(res);
 
         }
 
