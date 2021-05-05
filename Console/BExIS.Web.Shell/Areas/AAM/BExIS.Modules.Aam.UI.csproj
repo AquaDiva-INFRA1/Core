@@ -769,6 +769,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Images\" />
+    <Folder Include="Views\Aam_Api\" />
     <Folder Include="Views\Shared\" />
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.Mvc;
 using BExIS.Aam.Entities.Mapping;
 using BExIS.Aam.Services;
@@ -108,6 +109,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
             }
         }
 
+
         public void SelectFileProcess(HttpPostedFileBase SelectFileUploader)
         {
             if (SelectFileUploader != null)
@@ -127,6 +129,12 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 SelectFileUploader.SaveAs(path_temp);
             }
 
+        }
+
+        public JsonResult update_semantics()
+        {
+            AnnotationManager AM = new AnnotationManager();
+            return Json(AM.Update_semantic_API_data(), JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult import()

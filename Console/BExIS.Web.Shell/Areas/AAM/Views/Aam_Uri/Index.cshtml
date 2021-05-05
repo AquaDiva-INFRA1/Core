@@ -40,7 +40,7 @@
 
 <br />
 
-
+<button onclick="update()" >Update sematic table</button>
 
 
 
@@ -85,7 +85,7 @@
                 </td>
             </tr>
         }
-</tbody>
+    </tbody>
 </table>
 
 
@@ -149,4 +149,18 @@
             });
         });
     });
+
+    function update() {
+        $.ajax({
+            url: '/aam/Aam_Uri/update_semantics',
+            type: 'POST',
+            error: function (xhr) {
+                alert('Error occured, please contact your administrator');
+                console.log(xhr)
+            },
+            success: function (result) {
+                alert(result)
+            }
+        })
+    }
 </script>
