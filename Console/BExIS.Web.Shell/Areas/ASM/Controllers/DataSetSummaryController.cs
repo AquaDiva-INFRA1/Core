@@ -331,8 +331,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         }
 
         //string should be under this form 42; 155 where dataset ids should be sepearated by ; semicolon
-        
-        public async System.Threading.Tasks.Task<ActionResult> classificationAsync(string ds , string flag = "" )
+        public async System.Threading.Tasks.Task<ActionResult> classificationAsync(string ds , string flag = "", string operation="" )
         {
             List<string> nodes = new List<string>();
             List<List<int>> paths = new List<List<int>>();
@@ -346,8 +345,14 @@ namespace BExIS.Modules.ASM.UI.Controllers
                 Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
                 List<Aam_Dataset_column_annotation> annots = aam.get_all_dataset_column_annotation();
                 classification_results = new List<Input>();
-                prepare_for_classification(datapath+ Path.DirectorySeparatorChar+"tmp_" +ds.Replace(';','_').Trim()+".txt", ds);
+                prepare_for_classification(datapath+ Path.DirectorySeparatorChar + "tmp_" +ds.Replace(';','_').Trim()+".txt", ds);
 
+                if (operation == "prepare_only")
+                {
+                    byte[] fileBytes = System.IO.File.ReadAllBytes(datapath + Path.DirectorySeparatorChar + "tmp_" + ds.Replace(';', '_').Trim() + ".txt");
+
+                    return File(fileBytes, "application/force-download", "tmp_" + ds.Replace(';', '_').Trim() + ".txt");
+                }
 
                 string results = "";
                 String summary_file_temp = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "TEmp_Summary", Path.GetFileNameWithoutExtension("tmp_" +
