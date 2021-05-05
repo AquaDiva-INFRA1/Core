@@ -140,8 +140,12 @@ namespace BExIS.App.Bootstrap
             //This method identifies and loads the current tenant of the application. Many other methods and layout sections depends upon the tenant identified here.
             initTenancy();
             // At application start, each modules obtains a chance to perform some initialization and warmup tasks. They are coded in each module's Start method.
-            // This call starts them.
+            // This call starts them.ConfigureServices
             ModuleManager.StartModules();
+
+            //to add custom controller factory (load different controllers depending on language for example)
+            //ControllerBuilder.Current.SetControllerFactory(typeof("CustomControllerFactory:IControllerFactorySample")
+            
         }
 
         private void initTenancy()
@@ -160,6 +164,8 @@ namespace BExIS.App.Bootstrap
             try
             {
                 IoCFactory.StartContainer(path, "DefaultContainer");
+                // to add services hardcoded
+                //IoCFactory.Container.Register(typeof(SampleAccessionInterface),typeof(BExIS.Modules.OAC.UI.Models.SampleAccessionInterface))
             }
             catch (System.TypeLoadException) { } // swallow this exception, as it means that the IoC is already running.
             catch (Exception ex)
