@@ -16,5 +16,11 @@
         title="Import OMIC Archives" description="Import OMIC Archives as samples to be integrated to the portal" icon=""
         controller="Home" action="Index"
         extends="./menubarRoot/collect" />
+
+    <Export tag="internalApi" id="SampleAccession"
+            title="SampleAccession" description="SampleAccession" icon=""
+            controller="SampleAccession" action="*"
+            extends="" />
+    
 	</Exports>
 </Manifest>

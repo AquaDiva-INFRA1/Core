@@ -11,9 +11,9 @@ using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Reflection;
 
-namespace BExIS.Modules.OAC.UI.Models
+namespace BEXIS.OAC.Entities
 {
-    public class EBIresponseModel
+    public class AccessionMetadata
     {
         public string accession { get; set; }
         public string name { get; set; }
@@ -51,9 +51,9 @@ namespace BExIS.Modules.OAC.UI.Models
         public List<string> externalReferencesacc { get; set; }
         public List<string> externalReferencesurl { get; set; }
 
-        public EBIresponseModel() { }
+        public AccessionMetadata() { }
 
-        public EBIresponseModel(JObject json)
+        public AccessionMetadata(JObject json)
         {
             this.accession = json["accession"] == null ? "" : json["accession"].ToString();
             this.name = json["name"] == null ? "" : json["name"].ToString();
@@ -253,21 +253,21 @@ namespace BExIS.Modules.OAC.UI.Models
             return xml;
         }
 
-        public string ConvertTocsv(EBIresponseModel model, string tempfile)
+        public string ConvertTocsv(AccessionMetadata model, string tempfile)
         {
             string x = "";
             //x = "accession,name,releaseDate,updateDate,description,_linksselfhref,_linkssamplehref,_linksrelationshref,geographicLocationDepth,organismtext,organismontologyTerms,environmentMaterial,insdcFirstPublic,enaChecklist,collectionDate,geographicLocationLongitude,titletext,geographicLocationLatitude,insdcLastUpdate,waterEnvironmentalPackage,waterEnvironmentalPackageontologyTerms,investigationType,synonym,insdcStatus,sequencingMethod,projectName,sraAccession,alias,environmentBiome,environmentFeature,insdcCenterName,geographicLocationCountryAndOrSea,externalReferences,externalReferencesacc,externalReferencesurl";
             //sw.WriteLine(x);
 
-            x = model.accession.Replace(',' , ' ').Replace(',' , ' ') + " ," + model.name.Replace(',' , ' ').Replace(',' , ' ') + " ," + model.releaseDate.Replace(',' , ' ').Replace(',' , ' ') + " ," + model.updateDate.Replace(',' , ' ').Replace(',' , ' ') + " ," + model.description.Replace(',' , ' ').Replace(',' , ' ') + " ," + model._linksselfhref.Replace(',' , ' ').Replace(',' , ' ') + " ," + model._linkssamplehref.Replace(',' , ' ').Replace(',' , ' ') + ","
-                + model._linksrelationshref.Replace(',' , ' ').Replace(',' , ' ') + " ," + string.Join("-", model.geographicLocationDepth).Replace(',' , ' ').Replace(',' , ' ') + " ," + string.Join("-", model.organismtext).Replace(',' , ' ').Replace(',' , ' ') + " ," + string.Join("-", model.organismontologyTerms).Replace(',' , ' ') + ","
-                + string.Join("-", model.environmentMaterial).Replace(',' , ' ') + " ," + string.Join("-", model.insdcFirstPublic).Replace(',' , ' ') + "," 
-                + string.Join("-", model.enaChecklist).Replace(',' , ' ') + " ," + string.Join("-", model.collectionDate).Replace(',' , ' ') + " ," + string.Join("-", model.geographicLocationLongitude).Replace(',' , ' ') + " ," + string.Join("-", model.titletext).Replace(',' , ' ') + "," 
-                + string.Join("-", model.geographicLocationLatitude).Replace(',' , ' ') + " ," + string.Join("-", model.insdcLastUpdate).Replace(',' , ' ') + " ," + string.Join("-", model.waterEnvironmentalPackage).Replace(',' , ' ') + " ," + string.Join("-", model.waterEnvironmentalPackageontologyTerms).Replace(',' , ' ') + ","
-                + string.Join("-", model.investigationType).Replace(',' , ' ') + " ," + string.Join("-", model.synonym).Replace(',' , ' ') + " ," + string.Join("-", model.insdcStatus).Replace(',' , ' ') + " ," + string.Join("-", model.sequencingMethod).Replace(',' , ' ') + ","
-                + string.Join("-", model.projectName).Replace(',' , ' ') + " ," + string.Join("-", model.sraAccession).Replace(',' , ' ') + " ," + string.Join("-", model.alias).Replace(',' , ' ') + "," 
-                + string.Join("-", model.environmentBiome).Replace(',' , ' ') + " ," + string.Join("-", model.environmentFeature).Replace(',' , ' ') + " ," + string.Join("-", model.insdcCenterName).Replace(',' , ' ') + "," 
-                + string.Join("-", model.geographicLocationCountryAndOrSea).Replace(',' , ' ') + " ," + string.Join("-", model.externalReferences).Replace(',' , ' ') + " ," + string.Join("-", model.externalReferencesacc).Replace(',' , ' ') + ","+ string.Join("-", model.externalReferencesurl) 
+            x = model.accession.Replace(',', ' ').Replace(',', ' ') + " ," + model.name.Replace(',', ' ').Replace(',', ' ') + " ," + model.releaseDate.Replace(',', ' ').Replace(',', ' ') + " ," + model.updateDate.Replace(',', ' ').Replace(',', ' ') + " ," + model.description.Replace(',', ' ').Replace(',', ' ') + " ," + model._linksselfhref.Replace(',', ' ').Replace(',', ' ') + " ," + model._linkssamplehref.Replace(',', ' ').Replace(',', ' ') + ","
+                + model._linksrelationshref.Replace(',', ' ').Replace(',', ' ') + " ," + string.Join("-", model.geographicLocationDepth).Replace(',', ' ').Replace(',', ' ') + " ," + string.Join("-", model.organismtext).Replace(',', ' ').Replace(',', ' ') + " ," + string.Join("-", model.organismontologyTerms).Replace(',', ' ') + ","
+                + string.Join("-", model.environmentMaterial).Replace(',', ' ') + " ," + string.Join("-", model.insdcFirstPublic).Replace(',', ' ') + ","
+                + string.Join("-", model.enaChecklist).Replace(',', ' ') + " ," + string.Join("-", model.collectionDate).Replace(',', ' ') + " ," + string.Join("-", model.geographicLocationLongitude).Replace(',', ' ') + " ," + string.Join("-", model.titletext).Replace(',', ' ') + ","
+                + string.Join("-", model.geographicLocationLatitude).Replace(',', ' ') + " ," + string.Join("-", model.insdcLastUpdate).Replace(',', ' ') + " ," + string.Join("-", model.waterEnvironmentalPackage).Replace(',', ' ') + " ," + string.Join("-", model.waterEnvironmentalPackageontologyTerms).Replace(',', ' ') + ","
+                + string.Join("-", model.investigationType).Replace(',', ' ') + " ," + string.Join("-", model.synonym).Replace(',', ' ') + " ," + string.Join("-", model.insdcStatus).Replace(',', ' ') + " ," + string.Join("-", model.sequencingMethod).Replace(',', ' ') + ","
+                + string.Join("-", model.projectName).Replace(',', ' ') + " ," + string.Join("-", model.sraAccession).Replace(',', ' ') + " ," + string.Join("-", model.alias).Replace(',', ' ') + ","
+                + string.Join("-", model.environmentBiome).Replace(',', ' ') + " ," + string.Join("-", model.environmentFeature).Replace(',', ' ') + " ," + string.Join("-", model.insdcCenterName).Replace(',', ' ') + ","
+                + string.Join("-", model.geographicLocationCountryAndOrSea).Replace(',', ' ') + " ," + string.Join("-", model.externalReferences).Replace(',', ' ') + " ," + string.Join("-", model.externalReferencesacc).Replace(',', ' ') + "," + string.Join("-", model.externalReferencesurl)
                 ;
 
             if (tempfile != "")
@@ -287,6 +287,26 @@ namespace BExIS.Modules.OAC.UI.Models
             return x;
         }
 
+        public string ConvertTocsv(AccessionMetadata model)
+        {
+            string x = "";
+            //x = "accession,name,releaseDate,updateDate,description,_linksselfhref,_linkssamplehref,_linksrelationshref,geographicLocationDepth,organismtext,organismontologyTerms,environmentMaterial,insdcFirstPublic,enaChecklist,collectionDate,geographicLocationLongitude,titletext,geographicLocationLatitude,insdcLastUpdate,waterEnvironmentalPackage,waterEnvironmentalPackageontologyTerms,investigationType,synonym,insdcStatus,sequencingMethod,projectName,sraAccession,alias,environmentBiome,environmentFeature,insdcCenterName,geographicLocationCountryAndOrSea,externalReferences,externalReferencesacc,externalReferencesurl";
+            //sw.WriteLine(x);
+
+            x = model.accession.Replace(',', ' ').Replace(',', ' ') + " ," + model.name.Replace(',', ' ').Replace(',', ' ') + " ," + model.releaseDate.Replace(',', ' ').Replace(',', ' ') + " ," + model.updateDate.Replace(',', ' ').Replace(',', ' ') + " ," + model.description.Replace(',', ' ').Replace(',', ' ') + " ," + model._linksselfhref.Replace(',', ' ').Replace(',', ' ') + " ," + model._linkssamplehref.Replace(',', ' ').Replace(',', ' ') + ","
+                + model._linksrelationshref.Replace(',', ' ').Replace(',', ' ') + " ," + string.Join("-", model.geographicLocationDepth).Replace(',', ' ').Replace(',', ' ') + " ," + string.Join("-", model.organismtext).Replace(',', ' ').Replace(',', ' ') + " ," + string.Join("-", model.organismontologyTerms).Replace(',', ' ') + ","
+                + string.Join("-", model.environmentMaterial).Replace(',', ' ') + " ," + string.Join("-", model.insdcFirstPublic).Replace(',', ' ') + ","
+                + string.Join("-", model.enaChecklist).Replace(',', ' ') + " ," + string.Join("-", model.collectionDate).Replace(',', ' ') + " ," + string.Join("-", model.geographicLocationLongitude).Replace(',', ' ') + " ," + string.Join("-", model.titletext).Replace(',', ' ') + ","
+                + string.Join("-", model.geographicLocationLatitude).Replace(',', ' ') + " ," + string.Join("-", model.insdcLastUpdate).Replace(',', ' ') + " ," + string.Join("-", model.waterEnvironmentalPackage).Replace(',', ' ') + " ," + string.Join("-", model.waterEnvironmentalPackageontologyTerms).Replace(',', ' ') + ","
+                + string.Join("-", model.investigationType).Replace(',', ' ') + " ," + string.Join("-", model.synonym).Replace(',', ' ') + " ," + string.Join("-", model.insdcStatus).Replace(',', ' ') + " ," + string.Join("-", model.sequencingMethod).Replace(',', ' ') + ","
+                + string.Join("-", model.projectName).Replace(',', ' ') + " ," + string.Join("-", model.sraAccession).Replace(',', ' ') + " ," + string.Join("-", model.alias).Replace(',', ' ') + ","
+                + string.Join("-", model.environmentBiome).Replace(',', ' ') + " ," + string.Join("-", model.environmentFeature).Replace(',', ' ') + " ," + string.Join("-", model.insdcCenterName).Replace(',', ' ') + ","
+                + string.Join("-", model.geographicLocationCountryAndOrSea).Replace(',', ' ') + " ," + string.Join("-", model.externalReferences).Replace(',', ' ') + " ," + string.Join("-", model.externalReferencesacc).Replace(',', ' ') + "," + string.Join("-", model.externalReferencesurl)
+                ;
+
+            return x;
+        }
+
         public string Initialise_header(string tempfile)
         {
             string data_csv = "accession,name,releaseDate,updateDate,description,_linksselfhref,_linkssamplehref," +
@@ -296,6 +316,7 @@ namespace BExIS.Modules.OAC.UI.Models
                 "insdcStatus,sequencingMethod,projectName,sraAccession,alias,environmentBiome,environmentFeature" +
                 ",insdcCenterName,geographicLocationCountryAndOrSea,externalReferences," +
                 "externalReferencesacc,externalReferencesurl";
+            
             if (tempfile != "")
             {
                 if (!File.Exists(tempfile))
@@ -310,6 +331,20 @@ namespace BExIS.Modules.OAC.UI.Models
                     sw.WriteLine(data_csv);sw.Close();
                 }
             }
+            
+            return data_csv;
+        }
+
+        public string Initialise_header()
+        {
+            string data_csv = "accession,name,releaseDate,updateDate,description,_linksselfhref,_linkssamplehref," +
+                "_linksrelationshref,geographicLocationDepth,organismtext,organismontologyTerms,environmentMaterial," +
+                "insdcFirstPublic,enaChecklist,collectionDate,geographicLocationLongitude,titletext,geographicLocationLatitude," +
+                "insdcLastUpdate,waterEnvironmentalPackage,waterEnvironmentalPackageontologyTerms,investigationType,synonym," +
+                "insdcStatus,sequencingMethod,projectName,sraAccession,alias,environmentBiome,environmentFeature" +
+                ",insdcCenterName,geographicLocationCountryAndOrSea,externalReferences," +
+                "externalReferencesacc,externalReferencesurl";
+            
             return data_csv;
         }
 

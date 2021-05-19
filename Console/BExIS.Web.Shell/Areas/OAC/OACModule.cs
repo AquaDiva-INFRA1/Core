@@ -2,6 +2,7 @@ using System;
 using Vaiona.Logging;
 using Vaiona.Web.Mvc.Modularity;
 using BExIS.Modules.OAC.UI.Helper;
+using System.Web.Mvc;
 
 namespace BExIS.Modules.OAC.UI
 {
@@ -32,6 +33,12 @@ namespace BExIS.Modules.OAC.UI
 
             LoggerFactory.GetFileLogger().LogCustom("...end install of OAC...");
 
+        }
+        public override void Start()
+        {
+            base.Start();
+            Vaiona.IoC.IoCFactory.Container.Register(typeof(BExIS.OAC.Services.ISampleAccession), typeof(BExIS.OAC.Services.SampleAccessionManager));
+            //ControllerBuilder.Current.SetControllerFactory(typeof("CustomControllerFactory:IControllerFactorySample");
         }
         /// <summary>
         /// Registers current area with the routing engine.

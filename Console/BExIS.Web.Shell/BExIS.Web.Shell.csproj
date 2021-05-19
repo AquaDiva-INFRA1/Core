@@ -1824,6 +1824,10 @@
       <Project>{c0c9f0f2-9e65-448d-8000-d311db326460}</Project>
       <Name>BExIS.Xml.Models</Name>
     </ProjectReference>
+    <ProjectReference Include="Areas\OAC\BEXIS.OAC.Services\BExIS.OAC.Services.csproj">
+      <Project>{b423a986-eb03-4696-aade-a5e8ea11fc73}</Project>
+      <Name>BExIS.OAC.Services</Name>
+    </ProjectReference>
     <ProjectReference Include="Areas\RPM\BExIS.Modules.Rpm.UI.csproj">
       <Project>{76702A4F-D6E5-416F-BD81-58447514AF05}</Project>
       <Name>BExIS.Modules.Rpm.UI</Name>
