@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vaiona.Persistence.Api;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.OAC.UI.Helper
 {
-    public class OACSeedDataGenerator : IDisposable
+    public class OACSeedDataGenerator : IModuleSeedDataGenerator
     {
         public void GenerateSeedData()
         {
@@ -21,7 +22,7 @@ namespace BExIS.Modules.OAC.UI.Helper
                 {
                     Feature OAC = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("OMIC Archives Import"));
                     if (OAC == null) DataCollectionFeature = featureManager.Create("OMIC Archives Import", "OMIC Archives Import", DataCollectionFeature);
-                    operationManager.Create("OAC", "Home", "*", DataCollectionFeature);
+                    operationManager.Create("OAC", "*", "*", DataCollectionFeature);
                 }
 
 

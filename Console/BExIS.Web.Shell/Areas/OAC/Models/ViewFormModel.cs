@@ -12,7 +12,7 @@ using BExIS.Modules.Dcm.UI.Controllers;
 
 namespace BExIS.Modules.OAC.UI.Models
 {
-    public class SelectedImportOptionsModel
+    public class ViewFormModel
     {
         internal string project;
 
@@ -42,9 +42,15 @@ namespace BExIS.Modules.OAC.UI.Models
         public List<ListViewItemWithType> DataStructureViewList { get; set; }
         public Dictionary<string,string> Accessions { get; set; }
         //acession contains key respresting the accession number and the project number separated by space , and the value is the Sample (not project) metadata extracted from the EBI
-        public  SelectedImportOptionsModel () {
+        public ViewFormModel() { }
 
-            
+        public ViewFormModel(List<ListViewItem> MetadataStructureViewList, List<ListViewItemWithType> DataStructureViewList,
+            List<ListViewItem> DataSourceViewList) 
+        {
+            this.MetadataStructureViewList = MetadataStructureViewList;
+            this.DataStructureViewList = DataStructureViewList;
+            this.DataSourceViewList = DataSourceViewList;
+            this.Accessions = new Dictionary<string, string>();
         }
 
         public List<ListViewItem> GetDataSourceList()

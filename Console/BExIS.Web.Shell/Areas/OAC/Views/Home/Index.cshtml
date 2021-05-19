@@ -1,4 +1,4 @@
-@model BExIS.Modules.OAC.UI.Models.SelectedImportOptionsModel
+@model BExIS.Modules.OAC.UI.Models.ViewFormModel
 
 @using System.Configuration
 @using System.Xml;
@@ -28,7 +28,7 @@
     
 <div class="row">
     <div class="col col-lg-6">
-        @using (Html.BeginForm("FetchDataFromPortal", "Home", FormMethod.Post ))
+        @using (Html.BeginForm("FetchDataFromPortalAsync", "Home", FormMethod.Post ))
         {
             <table>
                 <tr>
@@ -237,7 +237,7 @@
         var params_ = "?sample=" + sample +"&project="+project+ "&MetadataStructureId=" + SelectedMetadataStructureId + "&DataSourceId=" + SelectedDataSourceId + "&DataStructureId=" + SelectedDataStructureId;
         console.debug(params_)
         $.ajax({
-            url: '/OAC/Home/LoadSamplesViewMetadata'+params_,
+            url: '/OAC/Home/LoadSamplesViewMetadataAsync'+params_,
             error: function (xhr) {
                 alert('OoOoOoOppps ... error happened, come back later ...');
             },
@@ -262,7 +262,7 @@
         $('#spinner2').show();
         
         $.ajax({
-            url: '/OAC/Home/Submit',
+            url: '/OAC/Home/SubmitAsync',
             type: 'POST',
             data: {
                 'acc': accession_number.toString()
@@ -286,7 +286,7 @@
         if (child_checked_length > 0) {
             $("input[name='accession_number']").removeAttr('checked');
         } else {
-            $("input[name='accession_number']").attr("checked", "checked");;
+            $("input[name='accession_number']").attr("checked", "checked");
         }
     }
 
