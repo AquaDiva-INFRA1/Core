@@ -1,4 +1,5 @@
 using BExIS.Security.Entities.Objects;
+using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace BExIS.Modules.OAC.UI.Helper
         {
             FeatureManager featureManager = new FeatureManager();
             OperationManager operationManager = new OperationManager();
+            FeaturePermissionManager featurePermissionManager = new FeaturePermissionManager();
 
             try
             {
@@ -23,8 +25,13 @@ namespace BExIS.Modules.OAC.UI.Helper
                     Feature OAC = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("OMIC Archives Import"));
                     if (OAC == null) DataCollectionFeature = featureManager.Create("OMIC Archives Import", "OMIC Archives Import", DataCollectionFeature);
                     operationManager.Create("OAC", "*", "*", DataCollectionFeature);
-                }
 
+                    Feature API = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("API OMIC") && f.Parent.Equals(DataCollectionFeature));
+                    if (API == null) API = featureManager.Create("API OMIC", "API OMIC", DataCollectionFeature);
+                    if (!operationManager.Exists("api", "SampleAccession", "*")) operationManager.Create("API", "SampleAccession", "*", API);
+                    //set api public
+                    featurePermissionManager.Create(null, API.Id, Security.Entities.Authorization.PermissionType.Grant);
+                }
 
             }
             catch(Exception ex)
@@ -35,6 +42,7 @@ namespace BExIS.Modules.OAC.UI.Helper
             {
                 featureManager.Dispose();
                 operationManager.Dispose();
+                featurePermissionManager.Dispose();
             }
             
 

@@ -16,6 +16,7 @@ using Vaiona.Utils.Cfg;
 using System.Web.Mvc;
 using BEXIS.OAC.Entities;
 using System.Net.Http;
+using System.Text;
 
 namespace BExIS.Modules.OAC.UI.Controllers
 {
@@ -68,8 +69,9 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
                 using (var client = new HttpClient())
                 {
-                    string url = "https://"+this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/getStudy?";
-                    string param = "studyID=" + Identifier + "&datasource=" + DataSourceId.ToString();
+                    string url = "http://"+this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/getStudy/";
+                    //string param = "studyID=" + Identifier + "&datasource=" + DataSourceId.ToString();
+                    string param =  Identifier + "/" + DataSourceId.ToString(); 
                     client.BaseAddress = new Uri(url+ param);
                     //client.DefaultRequestHeaders.Add("studyID", Identifier);
                     //client.DefaultRequestHeaders.Add("datasource", DataSourceId.ToString());
@@ -132,19 +134,16 @@ namespace BExIS.Modules.OAC.UI.Controllers
                 KeyValuePair<string, string> xx = model.Accessions.FirstOrDefault(x => x.Key.Contains(s));
                 dict.Add(xx.Key, xx.Value);
             }
-            //Dataset ds = AddProjectsdataset(dict);
+
             using (var client = new HttpClient())
             {
-                string url = "https://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/add_Dataset";
-                //client.BaseAddress = new Uri(url + "?" + param);
+                string url = "http://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/add_Dataset";
                 client.BaseAddress = new Uri(url );
-                client.DefaultRequestHeaders.Add("accession_list", JsonConvert.SerializeObject(dict));
-                var responseTask = client.GetAsync("");
-                responseTask.Wait();
-                //To store result of web api response.   
-                Stream result = await responseTask.Result.Content.ReadAsStreamAsync();
-                string jsonstring = new StreamReader(result).ReadToEnd();
-                return JsonConvert.DeserializeObject<dynamic>(jsonstring).dataset_id;
+                StringContent data = new StringContent(JsonConvert.SerializeObject(dict), Encoding.UTF8, "application/json");
+                var responseTask = await client.PostAsync(url, data);
+                string result = await responseTask.Content.ReadAsStringAsync();
+
+                return JsonConvert.DeserializeObject<dynamic>(result).dataset_id;
             }
             return new Dataset().Id;
         }

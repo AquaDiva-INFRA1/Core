@@ -30,30 +30,39 @@ namespace BExIS.Modules.OAC.UI.Controllers
         }
 
         // GET: Sample
+        [BExISApiAuthorize]
+        [GetRoute("api/SampleAccession/getStudy/{studyID}/{datasource}")]
         public JObject getStudy(string studyID, DataSource datasource)
         {
-            return _sampleAccession.fetchStudy(studyID, datasource);
+            try
+            {
+                return _sampleAccession.fetchStudy(studyID, datasource);
+            }
+            catch (Exception e)
+            {
+                return new JObject () ;
+            }
+            
         }
 
-        [System.Web.Http.HttpPost, System.Web.Http.HttpGet]
-        //[GetRoute("api/SampleAccession/add_Dataset/{accession_list}")]
-        public JObject add_Dataset(string accession_list)
-        {
-            return _sampleAccession.AddProjectsdataset(JsonConvert.DeserializeObject<Dictionary<string, string>>(accession_list), GetUsernameOrDefault());
-        }
-
+        [BExISApiAuthorize]
         [System.Web.Http.HttpPost, System.Web.Http.HttpGet]
         //[GetRoute("api/SampleAccession/add_Dataset/{accession_list}")]
         //[ResponseType(typeof(ApiDatasetModel))]
         public IHttpActionResult add_Dataset()
         {
-            if (this.Request.Headers.Contains("accession_list"))
+            try
             {
-                string accession_list = this.Request.Headers.GetValues("accession_list").First();
-                JObject jsonObj = _sampleAccession.AddProjectsdataset(JsonConvert.DeserializeObject<Dictionary<string, string>>(accession_list), GetUsernameOrDefault());
-                return Ok(jsonObj);
+                System.IO.StreamReader reader = new System.IO.StreamReader(HttpContext.Current.Request.InputStream);
+                reader.BaseStream.Position = 0;
+                string requestFromPost = reader.ReadToEnd();
+                JObject jsonObj_ = _sampleAccession.AddProjectsdataset(JsonConvert.DeserializeObject<Dictionary<string, string>>(requestFromPost), GetUsernameOrDefault());
+                return Ok(jsonObj_);
             }
-            return Content(HttpStatusCode.BadRequest, "");
+            catch (Exception e)
+            {
+                return Content(HttpStatusCode.BadRequest, e.Message);
+            }
         }
 
         private string GetUsernameOrDefault()
