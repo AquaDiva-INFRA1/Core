@@ -2,6 +2,7 @@
 using BExIS.Dlm.Services.Party;
 using BExIS.Modules.Bam.UI.Models;
 using BExIS.Security.Services.Subjects;
+using BExIS.Security.Services.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -101,56 +102,53 @@ namespace BExIS.Modules.Bam.UI.Controllers
         [HttpPost]
         public ActionResult CreateUserParty(Party party, Dictionary<string, string> partyCustomAttributeValues, List<PartyRelationship> partyRelationships)
         {
-            PartyTypeManager partyTypeManager = null;
-            PartyManager partyManager = null;
-            PartyRelationshipTypeManager partyRelationshipManager = null;
-            UserManager userManager = null;
-            try
+            using (PartyTypeManager partyTypeManager = new PartyTypeManager())
+            using (PartyManager partyManager = new PartyManager())
+            using (PartyRelationshipTypeManager partyRelationshipManager = new PartyRelationshipTypeManager())
+            using (UserManager userManager = new UserManager())
+            using (PartyRelationshipTypeManager partyRelationshipTypeManager = new PartyRelationshipTypeManager())
             {
-                //check if the party blongs to the user
-                //Bind party if there is already a user associated to this party
 
-                userManager = new UserManager();
-                partyTypeManager = new PartyTypeManager();
-                partyManager = new PartyManager();
-                partyRelationshipManager = new PartyRelationshipTypeManager();
-                var partyType = partyTypeManager.PartyTypeRepository.Get(party.PartyType.Id);
-                var partyStatusType = partyTypeManager.GetStatusType(partyType, "Created");
-                //Create party
-                party = partyManager.Create(partyType, party.Description, null, null, partyCustomAttributeValues.ToDictionary(cc => long.Parse(cc.Key), cc => cc.Value));
-                if (partyRelationships != null)
-                    foreach (var partyRelationship in partyRelationships)
-                    {
-                        //the duration is from current datetime up to the end of target party date
-                        var TargetParty = partyManager.PartyRepository.Get(partyRelationship.TargetParty.Id);
-                        // var partyRelationshipType = partyRelationshipManager.PartyRelationshipTypeRepository.Get(partyRelationship.PartyRelationshipType.Id);
-                        var partyTypePair = partyRelationshipManager.PartyTypePairRepository.Get(partyRelationship.PartyTypePair.Id);
-                        partyManager.AddPartyRelationship(party, TargetParty, partyRelationship.Title, partyRelationship.Description, partyTypePair, DateTime.Now, TargetParty.EndDate, partyRelationship.Scope);
-                    }
+                // check if 
                 var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                 userTask.Wait();
                 var user = userTask.Result;
-                partyManager.AddPartyUser(party, user.Id);
 
-                //set FullName in user
-                var p = partyManager.GetParty(party.Id);
-                string displayName = String.Join(" ",
-                    p.CustomAttributeValues.
-                    Where(ca => ca.CustomAttribute.IsMain.Equals(true)).
-                    OrderBy(ca => ca.CustomAttribute.Id).
-                    Select(ca => ca.Value).ToArray());
+                //check if the party blongs to the user
+                //Bind party if there is already a user associated to this party
+                var partyuser = partyManager.GetPartyByUser(user.Id);
+                if (partyuser == null)
+                {
 
-                user.DisplayName = displayName;
-                userManager.UpdateAsync(user);
+                    var partyType = partyTypeManager.PartyTypeRepository.Get(party.PartyType.Id);
+                    var partyStatusType = partyTypeManager.GetStatusType(partyType, "Created");
+                    //Create party
+                    party = partyManager.Create(partyType, party.Description, null, null, partyCustomAttributeValues.ToDictionary(cc => long.Parse(cc.Key), cc => cc.Value));
+                    if (partyRelationships != null)
+                        foreach (var partyRelationship in partyRelationships)
+                        {
+                            //the duration is from current datetime up to the end of target party date
+                            var TargetParty = partyManager.PartyRepository.Get(partyRelationship.TargetParty.Id);
+                            // var partyRelationshipType = partyRelationshipManager.PartyRelationshipTypeRepository.Get(partyRelationship.PartyRelationshipType.Id);
+                            var partyTypePair = partyRelationshipManager.PartyTypePairRepository.Get(partyRelationship.PartyTypePair.Id);
+                            partyManager.AddPartyRelationship(party, TargetParty, partyRelationship.Title, partyRelationship.Description, partyTypePair, DateTime.Now, TargetParty.EndDate, partyRelationship.Scope);
+                        }
 
+                    partyManager.AddPartyUser(party, user.Id);
+
+                    //set FullName in user
+                    var p = partyManager.GetParty(party.Id);
+                    string displayName = String.Join(" ",
+                        p.CustomAttributeValues.
+                        Where(ca => ca.CustomAttribute.IsMain.Equals(true)).
+                        OrderBy(ca => ca.CustomAttribute.Id).
+                        Select(ca => ca.Value).ToArray());
+
+                    user.DisplayName = displayName;
+                    userManager.UpdateAsync(user);
+                }
 
                 return RedirectToAction("Index");
-            }
-            finally
-            {
-                partyTypeManager?.Dispose();
-                partyManager?.Dispose();
-                partyRelationshipManager?.Dispose();
             }
         }
 
@@ -186,6 +184,7 @@ namespace BExIS.Modules.Bam.UI.Controllers
                 else
                     model.EndDate = party.EndDate;
                 model.Name = party.Name;
+                model.PartyRelationships = getPartyRelationships(party.Id);
                 ViewBag.RelationTabAsDefault = false;
                 ViewBag.Title = "Edit party";
 
@@ -203,14 +202,11 @@ namespace BExIS.Modules.Bam.UI.Controllers
         public ActionResult Edit(PartyModel partyModel, Dictionary<string, string> partyCustomAttributeValues)
         {
             var party = new Party();
-            PartyManager partyManager = null;
-            PartyTypeManager partyTypeManager = null;
-            UserManager userManager = null;
-            try
-            {
-                partyManager = new PartyManager();
-                partyTypeManager = new PartyTypeManager();
-                userManager = new UserManager();
+            using (PartyManager partyManager = new PartyManager())
+            using (PartyTypeManager partyTypeManager = new PartyTypeManager())
+            using (UserManager userManager = new UserManager())
+            { 
+    
                 if (!HttpContext.User.Identity.IsAuthenticated)
                     return RedirectToAction("Index", "Home");
 
@@ -241,7 +237,16 @@ namespace BExIS.Modules.Bam.UI.Controllers
                         if (nameProp != null)
                         {               
                             var entity = party.CustomAttributeValues.FirstOrDefault(item => item.CustomAttribute.Id == nameProp.Id);
-                            user.Email = entity.Value;
+                            if (user.Email != entity.Value)
+                            {
+                                var es = new EmailService();
+                                es.Send(MessageHelper.GetUpdateEmailHeader(),
+                                    MessageHelper.GetUpdaterEmailMessage(user.DisplayName, user.Email, entity.Value),
+                                    ConfigurationManager.AppSettings["SystemEmail"]
+                                    );
+                            }
+                                user.Email = entity.Value;
+                            
                         }
                     }
                     
@@ -251,11 +256,7 @@ namespace BExIS.Modules.Bam.UI.Controllers
                 }
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
-            finally
-            {
-                partyManager?.Dispose();
-                userManager?.Dispose();
-            }
+            
         }
 
         /// <summary>
@@ -265,11 +266,11 @@ namespace BExIS.Modules.Bam.UI.Controllers
         /// <returns></returns>
         public ActionResult LoadPartyCustomAttr(int id)
         {
-            PartyManager partyManager = null;
-            UserManager userManager = null;
-            try
+            using (PartyManager partyManager = new PartyManager())
+            using (UserManager userManager = new UserManager())
+            using (PartyTypeManager partyTypeManager = new PartyTypeManager())
             {
-                userManager = new UserManager();
+
                 long partyId = 0;
                 var partyIdStr = HttpContext.Request.Params["partyId"];
 
@@ -277,7 +278,6 @@ namespace BExIS.Modules.Bam.UI.Controllers
 
                 if (long.TryParse(partyIdStr, out partyId) && partyId != 0)
                 {
-                    partyManager = new PartyManager();
                     ViewBag.customAttrValues = partyManager.PartyRepository.Get(partyId).CustomAttributeValues.ToList();
 
                     var userId = partyManager.GetUserIdByParty(partyId);
@@ -309,30 +309,25 @@ namespace BExIS.Modules.Bam.UI.Controllers
                 }
 
                 var customAttrList = new List<PartyCustomAttribute>();
-                PartyTypeManager partyTypeManager = new PartyTypeManager();
+                
                 IEnumerable<PartyType> partyType = partyTypeManager.PartyTypeRepository.Get(item => item.Id == id);
                 if (partyType != null)
                     customAttrList = partyType.First().CustomAttributes.ToList();
                 return PartialView("_customAttributesPartial", customAttrList);
             }
-            finally
-            {
-                partyManager?.Dispose();
-            }
+  
         }
 
         [HttpGet]
         public Boolean CheckUniqeness(int partyTypeId, int partyId, string hash)
         {
-            PartyManager partyManager = null;
-            try
+            using (PartyManager partyManager = new PartyManager())
+            using (PartyTypeManager partyTypeManager = new PartyTypeManager())
             {
-                partyManager = new PartyManager();
-                PartyType partyType = new PartyTypeManager().PartyTypeRepository.Get(partyTypeId);
+                PartyType partyType = partyTypeManager.PartyTypeRepository.Get(partyTypeId);
                 Party party = partyManager.PartyRepository.Get(partyId);
                 return partyManager.CheckUniqueness(partyManager.PartyRepository, partyType, hash, party);
             }
-            finally { partyManager?.Dispose(); }
         }
 
         public Dictionary<string, string[]> GetPartyTypesForAccount()
@@ -358,5 +353,44 @@ namespace BExIS.Modules.Bam.UI.Controllers
         {
             return Json(Helpers.Helper.ValidateRelationships(partyId));
         }
+
+        // copied from PartyController.cs
+        /// <summary>
+        /// get all party releationships without system releationships like to entites like dataset
+        /// </summary>
+        /// <param name="partyId"></param>
+        /// <returns></returns>
+        private List<PartyRelationshipModel> getPartyRelationships(long partyId)
+        {
+            using (var partyManager = new PartyManager())
+            {
+                var temp = new List<PartyRelationshipModel>();
+
+                var rList = partyManager.PartyRelationshipRepository.Get
+                   (item => (item.SourceParty.Id == partyId || item.TargetParty.Id == partyId)
+                   && (item.TargetParty.PartyType.SystemType == false && item.SourceParty.PartyType.SystemType == false)).ToList();
+
+                partyManager.PartyRelationshipRepository.LoadIfNot(rList.Select(r => r.TargetParty));
+                partyManager.PartyRelationshipRepository.LoadIfNot(rList.Select(r => r.TargetParty.PartyType));
+
+                foreach (var r in rList)
+                {
+                    temp.Add(new PartyRelationshipModel()
+                    {
+                        Id = r.Id,
+                        Title = r.Title,
+                        Description = r.Description,
+                        SourceName = r.SourceParty.Name,
+                        TargetName = r.TargetParty.Name,
+                        StartDate = r.StartDate,
+                        EndDate = r.EndDate
+                    });
+                }
+
+                return temp;
+            }
+        }
+
+
     }
 }
