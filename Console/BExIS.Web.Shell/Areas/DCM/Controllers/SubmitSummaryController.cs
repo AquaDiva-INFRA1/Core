@@ -119,40 +119,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 Task.Run(() => asyncUploadHelper.FinishUpload());
 
-                #region security
-                EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-                UserPiManager upm = new UserPiManager();
-
-                //Full permissions for the user
-                entityPermissionManager.Create<User>(GetUser().Name, "Dataset", typeof(Dataset), id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
-
-                //Get PIs of the current user
-                List<User> piList = upm.GetPisFromUserByName(GetUser().Name).ToList();
-                foreach (User pi in piList)
-                {
-                    //Full permissions for the pis
-                    entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
-
-                    //Get all users with the same pi
-                    List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
-                    //Give view and download rights to the members
-                    foreach (User piMember in piMembers)
-                    {
-                        entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), id, new List<RightType> {
-                                        RightType.Read
-                                });
-                    }
-                }
-                // add security
-                foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
-                {
-                    //The user gets full permissions
-                    // add security
-                    entityPermissionManager.Create<User>(GetUser().Name, "Dataset", typeof(Dataset), id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
-                }
-                entityPermissionManager.Dispose();
-                #endregion security
-
                 // send email after starting the upload
                 var es = new EmailService();
                 var user = GetUser();
