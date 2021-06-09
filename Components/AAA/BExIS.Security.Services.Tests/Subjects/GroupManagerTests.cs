@@ -1,5 +1,4 @@
-﻿using BExIS.Security.Entities.Subjects;
-using BExIS.Security.Services.Subjects;
+﻿using BExIS.Security.Services.Subjects;
 using NUnit.Framework;
 
 namespace BExIS.Security.Services.Tests.Subjects

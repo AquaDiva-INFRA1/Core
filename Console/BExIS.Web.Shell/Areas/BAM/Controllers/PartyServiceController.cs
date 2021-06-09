@@ -2,6 +2,7 @@
 using BExIS.Dlm.Services.Party;
 using BExIS.Modules.Bam.UI.Models;
 using BExIS.Security.Services.Subjects;
+using BExIS.Security.Services.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -183,6 +184,7 @@ namespace BExIS.Modules.Bam.UI.Controllers
                 else
                     model.EndDate = party.EndDate;
                 model.Name = party.Name;
+                model.PartyRelationships = getPartyRelationships(party.Id);
                 ViewBag.RelationTabAsDefault = false;
                 ViewBag.Title = "Edit party";
 
@@ -235,7 +237,16 @@ namespace BExIS.Modules.Bam.UI.Controllers
                         if (nameProp != null)
                         {               
                             var entity = party.CustomAttributeValues.FirstOrDefault(item => item.CustomAttribute.Id == nameProp.Id);
-                            user.Email = entity.Value;
+                            if (user.Email != entity.Value)
+                            {
+                                var es = new EmailService();
+                                es.Send(MessageHelper.GetUpdateEmailHeader(),
+                                    MessageHelper.GetUpdaterEmailMessage(user.DisplayName, user.Email, entity.Value),
+                                    ConfigurationManager.AppSettings["SystemEmail"]
+                                    );
+                            }
+                                user.Email = entity.Value;
+                            
                         }
                     }
                     
@@ -342,5 +353,44 @@ namespace BExIS.Modules.Bam.UI.Controllers
         {
             return Json(Helpers.Helper.ValidateRelationships(partyId));
         }
+
+        // copied from PartyController.cs
+        /// <summary>
+        /// get all party releationships without system releationships like to entites like dataset
+        /// </summary>
+        /// <param name="partyId"></param>
+        /// <returns></returns>
+        private List<PartyRelationshipModel> getPartyRelationships(long partyId)
+        {
+            using (var partyManager = new PartyManager())
+            {
+                var temp = new List<PartyRelationshipModel>();
+
+                var rList = partyManager.PartyRelationshipRepository.Get
+                   (item => (item.SourceParty.Id == partyId || item.TargetParty.Id == partyId)
+                   && (item.TargetParty.PartyType.SystemType == false && item.SourceParty.PartyType.SystemType == false)).ToList();
+
+                partyManager.PartyRelationshipRepository.LoadIfNot(rList.Select(r => r.TargetParty));
+                partyManager.PartyRelationshipRepository.LoadIfNot(rList.Select(r => r.TargetParty.PartyType));
+
+                foreach (var r in rList)
+                {
+                    temp.Add(new PartyRelationshipModel()
+                    {
+                        Id = r.Id,
+                        Title = r.Title,
+                        Description = r.Description,
+                        SourceName = r.SourceParty.Name,
+                        TargetName = r.TargetParty.Name,
+                        StartDate = r.StartDate,
+                        EndDate = r.EndDate
+                    });
+                }
+
+                return temp;
+            }
+        }
+
+
     }
 }
