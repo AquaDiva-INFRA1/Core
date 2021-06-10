@@ -183,45 +183,6 @@ namespace BExIS.Security.Services.Utilities
             return stringBuilder.ToString();
         }
 
-        public static string GetWithdrawRequestHeader(long datasetid, string requester)
-        {
-            return $"Data request from {requester} for dataset with id = {datasetid} withdrawn";
-        }
-
-        public static string GetWithdrawRequestMessage(long datasetid, string title, string requester)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"Dataset request from User \"{requester}\" for dataset <b>\"{title}\"</b> with id <b>{datasetid}</b> was withdrawn.<br/>");
-         
-            return stringBuilder.ToString();
-        }
-
-        public static string GetAcceptRequestHeader(long datasetid, string requester)
-        {
-            return $"Data request from {requester} for dataset with id = {datasetid} granted";
-        }
-
-        public static string GetAcceptRequestMessage(long datasetid, string title)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"Permission for Dataset <b>\"{title}\"</b> with id <b>{datasetid}</b> granted.<br/>");
-
-            return stringBuilder.ToString();
-        }
-
-        public static string GetRejectedRequestHeader(long datasetid, string requester)
-        {
-            return $"Data request from {requester} for dataset with id = {datasetid} rejected";
-        }
-
-        public static string GetRejectedRequestMessage(long datasetid, string title)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"Data request for dataset <b>\"{title}\"</b> with id <b>{datasetid}</b> rejected.<br/>");
-
-            return stringBuilder.ToString();
-        }
-
         public static string GetTryToRegisterUserHeader()
         {
             return $"User tries to register";

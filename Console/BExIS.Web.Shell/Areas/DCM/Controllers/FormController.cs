@@ -311,7 +311,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 }
 
                 Model.DatasetId = entityId;
-                Model.StepModelHelpers = stepInfoModelHelpers;
+                //Model.StepModelHelpers = stepInfoModelHelpers;
                 Model.Created = false;
 
                 //check if a metadatastructure has a import mapping

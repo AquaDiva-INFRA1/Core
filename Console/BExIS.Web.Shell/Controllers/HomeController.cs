@@ -167,37 +167,6 @@ namespace BExIS.Web.Shell.Controllers
             return RedirectToAction("Index");
         }
 
-        [DoesNotNeedDataAccess]
-        public ActionResult Version()
-        {
-            // Site
-            var site = ConfigurationManager.AppSettings["ApplicationVersion"];
-
-            // Database
-            using (var versionManager = new VersionManager())
-            {
-                var database = versionManager.GetLatestVersion().Value;
-
-                // Workspace
-                string filePath = Path.Combine(AppConfiguration.WorkspaceGeneralRoot, "General.Settings.xml");
-                XDocument settings = XDocument.Load(filePath);
-                XElement entry = XmlUtility.GetXElementByAttribute("entry", "key", "version", settings);
-                var workspace = entry.Attribute("value")?.Value;
-
-
-                var model = new VersionModel()
-                {
-                    Site = site,
-                    Database = database,
-                    Workspace = workspace
-                };
-
-                ViewBag.Title = PresentationModel.GetViewTitleForTenant("Session Timeout", this.Session.GetTenant());
-
-                return View(model);
-            }
-        }
-
         protected bool checkPermission(Tuple<string, string, string> LandingPage)
         {
             var featurePermissionManager = new FeaturePermissionManager();

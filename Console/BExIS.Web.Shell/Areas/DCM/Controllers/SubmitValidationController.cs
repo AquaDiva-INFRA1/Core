@@ -207,27 +207,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     }
                 }
 
-                List<Error> errorList = new List<Error>();
-                for (int i = 0; i < model.ErrorList.Count; i++)
-                {
-                    // Assume not duplicate.
-                    bool duplicate = false;
-                    for (int z = 0; z < i; z++)
-                    {
-                        if (model.ErrorList[z].ToString() == model.ErrorList[i].ToString())
-                        {
-                            // This is a duplicate.
-                            duplicate = true;
-                            break;
-                        }
-                    }
-                    // If not duplicate, add to result.
-                    if (!duplicate)
-                    {
-                        errorList.Add(model.ErrorList[i]);
-                    }
-                }
-
                 model.ErrorList = errorList;
 
                 if (errorList.Count > 0)

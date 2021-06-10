@@ -29,13 +29,15 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             ViewData["datasetCount"] = stats_obj["dataset_count"].ToString();
             ViewData["Datapoints"] = stats_obj["datapoints"].ToString();
 
-            Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager();
-            Int64 count =  aam_manager.get_all_dataset_column_annotation().Count;
+            using (Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager())
+            {
+                Int64 count = aam_manager.get_all_dataset_column_annotation().Count;
 
 
-            DataAttributeManagerModel dam = new DataAttributeManagerModel(false);
+                DataAttributeManagerModel dam = new DataAttributeManagerModel(false);
 
-            ViewData["semantic_Coverage"] = (double)dam.DataAttributeStructs.Count / (double)count;
+                ViewData["semantic_Coverage"] = (double)dam.DataAttributeStructs.Count / (double)count;
+            }
 
             return View("Index");
 
