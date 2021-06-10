@@ -1589,23 +1589,6 @@ namespace BExIS.Dlm.Services.Data
             }
         }
 
-        public long GetDatasetVersionId(long id, int versionNr)
-        {
-            using (IUnitOfWork uow = this.GetUnitOfWork())
-            {
-   
-
-                var datasetVersionRepo = uow.GetReadOnlyRepository<DatasetVersion>();
-                var datasetVersions = datasetVersionRepo.Query().Where(dsv=>dsv.Dataset.Id.Equals(id)).OrderBy(dsv=>dsv.Timestamp);
-
-                if (datasetVersions.Any() && datasetVersions.Count() >= (versionNr-1))
-                {
-                    return datasetVersions.ToList().ElementAt(versionNr - 1).Id;
-                }
-
-                return 0;
-            }
-        }
 
         public int GetDatasetVersionNr(long versionId)
         {

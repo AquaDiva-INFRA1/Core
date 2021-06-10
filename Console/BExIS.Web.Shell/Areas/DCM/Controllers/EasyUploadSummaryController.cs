@@ -672,9 +672,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                         TaskManager.AddToBus(EasyUploadTaskManager.DATASET_ID, ds.Id);
 
-                        Aam_Dataset_column_annotationManager aam_manag = new Aam_Dataset_column_annotationManager();
-                        Aam_Uri charac = (Aam_Uri)TaskManager.Bus[EasyUploadTaskManager.ANNOTATION_CHARACHTERISTIC];
-                        Aam_Uri entity = (Aam_Uri)TaskManager.Bus[EasyUploadTaskManager.ANNOTATION_ENTITY];
+                        using (Aam_Dataset_column_annotationManager aam_manag = new Aam_Dataset_column_annotationManager())
+                        {
+                            Aam_Uri charac = (Aam_Uri)TaskManager.Bus[EasyUploadTaskManager.ANNOTATION_CHARACHTERISTIC];
+                            Aam_Uri entity = (Aam_Uri)TaskManager.Bus[EasyUploadTaskManager.ANNOTATION_ENTITY];
+                        }
                     }
                     catch (Exception ex)
                     {

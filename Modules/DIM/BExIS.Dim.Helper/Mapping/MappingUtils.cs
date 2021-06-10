@@ -2,6 +2,8 @@
 using BExIS.Dim.Services;
 using BExIS.Dlm.Entities.Party;
 using BExIS.Dlm.Services.Party;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Objects;
 using BExIS.Xml.Helpers;
 using System;
 using System.Collections.Generic;
@@ -9,10 +11,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Vaiona.Persistence.Api;
-using BExIS.Dim.Entities.Mapping;
-using BExIS.Security.Services.Objects;
-using BExIS.Modules.Sam.UI.Models;
-using BExIS.Security.Services.Authorization;
 
 namespace BExIS.Dim.Helpers.Mapping
 {

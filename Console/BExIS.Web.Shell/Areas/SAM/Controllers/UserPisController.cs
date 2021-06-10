@@ -100,18 +100,20 @@ namespace BExIS.Modules.Sam.UI.Controllers
             {
                 string userName = model.SelectedUserName;
                 string piName = model.SelectedPiName;
+                using (SubjectManager subjectManager = new SubjectManager())
+                {
+                    //SubjectManager subjectManager = new SubjectManager();
+                    //User user = subjectManager.GetUserByName(userName);
+                    //User pi = subjectManager.GetUserByName(piName);
+                    var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+                    User user = repo.Query(u => u.Name.Equals(userName)).FirstOrDefault();
+                    User pi = repo.Query(u => u.Name.Equals(piName)).FirstOrDefault();
 
-                SubjectManager subjectManager = new SubjectManager();
-                //User user = subjectManager.GetUserByName(userName);
-                //User pi = subjectManager.GetUserByName(piName);
-                var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
-                User user = repo.Query(u => u.Name.Equals(userName)).FirstOrDefault();
-                User pi = repo.Query(u => u.Name.Equals(piName)).FirstOrDefault();
+                    UserPiManager userPiManager = new UserPiManager();
+                    userPiManager.AddUserPi(user.Id, pi.Id);
 
-                UserPiManager userPiManager = new UserPiManager();
-                userPiManager.AddUserPi(user.Id, pi.Id);
-
-                return Json(new { success = true });
+                    return Json(new { success = true });
+                }
             }
             return Json(new { success = false });
         }
@@ -135,21 +137,24 @@ namespace BExIS.Modules.Sam.UI.Controllers
 
             if (userName != null && piName != null && userName.Length > 0 && piName.Length > 0)
             {
-                SubjectManager sum = new SubjectManager();
-                //User User = sum.GetUserByName(userName);
-                //User Pi = sum.GetUserByName(piName);
-                var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
-                User User = repo.Query(u => u.Name.Equals(userName)).FirstOrDefault();
-                User Pi = repo.Query(u => u.Name.Equals(piName)).FirstOrDefault();
-
-                if (User != null && Pi != null)
+                using (SubjectManager subjectManager = new SubjectManager())
                 {
-                    UserPiManager upm = new UserPiManager();
-                    UserPi upi = upm.GetUserPi(User.Id, Pi.Id);
+                    //SubjectManager sum = new  SubjectManager();
+                    //User User = sum.GetUserByName(userName);
+                    //User Pi = sum.GetUserByName(piName);
+                    var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+                    User User = repo.Query(u => u.Name.Equals(userName)).FirstOrDefault();
+                    User Pi = repo.Query(u => u.Name.Equals(piName)).FirstOrDefault();
 
-                    if (upi == null)
+                    if (User != null && Pi != null)
                     {
-                        return true;
+                        UserPiManager upm = new UserPiManager();
+                        UserPi upi = upm.GetUserPi(User.Id, Pi.Id);
+
+                        if (upi == null)
+                        {
+                            return true;
+                        }
                     }
                 }
             }

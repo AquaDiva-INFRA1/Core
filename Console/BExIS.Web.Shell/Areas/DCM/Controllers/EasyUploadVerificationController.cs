@@ -161,9 +161,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     suggestions = new List<EasyUploadSuggestion>();
 
-                Aam_Dataset_column_annotationManager amm_manager = new Aam_Dataset_column_annotationManager();
+                    Aam_Dataset_column_annotationManager amm_manager = new Aam_Dataset_column_annotationManager();
 
-                if (!model.Rows.Any())
+                    if (!model.Rows.Any())
                     {
 
                         foreach (string varName in headers)
@@ -197,13 +197,14 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
                     }
 
-                amm_manager.Dispose();
-                TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, headers);
+                    amm_manager.Dispose();
+                    TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, headers);
 
-                model.StepInfo = TaskManager.Current();
-                
-                return PartialView(model);
-                
+                    model.StepInfo = TaskManager.Current();
+
+                    return PartialView(model);
+
+                }
             }
         }
 

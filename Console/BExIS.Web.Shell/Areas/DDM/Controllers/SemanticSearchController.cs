@@ -371,188 +371,190 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 String ontologyPath = ontology.getPath();
                 //Load the ontology as a graph
-                IGraph g = new Graph();
-                g.LoadFromFile(ontologyPath);
-
-                //Debugging output
-
-                /*foreach(Triple t in g.Triples){
-                    Console.WriteLine(t.ToString());
-                }*/
-
-                //Create a new queryString
-                SparqlParameterizedString queryString = new SparqlParameterizedString();
-
-                //Add some important namespaces
-                queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
-                queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
-                queryString.Namespaces.AddNamespace("owl", new Uri("http://www.w3.org/2002/07/owl#"));
-                queryString.Namespaces.AddNamespace("oboe.1.0", new Uri("http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#"));
-                queryString.Namespaces.AddNamespace("oboe.1.2", new Uri("http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#"));
-
-
-                #region Characteristics
-                //Grab all subclasses (transitively) of oboe-core:Characteristic
-                queryString.CommandText =
-                    "SELECT DISTINCT ?s ?label WHERE " +
-                    "{?s rdfs:subClassOf* oboe.1.2:Characteristic ." +
-                    "?s rdfs:label ?label . }";
-
-                //Debugging output
-                //Console.WriteLine(queryString.ToString());
-
-                //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
-                SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
-
-                foreach (SparqlResult res in results.Results)
+                using (IGraph g = new Graph())
                 {
-                    //Create the mapping and build output for the log file
-                    OntologyMapping mapping = new OntologyMapping();
-                    mapping.setBaseUri(g.BaseUri);
-                    mapping.setMappedConceptGroup("Characteristic");
+                    g.LoadFromFile(ontologyPath);
 
-                    sb.Append(res["s"].ToString() + " ");
-                    mapping.setMappedConceptUri(new Uri(res["s"].ToString()));
+                    //Debugging output
 
-                    //Process the language tags - for now, just throw them away
-                    String s = res["label"].ToString();
+                    /*foreach(Triple t in g.Triples){
+                        Console.WriteLine(t.ToString());
+                    }*/
 
-                    if (s.Contains("^^"))
+                    //Create a new queryString
+                    SparqlParameterizedString queryString = new SparqlParameterizedString();
+
+                    //Add some important namespaces
+                    queryString.Namespaces.AddNamespace("rdfs", new Uri("http://www.w3.org/2000/01/rdf-schema#"));
+                    queryString.Namespaces.AddNamespace("rdf", new Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+                    queryString.Namespaces.AddNamespace("owl", new Uri("http://www.w3.org/2002/07/owl#"));
+                    queryString.Namespaces.AddNamespace("oboe.1.0", new Uri("http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#"));
+                    queryString.Namespaces.AddNamespace("oboe.1.2", new Uri("http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#"));
+
+
+                    #region Characteristics
+                    //Grab all subclasses (transitively) of oboe-core:Characteristic
+                    queryString.CommandText =
+                        "SELECT DISTINCT ?s ?label WHERE " +
+                        "{?s rdfs:subClassOf* oboe.1.2:Characteristic ." +
+                        "?s rdfs:label ?label . }";
+
+                    //Debugging output
+                    //Console.WriteLine(queryString.ToString());
+
+                    //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
+                    SparqlResultSet results = (SparqlResultSet)g.ExecuteQuery(queryString);
+
+                    foreach (SparqlResult res in results.Results)
                     {
-                        s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
-                    }
-                    if (s.Contains("@"))
-                    {
-                        sb.Append(s.Split('@')[0] + "\n");
-                        mapping.setDisplayName(s.Split('@')[0]);
-                        //Add to mapping only if no other mapping for that string ---to be changed later
-                        if (!mappingDic.ContainsKey(s.Split('@')[0].ToLower()))
+                        //Create the mapping and build output for the log file
+                        OntologyMapping mapping = new OntologyMapping();
+                        mapping.setBaseUri(g.BaseUri);
+                        mapping.setMappedConceptGroup("Characteristic");
+
+                        sb.Append(res["s"].ToString() + " ");
+                        mapping.setMappedConceptUri(new Uri(res["s"].ToString()));
+
+                        //Process the language tags - for now, just throw them away
+                        String s = res["label"].ToString();
+
+                        if (s.Contains("^^"))
                         {
-                            List<OntologyMapping> mappingList = new List<OntologyMapping>();
-                            mappingList.Add(mapping);
-                            mappingDic.Add(s.Split('@')[0].ToLower(), new List<OntologyMapping>(mappingList));
+                            s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
+                        }
+                        if (s.Contains("@"))
+                        {
+                            sb.Append(s.Split('@')[0] + "\n");
+                            mapping.setDisplayName(s.Split('@')[0]);
+                            //Add to mapping only if no other mapping for that string ---to be changed later
+                            if (!mappingDic.ContainsKey(s.Split('@')[0].ToLower()))
+                            {
+                                List<OntologyMapping> mappingList = new List<OntologyMapping>();
+                                mappingList.Add(mapping);
+                                mappingDic.Add(s.Split('@')[0].ToLower(), new List<OntologyMapping>(mappingList));
+                            }
+                            else
+                            {
+                                mappingDic[s.Split('@')[0].ToLower()].Add(mapping);
+                            }
                         }
                         else
                         {
-                            mappingDic[s.Split('@')[0].ToLower()].Add(mapping);
+                            sb.Append(s + "\n");
+                            mapping.setDisplayName(s);
+                            if (!mappingDic.ContainsKey(s.ToString().ToLower()))
+                            {
+                                List<OntologyMapping> mappingList = new List<OntologyMapping>();
+                                mappingList.Add(mapping);
+                                mappingDic.Add(s.ToString().ToLower(), mappingList);
+                            }
+                            else
+                            {
+                                mappingDic[s.ToString().ToLower()].Add(mapping);
+                            }
+
                         }
                     }
-                    else
+                    #endregion
+
+                    #region Entities
+
+                    //Grab all subclasses (transitively) of oboe-core:Entity
+                    queryString.CommandText =
+                        "SELECT DISTINCT ?s ?label WHERE " +
+                        "{?s rdfs:subClassOf* oboe.1.2:Entity ." +
+                        "?s rdfs:label ?label . }";
+
+                    //Execute the query & Insert results in Dictionary with ConceptGroup "Entity"
+                    results = (SparqlResultSet)g.ExecuteQuery(queryString);
+
+                    foreach (SparqlResult res in results.Results)
                     {
-                        sb.Append(s + "\n");
-                        mapping.setDisplayName(s);
-                        if (!mappingDic.ContainsKey(s.ToString().ToLower()))
+                        //Create the mapping and build output for the log file
+                        OntologyMapping mapping = new OntologyMapping();
+                        mapping.setBaseUri(g.BaseUri);
+                        mapping.setMappedConceptGroup("Entity");
+
+                        sb.Append(res["s"].ToString() + " ");
+                        mapping.setMappedConceptUri(new Uri(res["s"].ToString()));
+
+                        //Process the language tags - for now, just throw them away
+                        String s = res["label"].ToString();
+
+                        if (s.Contains("^^"))
                         {
-                            List<OntologyMapping> mappingList = new List<OntologyMapping>();
-                            mappingList.Add(mapping);
-                            mappingDic.Add(s.ToString().ToLower(), mappingList);
+                            s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
+                        }
+                        if (s.Contains("@"))
+                        {
+                            sb.Append(s.Split('@')[0] + "\n");
+                            mapping.setDisplayName(s.Split('@')[0]);
+                            if (!mappingDic.ContainsKey(s.Split('@')[0].ToLower()))
+                            {
+                                List<OntologyMapping> mappingList = new List<OntologyMapping>();
+                                mappingList.Add(mapping);
+                                mappingDic.Add(s.Split('@')[0].ToLower(), mappingList);
+                            }
+                            else
+                            {
+                                mappingDic[s.Split('@')[0].ToLower()].Add(mapping);
+                            }
+
                         }
                         else
                         {
-                            mappingDic[s.ToString().ToLower()].Add(mapping);
+                            sb.Append(s + "\n");
+                            mapping.setDisplayName(s);
+                            if (!mappingDic.ContainsKey(s.ToString().ToLower()))
+                            {
+                                List<OntologyMapping> mappingList = new List<OntologyMapping>();
+                                mappingList.Add(mapping);
+                                mappingDic.Add(s.ToString().ToLower(), mappingList);
+                            }
+                            else
+                            {
+                                mappingDic[s.ToString().ToLower()].Add(mapping);
+                            }
+
                         }
-
                     }
-                }
-                #endregion
+                    #endregion
 
-                #region Entities
+                    #region Standards
+                    //Grab all subclasses (transitively) of oboe-core:Entity
+                    queryString.CommandText =
+                        "SELECT DISTINCT ?s ?label WHERE " +
+                        "{?s rdfs:subClassOf* oboe.1.2:Standard ." +
+                        "?s rdfs:label ?label . }";
 
-                //Grab all subclasses (transitively) of oboe-core:Entity
-                queryString.CommandText =
-                    "SELECT DISTINCT ?s ?label WHERE " +
-                    "{?s rdfs:subClassOf* oboe.1.2:Entity ." +
-                    "?s rdfs:label ?label . }";
+                    //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
+                    results = (SparqlResultSet)g.ExecuteQuery(queryString);
 
-                //Execute the query & Insert results in Dictionary with ConceptGroup "Entity"
-                results = (SparqlResultSet)g.ExecuteQuery(queryString);
-
-                foreach (SparqlResult res in results.Results)
-                {
-                    //Create the mapping and build output for the log file
-                    OntologyMapping mapping = new OntologyMapping();
-                    mapping.setBaseUri(g.BaseUri);
-                    mapping.setMappedConceptGroup("Entity");
-
-                    sb.Append(res["s"].ToString() + " ");
-                    mapping.setMappedConceptUri(new Uri(res["s"].ToString()));
-
-                    //Process the language tags - for now, just throw them away
-                    String s = res["label"].ToString();
-
-                    if (s.Contains("^^"))
+                    List<String> standards = new List<string>();
+                    foreach (SparqlResult res in results.Results)
                     {
-                        s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
-                    }
-                    if (s.Contains("@"))
-                    {
-                        sb.Append(s.Split('@')[0] + "\n");
-                        mapping.setDisplayName(s.Split('@')[0]);
-                        if (!mappingDic.ContainsKey(s.Split('@')[0].ToLower()))
+                        //Process the language tags - for now, just throw them away
+                        String s = res["label"].ToString();
+
+                        if (s.Contains("^^"))
                         {
-                            List<OntologyMapping> mappingList = new List<OntologyMapping>();
-                            mappingList.Add(mapping);
-                            mappingDic.Add(s.Split('@')[0].ToLower(), mappingList);
+                            s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
                         }
-                        else
+                        if (s.Contains("@"))
                         {
-                            mappingDic[s.Split('@')[0].ToLower()].Add(mapping);
+                            s = s.Split('@')[0];
                         }
 
+                        standards.Add(s + informationSeparator + res["s"].ToString());
                     }
-                    else
+                    #region Store standards in file
+                    using (StreamWriter writer = new StreamWriter(standardsFilePath, false))
                     {
-                        sb.Append(s + "\n");
-                        mapping.setDisplayName(s);
-                        if (!mappingDic.ContainsKey(s.ToString().ToLower()))
+                        writer.WriteLine(informationSeparator);
+                        foreach (String standard in standards)
                         {
-                            List<OntologyMapping> mappingList = new List<OntologyMapping>();
-                            mappingList.Add(mapping);
-                            mappingDic.Add(s.ToString().ToLower(), mappingList);
+                            writer.WriteLine(standard);
                         }
-                        else
-                        {
-                            mappingDic[s.ToString().ToLower()].Add(mapping);
-                        }
-
-                    }
-                }
-                #endregion
-
-                #region Standards
-                //Grab all subclasses (transitively) of oboe-core:Entity
-                queryString.CommandText =
-                    "SELECT DISTINCT ?s ?label WHERE " +
-                    "{?s rdfs:subClassOf* oboe.1.2:Standard ." +
-                    "?s rdfs:label ?label . }";
-
-                //Execute the query & Insert results in Dictionary with ConceptGroup "Characteristic"
-                results = (SparqlResultSet)g.ExecuteQuery(queryString);
-
-                List<String> standards = new List<string>();
-                foreach (SparqlResult res in results.Results)
-                {
-                    //Process the language tags - for now, just throw them away
-                    String s = res["label"].ToString();
-
-                    if (s.Contains("^^"))
-                    {
-                        s = s.Split(new String[] { "^^" }, StringSplitOptions.None)[0];
-                    }
-                    if (s.Contains("@"))
-                    {
-                        s = s.Split('@')[0];
-                    }
-
-                    standards.Add(s + informationSeparator + res["s"].ToString());
-                }
-                #region Store standards in file
-                using (StreamWriter writer = new StreamWriter(standardsFilePath, false))
-                {
-                    writer.WriteLine(informationSeparator);
-                    foreach (String standard in standards)
-                    {
-                       writer.WriteLine(standard);
                     }
                 }
                 #endregion
@@ -577,7 +579,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         {
                             writer.WriteLine(kvp.Value.ElementAt(0).getDisplayName());
                         }
-                            
+
                     }
                 }
 
@@ -759,7 +761,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         //debugging file
                         using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
                         {
-                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : token : "+ token + " has matched with the mapping file : \n " );
+                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : token : " + token + " has matched with the mapping file : \n ");
                         }
 
                         foreach (OntologyMapping mapping in mappingList)
@@ -789,144 +791,146 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             #region Http-Request and result-Parsing
             //Construct a HttpClient for the search-Server
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(semanticSearchURL);
-
-            //Set the searchTerm as query-String
-            //String param = HttpUtility.UrlEncode(paramBuilder.ToString().Replace(" ", " "));
-            String param = HttpUtility.UrlEncode(paramBuilder.ToString());
-
-            //debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            using (HttpClient client = new HttpClient())
             {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Parameters passed to the semantic Search API : " + param);
-            }
-            string output = "";
+                client.BaseAddress = new Uri(semanticSearchURL);
 
-            try
-            {
-                HttpResponseMessage response = client.GetAsync(paramBuilder.ToString()).Result;  // Blocking call!
-                if (response.IsSuccessStatusCode)
+                //Set the searchTerm as query-String
+                //String param = HttpUtility.UrlEncode(paramBuilder.ToString().Replace(" ", " "));
+                String param = HttpUtility.UrlEncode(paramBuilder.ToString());
+
+                //debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
                 {
-                    model.serachFlag = true;
-                    // Get the response body. Blocking!
-                    output = response.Content.ReadAsStringAsync().Result;
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Parameters passed to the semantic Search API : " + param);
+                }
+                string output = "";
 
-                    model.semanticComponent = CreateDataTable(headerItems);
-                    
+                try
+                {
+                    HttpResponseMessage response = client.GetAsync(paramBuilder.ToString()).Result;  // Blocking call!
+                    if (response.IsSuccessStatusCode)
+                    {
+                        model.serachFlag = true;
+                        // Get the response body. Blocking!
+                        output = response.Content.ReadAsStringAsync().Result;
+
+                        model.semanticComponent = CreateDataTable(headerItems);
+
+                        //debugging file
+                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                        {
+                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : REsponse Correct from Semantic search with results: " + output);
+                        }
+
+                    }
+                }
+                catch (SocketException e)
+                {
+                    model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
                     //debugging file
                     using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
                     {
-                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : REsponse Correct from Semantic search with results: " + output);
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Socket exception in Semantic Search: " + e.Message);
                     }
-
                 }
-            }
-            catch (SocketException e)
-            {
-                model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
-                //debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                catch (AggregateException e)
                 {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Socket exception in Semantic Search: " + e.Message);
-                }
-            }
-            catch (AggregateException e)
-            {
-                model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
-                //debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Aggregate Exception in Semantic Search: " + e.Message);
-                }
-            }
-
-            //Parse the search-output
-            SemanticSearchResultIds ids = null;
-            try
-            {
-                ids = JsonConvert.DeserializeObject<SemanticSearchResultIds>(output);
-            }
-            catch (Newtonsoft.Json.JsonSerializationException)
-            {
-                //Do nothing when the Server states that it didn't find any results
-                model.semanticSearchServerError = "No results found.";
-            }
-
-            #endregion
-            System.Data.DataTable m;
-            m = CreateDataTable(headerItems);
-
-            #region find metadata and fill DataTable
-            if (ids != null && ids.result != null)
-            {
-                #region cleaning ids of datasets so they can be put in the table as id should be unique
-                List<Result> clean_ids = new List<Result>();
-                foreach (Result res in ids.result)
-                {
-                    Boolean b = false;
-                    foreach (Result r in clean_ids)
+                    model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
+                    //debugging file
+                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
                     {
-                        if (r.dataset_id == res.dataset_id)
-                        {
-                            b = true;
-                            break;
-                        }
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Aggregate Exception in Semantic Search: " + e.Message);
                     }
-                    if (!b) clean_ids.Add(res);
+                }
+
+                //Parse the search-output
+                SemanticSearchResultIds ids = null;
+                try
+                {
+                    ids = JsonConvert.DeserializeObject<SemanticSearchResultIds>(output);
+                }
+                catch (Newtonsoft.Json.JsonSerializationException)
+                {
+                    //Do nothing when the Server states that it didn't find any results
+                    model.semanticSearchServerError = "No results found.";
+                }
+
+                #endregion
+                System.Data.DataTable m;
+                m = CreateDataTable(headerItems);
+
+                #region find metadata and fill DataTable
+                if (ids != null && ids.result != null)
+                {
+                    #region cleaning ids of datasets so they can be put in the table as id should be unique
+                    List<Result> clean_ids = new List<Result>();
+                    foreach (Result res in ids.result)
+                    {
+                        Boolean b = false;
+                        foreach (Result r in clean_ids)
+                        {
+                            if (r.dataset_id == res.dataset_id)
+                            {
+                                b = true;
+                                break;
+                            }
+                        }
+                        if (!b) clean_ids.Add(res);
+                    }
+                    #endregion
+
+                    foreach (Result r in ids.result)
+                    {
+                        DataRow row = m.NewRow();
+                        row["ID"] = Int64.Parse(r.dataset_id);
+                        //row["VersionID"] = Int64.Parse(r.versionno);
+
+                        //Grab the Metadata of the current ID
+                        long datasetID = long.Parse(r.dataset_id);
+                        string description = "";
+                        string title = "";
+                        string owner = "";
+
+                        Dataset dataset = null;
+                        using (IUnitOfWork uow = this.GetUnitOfWork())
+                        {
+                            var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
+                            dataset = datasetRepo.Get(datasetID);
+                        }
+
+                        try
+                        {
+                            if (dataset != null)
+                            {
+                                //Grab the Metadata
+                                XmlDatasetHelper helper = new XmlDatasetHelper();
+                                description = helper.GetInformation(datasetID, NameAttributeValues.description);
+                                title = helper.GetInformation(datasetID, NameAttributeValues.title);
+                                owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
+
+                                row["Title"] = title;
+                                row["Datasetdescription"] = description;
+                                row["Owner"] = owner;
+
+                                m.Rows.Add(row);
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                            {
+                                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Aggregate Exception in Semantic Search: " + exception.Message);
+                            }
+                        }
+
+
+                    }
                 }
                 #endregion
-
-                foreach (Result r in ids.result)
-                {
-                    DataRow row = m.NewRow();
-                    row["ID"] = Int64.Parse(r.dataset_id);
-                    //row["VersionID"] = Int64.Parse(r.versionno);
-
-                    //Grab the Metadata of the current ID
-                    long datasetID = long.Parse(r.dataset_id);
-                    string description = "";
-                    string title = "";
-                    string owner = "";
-
-                    Dataset dataset = null;
-                    using (IUnitOfWork uow = this.GetUnitOfWork())
-                    {
-                        var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
-                        dataset = datasetRepo.Get(datasetID);
-                    }
-
-                    try
-                    {
-                        if (dataset != null)
-                        {
-                            //Grab the Metadata
-                            XmlDatasetHelper helper = new XmlDatasetHelper();
-                            description = helper.GetInformation(datasetID, NameAttributeValues.description);
-                            title = helper.GetInformation(datasetID, NameAttributeValues.title);
-                            owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
-
-                            row["Title"] = title;
-                            row["Datasetdescription"] = description;
-                            row["Owner"] = owner;
-
-                            m.Rows.Add(row);
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                        {
-                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Aggregate Exception in Semantic Search: " + exception.Message);
-                        }
-                    }
-                    
-
-                }
+                if (m.Rows.Count > 0) return m;
+                return searchAndMerge(m, searchTerm);
             }
-            #endregion
-            if (m.Rows.Count > 0) return m;
-            return searchAndMerge(m, searchTerm);
             //return m;
         }
 
@@ -994,56 +998,58 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         {
             #region Http-Request
             //Construct a HttpClient for the search-Server
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(semedicoSearchURL);
-            client.Timeout = TimeSpan.FromSeconds(30);
-            //Set the searchTerm as query-String
-            String param = ("?inputstring=" + searchTerm.Replace(", ", "+") + "&subsetstart=" + subsetStart + "&subsetsize=" + subsetSize);
-
-            //debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            using (HttpClient client = new HttpClient())
             {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " parameters for the Semedico API : "+param);
-            }
-            String output = null;
+                client.BaseAddress = new Uri(semedicoSearchURL);
+                client.Timeout = TimeSpan.FromSeconds(30);
+                //Set the searchTerm as query-String
+                String param = ("?inputstring=" + searchTerm.Replace(", ", "+") + "&subsetstart=" + subsetStart + "&subsetsize=" + subsetSize);
 
-            try
-            {
-                HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
-                if (response.IsSuccessStatusCode)
+                //debugging file
+                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
                 {
-                    // Get the response body. Blocking!
-                    output = response.Content.ReadAsStringAsync().Result;
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " parameters for the Semedico API : " + param);
+                }
+                String output = null;
+
+                try
+                {
+                    HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Get the response body. Blocking!
+                        output = response.Content.ReadAsStringAsync().Result;
+                        //debugging file
+                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                        {
+                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " Response success from Semedico : " + output);
+                        }
+                    }
+                }
+                catch (SocketException e)
+                {
                     //debugging file
                     using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
                     {
-                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " Response success from Semedico : "+output);
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " Semedico Socket Exception  " + e.Message);
                     }
                 }
-            }
-            catch (SocketException e)
-            {
-                //debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                catch (AggregateException e)
                 {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " Semedico Socket Exception  "+e.Message);
-                }
-            }
-            catch (AggregateException e)
-            {
-                //debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " Semedico Aggregate Exception   " + e.Message);
-                }
-                //Returning null if the timeout triggers
-                return null;
-                
-            }
+                    //debugging file
+                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                    {
+                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " Semedico Aggregate Exception   " + e.Message);
+                    }
+                    //Returning null if the timeout triggers
+                    return null;
 
-            #endregion
+                }
 
-            return output;
+                #endregion
+
+                return output;
+            }
         }
 
         [GridAction]
@@ -1073,53 +1079,57 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         {
             #region Http-Request
             //Construct a HttpClient for the search-Server
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(url);
-            client.Timeout = TimeSpan.FromSeconds(30);
-            //Set the searchTerm as query-String
-            string encoded_param = "";
-            foreach (string ont_pair in query_String.Split(',').ToList<string>())
+            using (HttpClient client = new HttpClient())
             {
-                foreach(string pair_elem in ont_pair.Split(';').ToList<string>())
+                client.BaseAddress = new Uri(url);
+                client.Timeout = TimeSpan.FromSeconds(30);
+                //Set the searchTerm as query-String
+                string encoded_param = "";
+                foreach (string ont_pair in query_String.Split(',').ToList<string>())
                 {
-                    encoded_param = encoded_param + HttpUtility.UrlEncode(pair_elem.Trim()) + ";" ;
+                    foreach (string pair_elem in ont_pair.Split(';').ToList<string>())
+                    {
+                        encoded_param = encoded_param + HttpUtility.UrlEncode(pair_elem.Trim()) + ";";
+                    }
+                    encoded_param = encoded_param.Substring(0, encoded_param.Length - 1) + ",";
                 }
-                encoded_param = encoded_param.Substring(0, encoded_param.Length - 1) + ",";
-            }
-            encoded_param = encoded_param.Substring(0, encoded_param.Length - 1);
-            String param = ("?request=" + encoded_param + "&start=" + subsetStart + "&size=" + subsetSize);
-            String output = null;
+                encoded_param = encoded_param.Substring(0, encoded_param.Length - 1);
+                String param = ("?request=" + encoded_param + "&start=" + subsetStart + "&size=" + subsetSize);
+                String output = null;
 
-            try
-            {
-                HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    // Get the response body. Blocking!
-                    output = response.Content.ReadAsStringAsync().Result;
-                    
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.ToString());
-                return null;
-            }
-            #endregion
+                    HttpResponseMessage response = client.GetAsync(param).Result;  // Blocking call!
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Get the response body. Blocking!
+                        output = response.Content.ReadAsStringAsync().Result;
 
-            return output;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.ToString());
+                    return null;
+                }
+                #endregion
+
+                return output;
+            }
         }
-        
+
         private String get_observations_contextualized_contextualizing(String id)
         {
 
             String request_string = " ";
 
-            Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
-            //List<Aam_Dataset_column_annotation> annots = (List < Aam_Dataset_column_annotation > ) aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id));
-            foreach (Aam_Dataset_column_annotation ann in aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id)))
-                //request_string = request_string + clean_labels(ann.characteristic_id.label) + clean_labels(ann.entity_id.label) + ",";
-                request_string = request_string + ann.entity_id.URI.ToString() +";"+ ann.characteristic_id.URI.ToString() + ",";
+            using (Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager())
+            {
+                //List<Aam_Dataset_column_annotation> annots = (List < Aam_Dataset_column_annotation > ) aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id));
+                foreach (Aam_Dataset_column_annotation ann in aam.get_all_dataset_column_annotation().Where(x => x.Dataset.Id == long.Parse(id)))
+                    //request_string = request_string + clean_labels(ann.characteristic_id.label) + clean_labels(ann.entity_id.label) + ",";
+                    request_string = request_string + ann.entity_id.URI.ToString() + ";" + ann.characteristic_id.URI.ToString() + ",";
+            }
 
             return request_string.Substring(0, request_string.Length - 1);
         }
