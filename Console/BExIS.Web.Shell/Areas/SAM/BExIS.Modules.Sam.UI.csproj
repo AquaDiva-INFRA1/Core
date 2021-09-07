@@ -489,14 +489,6 @@
     <Content Include="Views\RequestsAdmin\_DecisionsAdmin.cshtml" />
     <Content Include="Views\RequestsAdmin\Index.cshtml" />
     <Content Include="Views\RequestsAdmin\_Entities.cshtml" />
-    <Content Include="Views\Files\FileList.cshtml" />
-    <Content Include="Views\Files\Index.cshtml" />
-    <Content Include="Views\Files\_CreateFolder.cshtml" />
-    <Content Include="Views\Files\_EditFileFolder.cshtml" />
-    <Content Include="Views\Files\_FolderContent.cshtml" />
-    <Content Include="Views\Files\_FolderContentAsList.cshtml" />
-    <Content Include="Views\Files\_FolderTree.cshtml" />
-    <Content Include="Views\Files\_UploadFile.cshtml" />
     <Content Include="Views\UserPis\UserPis.cshtml" />
     <Content Include="Views\UserPis\_CreatePartial.cshtml" />
     <Content Include="Views\UserPis\_EditPartial.cshtml" />

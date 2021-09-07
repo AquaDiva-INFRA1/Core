@@ -16,7 +16,7 @@ namespace BEXIS.OAC.Entities
     public static class PortalSource
     {
         public const string BioGPS = "http://biogps.org/dataset/";
-        public const string EBI = "https://www.ebi.ac.uk/ena/data/warehouse/filereport?result=read_run&fields=sample_accession,study_accession&accession=";
-        public const string NCBI = "https://www.ebi.ac.uk/ena/data/warehouse/filereport?result=read_run&fields=sample_accession,study_accession&accession=";
+        public const string EBI = "https://www.ebi.ac.uk/ena/portal/api/filereport?fields=sample_accession%2Cstudy_accession&result=read_run&accession=";
+        public const string NCBI = "https://www.ebi.ac.uk/ena/portal/api/filereport?fields=sample_accession%2Cstudy_accession&result=read_run&accession=";
     }
 }

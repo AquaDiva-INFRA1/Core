@@ -1151,7 +1151,6 @@
     <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\mixins.scss" />
     <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\common.scss" />
     <None Include="packages.config" />
-    <None Include="Properties\PublishProfiles\BexisServer_demo.pubxml" />
     <None Include="Properties\PublishProfiles\BexisServer_test.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\TestServer_release.pubxml" />

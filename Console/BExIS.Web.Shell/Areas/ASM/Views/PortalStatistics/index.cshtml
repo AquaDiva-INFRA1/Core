@@ -1,8 +1,8 @@
-﻿
-@using BExIS.Modules.Asm.UI.Models;
+﻿@using BExIS.Modules.Asm.UI.Models;
 @using Telerik.Web.Mvc.UI;
 @using BExIS.Modules.Rpm.UI.Models;
 @using BExIS.Dlm.Entities.DataStructure;
+@using Newtonsoft.Json.Linq;
 
 <header>
     <script type="text/javascript" src="/Scripts/trunk8.js"></script>
@@ -25,19 +25,15 @@
 <div id="searchContent">
 
     @{
-        Data_container_analytics datacontaineranalytics = (Data_container_analytics)ViewData["datacontaineranalytics"];
-        string temp;
-        string variables_count = (string)ViewData["variables_count"];
-
-        string datasetCount = (string)ViewData["datasetCount"];
-        string Datapoints = (string)ViewData["Datapoints"];
+        JObject Json_res = (JObject)ViewData["Json_res"];
     }
-    Dataset count : @datasetCount <br />
-    Data points count : @Datapoints <br />
+    Dataset count : @Json_res["extra_stats"]["dataset_count"] <br />
+    Data points count :@Json_res["extra_stats"]["datapoints"]<br />
     <button id="refresh_stats" class="bx-button function" title="Refresh portal stats" onclick="refresh_stats()">Refresh Portal stats (data points and datasets)</button>
     <br />
 
     <h3> Variable Templates Report</h3>
+
     <table>
         <thead class="thead-dark">
             <tr>
@@ -47,8 +43,8 @@
         </thead>
         <tbody>
             <tr>
-                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataAttributeStruct_list_in_use.Count </a></td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataAttributeStruct_list_non_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataAttributeStruct_list_in_use"] </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataAttributeStruct_list_non_use"] </a></td>
             </tr>
         </tbody>
     </table>
@@ -63,8 +59,8 @@
         </thead>
         <tbody>
             <tr>
-                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.EditUnitModel_list_in_use.Count </a></td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.EditUnitModel_list_non_use.Count </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["EditUnitModel_list_in_use"] </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["EditUnitModel_list_non_use"] </a></td>
 
             </tr>
 
@@ -82,8 +78,8 @@
         <tbody>
             <tr>
 
-                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataType_in_use.Count</td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataType_non_use.Count</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataType_in_use"]</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataType_non_use"]</td>
 
             </tr>
 
@@ -101,8 +97,8 @@
         <tbody>
             <tr>
 
-                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataStruct_in_use.Count</td>
-                <td><a data-toggle="modal" data-target="#exampleModalLong">@datacontaineranalytics.DataStruc_non_use.Count</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataStruct_in_use"]</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataStruc_non_use"]</td>
 
             </tr>
 
@@ -116,42 +112,16 @@
             <tr>
                 <th scope="col">Dataset Count</th>
                 <th scope="col">Variables Count</th>
-                <th scope="col">Concepts Count</th>
-                <th scope="col">Characteristics Count</th>
-                <th scope="col">Total Semantic Coverage</th>
+                <th scope="col">Total Variable Coverage</th>
             </tr>
         </thead>
         <tbody>
             @{
-                List<Variable_analytics> VA_listt = new List<Variable_analytics>();
-                VA_listt = (List<Variable_analytics>)ViewData["VA_list"];
-
-                int ds_count = VA_listt.FindAll(x => x.dataset_id > 0).Count;
-                List<string> somme_Variables_unique = new List<string>();
-                List<string> somme_Variables_duplicated = new List<string>();
-                int somme_Concepts = 0;
-                int somme_Caracteristics = 0;
-
-                foreach (Variable_analytics va in VA_listt)
-                {
-                    somme_Concepts = somme_Concepts + va.variable_concept_entity.Count;
-                    somme_Caracteristics = somme_Caracteristics + va.variable_concept_caracteristic.Count;
-                    foreach (string s in va.variable_id)
-                    {
-                        if (!somme_Variables_unique.Contains(s))
-                        {
-                            somme_Variables_unique.Add(s);
-                        }
-                        somme_Variables_duplicated.Add(s);
-                    }
-                }
 
                 <tr>
-                    <td>@ds_count</td>
-                    <td>@somme_Variables_duplicated.Count</td>
-                    <td>@somme_Concepts</td>
-                    <td>@somme_Caracteristics</td>
-                    <td>@somme_Variables_duplicated.Count/  @datacontaineranalytics.DataAttributeStruct_list_in_use.Count </td>
+                    <td>@Json_res["extra_stats"]["dataset_count"]</td>
+                    <td>@Json_res["extra_stats"]["counting"]</td>
+                    <td>@Json_res["extra_stats"]["counting"] /  @Json_res["extra_stats"]["DataAttributeStruct_list_in_use"]</td>
                 </tr>
             }
 
@@ -160,9 +130,10 @@
 
     <br />
 
-    <button id="downloadCsvButton" class="bx-button function" title="Csv download" onclick="download()">Download Semantic Coverage Report</button>
-    <br />
-
+    @*
+        <button id="downloadCsvButton" class="bx-button function" title="Csv download" onclick="download()">Download Semantic Coverage Report</button>
+        <br />
+    *@
 
     <h3> Detailed Report related to semantic coverage ofthe portal</h3>
     <table>
@@ -172,7 +143,6 @@
                 <th scope="col">Data Structure id</th>
                 <th scope="col">Dataset Owner</th>
                 <th scope="col">Project</th>
-                <th scope="col">Semantic Coverage</th>
                 <th scope="col">Variables id</th>
                 <th scope="col">Variables label</th>
                 <th scope="col">Concepts URI</th>
@@ -183,59 +153,85 @@
         </thead>
         <tbody>
             @{
-                List<Variable_analytics> VA_list = (List<Variable_analytics>)ViewData["VA_list"];
-
-                foreach (Variable_analytics va in VA_list)
+                foreach (KeyValuePair<string, JToken> kvp in (JObject)Json_res["primary_stats"])
                 {
-                    if (va.variable_id.Count > 0)
+                    JObject obj = (JObject)Json_res["primary_stats"][kvp.Key];
+                    JArray arr = (JArray)obj["Variables"];
+
+                    foreach (JObject objct in arr)
                     {
-                        int Concepts_count = 0;
-                        int Caracteristics_count = 0;
-
-
-                        foreach (String s in va.variable_concept_entity)
-                        {
-                            if (s != "No Annotation")
-                            {
-                                Concepts_count = Concepts_count + 1;
-                            }
-                        }
-                        foreach (String s in va.variable_concept_caracteristic)
-                        {
-                            if (s != "No Annotation")
-                            {
-                                Caracteristics_count = Caracteristics_count + 1;
-                            }
-                        }
-
                         <tr>
-                            <td rowspan="@va.variable_id.Count">@va.dataset_id</td>
-                            <td rowspan="@va.variable_id.Count">@va.datastructure_id</td>
-                            <td rowspan="@va.variable_id.Count">@va.owner</td>
-                            <td rowspan="@va.variable_id.Count">@va.project</td>
-                            <td rowspan="@va.variable_id.Count">Concept Coverage : @Concepts_count/@va.variable_id.Count <br /> Characteristics Coverage : @Caracteristics_count/@va.variable_id.Count</td>
-                            <td>@va.variable_id[0] </td>
-                            <td>@va.variable_label[0] </td>
-                            <td>@va.variable_concept_entity[0] </td>
-                            <td>@va.variable_concept_caracteristic[0] </td>
-                            <td>@va.unit[0] </td>
-                            <td>@va.dataType[0] </td>
-
+                            <td>@kvp.Key</td>
+                            <td>@obj["Id"]</td>
+                            <td>@obj["owner"]</td>
+                            <td>@obj["project"]</td>
+                            <td>@objct["Id"] </td>
+                            <td>@objct["Label"] </td>
+                            <td>@objct["entity_id"] </td>
+                            <td>@objct["characteristic_id"] </td>
+                            <td>@objct["Unit"]</td>
+                            <td>@objct["DataType"] </td>
                         </tr>
+                    }
 
-                        for (int kk = 1; kk < @va.variable_id.Count; kk++)
+
+                }
+
+                @*
+                    List<Variable_analytics> VA_list = (List<Variable_analytics>)ViewData["VA_list"];
+
+                    foreach (Variable_analytics va in VA_list)
+                    {
+                        if (va.variable_id.Count > 0)
                         {
+                            int Concepts_count = 0;
+                            int Caracteristics_count = 0;
+
+
+                            foreach (String s in va.variable_concept_entity)
+                            {
+                                if (s != "No Annotation")
+                                {
+                                    Concepts_count = Concepts_count + 1;
+                                }
+                            }
+                            foreach (String s in va.variable_concept_caracteristic)
+                            {
+                                if (s != "No Annotation")
+                                {
+                                    Caracteristics_count = Caracteristics_count + 1;
+                                }
+                            }
+
                             <tr>
-                                <td>@va.variable_id[kk] </td>
-                                <td>@va.variable_label[kk] </td>
-                                <td>@va.variable_concept_entity[kk] </td>
-                                <td>@va.variable_concept_caracteristic[kk] </td>
-                                <td>@va.unit[kk] </td>
-                                <td>@va.dataType[kk] </td>
+                                <td rowspan="@va.variable_id.Count">@va.dataset_id</td>
+                                <td rowspan="@va.variable_id.Count">@va.datastructure_id</td>
+                                <td rowspan="@va.variable_id.Count">@va.owner</td>
+                                <td rowspan="@va.variable_id.Count">@va.project</td>
+                                <td rowspan="@va.variable_id.Count">Concept Coverage : @Concepts_count/@va.variable_id.Count <br /> Characteristics Coverage : @Caracteristics_count/@va.variable_id.Count</td>
+                                <td>@va.variable_id[0] </td>
+                                <td>@va.variable_label[0] </td>
+                                <td>@va.variable_concept_entity[0] </td>
+                                <td>@va.variable_concept_caracteristic[0] </td>
+                                <td>@va.unit[0] </td>
+                                <td>@va.dataType[0] </td>
+
                             </tr>
+
+                            for (int kk = 1; kk < @va.variable_id.Count; kk++)
+                            {
+                                <tr>
+                                    <td>@va.variable_id[kk] </td>
+                                    <td>@va.variable_label[kk] </td>
+                                    <td>@va.variable_concept_entity[kk] </td>
+                                    <td>@va.variable_concept_caracteristic[kk] </td>
+                                    <td>@va.unit[kk] </td>
+                                    <td>@va.dataType[kk] </td>
+                                </tr>
+                            }
                         }
                     }
-                }
+                *@
             }
 
         </tbody>
@@ -287,7 +283,7 @@
 
     function refresh_stats() {
 		$.ajax({
-			url: '@Url.Action("refresh_stats", "PortalStatistics", "ASM")',
+			url: '@Url.Action("reset", "PortalStatistics", "ASM")',
             type: "GET",
             async: true,
 			success: function (e) {

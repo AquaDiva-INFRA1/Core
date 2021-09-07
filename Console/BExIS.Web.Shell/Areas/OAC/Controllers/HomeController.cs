@@ -17,6 +17,10 @@ using System.Web.Mvc;
 using BEXIS.OAC.Entities;
 using System.Net.Http;
 using System.Text;
+using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Services.Subjects;
 
 namespace BExIS.Modules.OAC.UI.Controllers
 {
@@ -69,7 +73,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
                 using (var client = new HttpClient())
                 {
-                    string url = "http://"+this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/getStudy/";
+                    string url = "https://"+this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/getStudy/";
                     //string param = "studyID=" + Identifier + "&datasource=" + DataSourceId.ToString();
                     string param =  Identifier + "/" + DataSourceId.ToString(); 
                     client.BaseAddress = new Uri(url+ param);
@@ -120,10 +124,12 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
         public async System.Threading.Tasks.Task<ActionResult> LoadSamplesViewMetadataAsync(string sample, string project)
         {
-            string accessionValue = model.Accessions.FirstOrDefault(xx => xx.Key.Contains(sample)).Value.Replace(" ", "").Replace("\n", "").Replace('"', '\"');
-            AccessionMetadata metadata = new AccessionMetadata(JObject.Parse(accessionValue));
+            string accessionValue = model.Accessions.FirstOrDefault(xx => xx.Key.Contains(sample)).Value.Replace("\r\n", "");//.Replace("@", "").Replace("\n", "").Replace('"', '\"');
+            string json_string_ = JsonConvert.SerializeObject(accessionValue);
+            AccessionMetadataV2 metadata = JsonConvert.DeserializeObject<AccessionMetadataV2>(accessionValue);
+            //AccessionMetadata metadata = new AccessionMetadata(JObject.Parse(accessionValue));
             string json_string = JsonConvert.SerializeObject(metadata);
-            return PartialView("View", metadata);
+            return PartialView("View1", metadata);
         }
 
         public async System.Threading.Tasks.Task<long> SubmitAsync(string acc)
@@ -137,12 +143,43 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
             using (var client = new HttpClient())
             {
-                string url = "http://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/add_Dataset";
+                EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+                string url = "https://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/add_Dataset";
                 client.BaseAddress = new Uri(url );
                 StringContent data = new StringContent(JsonConvert.SerializeObject(dict), Encoding.UTF8, "application/json");
                 var responseTask = await client.PostAsync(url, data);
                 string result = await responseTask.Content.ReadAsStringAsync();
+                if ((GetUsernameOrDefault() != "DEFAULT")&&(JsonConvert.DeserializeObject<dynamic>(result).dataset_id != null))
+                {
+                    UserPiManager upm = new UserPiManager();
 
+                    //Full permissions for the user
+                    entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset),
+                        (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value,
+                        Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                    //Get PIs of the current user
+                    List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
+                    foreach (User pi in piList)
+                    {
+                        //Full permissions for the pis
+                        entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset),
+                            (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value, 
+                            Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                        //Get all users with the same pi
+                        List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                        //Give view and download rights to the members
+                        foreach (User piMember in piMembers)
+                        {
+                            entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset),
+                                (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value, 
+                                new List<RightType> {
+                                        RightType.Read
+                                });
+                        }
+                    }
+                }
                 return JsonConvert.DeserializeObject<dynamic>(result).dataset_id;
             }
             return new Dataset().Id;
@@ -220,6 +257,18 @@ namespace BExIS.Modules.OAC.UI.Controllers
             }
 
             return temp;
+        }
+
+        public string GetUsernameOrDefault()
+        {
+            string username = string.Empty;
+            try
+            {
+                username = HttpContext.User.Identity.Name;
+            }
+            catch { }
+
+            return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
         }
 
     }

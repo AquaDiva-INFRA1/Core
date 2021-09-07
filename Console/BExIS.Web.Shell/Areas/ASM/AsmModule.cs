@@ -36,6 +36,7 @@ namespace BExIS.Modules.Asm.UI
         public override void Start()
         {
             base.Start();
+            Vaiona.IoC.IoCFactory.Container.RegisterHeirarchical(typeof(BExIS.ASM.Services.IStatisticsExtractor), typeof(BExIS.ASM.Services.StatisticsExtractor));
         }
 
         public override void Shutdown()
