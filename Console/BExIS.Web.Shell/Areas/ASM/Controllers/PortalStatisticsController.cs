@@ -23,6 +23,7 @@ using BExIS.Aam.Services;
 using BExIS.Aam.Entities.Mapping;
 using Vaiona.Persistence.Api;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace BExIS.Modules.ASM.UI.Controllers
 {
@@ -33,20 +34,45 @@ namespace BExIS.Modules.ASM.UI.Controllers
         static String temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
         static List<string> project_list_names = new List<string> { "A01", "A02", "A03", "A04", "A05", "A06", "B01", "B02", "B03", "B04", "B05", "C03", "C05", "D01", "D02", "D03", "D04" };
 
-        static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
-
-        static string python_path = @WebConfigurationManager.AppSettings["python_path"].ToString();
-        static string python_script = @WebConfigurationManager.AppSettings["python_script"].ToString();
-        static string output_Folder = @WebConfigurationManager.AppSettings["output_Folder"].ToString();
-
-        private static string datasets_root_folder = WebConfigurationManager.AppSettings["DataPath"];
-        string[] allowed_extention = new string[] { ".csv", ".xlsx" ,".xls" };
-
-        static List<string> lines = new List<string>();
         static String DebugFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
 
-        /* this action reveals a semantic coverage for our data portal and needs to be accessed via URL ... no button for it ...
-        */
+
+
+        public async System.Threading.Tasks.Task<ActionResult> Index()
+        {
+            using (var client = new HttpClient())
+            {
+                string url = "https://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/Statistics/get";
+                client.BaseAddress = new Uri(url);
+                var responseTask = client.GetAsync("");
+                responseTask.Wait();
+                //To store result of web api response.   
+                Stream result = await responseTask.Result.Content.ReadAsStreamAsync();
+                string jsonstring = new StreamReader(result).ReadToEnd();
+                JObject Json_res = JObject.Parse(jsonstring);
+                ViewData["Json_res"] = Json_res;
+                return View("Index");
+            }
+        }
+
+        public async System.Threading.Tasks.Task<ActionResult> reset()
+        {
+            using (var client = new HttpClient())
+            {
+                string url = "https://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/Statistics/reset";
+                client.BaseAddress = new Uri(url);
+                var responseTask = client.GetAsync("");
+                responseTask.Wait();
+                //To store result of web api response.   
+                Stream result = await responseTask.Result.Content.ReadAsStreamAsync();
+                string jsonstring = new StreamReader(result).ReadToEnd();
+                JObject Json_res = JObject.Parse(jsonstring);
+                //ViewData["Json_res"] = Json_res;
+                return RedirectToAction("Index");
+            }
+        }
+
+        /*
         public ActionResult Index()
         {
             DatasetManager DM = new DatasetManager();
@@ -57,6 +83,9 @@ namespace BExIS.Modules.ASM.UI.Controllers
             JObject stats_obj = JObject.Parse(System.IO.File.ReadAllText(temp_file));
             ViewData["datasetCount"] = stats_obj["dataset_count"].ToString();
             ViewData["Datapoints"] = stats_obj["datapoints"].ToString();
+
+            Data_container_analytics datacontaineranalytics = new Data_container_analytics();
+            ViewData["datacontaineranalytics"] = datacontaineranalytics;
 
             VA_list = new List<Variable_analytics>();
 
@@ -197,7 +226,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
             return View("Index");
         }
-        
+        */
         public ActionResult Download_Report()
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
@@ -250,30 +279,6 @@ namespace BExIS.Modules.ASM.UI.Controllers
                             va.dataType[kk].ToString().Replace("\n", String.Empty).Trim() + "," +
                             somme);
                     }
-                    //sb.AppendLine(
-                    //    va.dataset_id.ToString() + "," +
-                    //    va.owner.Replace(",", "-") + "," +
-                    //    va.project.Replace(",", "-") + "," +
-                    //    Concepts_count.ToString() + "," +
-                    //    va.variable_id.Count.ToString() + "," +
-                    //    va.variable_id[0].ToString() + "," +
-                    //    va.variable_label[0] + "," +
-                    //    va.variable_concept_entity[0] + "," +
-                    //    va.variable_concept_caracteristic[0] + "," +
-                    //    va.dataType[0] + "," +
-                    //    va.unit[0]);
-                    //
-                    //for (int kk = 1; kk < va.variable_id.Count; kk++)
-                    //{
-                    //    sb.AppendLine(
-                    //        ", , , , , " +
-                    //        va.variable_id[kk].ToString() + "," +
-                    //        va.variable_label[kk].ToString() + "," +
-                    //        va.variable_concept_entity[kk].ToString() + "," +
-                    //        va.variable_concept_caracteristic[kk].ToString() + "," +
-                    //        va.unit[kk].ToString() + "," +
-                    //        va.dataType[kk].ToString());
-                    //}
                 }
             }
             // save the string builder sb and ask for download 

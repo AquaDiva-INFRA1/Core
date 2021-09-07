@@ -100,7 +100,14 @@ namespace BExIS.OAC.Services
 
                     for (int j = Var_StartColumn; j <= Var_EndColumn; j++)
                     {
-                        vars.Add(cells[j]);
+                        try
+                        {
+                            vars.Add(cells[j]);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                        }
                     }
                     //index of the row is not needed in the method "ReadRow"
                     this.DataTuples.Add(ReadRow(vars, 0));

@@ -16,4 +16,7 @@
 
   <entry key="version" value="2.14.4" type="string" />
 
+  <entry key="help" value="https://github.com/BEXIS2/Documents/blob/2.14.4/Manuals/DCM/Manual.md" type="String"/>
+
+
 </settings>

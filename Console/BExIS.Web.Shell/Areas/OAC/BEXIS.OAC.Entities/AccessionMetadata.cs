@@ -59,7 +59,7 @@ namespace BEXIS.OAC.Entities
             this.name = json["name"] == null ? "" : json["name"].ToString();
             this.releaseDate = json["releaseDate"] == null ? "" : json["releaseDate"].ToString();
             this.updateDate = json["updateDate"] == null ? "" : json["updateDate"].ToString();
-            this.description = json["description"] == null ? "" : json["description"].ToString() ;
+            this.description = json["DESCRIPTION"] == null ? "" : json["DESCRIPTION"].ToString() ;
 
             this.geographicLocationDepth = new List<string>();
             if (json["characteristics"]["geographicLocationDepth"] != null)

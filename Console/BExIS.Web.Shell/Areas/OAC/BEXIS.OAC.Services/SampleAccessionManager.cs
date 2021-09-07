@@ -28,6 +28,9 @@ using BExIS.IO.Transform.Input;
 using Vaiona.Entities.Common;
 using System.IO;
 using System.Web.Configuration;
+using System.Data;
+using BExIS.IO.Transform.Validation.DSValidation;
+using BExIS.Utils.NH.Querying;
 
 namespace BExIS.OAC.Services
 {
@@ -71,14 +74,19 @@ namespace BExIS.OAC.Services
             int index = 0;
             foreach (string s in All_Accessions)
             {
-                string sample_Url = "https://www.ebi.ac.uk/biosamples/api/samples/" + s.Split('	')[1];
+                string sample_Url = "https://www.ebi.ac.uk/ena/browser/api/xml/" + s.Split('	')[1];
 
+                // string sample_Url = "https://www.ebi.ac.uk/biosamples/api/samples/" + s.Split('	')[1];
                 #region download the metadata
                 // download the metadata
                 string DownloadedData = new WebClient().DownloadString(sample_Url).Trim();
 
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(DownloadedData);
+                string json = JsonConvert.SerializeXmlNode(doc);
+                JObject obj = JObject.Parse(json);
                 #endregion
-                accessions.Add(index.ToString() + " " + s, DownloadedData);
+                accessions.Add(index.ToString() + " " + s, obj["SAMPLE_SET"]["SAMPLE"].ToString());
                 index++;
             }
             #endregion
@@ -101,6 +109,7 @@ namespace BExIS.OAC.Services
             EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
             List<Error> temp = new List<Error>();
             string temp_file_path = "";
+
             try
             {
                 #region create empty dataset to be filled
@@ -157,14 +166,14 @@ namespace BExIS.OAC.Services
                 var json_array_data = new List<string[]>();
                 temp_file_path = temp_file_to_save_json_as_csv + ds.Id + ".csv";
 
-                string data_csv = new AccessionMetadata().Initialise_header(temp_file_path);
+                string data_csv = new AccessionMetadataV2().Initialise_header(temp_file_path);
                 json_array_data.Add(data_csv.Split(','));
 
                 foreach (KeyValuePair<string, string> kvp in xx)
                 {
-                    AccessionMetadata EBIresponseModel = new AccessionMetadata(JObject.Parse(kvp.Value));
-                    data_csv = data_csv + EBIresponseModel.ConvertTocsv(EBIresponseModel, temp_file_path);
-                    json_array_data.Add(EBIresponseModel.ConvertTocsv(EBIresponseModel, "").Split(','));
+                    AccessionMetadataV2 EBIresponseModel = JsonConvert.DeserializeObject<AccessionMetadataV2>(kvp.Value);
+                    data_csv = data_csv + EBIresponseModel.convertToCSV(EBIresponseModel, temp_file_path);
+                    json_array_data.Add(EBIresponseModel.convertToCSV(EBIresponseModel, "").Split(','));
                 }
                 //json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(json_array_data);
                 json = JsonConvert.SerializeObject(json_array_data);
@@ -181,8 +190,8 @@ namespace BExIS.OAC.Services
             int packageSize = 10000;
             int counter = 0;
             counter++;
-            List<string> selectedDataAreaJsonArray = new List<string>() { "[1 , 0 ," + xx.Count.ToString() + "," + (typeof(AccessionMetadata).GetProperties().Count() - 1).ToString() + "]" };
-            string selectedHeaderAreaJsonArray = string.Join(" ,", new List<string>() { "[0, 0, 0, " + (typeof(AccessionMetadata).GetProperties().Count() - 1).ToString() + "]" });
+            List<string> selectedDataAreaJsonArray = new List<string>() { "[1 , 0 ," + xx.Count.ToString() + "," + (((System.Reflection.TypeInfo)typeof(AccessionMetadataV2)).DeclaredFields.ToList().Count - 1).ToString() + "]" };
+            string selectedHeaderAreaJsonArray = string.Join(" ,", new List<string>() { "[0, 0, 0, " + (((System.Reflection.TypeInfo)typeof(AccessionMetadataV2)).DeclaredFields.ToList().Count - 1).ToString() + "]" });
             List<int[]> areaDataValuesList = new List<int[]>();
             foreach (string area in selectedDataAreaJsonArray)
             {
@@ -236,9 +245,46 @@ namespace BExIS.OAC.Services
                     List<String[]> Json_table_ = JsonConvert.DeserializeObject<List<String[]>>
                         (json);
 
-                    AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload(dataStruct_, afri);
+                    XmlDocument xmldoc = new XmlDocument();
+                    XmlElement extraElement = xmldoc.CreateElement("extra");
+                    XmlElement orderElement = xmldoc.CreateElement("order");
+                    DataContainerManager dam = new DataContainerManager();
+                    var dataTypeRepo = this.GetUnitOfWork().GetReadOnlyRepository<Dlm.Entities.DataStructure.DataType>();
+                    var unitRepo = this.GetUnitOfWork().GetReadOnlyRepository<Unit>();
+
+                    StructuredDataStructure sds = find_data_struct();
+                    List<VariableIdentifier> vars = new List<VariableIdentifier>();
+                    string header = new AccessionMetadataV2().Initialise_header("");
+                    if (sds.Variables.Count == 0)
+                    {
+                        foreach(string elem in header.Split(','))
+                        {
+                            DataAttribute CurrentDataAttribute = dam.CreateDataAttribute(elem, elem, elem , false, false, "", MeasurementScale.Categorial, 
+                                DataContainerType.ReferenceType, "", dataTypeRepo.Get().ToList<Dlm.Entities.DataStructure.DataType>().FirstOrDefault(x=>x.Name=="String") ,
+                                unitRepo.Get().ToList<Unit>().FirstOrDefault(x=>x.Name=="None"), null, null, null, null, null, null);
+                            Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, elem, "", "", "", 
+                                unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"));
+                            VariableIdentifier vi = new VariableIdentifier
+                            {
+                                name = newVariable.Label,
+                                id = newVariable.Id
+                            };
+                            vars.Add(vi);
+                            XmlElement newVariableXml = xmldoc.CreateElement("variable");
+                            newVariableXml.InnerText = Convert.ToString(newVariable.Id);
+
+                            orderElement.AppendChild(newVariableXml);
+                        }
+                        extraElement.AppendChild(orderElement);
+                        xmldoc.AppendChild(extraElement);
+
+                        sds.Extra = xmldoc;
+                        sds.Name = "generated import structure " + DateTime.UtcNow.ToString("r");
+                        sds.Description = "sequence data" + "_" + DateTime.UtcNow.ToString("r");
+                    }
+                    AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload(sds, afri);
                     FileStream Stream = reader_.Open(temp_file_path);
-                    rows = reader_.ReadFile(Stream, System.IO.Path.GetFileName(temp_file_path), Json_table_, afri, dataStruct_, ds.Id, packageSize, fri);
+                    rows = reader_.ReadFile(Stream, System.IO.Path.GetFileName(temp_file_path), Json_table_, afri, sds, ds.Id, packageSize, fri);
                     Stream.Close();
                     if (rows != null)
                     {
@@ -287,5 +333,43 @@ namespace BExIS.OAC.Services
             };
             return JObject.Parse(JsonConvert.SerializeObject(result));
         }
+
+        private StructuredDataStructure find_data_struct()
+        {
+            DataStructureManager dsm = new DataStructureManager();
+            StructuredDataStructure sds = dsm.CreateStructuredDataStructure("sequence data" + "_" + DateTime.UtcNow.ToString("r"), "sequence data" + " " + DateTime.UtcNow.ToString("r"), "", "", DataStructureCategory.Generic);
+            bool foundReusableDataStructure = false;
+            List<StructuredDataStructure> allDatastructures = dsm.StructuredDataStructureRepo.Get().ToList();
+            foreach (StructuredDataStructure existingStructure in allDatastructures)
+            {
+                if (!foundReusableDataStructure)
+                {
+                    //For now a datastructure is considered an exact match if it contains variables with
+                    //the same names (labels), datatypes and units in the correct order
+                    List<Variable> variablesOfExistingStructure = existingStructure.Variables.ToList();
+                    foundReusableDataStructure = true;
+                    if (variablesOfExistingStructure.Count != ((System.Reflection.TypeInfo)typeof(AccessionMetadataV2)).DeclaredFields.ToList().Count)
+                        foundReusableDataStructure = false;
+                    else
+                    {
+                        for (int i = 0; i < variablesOfExistingStructure.Count; i++)
+                        {
+                            Variable exVar = variablesOfExistingStructure.ElementAt(i);
+                            if (exVar.Label != ((System.Reflection.TypeInfo)typeof(AccessionMetadataV2)).DeclaredFields.ToList().ElementAt(i).Name)
+                            {
+                                foundReusableDataStructure = false;
+                            }
+                        }
+                    }
+                    if (foundReusableDataStructure)
+                    {
+                        sds = existingStructure;
+                    }
+                    
+                }
+            }
+            return sds;
+        }
+
     }
 }

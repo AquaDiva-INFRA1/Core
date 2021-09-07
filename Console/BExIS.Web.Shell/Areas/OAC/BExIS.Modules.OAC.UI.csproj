@@ -781,6 +781,8 @@
     <Content Include="Views\Shared\_errorMessages.cshtml" />
     <Content Include="Views\Shared\_summaryErrorMessages.cshtml" />
     <Content Include="Views\Home\View.cshtml" />
+    <Content Include="Views\Home\View1.cshtml" />
+    <Content Include="Views\Home\LoadSamplesViewMetadataAsync.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>

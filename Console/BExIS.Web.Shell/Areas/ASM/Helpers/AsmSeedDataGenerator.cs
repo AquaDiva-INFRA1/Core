@@ -42,23 +42,35 @@ namespace BExIS.Modules.Asm.UI.Helpers
                     f.Parent != null &&
                     f.Parent.Id.Equals(ASM.Id));
                 if (portalstatistics == null) portalstatistics = featureManager.Create("Portal Statistics", "Portal Statistics", ASM);
+                if (!operationManager.Exists("ASM", "PortalStatistics", "*")) 
+                    operationManager.Create("ASM", "PortalStatistics", "*", portalstatistics);
+
 
                 Feature summary = features.FirstOrDefault(f =>
                     f.Name.Equals("Dataset Summary") &&
                     f.Parent != null &&
                     f.Parent.Id.Equals(ASM.Id));
                 if (summary == null) summary = featureManager.Create("Dataset Summary", "Dataset Summary", ASM);
+                if (!operationManager.Exists("ASM", "DataSetSummary", "*")) 
+                    operationManager.Create("ASM", "DataSetSummary", "*", summary);
+
 
                 Feature classification = features.FirstOrDefault(f =>
                     f.Name.Equals("Dataset Classification") &&
                     f.Parent != null &&
                     f.Parent.Id.Equals(ASM.Id));
                 if (classification == null) classification = featureManager.Create("Dataset Classification", "Dataset Classification", ASM);
+                if (!operationManager.Exists("ASM", "DataSetSummary", "classification")) 
+                    operationManager.Create("ASM", "DataSetSummary", "classification", classification);
 
-                //security
-                operationManager.Create("ASM", "PortalStatistics", "*", portalstatistics);
-                operationManager.Create("ASM", "DataSetSummary", "*", summary);
-                operationManager.Create("ASM", "DataSetSummary", "classification", classification);
+                //// APIs
+                Feature API = featureManager.FeatureRepository.Get().FirstOrDefault(f => 
+                    f.Name.Equals("API") &&
+                    f.Parent != null &&
+                    f.Parent.Equals(ASM));
+                if (API == null) API = featureManager.Create("ASM API", "ASM API", ASM);
+                if (!operationManager.Exists("api", "Summary", "*"))
+                    operationManager.Create("api", "Statistics", "*", API);
 
             }
             finally

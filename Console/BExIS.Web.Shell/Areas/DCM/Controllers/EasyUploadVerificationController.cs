@@ -143,68 +143,71 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 FileStream fis = null;
                 fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                using (ExcelPackage ep = new ExcelPackage(fis))
+
+                string sheetFormatString = Convert.ToString(TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT]);
+                SheetFormat sheetFormat = 0;
+                Enum.TryParse<SheetFormat>(sheetFormatString, true, out sheetFormat);
+                if (TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString() != ".csv")
                 {
-                    fis.Close();
-
-                    ExcelWorkbook excelWorkbook = ep.Workbook;
-                    ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
-
-                    string sheetFormatString = Convert.ToString(TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT]);
-
-                    SheetFormat sheetFormat = 0;
-                    Enum.TryParse<SheetFormat>(sheetFormatString, true, out sheetFormat);
-
-                    headers = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson);
-
-                    headers = makeHeaderUnique(headers);
-
-                    suggestions = new List<EasyUploadSuggestion>();
-
-                    Aam_Dataset_column_annotationManager amm_manager = new Aam_Dataset_column_annotationManager();
-
-                    if (!model.Rows.Any())
+                    using (ExcelPackage ep = new ExcelPackage(fis))
                     {
+                        fis.Close();
+                        ExcelWorkbook excelWorkbook = ep.Workbook;
+                        ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
+                        headers = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson);
+                    }
+                }
+                else
+                {
+                    headers = GetExcelHeaderFields(sheetFormat, selectedHeaderAreaJson);
+                }
 
-                        foreach (string varName in headers)
-                        {
-                            #region suggestions
+                headers = makeHeaderUnique(headers);
+
+                suggestions = new List<EasyUploadSuggestion>();
+                Aam_Dataset_column_annotationManager amm_manager = new Aam_Dataset_column_annotationManager();
+
+                if (!model.Rows.Any())
+                {
+                    foreach (string varName in headers)
+                    {
+                        #region suggestions
 
                             //Add a variable to the suggestions if the names are similar
                             suggestions = getSuggestions(varName, dataAttributeInfos);
 
                             #endregion
 
-                            //set rowmodel
-                            RowModel row = new RowModel(
-                                headers.IndexOf(varName),
-                                varName,
-                                null,
-                                null,
-                                null,
-                                suggestions,
-                                unitInfos,
-                                dataAttributeInfos,
-                                dataTypeInfos,
-                                amm_manager.get_all_dataset_column_annotationBy_Variable_measures(varName),
-                                amm_manager.get_all_dataset_column_annotationByVariable_label_matching(varName)
-                                );
+                        //set rowmodel
+                        RowModel row = new RowModel(
+                            headers.IndexOf(varName),
+                            varName,
+                            null,
+                            null,
+                            null,
+                            suggestions,
+                            unitInfos,
+                            dataAttributeInfos,
+                            dataTypeInfos,
+                            amm_manager.get_all_dataset_column_annotationBy_Variable_measures(varName),
+                            amm_manager.get_all_dataset_column_annotationByVariable_label_matching(varName)
+                            );
 
-                            model.Rows.Add(row);
+                        model.Rows.Add(row);
 
-                            TaskManager.AddToBus(EasyUploadTaskManager.ROWS, model.Rows);
-                            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, RowsToTuples());
-                        }
+                        TaskManager.AddToBus(EasyUploadTaskManager.ROWS, model.Rows);
+                        TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, RowsToTuples());
                     }
-
-                    amm_manager.Dispose();
-                    TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, headers);
-
-                    model.StepInfo = TaskManager.Current();
-
-                    return PartialView(model);
-
                 }
+
+                amm_manager.Dispose();
+                TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, headers);
+
+                model.StepInfo = TaskManager.Current();
+
+                return PartialView(model);
+
+            
             }
         }
 

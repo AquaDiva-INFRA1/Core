@@ -175,6 +175,12 @@
                                                   .HtmlAttributes(new { id = "datastructure" })
                                                   .Enabled(false);
 
+                                              tabs.Add()
+                                              .Text("Summary")
+                                              .LoadContentFrom("Summary", "DataSetSummary", new { area = "asm", id = @Model.Id })
+                                              .HtmlAttributes(new { id = "Summary" })
+                                              .Enabled(false);
+
 
                                           }
                                           if (show_tabs["show_link_tab"] == "true")
@@ -284,6 +290,7 @@
 			//console.log(viewAccess);
 			//console.log(grantAccess);
 
+            $("li#Summary").removeClass("t-state-disabled");
             $("li#datastructure").removeClass("t-state-disabled");
             $("li#showreferences").removeClass("t-state-disabled");
 			//console.log($(tabStrip).find("li #datastructure"));

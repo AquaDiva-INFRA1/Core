@@ -21,7 +21,12 @@
             title="Portal Statistics" description="Portal Statistics relating data attributes and semantic coverage" icon=""
             controller="PortalStatistics" action="Index"
             extends="./lunchbarRoot/help"
-            />  
+            />
+
+    <Export tag="internalApi" id="Summary"
+            title="Summary" description="Summary" icon=""
+            controller="Summary" action="*"
+            extends="" />
    
   </Exports>
 </Manifest>
