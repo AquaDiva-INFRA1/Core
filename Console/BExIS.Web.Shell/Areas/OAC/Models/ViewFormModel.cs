@@ -1,14 +1,7 @@
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System;
-using System.Net;
-using System.Web.Mvc;
-using System.Xml;
-using Vaiona.Web.Extensions;
-using Vaiona.Web.Mvc.Models;
 using BExIS.Modules.Dcm.UI.Models;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using BExIS.Modules.Dcm.UI.Controllers;
 
 namespace BExIS.Modules.OAC.UI.Models
 {
@@ -40,12 +33,12 @@ namespace BExIS.Modules.OAC.UI.Models
         public List<ListViewItem> MetadataStructureViewList { get; set; }
         public List<ListViewItem> DataSourceViewList { get; set; }
         public List<ListViewItemWithType> DataStructureViewList { get; set; }
-        public Dictionary<string,string> Accessions { get; set; }
+        public Dictionary<string, string> Accessions { get; set; }
         //acession contains key respresting the accession number and the project number separated by space , and the value is the Sample (not project) metadata extracted from the EBI
         public ViewFormModel() { }
 
         public ViewFormModel(List<ListViewItem> MetadataStructureViewList, List<ListViewItemWithType> DataStructureViewList,
-            List<ListViewItem> DataSourceViewList) 
+            List<ListViewItem> DataSourceViewList)
         {
             this.MetadataStructureViewList = MetadataStructureViewList;
             this.DataStructureViewList = DataStructureViewList;

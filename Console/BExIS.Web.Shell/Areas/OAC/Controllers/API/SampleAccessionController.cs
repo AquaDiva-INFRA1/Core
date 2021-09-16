@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.Mvc;
+﻿using BExIS.App.Bootstrap.Attributes;
 using BExIS.OAC.Services;
 using BExIS.Utils.Route;
-using BExIS.App.Bootstrap.Attributes;
-using System.Web.Routing;
 using BEXIS.OAC.Entities;
-using Newtonsoft.Json.Linq;
-using BExIS.Dlm.Entities.Data;
 using Newtonsoft.Json;
-using System.Net;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Web;
+using System.Web.Http;
 
 namespace BExIS.Modules.OAC.UI.Controllers
 {
@@ -26,7 +21,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
         }
         public SampleAccessionController()
         {
-            _sampleAccession = new SampleAccessionManager();
+            if (this._sampleAccession == null)
+                _sampleAccession = new SampleAccessionManager();
         }
 
         // GET: Sample
@@ -38,30 +34,36 @@ namespace BExIS.Modules.OAC.UI.Controllers
             {
                 return _sampleAccession.fetchStudy(studyID, datasource);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return new JObject () ;
+                return new JObject();
             }
-            
+
         }
 
         [BExISApiAuthorize]
-        [System.Web.Http.HttpPost, System.Web.Http.HttpGet]
-        //[GetRoute("api/SampleAccession/add_Dataset/{accession_list}")]
-        //[ResponseType(typeof(ApiDatasetModel))]
-        public IHttpActionResult add_Dataset()
+        [PostRoute("api/SampleAccession/add_study")]
+        public JObject add_study()
         {
             try
             {
-                System.IO.StreamReader reader = new System.IO.StreamReader(HttpContext.Current.Request.InputStream);
-                reader.BaseStream.Position = 0;
-                string requestFromPost = reader.ReadToEnd();
-                JObject jsonObj_ = _sampleAccession.AddProjectsdataset(JsonConvert.DeserializeObject<Dictionary<string, string>>(requestFromPost), GetUsernameOrDefault());
-                return Ok(jsonObj_);
+
+                //Tuple<string, string> data = JsonConvert.DeserializeObject<Tuple<string, string>>(data_);
+                string res = this.Request.Content.ReadAsStringAsync().Result.ToString();
+                Dictionary<string, string> dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(res);
+
+                string accession; dict.TryGetValue("data", out accession);
+                string username; dict.TryGetValue("username", out username);
+
+
+                JObject jsonObj_ = _sampleAccession.AddProjectsdataset(JsonConvert.DeserializeObject<Dictionary<string, string>>(accession), username);
+                return jsonObj_;
+                //return Ok(jsonObj_);
             }
             catch (Exception e)
             {
-                return Content(HttpStatusCode.BadRequest, e.Message);
+                return JObject.Parse(JsonConvert.SerializeObject(new { e.Message }));
+                //return Content(HttpStatusCode.BadRequest, e.Message);
             }
         }
 

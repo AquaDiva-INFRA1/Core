@@ -42,8 +42,9 @@ namespace BExIS.Modules.ASM.UI.Controllers
         {
             using (var client = new HttpClient())
             {
-                string url = "https://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/Statistics/get";
+                string url = this.ControllerContext.HttpContext.Request.Url.Scheme + "://" +this.ControllerContext.HttpContext.Request.Url.Authority + "/api/Statistics/get";
                 client.BaseAddress = new Uri(url);
+                var res = client.GetAsync("").Result.Content.ReadAsStringAsync();
                 var responseTask = client.GetAsync("");
                 responseTask.Wait();
                 //To store result of web api response.   
@@ -59,7 +60,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         {
             using (var client = new HttpClient())
             {
-                string url = "https://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/Statistics/reset";
+                string url = this.ControllerContext.HttpContext.Request.Url.Scheme + "://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/Statistics/reset";
                 client.BaseAddress = new Uri(url);
                 var responseTask = client.GetAsync("");
                 responseTask.Wait();

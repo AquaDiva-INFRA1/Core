@@ -69,7 +69,7 @@ namespace BExIS.Modules.Asm.UI.Helpers
                     f.Parent != null &&
                     f.Parent.Equals(ASM));
                 if (API == null) API = featureManager.Create("ASM API", "ASM API", ASM);
-                if (!operationManager.Exists("api", "Summary", "*"))
+                if (!operationManager.Exists("api", "Statistics", "*"))
                     operationManager.Create("api", "Statistics", "*", API);
 
             }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Vaiona.Logging;
 
 namespace BEXIS.OAC.Entities
 {
@@ -239,17 +240,24 @@ namespace BEXIS.OAC.Entities
             string x = "";
             //x = "accession,name,releaseDate,updateDate,description,_linksselfhref,_linkssamplehref,_linksrelationshref,geographicLocationDepth,organismtext,organismontologyTerms,environmentMaterial,insdcFirstPublic,enaChecklist,collectionDate,geographicLocationLongitude,titletext,geographicLocationLatitude,insdcLastUpdate,waterEnvironmentalPackage,waterEnvironmentalPackageontologyTerms,investigationType,synonym,insdcStatus,sequencingMethod,projectName,sraAccession,alias,environmentBiome,environmentFeature,insdcCenterName,geographicLocationCountryAndOrSea,externalReferences,externalReferencesacc,externalReferencesurl";
             //sw.WriteLine(x);
-
-            x = model.Accession.Replace(',', ' ').Replace(',', ' ') + " ,"
-                + model.Alias.Replace(',', ' ').Replace(',', ' ') + " ,"
-                + model.CenterName.Replace(',', ' ').Replace(',', ' ') + " ,"
-                + model.TITLE.Replace(',', ' ').Replace(',', ' ') + " ,"
-                + model.DESCRIPTION.Replace(',', ' ').Replace(',', ' ') + " ,"
-                + model.SAMPLENAME.SCIENTIFICNAME.Replace(',', ' ').Replace(',', ' ') + " ,"
-                + model.SAMPLENAME.TAXONID.Replace(',', ' ').Replace(',', ' ') + " ,"
-                + string.Join("-", model.SAMPLELINKS.SAMPLELINK).Replace(',', ' ') + " ,"
-                + string.Join("-", model.SAMPLEATTRIBUTES.SAMPLEATTRIBUTE).Replace(',', ' ')
+            try
+            {
+                x = model.Accession.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
+                + model.Alias.Replace(',', ' ').Replace(',', ' ')?? " " + " ,"
+                + model.CenterName.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
+                + model.TITLE.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
+                + model.DESCRIPTION.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
+                + model.SAMPLENAME.SCIENTIFICNAME.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
+                + model.SAMPLENAME.TAXONID.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
+                + string.Join("-", model.SAMPLELINKS.SAMPLELINK).Replace(',', ' ') ?? " " + " ,"
+                + string.Join("-", model.SAMPLEATTRIBUTES.SAMPLEATTRIBUTE).Replace(',', ' ') ?? " "
                 ;
+            }
+            catch (Exception e) {
+                LoggerFactory.GetFileLogger().LogCustom(e.Message);
+                LoggerFactory.GetFileLogger().LogCustom(e.StackTrace);
+            }
+            
             if (tempfile != "")
             {
                 if (!File.Exists(tempfile))

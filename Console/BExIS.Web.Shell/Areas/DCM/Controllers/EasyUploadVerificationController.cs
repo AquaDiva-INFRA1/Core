@@ -133,7 +133,21 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
 
                 //Setall Data AttrInfos to Session -> default
-                allDataAttributes.ForEach(d => dataAttributeInfos.Add(new DataAttrInfo(d.Id, d.Unit.Id, d.DataType.Id, d.Description, d.Name, d.Unit.Dimension.Id)));
+                
+                foreach (DataAttribute d in allDataAttributes)
+                {
+                    try
+                    {
+                        DataAttrInfo dainfo = new DataAttrInfo(d.Id, d.Unit.Id, d.DataType.Id, d.Description, d.Name, d.Unit.Dimension.Id);
+                        dataAttributeInfos.Add(dainfo);
+                    }
+                    catch (Exception ex)
+                    {
+                        ViewData["errors"] = ViewData["errors"] + " - " + ex.Message;
+                    }
+                }
+                
+                //allDataAttributes.ForEach(d => dataAttributeInfos.Add(new DataAttrInfo(d.Id, d.Unit.Id, d.DataType.Id, d.Description, d.Name, d.Unit.Dimension.Id)));
                 Session["DataAttributes"] = dataAttributeInfos;
 
 
