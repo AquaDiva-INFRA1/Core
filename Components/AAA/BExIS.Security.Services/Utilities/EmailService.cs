@@ -22,8 +22,6 @@ namespace BExIS.Security.Services.Utilities
 
         public void Send(MimeMessage message)
         {
-            return; 
-
             using (var client = new SmtpClient())
             {
                 // 2021-03-16 by Sven

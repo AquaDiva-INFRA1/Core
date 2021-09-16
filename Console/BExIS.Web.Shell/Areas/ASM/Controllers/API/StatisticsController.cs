@@ -62,7 +62,6 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
         [BExISApiAuthorize]
         [GetRoute("api/Statistics/get")]
-        [HttpGet]
         public HttpResponseMessage getData()
         {
             JObject metadata_obj = _StatisticsExtractor.allMetadata_extract ();
@@ -103,7 +102,6 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
         [BExISApiAuthorize]
         [GetRoute("api/Statistics/reset")]
-        [HttpGet]
         public HttpResponseMessage reset()
         {
             var response = Request.CreateResponse(HttpStatusCode.OK);

@@ -51,8 +51,9 @@ namespace BExIS.Web.Shell.Controllers
                         //    ViewBag.ErrorMessage = "You must have a confirmed email address to log in.";
                         //    return View("Error");
                         //}
-
-                        SignInStatus result = ldapAuthenticationManager.ValidateUser(model.UserName, model.Password);
+                        Tuple<SignInStatus, string> dict = ldapAuthenticationManager.ValidateUser2(model.UserName, model.Password);
+                        //SignInStatus result = ldapAuthenticationManager.ValidateUser(model.UserName, model.Password);
+                        SignInStatus result = dict.Item1;
                         switch (result)
                         {
                             case SignInStatus.Success:
@@ -61,7 +62,7 @@ namespace BExIS.Web.Shell.Controllers
                                 return RedirectToLocal(returnUrl);
 
                             default:
-                                ModelState.AddModelError("", "Invalid login attempt.");
+                                ModelState.AddModelError("", "Invalid login attempt." + dict.Item2);
                                 return View(model);
                         }
                     }

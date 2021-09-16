@@ -24,40 +24,42 @@ namespace BExIS.ASM.Services
 {
     public class StatisticsExtractor : IStatisticsExtractor
     {
-        Aam_Dataset_column_annotationManager aam_manager;
-        List<Aam_Dataset_column_annotation> aam_list;
-        Dictionary<string, string> stats_extra;
+        static Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager();
+        static DatasetManager dm = new DatasetManager();
+        static DataStructureManager dataStructureManager = new DataStructureManager();
 
-        HttpClient client;
+        static List<Aam_Dataset_column_annotation> aam_list = aam_manager.get_all_dataset_column_annotation();
+        static List<StructuredDataStructure> structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>().Get().ToList<StructuredDataStructure>();
+        static Dictionary<string, string> stats_extra = new Dictionary<string, string>();
+
+        public List<DataAttributeStruct> DataAttributeStruct_list_in_use = new List<DataAttributeStruct>();
+        public List<DataAttributeStruct> DataAttributeStruct_list_non_use = new List<DataAttributeStruct>();
+
+        public List<EditUnitModel> EditUnitModel_list_in_use = new List<EditUnitModel>();
+        public List<EditUnitModel> EditUnitModel_list_non_use = new List<EditUnitModel>();
+
+        public List<DataType> DataType_in_use = new List<DataType>();
+        public List<DataType> DataType_non_use = new List<DataType>();
+
+        public List<DataStructureResultStruct> DataStruct_in_use = new List<DataStructureResultStruct>();
+        public List<DataStructureResultStruct> DataStruc_non_use = new List<DataStructureResultStruct>();
+        private readonly string temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
+
         static string DatastructAPI = "https://addp.uni-jena.de/api/structures/";
-
-        DatasetManager dm;
 
 
         public StatisticsExtractor()
         {
-            aam_manager = new Aam_Dataset_column_annotationManager();
-            aam_list = aam_manager.get_all_dataset_column_annotation();
-
-            client = new HttpClient();
-            client.BaseAddress = new Uri(DatastructAPI);
-
-            dm = new DatasetManager();
-
-
             JObject stats_obj = JObject.Parse(System.IO.File.ReadAllText(temp_file));
             string datasetCount = stats_obj["dataset_count"].ToString();
             string Datapoints = stats_obj["datapoints"].ToString();
 
-            DataStructureManager dataStructureManager = new DataStructureManager();
-            List<StructuredDataStructure> structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>().Get().ToList<StructuredDataStructure>();
             int counting = 0;
             foreach (StructuredDataStructure x in structureRepo)
             {
                 counting = counting + x.Variables.Count;
             }
-
-            stats_extra = new Dictionary<string, string>();
+            stats_extra.Clear();
             stats_extra.Add("dataset_count", datasetCount);
             stats_extra.Add("datapoints", Datapoints);
             stats_extra.Add("counting", counting.ToString());
@@ -66,7 +68,7 @@ namespace BExIS.ASM.Services
 
         public JObject get_extra_stats()
         {
-            string json_string = JsonConvert.SerializeObject(this.stats_extra);
+            string json_string = JsonConvert.SerializeObject(stats_extra);
             return JObject.Parse(json_string);
         }
 
@@ -74,20 +76,13 @@ namespace BExIS.ASM.Services
         {
             Task.Run(() => this.refresh_stats_async());
 
-            aam_manager = new Aam_Dataset_column_annotationManager();
             aam_list = aam_manager.get_all_dataset_column_annotation();
-
-            client = new HttpClient();
-            client.BaseAddress = new Uri(DatastructAPI);
-
-            dm = new DatasetManager();
 
             String temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
             JObject stats_obj = JObject.Parse(System.IO.File.ReadAllText(temp_file));
             string datasetCount = stats_obj["dataset_count"].ToString();
             string Datapoints = stats_obj["datapoints"].ToString();
 
-            DataStructureManager dataStructureManager = new DataStructureManager();
             List<StructuredDataStructure> structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>().Get().ToList<StructuredDataStructure>();
             int counting = 0;
             foreach (StructuredDataStructure x in structureRepo)
@@ -210,11 +205,15 @@ namespace BExIS.ASM.Services
 
             try
             {
-                HttpResponseMessage response = client.GetAsync(param).Result;
-                if (response.IsSuccessStatusCode)
-                {
-                    json_ds_struct = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-                    JArray json_variables = JArray.Parse(json_ds_struct["Variables"].ToString());
+                using(var client = new HttpClient() )
+                { 
+                    client.BaseAddress = new Uri(DatastructAPI);
+                    HttpResponseMessage response = client.GetAsync(param).Result;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        json_ds_struct = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                        JArray json_variables = JArray.Parse(json_ds_struct["Variables"].ToString());
+                    }
                 }
             }
             catch (Exception e)
@@ -309,28 +308,10 @@ namespace BExIS.ASM.Services
         public void Dispose()
         {
             dm.Dispose();
-            client.Dispose();
             aam_list.Clear();
             aam_manager.Dispose();
-
-            throw new NotImplementedException();
+            dataStructureManager.Dispose();
         }
-
-        /////
-        ///
-
-        public List<DataAttributeStruct> DataAttributeStruct_list_in_use = new List<DataAttributeStruct>();
-        public List<DataAttributeStruct> DataAttributeStruct_list_non_use = new List<DataAttributeStruct>();
-
-        public List<EditUnitModel> EditUnitModel_list_in_use = new List<EditUnitModel>();
-        public List<EditUnitModel> EditUnitModel_list_non_use = new List<EditUnitModel>();
-
-        public List<DataType> DataType_in_use = new List<DataType>();
-        public List<DataType> DataType_non_use = new List<DataType>();
-
-        public List<DataStructureResultStruct> DataStruct_in_use = new List<DataStructureResultStruct>();
-        public List<DataStructureResultStruct> DataStruc_non_use = new List<DataStructureResultStruct>();
-        private readonly string temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
 
         private void fill_lists()
         {
@@ -376,14 +357,14 @@ namespace BExIS.ASM.Services
                 else this.DataStruc_non_use.Add(ds);
             }
 
-            this.stats_extra.Add("DataAttributeStruct_list_in_use", DataAttributeStruct_list_in_use.Count().ToString());
-            this.stats_extra.Add("DataAttributeStruct_list_non_use", DataAttributeStruct_list_non_use.Count().ToString());
-            this.stats_extra.Add("EditUnitModel_list_in_use", EditUnitModel_list_in_use.Count().ToString());
-            this.stats_extra.Add("EditUnitModel_list_non_use", EditUnitModel_list_non_use.Count().ToString());
-            this.stats_extra.Add("DataType_in_use", DataType_in_use.Count().ToString());
-            this.stats_extra.Add("DataType_non_use", DataType_non_use.Count().ToString());
-            this.stats_extra.Add("DataStruct_in_use", DataStruct_in_use.Count().ToString());
-            this.stats_extra.Add("DataStruc_non_use", DataStruc_non_use.Count().ToString());
+            stats_extra.Add("DataAttributeStruct_list_in_use", DataAttributeStruct_list_in_use.Count().ToString());
+            stats_extra.Add("DataAttributeStruct_list_non_use", DataAttributeStruct_list_non_use.Count().ToString());
+            stats_extra.Add("EditUnitModel_list_in_use", EditUnitModel_list_in_use.Count().ToString());
+            stats_extra.Add("EditUnitModel_list_non_use", EditUnitModel_list_non_use.Count().ToString());
+            stats_extra.Add("DataType_in_use", DataType_in_use.Count().ToString());
+            stats_extra.Add("DataType_non_use", DataType_non_use.Count().ToString());
+            stats_extra.Add("DataStruct_in_use", DataStruct_in_use.Count().ToString());
+            stats_extra.Add("DataStruc_non_use", DataStruc_non_use.Count().ToString());
 
         }
 

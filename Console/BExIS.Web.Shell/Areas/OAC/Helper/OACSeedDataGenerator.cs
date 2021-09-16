@@ -2,9 +2,7 @@ using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using Vaiona.Persistence.Api;
 using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.OAC.UI.Helper
@@ -24,17 +22,17 @@ namespace BExIS.Modules.OAC.UI.Helper
                 {
                     Feature OAC = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("OMIC Archives Import"));
                     if (OAC == null) DataCollectionFeature = featureManager.Create("OMIC Archives Import", "OMIC Archives Import", DataCollectionFeature);
-                    operationManager.Create("OAC", "*", "*", DataCollectionFeature);
+                    operationManager.Create("OAC", "Home", "*", DataCollectionFeature);
 
                     Feature API = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("API OMIC") && f.Parent.Equals(DataCollectionFeature));
                     if (API == null) API = featureManager.Create("API OMIC", "API OMIC", DataCollectionFeature);
-                    if (!operationManager.Exists("api", "SampleAccession", "*")) operationManager.Create("API", "SampleAccession", "*", API);
+                    if (!operationManager.Exists("api", "SampleAccession", "*")) operationManager.Create("api", "SampleAccession", "*", API);
                     //set api public
                     featurePermissionManager.Create(null, API.Id, Security.Entities.Authorization.PermissionType.Grant);
                 }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }
@@ -44,7 +42,7 @@ namespace BExIS.Modules.OAC.UI.Helper
                 operationManager.Dispose();
                 featurePermissionManager.Dispose();
             }
-            
+
 
         }
 

@@ -1,26 +1,25 @@
-using System;
-using BExIS.Modules.OAC.UI.Models;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
+using BExIS.Dlm.Entities.Data;
 using BExIS.Modules.Dcm.UI.Controllers;
 using BExIS.Modules.Dcm.UI.Models;
-using System.Net;
-using System.Web.Script.Serialization;
-using System.Linq;
-using Newtonsoft.Json.Linq;
-using BExIS.Dlm.Entities.Data;
-using System.Web.Configuration;
-using Newtonsoft.Json;
-using Vaiona.Utils.Cfg;
-using System.Web.Mvc;
-using BEXIS.OAC.Entities;
-using System.Net.Http;
-using System.Text;
+using BExIS.Modules.OAC.UI.Models;
 using BExIS.Security.Entities.Authorization;
-using BExIS.Security.Services.Authorization;
 using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Subjects;
+using BEXIS.OAC.Entities;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using System.Xml;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.OAC.UI.Controllers
 {
@@ -31,7 +30,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
         {
             CreateDatasetController HelperController = new CreateDatasetController();
 
-            model = new ViewFormModel(HelperController.LoadMetadataStructureViewList(), 
+            model = new ViewFormModel(HelperController.LoadMetadataStructureViewList(),
                 HelperController.LoadDataStructureViewList(),
                 GetDataSourceList());
 
@@ -43,7 +42,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
         public async System.Threading.Tasks.Task<ActionResult> FetchDataFromPortalAsync()
         {
             if (model != null)
-                if(model.Accessions.Count > 0 )
+                if (model.Accessions.Count > 0)
                     if (Request.Params["Identifier"] == model.Identifier)
                         return View("Index", model);
 
@@ -73,12 +72,13 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
                 using (var client = new HttpClient())
                 {
-                    string url = "https://"+this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/getStudy/";
+                    string url = this.ControllerContext.HttpContext.Request.Url.Scheme + "://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/getStudy/";
                     //string param = "studyID=" + Identifier + "&datasource=" + DataSourceId.ToString();
-                    string param =  Identifier + "/" + DataSourceId.ToString(); 
-                    client.BaseAddress = new Uri(url+ param);
+                    string param = Identifier + "/" + DataSourceId.ToString();
+                    client.BaseAddress = new Uri(url + param);
                     //client.DefaultRequestHeaders.Add("studyID", Identifier);
                     //client.DefaultRequestHeaders.Add("datasource", DataSourceId.ToString());
+                    client.Timeout = TimeSpan.FromMinutes(10);
                     var responseTask = client.GetAsync("");
                     responseTask.Wait();
                     //To store result of web api response.   
@@ -132,57 +132,77 @@ namespace BExIS.Modules.OAC.UI.Controllers
             return PartialView("View1", metadata);
         }
 
-        public async System.Threading.Tasks.Task<long> SubmitAsync(string acc)
+        public async System.Threading.Tasks.Task<string> SubmitAsync(string acc)
         {
             Dictionary<string, string> dict = new Dictionary<string, string>();
+            string result = "";
             foreach (string s in acc.Split(',').ToList())
             {
                 KeyValuePair<string, string> xx = model.Accessions.FirstOrDefault(x => x.Key.Contains(s));
                 dict.Add(xx.Key, xx.Value);
             }
-
-            using (var client = new HttpClient())
+            Dictionary<string, string> dict_data = new Dictionary<string, string>();
+            dict_data.Add("username", GetUsernameOrDefault());
+            dict_data.Add("data", JsonConvert.SerializeObject(dict)  );
+            try
             {
-                EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-                string url = "https://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/add_Dataset";
-                client.BaseAddress = new Uri(url );
-                StringContent data = new StringContent(JsonConvert.SerializeObject(dict), Encoding.UTF8, "application/json");
-                var responseTask = await client.PostAsync(url, data);
-                string result = await responseTask.Content.ReadAsStringAsync();
-                if ((GetUsernameOrDefault() != "DEFAULT")&&(JsonConvert.DeserializeObject<dynamic>(result).dataset_id != null))
+                using (var client = new HttpClient())
                 {
-                    UserPiManager upm = new UserPiManager();
+                    EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+                    string url = this.ControllerContext.HttpContext.Request.Url.Scheme + "://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/add_study";
+                    client.BaseAddress = new Uri(url);
 
-                    //Full permissions for the user
-                    entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset),
-                        (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value,
-                        Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                    var json = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);
+                    var stringContent = new StringContent(json);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                    //Get PIs of the current user
-                    List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
-                    foreach (User pi in piList)
+                    //var httpContent = new FormUrlEncodedContent(dict_data);
+
+                    //StringContent data = new StringContent(JsonConvert.SerializeObject(dict_data), Encoding.UTF8);
+
+                    var responseTask = await client.PostAsync(url, stringContent);
+
+                    result = await responseTask.Content.ReadAsStringAsync();
+
+                    if ((GetUsernameOrDefault() != "DEFAULT") && result.Contains("dataset_id"))
                     {
-                        //Full permissions for the pis
-                        entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset),
-                            (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value, 
+                        UserPiManager upm = new UserPiManager();
+
+                        //Full permissions for the user
+                        entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset),
+                            (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value,
                             Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
 
-                        //Get all users with the same pi
-                        List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
-                        //Give view and download rights to the members
-                        foreach (User piMember in piMembers)
+                        //Get PIs of the current user
+                        List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
+                        foreach (User pi in piList)
                         {
-                            entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset),
-                                (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value, 
-                                new List<RightType> {
+                            //Full permissions for the pis
+                            entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset),
+                                (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value,
+                                Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                            //Get all users with the same pi
+                            List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                            //Give view and download rights to the members
+                            foreach (User piMember in piMembers)
+                            {
+                                entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset),
+                                    (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value,
+                                    new List<RightType> {
                                         RightType.Read
-                                });
+                                    });
+                            }
                         }
                     }
+                    long ds_id = (long)JsonConvert.DeserializeObject<dynamic>(result).dataset_id.Value;
+                    return ds_id.ToString();
                 }
-                return JsonConvert.DeserializeObject<dynamic>(result).dataset_id;
             }
-            return new Dataset().Id;
+            catch (Exception e)
+            {
+                return e.Message + " - " + result;
+            }
         }
 
         public ActionResult QueryAvailableMappings()
@@ -217,17 +237,18 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
         public void ConvertXMLItemKeys(XmlDocument doc, XmlNode parent)
         {
-            foreach(XmlNode node in parent.ChildNodes)
+            foreach (XmlNode node in parent.ChildNodes)
             {
-                if(node.Name == "item" && node.Attributes["key"] != null)
+                if (node.Name == "item" && node.Attributes["key"] != null)
                 {
                     var NewChild = doc.CreateNode(System.Xml.XmlNodeType.Element, "", node.Attributes["key"].Value, "");
-                    foreach(XmlNode child in node.ChildNodes)
+                    foreach (XmlNode child in node.ChildNodes)
                     {
                         NewChild.AppendChild(child);
                     }
                     parent.AppendChild(NewChild);
-                } else
+                }
+                else
                 {
                     ConvertXMLItemKeys(doc, node);
                 }
@@ -264,7 +285,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
             string username = string.Empty;
             try
             {
-                username = HttpContext.User.Identity.Name;
+                username = this.ControllerContext.HttpContext.User.Identity.Name;
             }
             catch { }
 

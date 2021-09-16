@@ -13,43 +13,41 @@
         <br />BExIS itself isn't meant as genome string storage, because it's not build for such large amounts of data, and has no appropriate search / analysis tools for it (yet).
     }
     @Html.ValidationSummary(true)
-    
+
     <h1>Import External Sample Metadata</h1>
-    @if (Model.Error == null)
+    @if (Model.Error != null)
     {
-        <p>Please provide the following information.</p>
+        <div class="alert alert-danger" role="alert">
+            @Model.Error;
+        </div>
+
     }
-    else
-    {
-        // "Please provide the following information." shown too would be distracting
-        @Model.Error;
-    }
-    
-    
-<div class="row">
-    <div class="col col-lg-6">
-        @using (Html.BeginForm("FetchDataFromPortalAsync", "Home", FormMethod.Post ))
-        {
-            <table>
-                <tr>
-                    <td style="width: 300px;">
-                        @Html.LabelFor(m => m.Identifier) <span class="bx bx-required" title="Required"></span>
-                    </td>
-                    <td style="width: 400px;">
-                        @Html.TextBoxFor(m => m.Identifier, new { @class = "form-control" })
-                    </td>
-                    <td>
-                        @Html.ValidationMessageFor(m => m.Identifier)
-                    </td>
-                </tr>
-                @if (Convert.ToBoolean(ConfigurationManager.AppSettings["OAC_Selectable_Data_Structure_Id"]))
-                {
+
+
+    <div class="row">
+        <div class="col col-lg-6">
+            @using (Html.BeginForm("FetchDataFromPortalAsync", "Home", FormMethod.Post))
+            {
+                <table>
                     <tr>
                         <td style="width: 300px;">
-                            @Html.LabelFor(m => m.SelectedDataStructureId) <span class="bx bx-required" title="Required"></span>
+                            @Html.LabelFor(m => m.Identifier) <span class="bx bx-required" title="Required"></span>
+                        </td>
+                        <td style="width: 400px;">
+                            @Html.TextBoxFor(m => m.Identifier, new { @class = "form-control" })
                         </td>
                         <td>
-                            @(Html.Telerik().DropDownList()
+                            @Html.ValidationMessageFor(m => m.Identifier)
+                        </td>
+                    </tr>
+                    @if (Convert.ToBoolean(ConfigurationManager.AppSettings["OAC_Selectable_Data_Structure_Id"]))
+                    {
+                        <tr>
+                            <td style="width: 300px;">
+                                @Html.LabelFor(m => m.SelectedDataStructureId) <span class="bx bx-required" title="Required"></span>
+                            </td>
+                            <td>
+                                @(Html.Telerik().DropDownList()
                                   .Name("SelectedDataStructureId")
                                   .Placeholder("Select")
                                   .HtmlAttributes(new
@@ -60,19 +58,19 @@
                                   .SelectedIndex(0)
                                   .BindTo(new SelectList(Model.DataStructureViewList, "Id", "Title", Model.SelectedDataStructureId))
                             )
-                        </td>
-                        <td>
-                            @Html.ValidationMessageFor(m => m.SelectedDataStructureId)
-                        </td>
+                            </td>
+                            <td>
+                                @Html.ValidationMessageFor(m => m.SelectedDataStructureId)
+                            </td>
 
-                    </tr>
-                }
-                <tr>
-                    <td style="width: 300px;">
-                        @Html.LabelFor(m => m.SelectedDataSourceId) <span class="bx bx-required" title="Required"></span>
-                    </td>
-                    <td id="selectPortal">
-                        @(Html.Telerik().DropDownList()
+                        </tr>
+                    }
+                    <tr>
+                        <td style="width: 300px;">
+                            @Html.LabelFor(m => m.SelectedDataSourceId) <span class="bx bx-required" title="Required"></span>
+                        </td>
+                        <td id="selectPortal">
+                            @(Html.Telerik().DropDownList()
                               .Name("SelectedDataSourceId")
                               .ClientEvents(events => events.OnChange("onChangeSource"))
                               .Placeholder("Select")
@@ -84,17 +82,17 @@
                               })
                               .BindTo(new SelectList(Model.DataSourceViewList, "Id", "Title", Model.SelectedDataSourceId))
                         )
-                    </td>
-                    <td>
-                        @Html.ValidationMessageFor(m => m.SelectedDataSourceId)
-                    </td>
-                </tr>
-                <tr>
-                    <td style="width: 300px;">
-                        @Html.LabelFor(m => m.SelectedMetadataStructureId) <span class="bx bx-required" title="Required"></span>
-                    </td>
-                    <td id="smsid_parent">
-                        @(Html.Telerik().DropDownList()
+                        </td>
+                        <td>
+                            @Html.ValidationMessageFor(m => m.SelectedDataSourceId)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 300px;">
+                            @Html.LabelFor(m => m.SelectedMetadataStructureId) <span class="bx bx-required" title="Required"></span>
+                        </td>
+                        <td id="smsid_parent">
+                            @(Html.Telerik().DropDownList()
                                   .Name("SelectedMetadataStructureId")
                                   .ClientEvents(events => events.OnOpen("onOpen"))
                                   .Placeholder("Select")
@@ -106,23 +104,23 @@
                                   .SelectedIndex(0)
                                   .BindTo(new SelectList(Model.MetadataStructureViewList, "Id", "Title", Model.SelectedMetadataStructureId))
                         )
-                    </td>
-                    <td>
-                        @Html.ValidationMessageFor(m => m.SelectedMetadataStructureId)
-                    </td>
+                        </td>
+                        <td>
+                            @Html.ValidationMessageFor(m => m.SelectedMetadataStructureId)
+                        </td>
 
-                </tr>
-            </table>
+                    </tr>
+                </table>
 
-            <div class="bx-footer right">
-                <button type="submit" class="bx-button action" style="border:0px;">Fetch "Accession / Study number" data</button>
-            </div>
+                <div class="bx-footer right">
+                    <button type="submit" class="bx-button action" style="border:0px;">Fetch "Accession / Study number" data</button>
+                </div>
 
-        }
+            }
+        </div>
+        <div class="col col-lg-6">
+        </div>
     </div>
-    <div class="col col-lg-6">
-    </div>
-</div>
 
     @if (Model.Accessions.Count > 0)
     {
@@ -139,17 +137,17 @@
                 </div>
                 <div class="row">
                     <div class="overflow-auto">
-                    <div class="form-check" style="overflow-y: scroll; height:600px; width: auto;">
-                        @foreach (KeyValuePair<string, string> acc in Model.Accessions)
-                        {
-                            <input name="accession_number" class="form-check-input" type="checkbox" value="@acc.Key.Split('	')[0]" id="@acc.Key.Split('	')[0]" 
-                                   onclick="loadView( '@Html.Raw(@acc.Key.Split('	')[0].Split(' ')[1])' , '@Model.SelectedMetadataStructureId' ,'@Model.SelectedDataSourceId','@Model.SelectedDataStructureId', '@Html.Raw(@acc.Key.Split('	')[1])' )">
-                            <label class="form-check-label" for="@acc.Key.Split('	')[0]">
-                                @acc.Key.Split('	')[0].Split(' ')[1]
-                            </label>
-                            <br />
-                        }
-                    </div>
+                        <div class="form-check" style="overflow-y: scroll; height:600px; width: auto;">
+                            @foreach (KeyValuePair<string, string> acc in Model.Accessions)
+                            {
+                                <input name="accession_number" class="form-check-input" type="checkbox" value="@acc.Key.Split('	')[0]" id="@acc.Key.Split('	')[0]"
+                                       onclick="loadView( '@Html.Raw(@acc.Key.Split('	')[0].Split(' ')[1])' , '@Model.SelectedMetadataStructureId' ,'@Model.SelectedDataSourceId','@Model.SelectedDataStructureId', '@Html.Raw(@acc.Key.Split('	')[1])' )">
+                                <label class="form-check-label" for="@acc.Key.Split('	')[0]">
+                                    @acc.Key.Split('	')[0].Split(' ')[1]
+                                </label>
+                                <br />
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
@@ -260,19 +258,20 @@
             return;
         };
         $('#spinner2').show();
-        
+        console.log(accession_number.toString());
         $.ajax({
             url: '/OAC/Home/SubmitAsync',
             type: 'POST',
             data: {
                 'acc': accession_number.toString()
             },
+            //contentType: 'text/plain',
             error: function (xhr) {
                  console.log(xhr.responseText);
                 alert('OoOoOoOppps ... error happened, come back later ...');
             },
             success: function (result) {
-                console.log(result);
+                console.log("results : " + result);
                 window.location.href = "/ddm/Data/ShowData/" + result;
             },
             complete: function () {
