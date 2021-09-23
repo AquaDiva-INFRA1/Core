@@ -232,26 +232,86 @@ namespace BEXIS.OAC.Entities
         [JsonProperty("SAMPLE_ATTRIBUTES")]
         public readonly SAMPLEATTRIBUTES SAMPLEATTRIBUTES;
 
+        [JsonProperty("primaryID")]
+        public readonly string PrimaryID;
+
+        [JsonProperty("external_namespace")]
+        public readonly string ExternalNamespace;
+
+        [JsonProperty("external_text")]
+        public readonly string ExternalText;
+
+        [JsonProperty("submitter_namespace")]
+        public readonly string SubmitterNamespace;
+
+        [JsonProperty("submitter_text")]
+        public readonly string SubmitterText;
+
+
+        #region unpack / deserialise  classes
+        private string  unpack(SAMPLEATTRIBUTES t)
+        {
+            string x = "";
+            x = (string.Join("-", t.SAMPLEATTRIBUTE) ?? " ").Replace(',', ' ');
+            return x;
+        }
+
+        private string unpack(SAMPLELINKS t)
+        {
+            string x = "";
+            x = (string.Join("-", t.SAMPLELINK) ?? " ").Replace(',', ' ');
+            return x;
+        }
+
+        private string unpack(IDENTIFIERS t)
+        {
+            string x = "";
+            x = (t.PRIMARYID ?? " ").Replace(',', ' ') + " ,"
+                + (t.EXTERNALID.Namespace ?? " ").Replace(',', ' ') + " ,"
+                + (t.EXTERNALID.Text ?? " ").Replace(',', ' ') + " ,"
+                + (t.SUBMITTERID.Namespace ?? " ").Replace(',', ' ') + " ,"
+                + (t.SUBMITTERID.Text ?? " ").Replace(',', ' ')
+                ;
+            return x;
+        }
+
+        private  string unpack(SAMPLENAME t)
+        {
+            string x = "";
+            x = (t.SCIENTIFICNAME ?? " ").Replace(',', ' ') + " ,"
+                + (t.TAXONID ?? " ").Replace(',', ' ')
+                ;
+            return x;
+        }
+
+        private string unpack(string prop)
+        {
+            string x = "";
+
+            x = (prop ?? " ").Replace(',', ' ');
+            return x;
+        }
+        #endregion
 
 
         public string convertToCSV(AccessionMetadataV2 model, string tempfile)
         {
 
             string x = "";
-            //x = "accession,name,releaseDate,updateDate,description,_linksselfhref,_linkssamplehref,_linksrelationshref,geographicLocationDepth,organismtext,organismontologyTerms,environmentMaterial,insdcFirstPublic,enaChecklist,collectionDate,geographicLocationLongitude,titletext,geographicLocationLatitude,insdcLastUpdate,waterEnvironmentalPackage,waterEnvironmentalPackageontologyTerms,investigationType,synonym,insdcStatus,sequencingMethod,projectName,sraAccession,alias,environmentBiome,environmentFeature,insdcCenterName,geographicLocationCountryAndOrSea,externalReferences,externalReferencesacc,externalReferencesurl";
-            //sw.WriteLine(x);
+            //x = "accession,alias,center name,title,description,sample name - scientific name , sample name - taxon id, sample links,samples attributes,identifier - primary id,identifier - external id,identifier - external text,identifier - internal id,identifier - internal text";
             try
             {
-                x = model.Accession.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
-                + model.Alias.Replace(',', ' ').Replace(',', ' ')?? " " + " ,"
-                + model.CenterName.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
-                + model.TITLE.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
-                + model.DESCRIPTION.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
-                + model.SAMPLENAME.SCIENTIFICNAME.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
-                + model.SAMPLENAME.TAXONID.Replace(',', ' ').Replace(',', ' ') ?? " " + " ,"
-                + string.Join("-", model.SAMPLELINKS.SAMPLELINK).Replace(',', ' ') ?? " " + " ,"
-                + string.Join("-", model.SAMPLEATTRIBUTES.SAMPLEATTRIBUTE).Replace(',', ' ') ?? " "
+                x = unpack(model.Accession)+ " ,"
+                + unpack(model.Alias) + " ,"
+                + unpack(model.CenterName) + " ,"
+                + unpack(model.TITLE) + " ,"
+                + unpack(model.DESCRIPTION)+ " ,"
+                + unpack(model.SAMPLENAME) + " ,"
+                + unpack(model.SAMPLELINKS) + " ,"
+                + unpack(model.SAMPLEATTRIBUTES) + " ,"
+                + unpack(model.IDENTIFIERS)
                 ;
+
             }
             catch (Exception e) {
                 LoggerFactory.GetFileLogger().LogCustom(e.Message);
@@ -277,8 +337,8 @@ namespace BEXIS.OAC.Entities
 
         public string Initialise_header(string tempfile)
         {
-            string data_csv = "accession,alias,center name,title,description,sample name - scientific name , sample name - taxon id, sample links,samples attributes";
-
+            string data_csv = "accession,alias,center name,title,description,sample name - scientific name , sample name - taxon id, sample links,samples attributes,identifier - primary id,identifier - external id,identifier - external text,identifier - internal id,identifier - internal text";
+            
             if (tempfile != "")
             {
                 if (!File.Exists(tempfile))
