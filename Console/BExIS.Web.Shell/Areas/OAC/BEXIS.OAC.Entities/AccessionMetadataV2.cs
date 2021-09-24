@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Vaiona.Logging;
@@ -247,25 +248,69 @@ namespace BEXIS.OAC.Entities
         [JsonProperty("submitter_text")]
         public readonly string SubmitterText;
 
+        [JsonProperty("SAMPLEATTRIBUTE_Tags")]
+        public readonly string SampleAttribute_Tag;
+
+        [JsonProperty("SAMPLEATTRIBUTE_Values")]
+        public readonly string SampleAttribute_Value;
+
+        [JsonProperty("SAMPLEATTRIBUTE_Units")]
+        public readonly string SampleAttribute_Units;
+
+        /*[JsonProperty("SAMPLELINK_IDs")]
+        public readonly string SampleLinkID;
+
+        [JsonProperty("SAMPLELINK_DBs")]
+        public readonly string SampleLinkDB;
+        
+         [JsonProperty("TAXON_ID")]
+        public readonly string taxonID;
+
+        [JsonProperty("SCIENTIFIC_NAME")]
+        public readonly string scientificName;*/
 
         #region unpack / deserialise  classes
-        private string  unpack(SAMPLEATTRIBUTES t)
+        private string unpack(SAMPLEATTRIBUTES t)
         {
             string x = "";
-            x = (string.Join("-", t.SAMPLEATTRIBUTE) ?? " ").Replace(',', ' ');
+            string tag = "";
+            string value = "";
+            string unit = "";
+            //header = "samples attributes - tags, samples attributes - values, samples attributes - units"
+            foreach (SAMPLEATTRIBUTE att in t.SAMPLEATTRIBUTE)
+            {
+                tag = tag + (att.TAG ?? " ").Replace(',', ' ').Replace('-', ' ') + "-";
+                unit = unit + (att.UNITS ?? " ").Replace(',', ' ').Replace('-', ' ') + "-";
+                value = value + (att.VALUE ?? " ").Replace(',', ' ').Replace('-', ' ') + "-";
+            }
+            tag = tag.TrimEnd('-');
+            unit = unit.TrimEnd('-');
+            value = value.TrimEnd('-');
+            x = tag + "," + value + "," + unit;
             return x;
         }
 
         private string unpack(SAMPLELINKS t)
         {
+            string IDs = "";
+            string DBs = "";
             string x = "";
-            x = (string.Join("-", t.SAMPLELINK) ?? " ").Replace(',', ' ');
+            //header = 'sample link - IDs, sample link - DBs';
+            foreach(SAMPLELINK link in t.SAMPLELINK)
+            {
+                DBs = DBs + (link.XREFLINK.DB ?? " ").Replace(',', ' ').Replace('-', ' ') + "-";
+                IDs = IDs + (link.XREFLINK.ID ?? " ").ToString().Replace(',', ' ').Replace('-', ' ') + "-";
+            }
+            IDs = IDs.TrimEnd('-');
+            DBs = DBs.TrimEnd('-');
+            x = DBs + "," + IDs;
             return x;
         }
 
         private string unpack(IDENTIFIERS t)
         {
             string x = "";
+            //header = "identifier - primary id,identifier - external id,identifier - external text,identifier - internal id,identifier - internal text"
             x = (t.PRIMARYID ?? " ").Replace(',', ' ') + " ,"
                 + (t.EXTERNALID.Namespace ?? " ").Replace(',', ' ') + " ,"
                 + (t.EXTERNALID.Text ?? " ").Replace(',', ' ') + " ,"
@@ -275,9 +320,10 @@ namespace BEXIS.OAC.Entities
             return x;
         }
 
-        private  string unpack(SAMPLENAME t)
+        private string unpack(SAMPLENAME t)
         {
             string x = "";
+            //header = "sample name - scientific name, sample name - taxon id"
             x = (t.SCIENTIFICNAME ?? " ").Replace(',', ' ') + " ,"
                 + (t.TAXONID ?? " ").Replace(',', ' ')
                 ;
@@ -287,10 +333,11 @@ namespace BEXIS.OAC.Entities
         private string unpack(string prop)
         {
             string x = "";
-
+            //header = "accession,alias,center name,title,description"
             x = (prop ?? " ").Replace(',', ' ');
             return x;
         }
+
         #endregion
 
 
@@ -311,7 +358,6 @@ namespace BEXIS.OAC.Entities
                 + unpack(model.SAMPLEATTRIBUTES) + " ,"
                 + unpack(model.IDENTIFIERS)
                 ;
-
             }
             catch (Exception e) {
                 LoggerFactory.GetFileLogger().LogCustom(e.Message);
@@ -337,7 +383,7 @@ namespace BEXIS.OAC.Entities
 
         public string Initialise_header(string tempfile)
         {
-            string data_csv = "accession,alias,center name,title,description,sample name - scientific name , sample name - taxon id, sample links,samples attributes,identifier - primary id,identifier - external id,identifier - external text,identifier - internal id,identifier - internal text";
+            string data_csv = "accession,alias,center name,title,description,sample name - scientific name , sample name - taxon id, sample link - IDs, sample link - DBs,samples attributes - tags, samples attributes - values, samples attributes - units,identifier - primary id,identifier - external id,identifier - external text,identifier - internal id,identifier - internal text";
             
             if (tempfile != "")
             {
