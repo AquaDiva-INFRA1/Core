@@ -54,9 +54,10 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
                 string accession; dict.TryGetValue("data", out accession);
                 string username; dict.TryGetValue("username", out username);
+                string metadata; dict.TryGetValue("metadata", out metadata);
 
 
-                JObject jsonObj_ = _sampleAccession.AddProjectsdataset(JsonConvert.DeserializeObject<Dictionary<string, string>>(accession), username);
+                JObject jsonObj_ = _sampleAccession.AddProjectsdataset(JsonConvert.DeserializeObject<Dictionary<string, string>>(accession), username, metadata);
                 return jsonObj_;
                 //return Ok(jsonObj_);
             }
