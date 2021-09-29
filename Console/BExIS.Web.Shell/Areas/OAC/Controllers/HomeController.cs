@@ -143,7 +143,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
             }
             Dictionary<string, string> dict_data = new Dictionary<string, string>();
             dict_data.Add("username", GetUsernameOrDefault());
-            dict_data.Add("data", JsonConvert.SerializeObject(dict)  );
+            dict_data.Add("data", JsonConvert.SerializeObject(dict));
+            dict_data.Add("metadata", model.SelectedDataStructureId.ToString()  );
             try
             {
                 using (var client = new HttpClient())

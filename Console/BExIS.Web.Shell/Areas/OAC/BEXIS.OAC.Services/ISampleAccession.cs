@@ -11,6 +11,6 @@ namespace BExIS.OAC.Services
     public interface ISampleAccession : IDisposable
     {
         JObject fetchStudy(string studyID, DataSource url);
-        JObject AddProjectsdataset(Dictionary<string, string> xx, string username);
+        JObject AddProjectsdataset(Dictionary<string, string> xx, string username, string metadata);
     }
 }

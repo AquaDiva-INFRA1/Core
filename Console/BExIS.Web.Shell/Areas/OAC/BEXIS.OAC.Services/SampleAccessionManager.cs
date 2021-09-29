@@ -97,22 +97,23 @@ namespace BExIS.OAC.Services
             return JObject.Parse(json_string);
         }
 
-        public JObject AddProjectsdataset(Dictionary<string, string> xx, string username)
+        public JObject AddProjectsdataset(Dictionary<string, string> xx, string username, string metadata)
         {
             try
             {
                 DataStructureManager dsm = new DataStructureManager();
                 DatasetManager dm = new DatasetManager();
                 Dataset ds = new Dataset();
-                StructuredDataStructure sds = find_data_struct();
                 MetadataStructureManager msm = new MetadataStructureManager();
                 ResearchPlanManager rpm = new ResearchPlanManager();
                 string temp_file_path = "";
 
                 #region create empty dataset to be filled
 
+                StructuredDataStructure sds = find_data_struct();
+
                 ResearchPlan rp = rpm.Repo.Get().First();
-                MetadataStructure metadataStructure = msm.Repo.Get().FirstOrDefault(x => x.Name.ToLower() == "basic abcd");
+                MetadataStructure metadataStructure = msm.Repo.Get().FirstOrDefault(x => x.Id == Int64.Parse(metadata));
                 ds = dm.CreateEmptyDataset(sds, rp, metadataStructure);
                 if (dm.IsDatasetCheckedOutFor(ds.Id, username) || dm.CheckOutDataset(ds.Id, username))
                 {
@@ -127,7 +128,7 @@ namespace BExIS.OAC.Services
                 }
                 #endregion
 
-
+                # region create json object from json_array_data where every line represents the csv file content line including the header as an array of strings 
                 string json = "";
 
                 var json_array_data = new List<string[]>();
@@ -138,21 +139,24 @@ namespace BExIS.OAC.Services
 
                 foreach (KeyValuePair<string, string> kvp in xx)
                 {
-                    AccessionMetadataV2 EBIresponseModel = JsonConvert.DeserializeObject<AccessionMetadataV2>(kvp.Value);
+                    string accessionValue = kvp.Value.Replace("\r\n", "");
+                    string json_string_ = JsonConvert.SerializeObject(accessionValue);
+                    AccessionMetadataV2 EBIresponseModel = JsonConvert.DeserializeObject<AccessionMetadataV2>(accessionValue);
                     data_csv = data_csv + EBIresponseModel.convertToCSV(EBIresponseModel, temp_file_path);
                     json_array_data.Add(EBIresponseModel.convertToCSV(EBIresponseModel, "").Split(','));
                 }
                 //json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(json_array_data);
                 json = JsonConvert.SerializeObject(json_array_data);
 
+                #endregion
 
-
+                #region bulk upload and validate data against data structure and using json_array_data for AsciiFileReaderInfo dimensions
                 DataTuple[] rows = null;
                 int packageSize = 10000;
                 int counter = 0;
                 counter++;
-                List<string> selectedDataAreaJsonArray = new List<string>() { "[1 , 0 ," + xx.Count.ToString() + "," + (((System.Reflection.TypeInfo)typeof(AccessionMetadataV2)).DeclaredFields.ToList().Count - 1).ToString() + "]" };
-                string selectedHeaderAreaJsonArray = string.Join(" ,", new List<string>() { "[0, 0, 0, " + (((System.Reflection.TypeInfo)typeof(AccessionMetadataV2)).DeclaredFields.ToList().Count - 1).ToString() + "]" });
+                List<string> selectedDataAreaJsonArray = new List<string>() { "[1 , 0 ," + xx.Count.ToString() + "," + (json_array_data[0].Length -1) + "]" };
+                string selectedHeaderAreaJsonArray = string.Join(" ,", new List<string>() { "[0, 0, 0, " + (json_array_data[0].Length-1) + "]" });
                 List<int[]> areaDataValuesList = new List<int[]>();
                 foreach (string area in selectedDataAreaJsonArray)
                 {
@@ -205,44 +209,6 @@ namespace BExIS.OAC.Services
                         List<String[]> Json_table_ = JsonConvert.DeserializeObject<List<String[]>>
                             (json);
 
-                        XmlDocument xmldoc = new XmlDocument();
-                        XmlElement extraElement = xmldoc.CreateElement("extra");
-                        XmlElement orderElement = xmldoc.CreateElement("order");
-                        DataContainerManager dam = new DataContainerManager();
-                        var dataTypeRepo = this.GetUnitOfWork().GetReadOnlyRepository<Dlm.Entities.DataStructure.DataType>();
-                        var unitRepo = this.GetUnitOfWork().GetReadOnlyRepository<Unit>();
-
-
-                        List<VariableIdentifier> vars = new List<VariableIdentifier>();
-                        string header = new AccessionMetadataV2().Initialise_header("");
-                        if (sds.Variables.Count == 0)
-                        {
-                            foreach (string elem in header.Split(','))
-                            {
-                                DataAttribute CurrentDataAttribute = dam.CreateDataAttribute(elem, elem, elem, false, false, "", MeasurementScale.Categorial,
-                                    DataContainerType.ReferenceType, "", dataTypeRepo.Get().ToList<Dlm.Entities.DataStructure.DataType>().FirstOrDefault(x => x.Name == "String"),
-                                    unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"), null, null, null, null, null, null);
-                                Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, elem, "", "", "",
-                                    unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"));
-                                VariableIdentifier vi = new VariableIdentifier
-                                {
-                                    name = newVariable.Label,
-                                    id = newVariable.Id
-                                };
-                                vars.Add(vi);
-                                XmlElement newVariableXml = xmldoc.CreateElement("variable");
-                                newVariableXml.InnerText = Convert.ToString(newVariable.Id);
-
-                                orderElement.AppendChild(newVariableXml);
-                            }
-                            extraElement.AppendChild(orderElement);
-                            xmldoc.AppendChild(extraElement);
-
-                            sds.Extra = xmldoc;
-                            sds.Name = "generated import structure " + System.DateTime.UtcNow.ToString("r");
-                            sds.Description = "sequence data" + "_" + System.DateTime.UtcNow.ToString("r");
-                        }
-                        dam.Dispose();
 
                         AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload(sds, afri);
                         FileStream Stream = reader_.Open(temp_file_path);
@@ -275,7 +241,7 @@ namespace BExIS.OAC.Services
                 };
 
                 dm.CheckInDataset(ds.Id, "Import data from OMIC archives  ", username);
-
+                #endregion
 
                 dsm.Dispose();
                 dm.Dispose();
@@ -330,6 +296,45 @@ namespace BExIS.OAC.Services
 
                 }
             }
+
+            // if no data structure is found, we create a new onw
+            XmlDocument xmldoc = new XmlDocument();
+            XmlElement extraElement = xmldoc.CreateElement("extra");
+            XmlElement orderElement = xmldoc.CreateElement("order");
+            DataContainerManager dam = new DataContainerManager();
+            var dataTypeRepo = this.GetUnitOfWork().GetReadOnlyRepository<Dlm.Entities.DataStructure.DataType>();
+            var unitRepo = this.GetUnitOfWork().GetReadOnlyRepository<Unit>();
+            List<VariableIdentifier> vars = new List<VariableIdentifier>();
+            string header = new AccessionMetadataV2().Initialise_header("");
+            if (sds.Variables.Count == 0)
+            {
+                foreach (string elem in header.Split(','))
+                {
+                    DataAttribute CurrentDataAttribute = dam.CreateDataAttribute(elem, elem, elem, false, false, "", MeasurementScale.Categorial,
+                        DataContainerType.ReferenceType, "", dataTypeRepo.Get().ToList<Dlm.Entities.DataStructure.DataType>().FirstOrDefault(x => x.Name == "String"),
+                        unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"), null, null, null, null, null, null);
+                    Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, elem, "", "", "",
+                        unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"));
+                    VariableIdentifier vi = new VariableIdentifier
+                    {
+                        name = newVariable.Label,
+                        id = newVariable.Id
+                    };
+                    vars.Add(vi);
+                    XmlElement newVariableXml = xmldoc.CreateElement("variable");
+                    newVariableXml.InnerText = Convert.ToString(newVariable.Id);
+
+                    orderElement.AppendChild(newVariableXml);
+                }
+                extraElement.AppendChild(orderElement);
+                xmldoc.AppendChild(extraElement);
+
+                sds.Extra = xmldoc;
+                sds.Name = "generated import structure " + System.DateTime.UtcNow.ToString("r");
+                sds.Description = "sequence data" + "_" + System.DateTime.UtcNow.ToString("r");
+            }
+            dam.Dispose();
+
             dsm.Dispose();
             return sds;
         }
