@@ -15,7 +15,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
+using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
 using System.Xml;
@@ -26,6 +26,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
     public class HomeController : Controller
     {
         static ViewFormModel model;
+        string BaseAdress = WebConfigurationManager.AppSettings["BaseAdress"];
         public ActionResult Index()
         {
             CreateDatasetController HelperController = new CreateDatasetController();
@@ -72,7 +73,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
                 using (var client = new HttpClient())
                 {
-                    string url = this.ControllerContext.HttpContext.Request.Url.Scheme + "://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/getStudy/";
+                    string url = BaseAdress + "/api/SampleAccession/getStudy/";
                     //string param = "studyID=" + Identifier + "&datasource=" + DataSourceId.ToString();
                     string param = Identifier + "/" + DataSourceId.ToString();
                     client.BaseAddress = new Uri(url + param);
@@ -144,13 +145,13 @@ namespace BExIS.Modules.OAC.UI.Controllers
             Dictionary<string, string> dict_data = new Dictionary<string, string>();
             dict_data.Add("username", GetUsernameOrDefault());
             dict_data.Add("data", JsonConvert.SerializeObject(dict));
-            dict_data.Add("metadata", model.SelectedDataStructureId.ToString()  );
+            dict_data.Add("metadata", model.SelectedMetadataStructureId.ToString()  );
             try
             {
                 using (var client = new HttpClient())
                 {
                     EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-                    string url = this.ControllerContext.HttpContext.Request.Url.Scheme + "://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/SampleAccession/add_study";
+                    string url = BaseAdress + "/api/SampleAccession/add_study/";
                     client.BaseAddress = new Uri(url);
 
                     var json = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);

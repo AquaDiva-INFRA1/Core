@@ -856,18 +856,6 @@
       <Project>{E5128814-4541-45C8-A9E6-6C91A7E3D1E2}</Project>
       <Name>BExIS.Web.Shell</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
-      <Project>{2b541d06-3259-4aa3-ae6a-452c8f67164d}</Project>
-      <Name>BExIS.Aam.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Orm.NH\BExIS.Aam.Orm.NH.csproj">
-      <Project>{867a1e69-2f75-4f4b-a28c-026f0f5654b1}</Project>
-      <Name>BExIS.Aam.Orm.NH</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Services\BExIS.Aam.Services.csproj">
-      <Project>{898568be-061e-44d2-a94c-04729f07ddca}</Project>
-      <Name>BExIS.Aam.Services</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BAM\BExIS.Modules.Bam.UI.csproj">
       <Project>{4c00a9c4-5a27-485a-bc14-147567b29332}</Project>
       <Name>BExIS.Modules.Bam.UI</Name>

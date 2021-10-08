@@ -104,6 +104,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         [GetRoute("api/Statistics/reset")]
         public HttpResponseMessage reset()
         {
+            throw new HttpResponseException(HttpStatusCode.NotImplemented);
             var response = Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StringContent(_StatisticsExtractor.reset().ToString(), System.Text.Encoding.UTF8, "application/json");
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");

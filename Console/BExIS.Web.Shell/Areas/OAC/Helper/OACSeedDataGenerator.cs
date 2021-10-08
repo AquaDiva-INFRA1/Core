@@ -21,14 +21,14 @@ namespace BExIS.Modules.OAC.UI.Helper
                 if (DataCollectionFeature != null)
                 {
                     Feature OAC = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("OMIC Archives Import"));
-                    if (OAC == null) DataCollectionFeature = featureManager.Create("OMIC Archives Import", "OMIC Archives Import", DataCollectionFeature);
+                    if (OAC == null) OAC = featureManager.Create("OMIC Archives Import", "OMIC Archives Import", DataCollectionFeature);
                     operationManager.Create("OAC", "Home", "*", DataCollectionFeature);
 
                     Feature API = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("API OMIC") && f.Parent.Equals(DataCollectionFeature));
                     if (API == null) API = featureManager.Create("API OMIC", "API OMIC", DataCollectionFeature);
                     if (!operationManager.Exists("api", "SampleAccession", "*")) operationManager.Create("api", "SampleAccession", "*", API);
                     //set api public
-                    featurePermissionManager.Create(null, API.Id, Security.Entities.Authorization.PermissionType.Grant);
+                    //featurePermissionManager.Create(null, API.Id, Security.Entities.Authorization.PermissionType.Grant);
                 }
 
             }

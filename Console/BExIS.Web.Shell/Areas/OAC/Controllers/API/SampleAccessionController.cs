@@ -43,6 +43,7 @@ namespace BExIS.Modules.OAC.UI.Controllers
 
         [BExISApiAuthorize]
         [PostRoute("api/SampleAccession/add_study")]
+        [GetRoute("api/SampleAccession/add_study")]
         public JObject add_study()
         {
             try

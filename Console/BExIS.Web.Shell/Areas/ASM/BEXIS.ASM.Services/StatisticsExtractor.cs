@@ -19,6 +19,7 @@ using BExIS.Modules.Rpm.UI.Models;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using BExIS.Dlm.Entities.Data;
+using Vaiona.Logging;
 
 namespace BExIS.ASM.Services
 {
@@ -156,14 +157,23 @@ namespace BExIS.ASM.Services
 
             JArray res = new JArray();
             int i = 0;
+            if (json_variables_ == null) return res;
             foreach (JObject json_variable in json_variables_)
             {
                 variable_id.Add(json_variable["Id"].ToString());
                 variable_label.Add(json_variable["Label"].ToString());
                 dataType.Add(json_variable["DataType"].ToString());
                 unit.Add(json_variable["Unit"].ToString());
-                Aam_Dataset_column_annotation annot;
-                annot = aam_list.Where(x => x.Dataset.Id == Int32.Parse(id) && x.variable_id.Id == Int64.Parse(json_variable["Id"].ToString())).FirstOrDefault();
+                Aam_Dataset_column_annotation annot = null;
+                try
+                {
+                    annot = aam_list.Find(x => (x.Dataset.Id == long.Parse(id)) && (x.variable_id.Id == long.Parse(json_variable["Id"].ToString())));
+                }
+                catch (Exception e)
+                {
+                    LoggerFactory.GetFileLogger().LogCustom(e.Message);
+                    LoggerFactory.GetFileLogger().LogCustom(e.StackTrace);
+                }
                 if (annot != null)
                 {
                     if (annot.entity_id.URI.ToString() == "")
