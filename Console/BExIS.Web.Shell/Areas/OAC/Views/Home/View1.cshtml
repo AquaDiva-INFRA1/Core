@@ -45,7 +45,7 @@
             @Html.DisplayFor(model => model.DESCRIPTION)
         </dd>
 
-        <!--      -->
+        <!--  IDENTIFIERS    -->
 
         <dt>
             @Html.DisplayNameFor(model => model.IDENTIFIERS.EXTERNALID.Namespace)
@@ -82,6 +82,7 @@
             @Html.DisplayFor(model => model.IDENTIFIERS.SUBMITTERID.Text)
         </dd>
 
+        <!-- SAMPLENAME -->
 
         <dt>
             @Html.DisplayNameFor(model => model.SAMPLENAME.TAXONID)
@@ -97,10 +98,10 @@
             @Html.DisplayFor(model => model.SAMPLENAME.SCIENTIFICNAME)
         </dd>
 
-
+        <!-- SAMPLELINKS -->
 
         @{
-            List<SAMPLELINK> sls = (List<SAMPLELINK>) Model.SAMPLELINKS.SAMPLELINK;
+            List<SAMPLELINK> sls = (List<SAMPLELINK>)Model.SAMPLELINKS.SAMPLELINK;
             foreach (SAMPLELINK sl in sls)
             {
                 <dt>

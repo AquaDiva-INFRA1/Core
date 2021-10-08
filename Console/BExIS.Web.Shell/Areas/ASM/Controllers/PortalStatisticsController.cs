@@ -36,15 +36,19 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
         static String DebugFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "debug.txt");
 
+        string BaseAdress = WebConfigurationManager.AppSettings["BaseAdress"];
+
 
 
         public async System.Threading.Tasks.Task<ActionResult> Index()
         {
             using (var client = new HttpClient())
             {
-                string url = this.ControllerContext.HttpContext.Request.Url.Scheme + "://" +this.ControllerContext.HttpContext.Request.Url.Authority + "/api/Statistics/get";
+                client.Timeout = TimeSpan.FromMinutes(10);
+
+                string url = BaseAdress + "/api/Statistics/get";
                 client.BaseAddress = new Uri(url);
-                var res = client.GetAsync("").Result.Content.ReadAsStringAsync();
+                client.Timeout = TimeSpan.FromMinutes(10);
                 var responseTask = client.GetAsync("");
                 responseTask.Wait();
                 //To store result of web api response.   

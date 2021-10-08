@@ -157,21 +157,23 @@
                 {
                     JObject obj = (JObject)Json_res["primary_stats"][kvp.Key];
                     JArray arr = (JArray)obj["Variables"];
-
-                    foreach (JObject objct in arr)
-                    {
-                        <tr>
-                            <td>@kvp.Key</td>
-                            <td>@obj["Id"]</td>
-                            <td>@obj["owner"]</td>
-                            <td>@obj["project"]</td>
-                            <td>@objct["Id"] </td>
-                            <td>@objct["Label"] </td>
-                            <td>@objct["entity_id"] </td>
-                            <td>@objct["characteristic_id"] </td>
-                            <td>@objct["Unit"]</td>
-                            <td>@objct["DataType"] </td>
-                        </tr>
+                    if (arr != null )
+                    { 
+                        foreach (JObject objct in arr)
+                        {
+                            <tr>
+                                <td>@kvp.Key</td>
+                                <td>@obj["Id"]</td>
+                                <td>@obj["owner"]</td>
+                                <td>@obj["project"]</td>
+                                <td>@objct["Id"] </td>
+                                <td>@objct["Label"] </td>
+                                <td>@objct["entity_id"] </td>
+                                <td>@objct["characteristic_id"] </td>
+                                <td>@objct["Unit"]</td>
+                                <td>@objct["DataType"] </td>
+                            </tr>
+                        }
                     }
 
 

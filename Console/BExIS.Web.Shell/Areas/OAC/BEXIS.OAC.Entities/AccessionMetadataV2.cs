@@ -208,17 +208,17 @@ namespace BEXIS.OAC.Entities
         [JsonProperty("@center_name")]
         public readonly string CenterName;
 
-        [JsonProperty("IDENTIFIERS")]
-        public readonly IDENTIFIERS IDENTIFIERS;
-
         [JsonProperty("TITLE")]
         public readonly string TITLE;
 
-        [JsonProperty("SAMPLE_NAME")]
-        public readonly SAMPLENAME SAMPLENAME;
-
         [JsonProperty("DESCRIPTION")]
         public readonly string DESCRIPTION;
+
+        [JsonProperty("IDENTIFIERS")]
+        public readonly IDENTIFIERS IDENTIFIERS;
+
+        [JsonProperty("SAMPLE_NAME")]
+        public readonly SAMPLENAME SAMPLENAME;
 
         [JsonProperty("SAMPLE_LINKS")]
         public readonly SAMPLELINKS SAMPLELINKS;
@@ -269,7 +269,7 @@ namespace BEXIS.OAC.Entities
         public string Initialise_header(string tempfile)
         {
             //string data_csv = "accession,alias,center name,title,description,sample name - scientific name , sample name - taxon id, sample link - IDs, sample link - DBs,samples attributes - tags, samples attributes - values, samples attributes - units,identifier - primary id,identifier - external id,identifier - external text,identifier - internal id,identifier - internal text";
-            string data_csv = "accession,alias,center_name,IDENTIFIERS__PRIMARY_ID,IDENTIFIERS__|,IDENTIFIERS__|__namespace,IDENTIFIERS__|__#text," +
+            string data_csv = "accession,alias,center_name, IDENTIFIERS__|__PRIMARY_ID,IDENTIFIERS__|__namespace,IDENTIFIERS__|__#text," +
                 "TITLE,SAMPLE_NAME__TAXON_ID,SAMPLE_NAME__SCIENTIFIC_NAME,DESCRIPTION,SAMPLE_LINKS__SAMPLE_LINK__XREF_LINK__DB," +
                 "SAMPLE_LINKS__SAMPLE_LINK__XREF_LINK__ID__#cdata-section,SAMPLE_LINKS__SAMPLE_LINK__XREF_LINK__ID,SAMPLE_ATTRIBUTES__SAMPLE_ATTRIBUTE__TAG," +
                 "SAMPLE_ATTRIBUTES__SAMPLE_ATTRIBUTE__VALUE,SAMPLE_ATTRIBUTES__SAMPLE_ATTRIBUTE__UNITS";
