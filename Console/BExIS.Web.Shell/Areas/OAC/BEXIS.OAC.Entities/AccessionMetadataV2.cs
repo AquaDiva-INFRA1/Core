@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -233,15 +234,15 @@ namespace BEXIS.OAC.Entities
             //x = "accession,alias,center name,title,description,sample name - scientific name , sample name - taxon id, sample links,samples attributes,identifier - primary id,identifier - external id,identifier - external text,identifier - internal id,identifier - internal text";
             try
             {
-                x = unpack(model.Accession)+ " ,"
-                + unpack(model.Alias) + " ,"
-                + unpack(model.CenterName) + " ,"
-                + unpack(model.TITLE) + " ,"
-                + unpack(model.DESCRIPTION?.ToString())+ " ,"
-                + unpack(model.SAMPLENAME) + " ,"
-                + unpack(model.SAMPLELINKS) + " ,"
-                + unpack(model.SAMPLEATTRIBUTES) + " ,"
-                + unpack(model.IDENTIFIERS)
+                x = Unpack(model.Accession)+ " ,"      //returns: 1 attibute
+                + Unpack(model.Alias) + " ,"                    //1
+                + Unpack(model.CenterName) + " ,"               //1
+                + Unpack(model.IDENTIFIERS) + " ,"              //3
+                + Unpack(model.TITLE) + " ,"                    //1
+                + Unpack(model.SAMPLENAME) + " ,"               //2
+                + Unpack(model.DESCRIPTION?.ToString())+ " ,"   //1
+                + Unpack(model.SAMPLELINKS) + " ,"              //3
+                + Unpack(model.SAMPLEATTRIBUTES)                //3
                 ;
             }
             catch (Exception e) {
@@ -268,7 +269,7 @@ namespace BEXIS.OAC.Entities
 
         public string Initialise_header(string tempfile)
         {
-            //string data_csv = "accession,alias,center name,title,description,sample name - scientific name , sample name - taxon id, sample link - IDs, sample link - DBs,samples attributes - tags, samples attributes - values, samples attributes - units,identifier - primary id,identifier - external id,identifier - external text,identifier - internal id,identifier - internal text";
+
             string data_csv = "accession,alias,center_name, IDENTIFIERS__|__PRIMARY_ID,IDENTIFIERS__|__namespace,IDENTIFIERS__|__#text," +
                 "TITLE,SAMPLE_NAME__TAXON_ID,SAMPLE_NAME__SCIENTIFIC_NAME,DESCRIPTION,SAMPLE_LINKS__SAMPLE_LINK__XREF_LINK__DB," +
                 "SAMPLE_LINKS__SAMPLE_LINK__XREF_LINK__ID__#cdata-section,SAMPLE_LINKS__SAMPLE_LINK__XREF_LINK__ID,SAMPLE_ATTRIBUTES__SAMPLE_ATTRIBUTE__TAG," +
@@ -293,7 +294,7 @@ namespace BEXIS.OAC.Entities
         }
 
         #region unpack / deserialise  classes
-        private string unpack(SAMPLEATTRIBUTES t)
+        private string Unpack(SAMPLEATTRIBUTES t)
         {
             string tag = "";
             string value = "";
@@ -301,58 +302,84 @@ namespace BEXIS.OAC.Entities
             //header = "samples attributes - tags, samples attributes - values, samples attributes - units"
             foreach (SAMPLEATTRIBUTE att in t.SAMPLEATTRIBUTE)
             {
-                tag = tag + (att.TAG?.Replace(',', ' ').Replace('-', ' ') ?? " ");
-                unit = unit + (att.UNITS?.Replace(',', ' ').Replace('-', ' ') ?? " ") ;
-                value = value + (att.VALUE?.Replace(',', ' ').Replace('-', ' ') ?? " ") ;
+                tag = tag + (att.TAG?.Replace(',', ' ').Replace(';', ' ') ?? " ") + "; ";
+                unit = unit + (att.UNITS?.Replace(',', ' ').Replace(';', ' ') ?? " ") + "; ";
+                value = value + (att.VALUE?.Replace(',', ' ').Replace(';', ' ') ?? " ") + "; ";
             }
-            tag = tag.TrimEnd('-');
-            unit = unit.TrimEnd('-');
-            value = value.TrimEnd('-');
+            tag = tag.TrimEnd(' ').TrimEnd(';');
+            unit = unit.TrimEnd(' ').TrimEnd(';');
+            value = value.TrimEnd(' ').TrimEnd(';');
             string x = tag + "," + value + "," + unit;
             return x;
         }
 
-        private string unpack(SAMPLELINKS t)
+        private string Unpack(SAMPLELINKS t)
         {
             string IDs = "";
             string DBs = "";
-            string x = "";
-            //header = 'sample link - IDs, sample link - DBs';
+            string cData = "";
+            string temp_ID, temp_cData = "";
+            //header = 'sample link - DBs, sample link - cdata, sample link - IDs ';
             foreach (SAMPLELINK link in t.SAMPLELINK)
             {
-                DBs = DBs + (link.XREFLINK.DB?.Replace(',', ' ').Replace('-', ' ') ?? " ") ;
-                IDs = IDs + (link.XREFLINK.ID?.ToString().Replace(',', ' ').Replace('-', ' ') ?? " ");
+                DBs = DBs + (link.XREFLINK.DB?.Replace(',', ' ').Replace(';', ' ') ?? " ") + "; ";
+                (temp_ID, temp_cData) = ParseIDs(link.XREFLINK.ID?.ToString() ?? " ");
+                IDs = IDs + (temp_ID?.Replace(',', ' ') ?? " ");
+                cData = cData + (temp_cData?.Replace(',', ' ') ?? " ");
             }
-            IDs = IDs.TrimEnd('-');
-            DBs = DBs.TrimEnd('-');
-            x = DBs + "," + IDs;
-            return x;
+            IDs = IDs.TrimEnd(' ').TrimEnd(';');
+            DBs = DBs.TrimEnd(' ').TrimEnd(';');
+            cData = cData.TrimEnd(' ').TrimEnd(';');
+            return DBs + "," + cData + "," + IDs;
         }
 
-        private string unpack(IDENTIFIERS t)
+        private (string,string) ParseIDs(string json)
+        {
+            try
+            {
+                var jObject = new JObject();
+                jObject = JObject.Parse(json);
+                string target = "";
+                foreach (JProperty x in (JToken)jObject)
+                {
+                    string name = x.Name;
+                    string value = x.Value.ToString();
+                    target = target + value + ";";
+                }
+                target = target.TrimEnd(';').Replace(';',' ');
+                return ("", target + "; ");
+            }
+            catch
+            {
+                return (json.Replace(';', ' ') + "; ", "");
+            }
+        }
+
+
+        private string Unpack(IDENTIFIERS t)
         {
             string x = "";
-            //header = "identifier - primary id,identifier - external id,identifier - external text,identifier - internal id,identifier - internal text"
+            //header = "identifier - primary id,identifier - namespace,identifier - text"
             x = (t.PRIMARYID?.Replace(',', ' ') ?? " ") + " ,"
-                + (t.EXTERNALID.Namespace?.Replace(',', ' ') ?? " ") + " ,"
-                + (t.EXTERNALID.Text?.Replace(',', ' ') ?? " ") + " ,"
+                + (t.EXTERNALID.Namespace?.Replace(',', ' ') ?? " ") + "; "
                 + (t.SUBMITTERID.Namespace?.Replace(',', ' ') ?? " ") + " ,"
+                + (t.EXTERNALID.Text?.Replace(',', ' ') ?? " ") + "; "
                 + (t.SUBMITTERID.Text?.Replace(',', ' ') ?? " ")
                 ;
             return x;
         }
 
-        private string unpack(SAMPLENAME t)
+        private string Unpack(SAMPLENAME t)
         {
             string x = "";
-            //header = "sample name - scientific name, sample name - taxon id"
-            x = (t.SCIENTIFICNAME?.Replace(',', ' ') ?? " ") + " ,"
-                + (t.TAXONID?.Replace(',', ' ') ?? " ")
+            //header = "sample name - taxon id, sample name - scientific name"   
+            x = (t.TAXONID?.Replace(',', ' ') ?? " ") + " ,"
+                + (t.SCIENTIFICNAME?.Replace(',', ' ') ?? " ")
                 ;
             return x;
         }
 
-        private string unpack(string prop)
+        private string Unpack(string prop)
         {
             //header = "accession,alias,center name,title,description"
             string x = prop?.Replace(',', ' ') ?? " ";
