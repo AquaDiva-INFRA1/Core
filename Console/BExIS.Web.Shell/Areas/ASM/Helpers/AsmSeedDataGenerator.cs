@@ -60,8 +60,17 @@ namespace BExIS.Modules.Asm.UI.Helpers
                     f.Parent != null &&
                     f.Parent.Id.Equals(ASM.Id));
                 if (classification == null) classification = featureManager.Create("Dataset Classification", "Dataset Classification", ASM);
-                if (!operationManager.Exists("ASM", "DataSetSummary", "classification")) 
+                if (!operationManager.Exists("ASM", "DataSetSummary", "classification"))
                     operationManager.Create("ASM", "DataSetSummary", "classification", classification);
+
+                ////////// new for new summary controller 
+                Feature SummaryAnalysis = features.FirstOrDefault(f =>
+                    f.Name.Equals("Summary and Analysis") &&
+                    f.Parent != null &&
+                    f.Parent.Id.Equals(ASM.Id));
+                if (SummaryAnalysis == null) SummaryAnalysis = featureManager.Create("Summary and Analysis", "Summary and Analysis", ASM);
+                if (!operationManager.Exists("ASM", "SummaryAnalysis", "*"))
+                    operationManager.Create("ASM", "SummaryAnalysis", "*", SummaryAnalysis);
 
                 //// APIs
                 Feature API = featureManager.FeatureRepository.Get().FirstOrDefault(f => 
@@ -71,6 +80,8 @@ namespace BExIS.Modules.Asm.UI.Helpers
                 if (API == null) API = featureManager.Create("ASM API", "ASM API", ASM);
                 if (!operationManager.Exists("api", "Statistics", "*"))
                     operationManager.Create("api", "Statistics", "*", API);
+                if (!operationManager.Exists("api", "Summary", "*"))
+                    operationManager.Create("api", "Summary", "*", API);
 
             }
             finally

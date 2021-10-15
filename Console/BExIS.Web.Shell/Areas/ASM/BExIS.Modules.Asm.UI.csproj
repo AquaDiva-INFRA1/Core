@@ -261,8 +261,9 @@
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NMath, Version=6.2.0.58, Culture=neutral, PublicKeyToken=873235918a322639, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\CenterSpace.NMath.6.2.0.58\lib\net40\NMath.dll</HintPath>
@@ -578,6 +579,7 @@
     <Compile Include="Controllers\API\SummaryController.cs" />
     <Compile Include="Controllers\DataSetSummaryController.cs" />
     <Compile Include="Controllers\PortalStatisticsController.cs" />
+    <Compile Include="Controllers\SummaryAnalysisController.cs" />
     <Compile Include="Helpers\AsmSeedDataGenerator.cs" />
     <Compile Include="Models\Classification.cs" />
     <Compile Include="Models\Data_container_analytics.cs" />
@@ -907,6 +909,7 @@
     <Content Include="Scripts\vis\vis.js.map" />
     <Content Include="Scripts\vis\vis.map" />
     <Content Include="Views\DataSetSummary\Summary.cshtml" />
+    <Content Include="Views\SummaryAnalysis\classify.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -1006,7 +1009,7 @@
       <Name>BExIS.Modules.Rpm.UI</Name>
     </ProjectReference>
     <ProjectReference Include="BEXIS.ASM.Services\BEXIS.ASM.Services.csproj">
-      <Project>{18aacad7-16ba-4604-917a-90202efd8f45}</Project>
+      <Project>{18AACAD7-16BA-4604-917A-90202EFD8F45}</Project>
       <Name>BEXIS.ASM.Services</Name>
     </ProjectReference>
   </ItemGroup>

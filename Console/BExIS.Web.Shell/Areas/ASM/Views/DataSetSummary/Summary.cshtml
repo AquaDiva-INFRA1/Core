@@ -18,7 +18,7 @@
 
         tabs.Add()
             .Text("Semantic Analysis")
-            .LoadContentFrom("classificationAsync", "DataSetSummary", new { area = "asm", ds = id })
+            .LoadContentFrom("Summary", "SummaryAnalysis", new { area = "asm", id = id })
             .HtmlAttributes(new { id = "classification" });
 
     })

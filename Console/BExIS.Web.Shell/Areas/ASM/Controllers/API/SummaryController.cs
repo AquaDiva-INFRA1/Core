@@ -2,69 +2,53 @@
 using BExIS.Utils.Route;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using BEXIS.ASM.Services;
 
 //using System.Linq.Dynamic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web.Configuration;
 using System.Web.Http;
+using Newtonsoft.Json.Linq;
 
 namespace BExIS.Modules.ASM.UI.Controllers
 {
 
     public class SummaryController : ApiController
     {
-        /// <param name="id">Dataset Id</param>
-        [BExISApiAuthorize]
-        //[Route("api/Data")]
-        [GetRoute("api/Summary/{id}")]
-        [HttpGet]
-        public async Task<HttpResponseMessage> GetAsync(int id)
+        private readonly ISummary _summary;
+        public SummaryController(ISummary summary)
         {
-            string token = this.Request.Headers.Authorization?.Parameter;
-            using (var client = new HttpClient())
-            {
-                string url = this.Request.RequestUri.Authority;  // "http://" + Request.Url.Authority + "/api/DataStatistic/";
-                string param = id.ToString();
-                client.BaseAddress = new Uri(url + param);
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "UeyJRyCegdcfxiKXw99NtgTRYJy2hThzo2GL3TbW55Eiq3ShQKQ8gdiV88a8ZW85");
-                /*
-                client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue(
-                    "Basic", Convert.ToBase64String(
-                        System.Text.ASCIIEncoding.ASCII.GetBytes(
-                           $"{yourusername}:{yourpwd}")));
-                */
-                var responseTask = client.GetAsync("");
-                responseTask.Wait();
-                //To store result of web api response.   
-                Stream result = await responseTask.Result.Content.ReadAsStreamAsync();
-                string jsonstring = new StreamReader(result).ReadToEnd();
-            }
-
-            return getData(id, -1, token);
+            this._summary = summary;
+        }
+        public SummaryController()
+        {
+            if (this._summary == null)
+                _summary = new summaryManager();
         }
 
         [BExISApiAuthorize]
-        [GetRoute("api/Summary/get_data/{id}")]
-        [HttpGet]
-        public HttpResponseMessage get_data(int id=79)
+        [HttpPost]
+        [PostRoute("api/Summary/getSummary")]
+        [GetRoute("api/Summary/getSummary")]
+        public async Task<JObject> getSummary()
         {
-            return getData(id, -1, "");
+            string res = this.Request.Content.ReadAsStringAsync().Result.ToString();
+            Dictionary<string, string> dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(res);
+
+            string dataset; 
+            dict.TryGetValue("data", out dataset);
+            string username; 
+            dict.TryGetValue("username", out username);
+
+            JObject jsonObj_ = await _summary.get_analysisAsync(dataset, username);
+            return jsonObj_;
         }
 
-        private HttpResponseMessage getData(long id, int variableId, string token)
-        {
-            var response = Request.CreateResponse(HttpStatusCode.OK);
-            string resp = JsonConvert.SerializeObject("");
-
-            response.Content = new StringContent(resp, System.Text.Encoding.UTF8, "application/json");
-            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-            return response;
-        }
 
 
 
