@@ -177,8 +177,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Modules.OAC.UI", "Con
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BEXIS.ASM.Services", "Console\BExIS.Web.Shell\Areas\ASM\BEXIS.ASM.Services\BEXIS.ASM.Services.csproj", "{18AACAD7-16BA-4604-917A-90202EFD8F45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BEXIS.ASM.Entities", "Console\BExIS.Web.Shell\Areas\ASM\BEXIS.ASM.Entities\BEXIS.ASM.Entities.csproj", "{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1275,24 +1273,6 @@ Global
 		{18AACAD7-16BA-4604-917A-90202EFD8F45}.TestServerRelease|Mixed Platforms.Build.0 = Release|Any CPU
 		{18AACAD7-16BA-4604-917A-90202EFD8F45}.TestServerRelease|x86.ActiveCfg = Release|Any CPU
 		{18AACAD7-16BA-4604-917A-90202EFD8F45}.TestServerRelease|x86.Build.0 = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Debug|x86.Build.0 = Debug|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Release|x86.ActiveCfg = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.Release|x86.Build.0 = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.TestServerRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.TestServerRelease|Any CPU.Build.0 = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.TestServerRelease|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.TestServerRelease|Mixed Platforms.Build.0 = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.TestServerRelease|x86.ActiveCfg = Release|Any CPU
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8}.TestServerRelease|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1379,11 +1359,10 @@ Global
 		{B423A986-EB03-4696-AADE-A5E8EA11FC73} = {E94DD0B9-D8C0-44C5-A8F6-B7218416F74F}
 		{A2B47C9B-9466-4C52-8BD4-7E99C82732AB} = {E94DD0B9-D8C0-44C5-A8F6-B7218416F74F}
 		{18AACAD7-16BA-4604-917A-90202EFD8F45} = {CB588E93-67D2-41DA-976D-9AE102D21B3D}
-		{7E2F936E-FCA7-482C-839E-FB4D7297D0B8} = {CB588E93-67D2-41DA-976D-9AE102D21B3D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {E189371C-381B-4FE5-A432-53E3EF8E0581}
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.0\lib\NET35;packages\Unity.2.1.505.2\lib\NET35
+		SolutionGuid = {E189371C-381B-4FE5-A432-53E3EF8E0581}
 	EndGlobalSection
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True

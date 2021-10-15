@@ -2,8 +2,6 @@
 using System;
 using Vaiona.Logging;
 using Vaiona.Web.Mvc.Modularity;
-using BExIS.Modules.Asm.UI.Helpers;
-using System;
 
 namespace BExIS.Modules.Asm.UI
 {
@@ -37,6 +35,7 @@ namespace BExIS.Modules.Asm.UI
         {
             base.Start();
             Vaiona.IoC.IoCFactory.Container.RegisterHeirarchical(typeof(BExIS.ASM.Services.IStatisticsExtractor), typeof(BExIS.ASM.Services.StatisticsExtractor));
+            Vaiona.IoC.IoCFactory.Container.Register(typeof(BEXIS.ASM.Services.ISummary), typeof(BEXIS.ASM.Services.summaryManager));
         }
 
         public override void Shutdown()
