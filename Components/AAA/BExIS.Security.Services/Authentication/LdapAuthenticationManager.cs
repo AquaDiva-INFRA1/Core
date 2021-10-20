@@ -114,8 +114,8 @@ namespace BExIS.Security.Services.Authentication
 
                         ldapUser = new User()
                         {
-                            Email = (attributes["mail"][0]).ToString(),
-                            UserName = (attributes["cn"][0]).ToString(),
+                            Email = (attributes["mail"]?[0] ?? " ").ToString(),
+                            UserName = (attributes["cn"]?[0] ?? " ").ToString(),
                             IsEmailConfirmed = true
                         };
                     }
