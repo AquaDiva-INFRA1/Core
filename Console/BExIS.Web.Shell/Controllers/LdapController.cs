@@ -35,7 +35,8 @@ namespace BExIS.Web.Shell.Controllers
             try
             {
                 var user = await userManager.FindByNameAsync(model.UserName);
-
+                Tuple<SignInStatus, string> dict = ldapAuthenticationManager.ValidateUser2(model.UserName, model.Password);
+                SignInStatus result = dict.Item1;
                 if (user != null)
                 {
                     if (user.Logins.Any(l => l.LoginProvider == "Ldap"))
@@ -51,13 +52,14 @@ namespace BExIS.Web.Shell.Controllers
                         //    ViewBag.ErrorMessage = "You must have a confirmed email address to log in.";
                         //    return View("Error");
                         //}
-                        Tuple<SignInStatus, string> dict = ldapAuthenticationManager.ValidateUser2(model.UserName, model.Password);
                         //SignInStatus result = ldapAuthenticationManager.ValidateUser(model.UserName, model.Password);
-                        SignInStatus result = dict.Item1;
+
+                        //Tuple<SignInStatus, string> dict = ldapAuthenticationManager.ValidateUser2(model.UserName, model.Password);
+                        //SignInStatus result = dict.Item1;
                         switch (result)
                         {
                             case SignInStatus.Success:
-                                var identity = await identityUserService.CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie);
+                                var identity = await identityUserService.CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie).ConfigureAwait(true);
                                 AuthenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = true }, identity);
                                 return RedirectToLocal(returnUrl);
 
@@ -74,19 +76,29 @@ namespace BExIS.Web.Shell.Controllers
                 }
                 else
                 {
-                    var result = ldapAuthenticationManager.ValidateUser(model.UserName, model.Password);
+                    //var result = ldapAuthenticationManager.ValidateUser2(model.UserName, model.Password);
                     switch (result)
                     {
                         case SignInStatus.Success:
-                            var ldapUser = new User() { Name = model.UserName, SecurityStamp = Guid.NewGuid().ToString() };
-                            await userManager.CreateAsync(ldapUser);
-                            await userManager.AddLoginAsync(ldapUser, new UserLoginInfo("Ldap", ""));
+                            var ldapUser = new User() { 
+                                Name = model.UserName, 
+                                SecurityStamp = Guid.NewGuid().ToString() ,
+                                IsEmailConfirmed = true,
+                                HasPrivacyPolicyAccepted = true,
+                                HasTermsAndConditionsAccepted = true
+                            };
+                            await userManager.CreateAsync(ldapUser).ConfigureAwait(true);
+                            await userManager.AddLoginAsync(ldapUser, new UserLoginInfo("Ldap", "")).ConfigureAwait(true);
+
+                            var identity = await identityUserService.CreateIdentityAsync(ldapUser, DefaultAuthenticationTypes.ApplicationCookie).ConfigureAwait(true);
+                            AuthenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = true }, identity);
 
                             ViewBag.ReturnUrl = returnUrl;
-                            return View("Confirm", LoginConfirmModel.Convert(ldapUser));
+                            //return View("Confirm", LoginConfirmModel.Convert(ldapUser));
+                            return RedirectToLocal(returnUrl);
 
                         default:
-                            ModelState.AddModelError("", "Invalid login attempt.");
+                            ModelState.AddModelError("", "Invalid login attempt " + dict.Item2.ToString());
                             return View(model);
                     }
                 }
