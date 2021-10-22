@@ -39,8 +39,7 @@ namespace BEXIS.ASM.Services
             this.Dispose();
         }
 
-        #region classification
-        public async Task<JObject> get_analysisAsync(string dataset, string username)
+        public async Task<string> get_analysisAsync(string dataset, string username)
         {
             string content = prepare_for_classification(dataset);
             StringBuilder sb = new StringBuilder();
@@ -65,7 +64,7 @@ namespace BEXIS.ASM.Services
             var responseTask = await client.PostAsync(url, stringContent);
 
             string result = await responseTask.Content.ReadAsStringAsync();
-            return JObject.Parse(result);
+            return result;
         }
         private string prepare_for_classification(string datasetids)
         {
@@ -79,7 +78,8 @@ namespace BEXIS.ASM.Services
             List<Aam_Dataset_column_annotation> all_annot = aam.get_all_dataset_column_annotation();
             try
             {
-                List<Int64> req_ds = datasetids.Split(';').ToList<string>().Select(Int64.Parse).ToList();
+                List<string> temp = datasetids.Split(';').ToList<string>();
+                List<Int64> req_ds = temp.Select(s => Int64.Parse(s)).ToList();
                 if (req_ds.Count > 0) all_annot = (List<Aam_Dataset_column_annotation>)all_annot.FindAll(x => req_ds.Contains(x.Dataset.Id));
             }
             catch (Exception ex)

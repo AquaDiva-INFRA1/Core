@@ -3,43 +3,42 @@
 
 
 
-    <head>
-        <script type="text/javascript" src='@Url.Content("~/Scripts/vis/vis.js")'></script>
+<head>
+	<script type="text/javascript" src='@Url.Content("~/Scripts/vis/vis.js")'></script>
 
-        <link href='@Url.Content("~/Scripts/vis/vis-network.min.css")' rel="stylesheet" type="text/css" />
-
-
-    </head>
-
-    <div class="row" id="terminoloies">
-        connected terminologies :
-        <span class=\"badge badge-light\">No Match</span><br>
-    </div>
-    <br />
-    <div class="row" id="matched_terms">
-        Matched terms :
-        <span class=\"badge badge-light\">No Match</span><br>
-        <br />
-    </div>
-    <br />
-    <div class="row">
-        <div id="map">
-            <center>
-                <div id="mynetwork"></div>
-            </center>
-        </div>
-        <div class="row">
-            <div id="datasets_list" hidden="true">
-            </div>
-        </div>
-    </div>
-
-    <div id="spinner_loader" hidden="true">
-        <center><i class="fa fa-spinner fa-spin" style="font-size:50px" id="spinner_loader"></i></center>
-    </div>
+	<link href='@Url.Content("~/Scripts/vis/vis-network.min.css")' rel="stylesheet" type="text/css" />
 
 
-    <script type="text/javascript">
+</head>
+Connected Terminologies :
+<div class="row" id="terminoloies">
+	<span class="badge badge-light">No Match</span><br>
+</div>
+<br />
+Matched terms :
+<div class="row" id="matched_terms">
+	<span class="badge badge-light">No Match</span><br>
+	<br />
+</div>
+<br />
+<div class="row">
+	<div id="map">
+		<center>
+			<div id="mynetwork"></div>
+		</center>
+	</div>
+	<div class="row">
+		<div id="datasets_list" hidden="true">
+		</div>
+	</div>
+</div>
+
+<div id="spinner_loader" hidden="true">
+	<center><i class="fa fa-spinner fa-spin" style="font-size:50px" id="spinner_loader"></i></center>
+</div>
+
+
+<script type="text/javascript">
 
     classify();
     // create an array with nodes
@@ -61,6 +60,7 @@
             },
             success: function (result) {
                 if (result != "") {
+                    console.debug("I am here debug");
                     var jsonObject = JSON.parse(result);
                     console.log(jsonObject)
                     // nodes end extraction
@@ -68,45 +68,72 @@
                         var key = jsonObject['nodes'][k];
                         var elem = { id: k, label: jsonObject['nodes'][k] }
                         nodes_.push(elem);
+                        console.debug('elemNode: ' + elem.id + " : " + elem.label)
                     }
+					console.debug('nodes: ' + nodes_)
                     // links for the map extraction
                     for (var k = 0; k < jsonObject['links'].length; k++) {
                         var ell = jsonObject['links'][k];
                         for (var kk = 0; kk < ell.length - 1; kk++) {
                             var elem = { from: ell[kk], to: ell[kk + 1] }
                             console.log(elem, " is ", links.includes(elem), " - ", links.includes(elem))
-                            if (!elemExists(elem, links))
+                            if (!elemExists(elem, links)) {
                                 links.push(elem);
+                                console.debug('elemLinks: ' + elem.from + " to " + elem.to)
+                            }
                         }
                     }
+                    console.debug('links:' + links)
                     // matched terms extraction
                     var matched_terms = "";
                     for (var k = 0; k < jsonObject['keywords'].length; k++) {
                         var ell = jsonObject['keywords'][k];
                         console.log("keyword :  " + ell)
-                        matched_terms = matched_terms + "<span class=\"badge badge-light\"> #" + ell + "</span><br>";
-                        console.log("keyword :  " + ell)
+                        matched_terms = matched_terms + "<span class=\"badge badge-light\"> #" + ell + "</span>";
+						console.debug("keyword :  " + ell)
                     }
-                    document.getElementById("matched_terms").innerText = matched_terms;
+					console.debug('matched_terms: ' + matched_terms)
+                    document.getElementById("matched_terms").innerHTML = matched_terms;
 
                     // terminologies extracttion
                     domains = ["Sites", "BioGeoChemichals", "Cycles", "Matter Cycles",
-                        "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter",
-                        "Groundwater BioGeoChem", "Viruses", "Pathways"];
-                    for (var k = 0; k < jsonObject['class_results'].length; k++) {
+                        "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways"];
+                    ////is best match prediction beig extracted here?
+                    /*for (var k = 0; k < jsonObject['class_results'].length; k++) {
                         var ell = jsonObject['keywords'][k];
                         for (var kk = 0; kk < ell.split(';').length - 1; kk++) {
                             if ( !class_res.includes(ell) && (ell!= "\" \"") )
                                 class_res.push(elem);
                         }
+                    }*/
+					for (var k = 0; k < jsonObject['class_results'].length; k++) {
+						var ell = jsonObject['class_results'][k]['predition_bestMatches'];
+                        var ell_lst = ell.split(';');
+                        console.debug('ellMatches:' + ell)
+						for (var kk = 0; kk < ell_lst.length; kk++) {
+							if (!class_res.includes(parseInt(ell_lst[kk])) && (ell_lst[kk] != "\" \"") && (ell_lst[kk] != " ")) {
+								class_res.push(parseInt(ell_lst[kk]));
+								console.debug('elemClassRes: ' + parseInt(ell_lst[kk]))
+                            }
+						}
                     }
+					console.debug('classRes: ' + class_res)
                     terminoloies = "";
+                    //getting corresponding class name??
+                    //for (var k = 0; k < class_res.length; k++) {
+                    //    var ell = jsonObject['keywords'][k];
+                    //    terminoloies = terminoloies + "<span class=\"badge badge-light\"> #" + ell + "</span><br>";
+                    //    console.log("class_result :  " + domains[ell])
+                    //}
                     for (var k = 0; k < class_res.length; k++) {
-                        var ell = jsonObject['keywords'][k];
-                        terminoloies = terminoloies + "<span class=\"badge badge-light\"> #" + ell + "</span><br>";
-                        console.log("class_result :  " + domains[ell])
+						var ell = domains[parseInt(class_res[k])];
+						terminoloies = terminoloies + "<span class=\"badge badge-light\"> #" + ell + "</span>";
+                        console.log("class_result :  " + ell)
+						console.debug("class_result :  " + ell)
                     }
-                    document.getElementById("matched_terms").innerText = terminoloies;
+					console.debug(terminoloies)
+                    //document.getElementById("matched_terms").innerText = terminoloies;
+					document.getElementById("terminoloies").innerHTML = terminoloies;
                 }
             },
             complete: function () {
@@ -211,5 +238,5 @@
 }
 
 
-    </script>
+</script>
 
