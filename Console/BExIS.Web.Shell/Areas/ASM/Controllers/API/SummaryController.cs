@@ -49,10 +49,41 @@ namespace BExIS.Modules.ASM.UI.Controllers
             return jsonObj_;
         }
 
+        [BExISApiAuthorize]
+        [HttpPost]
+        [PostRoute("api/Summary/getCategrocialAnalysis")]
+        [GetRoute("api/Summary/getCategrocialAnalysis")]
+        public async Task<JObject> getCategrocialAnalysis()
+        {
+            string res = this.Request.Content.ReadAsStringAsync().Result.ToString();
+            Dictionary<string, string> dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(res);
 
+            string data;
+            dict.TryGetValue("data", out data);
+            string username;
+            dict.TryGetValue("username", out username);
 
+            JObject jsonObj_ = await _summary.get_summary(data, username);
+            return jsonObj_;
+        }
 
+        [BExISApiAuthorize]
+        [HttpPost]
+        [PostRoute("api/Summary/getSamplingSummary")]
+        [GetRoute("api/Summary/getSamplingSummary")]
+        public async Task<JObject> getSamplingSummary()
+        {
+            string res = this.Request.Content.ReadAsStringAsync().Result.ToString();
+            Dictionary<string, string> dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(res);
 
+            string data;
+            dict.TryGetValue("data", out data);
+            string username;
+            dict.TryGetValue("username", out username);
+
+            JObject jsonObj_ = await _summary.get_sampling_summary(data, username);
+            return jsonObj_;
+        }
     }
 
 }

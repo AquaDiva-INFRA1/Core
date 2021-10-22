@@ -3,6 +3,7 @@ using BExIS.Aam.Services;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
+using BExIS.Security.Services.Subjects;
 using BExIS.Xml.Helpers;
 using ChoETL;
 using Newtonsoft.Json;
@@ -38,6 +39,7 @@ namespace BEXIS.ASM.Services
             this.Dispose();
         }
 
+        #region classification
         public async Task<JObject> get_analysisAsync(string dataset, string username)
         {
             string content = prepare_for_classification(dataset);
@@ -56,7 +58,7 @@ namespace BEXIS.ASM.Services
             string url = WebConfigurationManager.AppSettings["summary_adress"]+"/predict";
             client.BaseAddress = new Uri(url);
 
-            var json = JsonConvert.SerializeObject(sb.ToString(), Newtonsoft.Json.Formatting.Indented);
+            //var json = JsonConvert.SerializeObject(sb.ToString(), Newtonsoft.Json.Formatting.Indented);
             var stringContent = new StringContent(sb.ToString().Replace("[],","\"\",") , Encoding.UTF8, "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -65,18 +67,6 @@ namespace BEXIS.ASM.Services
             string result = await responseTask.Content.ReadAsStringAsync();
             return JObject.Parse(result);
         }
-
-        public async Task<JObject> get_sampling_summary()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<JObject> get_summary()
-        {
-            throw new NotImplementedException();
-        }
-
-
         private string prepare_for_classification(string datasetids)
         {
             StringBuilder str = new StringBuilder();
@@ -203,5 +193,58 @@ namespace BEXIS.ASM.Services
             }
             return str.ToString();
         }
+        #endregion
+
+        #region categorical / non categorical analysis
+        public async Task<JObject> get_summary(string dataset, string username)
+        {
+            string url = WebConfigurationManager.AppSettings["summary_adress"] + "/categoricalAnalysis";
+            client.BaseAddress = new Uri(url);
+            var stringContent = new StringContent((string)await getDataset(dataset, username).ConfigureAwait(true), Encoding.UTF8, "application/json");
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var responseTask = await client.PostAsync(url, stringContent);
+
+            string result = await responseTask.Content.ReadAsStringAsync();
+            return JObject.Parse(result);
+        }
+
+        private async Task<JObject> getDataset(string id, string username)
+        {
+            UserManager userManager = new UserManager();
+            var token = userManager.Users.Where(u => u.Name.Equals(username)).FirstOrDefault().Token;
+            string result = "";
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                string url = WebConfigurationManager.AppSettings["BaseAdress"] + "/api/DataStatistic/" + id.ToString();
+                client.BaseAddress = new Uri(url);
+                var responseTask = await client.GetAsync(url);
+                result = await responseTask.Content.ReadAsStringAsync();
+            }
+            return JObject.Parse(result); ;
+        }
+
+        #endregion
+
+        #region sampling campain
+        public async Task<JObject> get_sampling_summary(string data, string username)
+        {
+            string result = "";
+            using (var client = new HttpClient())
+            {
+                string url = WebConfigurationManager.AppSettings["summary_adress"] + "/getvalue";
+                var stringContent = new StringContent(data, Encoding.UTF8, "application/json");
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.BaseAddress = new Uri(url);
+                var responseTask = await client.GetAsync(url+ data);
+                result = await responseTask.Content.ReadAsStringAsync();
+            }
+            return JObject.Parse(result); ;
+        }
+        #endregion
+
+
+
     }
 }

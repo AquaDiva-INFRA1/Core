@@ -2,6 +2,7 @@
 using BExIS.Aam.Services;
 using BExIS.Dlm.Services.Data;
 using BExIS.Modules.Asm.UI.Models;
+using BExIS.Security.Services.Subjects;
 using F23.StringSimilarity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -24,10 +25,14 @@ namespace BExIS.Modules.Asm.UI.Controllers
     public class SummaryAnalysisController : Controller
     {
         static string BaseAdress = WebConfigurationManager.AppSettings["BaseAdress"];
+
         List<string> domains = new List<string>() { "Sites", "BioGeoChemichals", "Cycles", "Matter Cycles",
             "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways" };
         static String projectTerminolgies = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Project-terminologies.csv");
 
+        public static Dictionary<string, List<string>> dict_ = new Dictionary<string, List<string>>();
+
+        #region classification
         public ActionResult Summary(long id)
         {
             return PartialView("classify", id);
@@ -201,7 +206,6 @@ namespace BExIS.Modules.Asm.UI.Controllers
                         }
                         ), JsonRequestBehavior.AllowGet);
         }
-
         private double similarity(string a, string b)
         {
             List<double> similarities = new List<double>();
@@ -221,5 +225,108 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
             return output / similarities.Count;
         }
+        #endregion
+
+        #region categorical analysis
+        public async System.Threading.Tasks.Task<ActionResult> CategoralAnalysisAsync(long id)
+        {
+            string result = "";
+            using (var client = new HttpClient())
+            {
+                string username = this.ControllerContext.HttpContext.User.Identity.Name;
+                Dictionary<string, string> dict_data = new Dictionary<string, string>();
+                dict_data.Add("username", username);
+                dict_data.Add("data", id.ToString());
+
+                string url = BaseAdress + "/api/Summary/getCategrocialAnalysis";
+                client.BaseAddress = new Uri(url);
+
+                var json = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);
+                var stringContent = new StringContent(json);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var responseTask = await client.PostAsync(url, stringContent);
+                result = await responseTask.Content.ReadAsStringAsync();
+            }
+            return PartialView("classify", JObject.Parse(result));
+        }
+        #endregion
+
+        #region sampling summary
+        public async System.Threading.Tasks.Task<ActionResult> Filter_ApplyAsync(
+            string welllocation = "", string year = "", string filtersize = "", 
+            string GroupName = "", string NameFIlter = "",
+            String Season_dict = "", string column = "-1", string row = "-1", Boolean flag = false)
+        {
+            string row_ = "";
+            dict_ = dict_.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+            if (row != "-1")
+                row_ = dict_.ElementAt(dict_.Count - Int32.Parse(row) - 1).Key;
+            string col = "";
+            if (column != "-1")
+                col = dict_.ElementAt(dict_.Count - 1).Value[Int32.Parse(column) - 1];
+            string param = "?year=" + year + "&filtersize=" + filtersize + "&GroupName=" + GroupName + "&Season_dict=" + Season_dict + "&column=" + col + "&row=" + row_;
+            if (welllocation != "")
+                param = param + "&welllocation=" + parse_Json_location(welllocation);
+            if (NameFIlter != "")
+                param = param + "&PIName=" + NameFIlter;
+
+            string result = "";
+            using (var client = new HttpClient())
+            {
+                string username = this.ControllerContext.HttpContext.User.Identity.Name;
+                Dictionary<string, string> dict_data = new Dictionary<string, string>();
+                dict_data.Add("username", username);
+                dict_data.Add("data", param);
+
+                string url = BaseAdress + "/api/Summary/getSamplingSummary";
+                client.BaseAddress = new Uri(url);
+
+                var json = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);
+                var stringContent = new StringContent(json);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var responseTask = await client.PostAsync(url, stringContent);
+                result = await responseTask.Content.ReadAsStringAsync();
+            }
+            return PartialView("classify", JObject.Parse(result));
+        }
+
+        private String parse_Json_location(String location_coordinates)
+        {
+            String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
+            //"LatLng(51.080258, 10.42626)"
+            using (StreamReader r = new StreamReader(Gps_coordinates_for_wells))
+            {
+                string json = r.ReadToEnd();
+                List<coordinates_GPS> items = JsonConvert.DeserializeObject<List<coordinates_GPS>>(json);
+                if (location_coordinates.Length > 0)
+                {
+                    string lon = location_coordinates.Substring(location_coordinates.IndexOf('(') + 1, location_coordinates.IndexOf(',') - location_coordinates.IndexOf('(') - 1);
+                    string lat = location_coordinates.Substring(location_coordinates.IndexOf(", ") + 2, location_coordinates.IndexOf(')') - location_coordinates.IndexOf(',') - 2);
+
+                    foreach (coordinates_GPS item in items)
+                    {
+                        try
+                        {
+                            if ((item.Lat.ToString().IndexOf(lon.Substring(0, lon.Length - 1)) > -1) && (item.Lon.ToString().IndexOf(lat.Substring(0, lat.Length - 1)) > -1))
+                            {
+                                return item.Well_name;
+                            }
+                        }
+                        catch (NullReferenceException e)
+                        {
+                            LoggerFactory.GetFileLogger().LogCustom(e.Message);
+                            LoggerFactory.GetFileLogger().LogCustom(e.StackTrace);
+                        }
+
+                    }
+                }
+                else
+                {
+                    return json;
+                }
+            }
+            return "";
+        }
+        #endregion
     }
 }
