@@ -39,6 +39,7 @@ namespace BEXIS.ASM.Services
             this.Dispose();
         }
 
+        #region classification
         public async Task<string> get_analysisAsync(string dataset, string username)
         {
             string content = prepare_for_classification(dataset);
