@@ -270,10 +270,10 @@ namespace BEXIS.OAC.Entities
         public string Initialise_header(string tempfile)
         {
 
-            string data_csv = "accession,alias,center_name, IDENTIFIERS__|__PRIMARY_ID,IDENTIFIERS__|__namespace,IDENTIFIERS__|__#text," +
-                "TITLE,SAMPLE_NAME__TAXON_ID,SAMPLE_NAME__SCIENTIFIC_NAME,DESCRIPTION,SAMPLE_LINKS__SAMPLE_LINK__XREF_LINK__DB," +
-                "SAMPLE_LINKS__SAMPLE_LINK__XREF_LINK__ID__#cdata-section,SAMPLE_LINKS__SAMPLE_LINK__XREF_LINK__ID,SAMPLE_ATTRIBUTES__SAMPLE_ATTRIBUTE__TAG," +
-                "SAMPLE_ATTRIBUTES__SAMPLE_ATTRIBUTE__VALUE,SAMPLE_ATTRIBUTES__SAMPLE_ATTRIBUTE__UNITS";
+            string data_csv = "Accession,Alias,Center Name, Primary ID (IDENTIFIERS),Namespace (IDENTIFIERS),Text (IDENTIFIERS)," +
+                "Title,Taxon ID (SAMPLE_NAME),Scientific Name (SAMPLE_NAME),Description,DB (XREF_LINK)," +
+                "cData (XREF_LINK),ID (XREF_LINK),Tag(SAMPLE_ATTRIBUTE)," +
+                "Value(SAMPLE_ATTRIBUTE),Units(SAMPLE_ATTRIBUTE)";
 
             if (tempfile != "")
             {

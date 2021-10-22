@@ -35,7 +35,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         [HttpPost]
         [PostRoute("api/Summary/getSummary")]
         [GetRoute("api/Summary/getSummary")]
-        public async Task<JObject> getSummary()
+        public async Task<string> getSummary()
         {
             string res = this.Request.Content.ReadAsStringAsync().Result.ToString();
             Dictionary<string, string> dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(res);
@@ -45,8 +45,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
             string username; 
             dict.TryGetValue("username", out username);
 
-            JObject jsonObj_ = await _summary.get_analysisAsync(dataset, username);
-            return jsonObj_;
+            string result = await _summary.get_analysisAsync(dataset, username);
+            return result;
         }
 
         [BExISApiAuthorize]
