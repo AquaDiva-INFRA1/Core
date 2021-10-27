@@ -53,7 +53,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         [HttpPost]
         [PostRoute("api/Summary/getCategrocialAnalysis")]
         [GetRoute("api/Summary/getCategrocialAnalysis")]
-        public async Task<JObject> getCategrocialAnalysis()
+        public async Task<string> getCategrocialAnalysis()
         {
             string res = this.Request.Content.ReadAsStringAsync().Result.ToString();
             Dictionary<string, string> dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(res);
@@ -63,8 +63,8 @@ namespace BExIS.Modules.ASM.UI.Controllers
             string username;
             dict.TryGetValue("username", out username);
 
-            JObject jsonObj_ = await _summary.get_summary(data, username);
-            return jsonObj_;
+            string result= await _summary.get_summary(data, username);
+            return result;
         }
 
         [BExISApiAuthorize]

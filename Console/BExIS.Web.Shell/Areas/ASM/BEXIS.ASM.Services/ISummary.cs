@@ -9,7 +9,7 @@ namespace BEXIS.ASM.Services
 {
     public interface ISummary : IDisposable
     {
-        Task<JObject> get_summary(string dataset, string username);
+        Task<string> get_summary(string dataset, string username);
         Task<string> get_analysisAsync(string dataset, string username);
         Task<JObject> get_sampling_summary(string dataset, string username);
         void Dispose();

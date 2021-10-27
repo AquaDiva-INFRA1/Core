@@ -197,33 +197,37 @@ namespace BEXIS.ASM.Services
         #endregion
 
         #region categorical / non categorical analysis
-        public async Task<JObject> get_summary(string dataset, string username)
+        public async Task<string> get_summary(string dataset, string username)
         {
             string url = WebConfigurationManager.AppSettings["summary_adress"] + "/categoricalAnalysis";
             client.BaseAddress = new Uri(url);
-            var stringContent = new StringContent((string)await getDataset(dataset, username).ConfigureAwait(true), Encoding.UTF8, "application/json");
+            var stringContent = new StringContent(await getDataset(dataset, username).ConfigureAwait(true), Encoding.UTF8, "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             var responseTask = await client.PostAsync(url, stringContent);
 
             string result = await responseTask.Content.ReadAsStringAsync();
-            return JObject.Parse(result);
+            result = result.Replace("\n", string.Empty).Replace("\r", String.Empty).Replace("\t", String.Empty);
+            return result;
         }
 
-        private async Task<JObject> getDataset(string id, string username)
+        private async Task<string> getDataset(string id, string username)
         {
             UserManager userManager = new UserManager();
-            var token = userManager.Users.Where(u => u.Name.Equals(username)).FirstOrDefault().Token;
+            var token = userManager.Users.Where(u => u.Name.Equals(username));
+            var temp = token.FirstOrDefault();
+            var token1 = temp.Token;
             string result = "";
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                token1 = "UeyJRyCegdcfxiKXw99NtgTRYJy2hThzo2GL3TbW55Eiq3ShQKQ8gdiV88a8ZW85";
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token1);
                 string url = WebConfigurationManager.AppSettings["BaseAdress"] + "/api/DataStatistic/" + id.ToString();
                 client.BaseAddress = new Uri(url);
                 var responseTask = await client.GetAsync(url);
                 result = await responseTask.Content.ReadAsStringAsync();
             }
-            return JObject.Parse(result); ;
+            return result;
         }
 
         #endregion

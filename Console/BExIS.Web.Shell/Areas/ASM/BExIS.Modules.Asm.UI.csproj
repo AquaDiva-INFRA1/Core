@@ -583,6 +583,7 @@
     <Compile Include="Helpers\AsmSeedDataGenerator.cs" />
     <Compile Include="Models\Classification.cs" />
     <Compile Include="Models\coordinates_GPS.cs" />
+    <Compile Include="Models\Dataset_analysis.cs" />
     <Compile Include="Models\Data_container_analytics.cs" />
     <Compile Include="Models\Variable_analytics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -912,6 +913,7 @@
     <Content Include="Views\DataSetSummary\Summary.cshtml" />
     <Content Include="Views\SummaryAnalysis\classify.cshtml" />
     <Content Include="Views\SummaryAnalysis\CategoralAnalysisAsync.cshtml" />
+    <Content Include="Views\SummaryAnalysis\SpecialdatasetanalysisV2.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
