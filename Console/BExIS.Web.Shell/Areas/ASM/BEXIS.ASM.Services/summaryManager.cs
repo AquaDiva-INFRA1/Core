@@ -43,27 +43,18 @@ namespace BEXIS.ASM.Services
         public async Task<string> get_analysisAsync(string dataset, string username)
         {
             string content = prepare_for_classification(dataset);
-            StringBuilder sb = new StringBuilder();
-            
-            using (var p = ChoCSVReader.LoadText(content).WithFirstLineHeader().WithDelimiter(";").IgnoreEmptyLine())
-            {
-                using (var w = new ChoJSONWriter(sb))
-                    w.Write(p);
-            }
             
             Dictionary<string, string> dict_data = new Dictionary<string, string>();
             dict_data.Add("username", username);
-            dict_data.Add("data", sb.ToString());
+            dict_data.Add("data", csv_to_json(content) );
+
+            //var json = JsonConvert.SerializeObject(sb.ToString(), Newtonsoft.Json.Formatting.Indented);
+            var stringContent = new StringContent(csv_to_json(content).Replace("[],", "\"\","), Encoding.UTF8, "application/json");
 
             string url = WebConfigurationManager.AppSettings["summary_adress"]+"/predict";
             client.BaseAddress = new Uri(url);
-
-            //var json = JsonConvert.SerializeObject(sb.ToString(), Newtonsoft.Json.Formatting.Indented);
-            var stringContent = new StringContent(sb.ToString().Replace("[],","\"\",") , Encoding.UTF8, "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
             var responseTask = await client.PostAsync(url, stringContent);
-
             string result = await responseTask.Content.ReadAsStringAsync();
             return result;
         }
@@ -194,6 +185,17 @@ namespace BEXIS.ASM.Services
             }
             return str.ToString();
         }
+
+        private string csv_to_json(string content)
+        {
+            StringBuilder sb = new StringBuilder();
+            using (var p = ChoCSVReader.LoadText(content).WithFirstLineHeader().WithDelimiter(";").IgnoreEmptyLine())
+            {
+                using (var w = new ChoJSONWriter(sb))
+                    w.Write(p);
+            }
+            return sb.ToString();
+        }
         #endregion
 
         #region categorical / non categorical analysis
@@ -223,7 +225,8 @@ namespace BEXIS.ASM.Services
                 var responseTask = await client.GetAsync(url);
                 result = await responseTask.Content.ReadAsStringAsync();
             }
-            return JObject.Parse(result); ;
+            userManager.Dispose();
+            return JObject.Parse(result);
         }
 
         #endregion
@@ -231,18 +234,45 @@ namespace BEXIS.ASM.Services
         #region sampling campain
         public async Task<JObject> get_sampling_summary(string data, string username)
         {
+            string ds361 = getDatasetOut(WebConfigurationManager.AppSettings["dataset_Sampling_data_id"], username).Result;
+            string ds362 = getDatasetOut(WebConfigurationManager.AppSettings["dataset_Sampling_dates_id"], username).Result;
+
+            Dictionary<string, string> dict_data = new Dictionary<string, string>();
+            dict_data.Add("username", username);
+            dict_data.Add("dataset_Sampling_data", ds361);
+            dict_data.Add("dataset_Sampling_dates", ds362);
+
             string result = "";
             using (var client = new HttpClient())
             {
                 string url = WebConfigurationManager.AppSettings["summary_adress"] + "/getvalue";
-                var stringContent = new StringContent(data, Encoding.UTF8, "application/json");
+                var stringContent = new StringContent(JsonConvert.SerializeObject(dict_data), Encoding.UTF8, "application/json");
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.BaseAddress = new Uri(url);
-                var responseTask = await client.GetAsync(url+ data);
+                var responseTask = await client.PostAsync(url+ data, stringContent);
                 result = await responseTask.Content.ReadAsStringAsync();
             }
-            return JObject.Parse(result); ;
+            return JObject.Parse(result);
         }
+
+        private async Task<string> getDatasetOut(string id, string username)
+        {
+            UserManager userManager = new UserManager();
+            var token = userManager.Users.Where(u => u.Name.Equals(username)).FirstOrDefault().Token;
+            string result = "";
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                string url = WebConfigurationManager.AppSettings["BaseAdress"] + "/api/data/" + id.ToString();
+                client.BaseAddress = new Uri(url);
+                result = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
+                //var responseTask = await client.GetAsync(url);
+                //result = await responseTask.Content.ReadAsStringAsync();
+            }
+            userManager.Dispose();
+            return result;
+        }
+
         #endregion
 
 
