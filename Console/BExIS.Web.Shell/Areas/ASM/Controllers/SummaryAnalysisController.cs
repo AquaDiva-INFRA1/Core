@@ -224,6 +224,10 @@ namespace BExIS.Modules.Asm.UI.Controllers
         #region categorical analysis
         public async System.Threading.Tasks.Task<ActionResult> CategoralAnalysisAsync(long id)
         {
+            if (id == 361)
+            {
+                return RedirectToAction("SamplingSummary");
+            }
             string result = "";
             using (var client = new HttpClient())
             {
@@ -246,6 +250,10 @@ namespace BExIS.Modules.Asm.UI.Controllers
         #endregion
 
         #region sampling summary
+        public ActionResult SamplingSummary()
+        {
+            return PartialView("Specialdatasetanalysis");
+        }
         public async System.Threading.Tasks.Task<ActionResult> Filter_ApplyAsync(
             string welllocation = "", string year = "", string filtersize = "", 
             string GroupName = "", string NameFIlter = "",
@@ -276,12 +284,13 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 client.BaseAddress = new Uri(url);
 
                 var json = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);
-                var stringContent = new StringContent(json);
+                var stringContent = new StringContent(json, System.Text.Encoding.UTF8,"application/json");
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 var responseTask = await client.PostAsync(url, stringContent);
                 result = await responseTask.Content.ReadAsStringAsync();
             }
-            return PartialView("classify", JObject.Parse(result));
+
+            return PartialView("Specialdatasetanalysis", JToken.Parse(result));
         }
 
         private String parse_Json_location(String location_coordinates)
