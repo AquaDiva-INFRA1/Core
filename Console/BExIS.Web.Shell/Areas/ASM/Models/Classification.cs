@@ -7,6 +7,7 @@ using System.Web;
 
 namespace BExIS.Modules.Asm.UI.Models
 {
+    //delete classes classification and input after DataSetController.cs has been removed 
     public class Classification
     {
         //public Input var_name;
