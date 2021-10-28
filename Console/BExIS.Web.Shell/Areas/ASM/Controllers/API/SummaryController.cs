@@ -80,13 +80,9 @@ namespace BExIS.Modules.ASM.UI.Controllers
             string username;
             dict.TryGetValue("username", out username);
 
-            JObject jsonObj_ = await _summary.get_sampling_summary(data, username);
-            
-            Dictionary<string, Newtonsoft.Json.Linq.JToken> dict_res = JsonConvert.DeserializeObject<Dictionary<string, Newtonsoft.Json.Linq.JToken>>
-                (Newtonsoft.Json.JsonConvert.SerializeObject(jsonObj_));
+            string result = await _summary.get_sampling_summary(data, username);
 
-            //return JObject.Parse(JsonConvert.SerializeObject(dict_res, Newtonsoft.Json.Formatting.Indented));
-            return JsonConvert.SerializeObject(dict_res, Newtonsoft.Json.Formatting.Indented).Replace("\r\n","").Replace("\\","");
+            return result;
         }
     }
 

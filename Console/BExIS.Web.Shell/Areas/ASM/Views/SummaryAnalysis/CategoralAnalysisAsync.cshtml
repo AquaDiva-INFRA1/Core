@@ -207,11 +207,11 @@ else
 
     function start() {
         var myJSON = JSON.parse(@Html.Raw(Json.Encode(graphData)));
-        debugger;
+        
         console.debug(myJSON);
 
         Object.keys(myJSON).forEach(function (entry) {
-            debugger;
+            
             var element = myJSON[entry];
 
             var xdata = element[0];
@@ -221,7 +221,7 @@ else
             var ydata = element[1];
             var ylabel = ydata[0];
             var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
-            debugger;
+            
             //if (xlabel != ylabel){
             var data_ = [];
 
@@ -231,7 +231,6 @@ else
             else
                 graphType = "simpleBar"
 
-
             function convert_toInt(num) {
 				var temp = num.replace('\'', '')
 				return parseInt(temp);
@@ -240,7 +239,7 @@ else
 
             
 
-            debugger;   
+               
             for (var z = 0; z < yvalues.length; z++) {
                 data_.push({ x: xvalues[z], y: yvalues[z] });
             }
@@ -250,7 +249,7 @@ else
             for (var i = 0; i < yvalues.length; i++) {
                 colors.push(getRandomColor());
             };
-			debugger;
+			
             var scatterChartData = {
                 datasets:
                     [{
@@ -274,17 +273,22 @@ else
                     options: {
                         scales: {
                             xAxes: [{
-								gridLines: {
-									offsetGridLines: true
-								},
-								stacked: true,
-								fontColor: 'black',
+                                display: false,
+                                barPercentage: 1.5,                                ticks: {
+                                    max: 5,
+								}
+                            }, {
 								scaleLabel: {
 									display: true,
 									labelString: xlabel,
 									fontColor: 'black'
-								}
-                            }],
+								},
+								display: true,
+								ticks: {
+                                    autoSkip: false,
+                                    max: 5,
+								},
+							}],
 							yAxes: [{
 								ticks: {
 									beginAtZero: true
@@ -296,6 +300,9 @@ else
 									fontColor: 'black'
 								}
 							}]			
+                        },
+						legend: {
+							display: false
 						}
 					}
                 });
@@ -309,7 +316,7 @@ else
                     data: {
                         labels: xvalues, // ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], // x data here
                         datasets: [{
-                            data: yvalues, // [12, 19, 3, 5, 2, 3] // Y data here
+                            data: yvalues_int, // [12, 19, 3, 5, 2, 3] // Y data here
                             backgroundColor: colors
                         }]
                     },

@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -225,10 +226,6 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
         public async System.Threading.Tasks.Task<ActionResult> CategoralAnalysisAsync(long id)
         {
-            if (id == 361)
-            {
-                return RedirectToAction("SamplingSummary");
-            }
             string result = "";
             Dataset_analysis analytics;
             using (var client = new HttpClient())
@@ -255,8 +252,9 @@ namespace BExIS.Modules.Asm.UI.Controllers
             List<List<string>> labels = new List<List<string>>();
             foreach (var item in analytics.categorical)
             {
+                var temp = item.values.Select(i => i.ToString()).ToList();
                 labels.Add(new List<string> { item.name, "count" }) ;
-                values.Add(new List<string> {item.values.ToString(), item.counts.ToString() });
+                values.Add(new List<string> { temp.ToString(), item.counts.ToString() });
             }
             foreach (var item in analytics.non_Categorical)
             {
@@ -329,39 +327,15 @@ namespace BExIS.Modules.Asm.UI.Controllers
         #endregion
 
         #region sampling summary
-        public ActionResult SamplingSummary()
-        {
-            return PartialView("Specialdatasetanalysis");
-        }
-
         public ActionResult Specialdatasetanalysis()
         {
-            Dictionary<string, List<string>> project_list_names_ = new Dictionary<string, List<string>> {
-            {"A01", new List<string> { "Wick", "Antonis Chatzinotas" } },
-            {"A02", new List<string> { "Pohnert", "Gleixner" } },
-            {"A03", new List<string> { "Kusel", "Martin Taubert", "Jurgen Popp" , "Petra Rosch" } },
-            {"A04", new List<string> { "Martin von Bergen", "Jehmlich" } },
-            {"A05", new List<string> { "Ulrich Brose", "Bjorn Rall" } },
-            {"A06", new List<string> { "Manja Marz" } },
-            {"B01", new List<string> { "Beate Michalzik", "Nicole van Dam" } },
-            {"B02", new List<string> { "Anke Hildebrandt " } },
-            {"B03", new List<string> { "Susan Trumbore", "Torsten Frosch" } },
-            {"B04", new List<string> { "Sabine Attinger" } },
-            {"B05", new List<string> { "Martina Herrmann" } },
-            {"C03", new List<string> { "Totsche" } },
-            {"C05", new List<string> { "Totsche", "Ulrich S. Schubert" } },
-            {"D01", new List<string> { "Birgitta Konig-Ries", "Udo Hahn" } },
-            {"D02", new List<string> { "Anke Hildebrandt", "Kusel" } },
-            {"D03", new List<string> { "Totsche", "Kusel" } }
-            };
-            ViewData["project_list_names"] = project_list_names_;
-            return PartialView("SpecialdatasetanalysisV2");
+            return PartialView("SpecialdatasetanalysisV1");
         }
 
-        public async System.Threading.Tasks.Task<ActionResult> Filter_ApplyAsync(
+        public async System.Threading.Tasks.Task<string> Filter_ApplyAsync(
             string welllocation = "", string year = "", string filtersize = "", 
             string GroupName = "", string NameFIlter = "",
-            String Season_dict = "", string column = "-1", string row = "-1", Boolean flag = false)
+            String Season_dict = "", string column = "-1", string row = "-1", string flag = "false")
         {
             string row_ = "";
             dict_ = dict_.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
@@ -394,7 +368,64 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 result = await responseTask.Content.ReadAsStringAsync();
             }
 
-            return PartialView("Specialdatasetanalysis", JToken.Parse(result));
+            SpecialDataset_analysis keys = new SpecialDataset_analysis(JObject.Parse((string)JToken.Parse(result)));
+            if ((keys.key2.Count > 10) || (keys.key1.Count > 10))
+                try
+                {
+                    Dictionary<string, List<string>> backup_dict_ = new Dictionary<string, List<string>>();
+                    if (flag == "true")
+                        backup_dict_ = dict_;
+                    dict_ = new Dictionary<string, List<string>>();
+                    if (column == "-1" )
+                    { 
+                        foreach (var element in keys.key1)
+                        {
+                            var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
+                            foreach (KeyValuePair<string, string> kvp in dict)
+                            {
+                                if (!dict_.ContainsKey(kvp.Key))
+                                    dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
+                                List<string> value = new List<string>();
+                                dict_.TryGetValue(kvp.Key, out value);
+                                value.Add(kvp.Value);
+                                dict_[kvp.Key] = value;
+                            }
+                        }
+                        dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
+                        string ss = JsonConvert.SerializeObject(dict_);
+                        if (flag == "true")
+                            dict_ = backup_dict_;
+                        return ss;
+                    }
+                    else 
+                    {
+                        foreach (var element in keys.key2)
+                        {
+                            var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
+                            foreach (KeyValuePair<string, string> kvp in dict)
+                            {
+                                if (!dict_.ContainsKey(kvp.Key))
+                                    dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
+                                List<string> value = new List<string>();
+                                dict_.TryGetValue(kvp.Key, out value);
+                                value.Add(kvp.Value);
+                                dict_[kvp.Key] = value;
+                            }
+                        }
+                        dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
+                        dict_.Remove("id");
+                        string ss = JsonConvert.SerializeObject(dict_);
+                        if (flag == "true")
+                            dict_ = backup_dict_;
+                        return ss;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    return ("");
+                }
+            return ("");
         }
 
         private String parse_Json_location(String location_coordinates)

@@ -1,9 +1,8 @@
 ﻿@using Telerik.Web.Mvc.UI
 @using System.Linq;
-@model Int64
 
-@{ 
-    Int64 id =  Model ;
+@{
+	Int64 id = Model;
 }
 @(Html.Telerik().TabStrip()
 	.Name("SummaryTab")
@@ -14,15 +13,7 @@
 		if (id == 361){
 			tabs.Add()
 				.Text("Analysis")
-				.LoadContentFrom("Specialdatasetanalysis", "SummaryAnalysis");
-			tabs.Add()
-				.Selected(true)
-				.Text("Old Analysis")
-				.LoadContentFrom("Specialdatasetanalysis", "DataSetSummary");
-			tabs.Add()
-				.Text("Categoral Analysis")
-				.LoadContentFrom("CategoralAnalysisAsync", "SummaryAnalysis", new { area = "asm", id = id })
-				.HtmlAttributes(new { id = "CategoralAnalysis" });		
+				.LoadContentFrom("Specialdatasetanalysis", "SummaryAnalysis", new { area = "asm", id = id });
 		}
 		else {
 
@@ -38,11 +29,6 @@
 				.LoadContentFrom("Summary", "SummaryAnalysis", new { area = "asm", id = id })
 				.HtmlAttributes(new { id = "classification" });
 
-			tabs.Add()
-				.Selected(true)
-				.Text("Old Categoral Analysis")
-				.LoadContentFrom("CategoralAnalysisAsync", "DataSetSummary", new { area = "asm", id = id })
-				.HtmlAttributes(new { id = "CategoralAnalysis" });
 
 
 		}
@@ -50,14 +36,14 @@
 	.ClientEvents(e => e.OnSelect("OnSelectShowDataTabStrip")))
 
 <script type="text/javascript">
-    	function OnSelectShowDataTabStrip(e) {
-		    $("#preloaderContainer").preloader(20, "Loading...");
+	function OnSelectShowDataTabStrip(e) {
+		$("#preloaderContainer").preloader(20, "Loading...");
 
-		    if (e.item.id == "prepare") {
+		if (e.item.id == "prepare") {
 
-			    var tabStrip = $("#SummaryTab").data("tTabStrip");
-			    tabStrip.reload($("#" + e.item.id));
-            }
-            $("#preloaderContainer").removePreloader();
+			var tabStrip = $("#SummaryTab").data("tTabStrip");
+			tabStrip.reload($("#" + e.item.id));
+		}
+		$("#preloaderContainer").removePreloader();
 	}
 </script>
