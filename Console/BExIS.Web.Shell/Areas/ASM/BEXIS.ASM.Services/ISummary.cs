@@ -11,7 +11,7 @@ namespace BEXIS.ASM.Services
     {
         Task<string> get_summary(string dataset, string username);
         Task<string> get_analysisAsync(string dataset, string username);
-        Task<JObject> get_sampling_summary(string dataset, string username);
+        Task<string> get_sampling_summary(string dataset, string username);
         void Dispose();
     }
 }

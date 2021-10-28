@@ -216,14 +216,11 @@ namespace BEXIS.ASM.Services
         private async Task<string> getDataset(string id, string username)
         {
             UserManager userManager = new UserManager();
-            var token = userManager.Users.Where(u => u.Name.Equals(username));
-            var temp = token.FirstOrDefault();
-            var token1 = temp.Token;
+            var token = userManager.Users.Where(u => u.Name.Equals(username)).FirstOrDefault().Token;
             string result = "";
             using (var client = new HttpClient())
             {
-                token1 = "UeyJRyCegdcfxiKXw99NtgTRYJy2hThzo2GL3TbW55Eiq3ShQKQ8gdiV88a8ZW85";
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token1);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 string url = WebConfigurationManager.AppSettings["BaseAdress"] + "/api/DataStatistic/" + id.ToString();
                 client.BaseAddress = new Uri(url);
                 var responseTask = await client.GetAsync(url);
@@ -236,7 +233,7 @@ namespace BEXIS.ASM.Services
         #endregion
 
         #region sampling campain
-        public async Task<JObject> get_sampling_summary(string data, string username)
+        public async Task<string> get_sampling_summary(string data, string username)
         {
             string ds361 = getDatasetOut(WebConfigurationManager.AppSettings["dataset_Sampling_data_id"], username).Result;
             string ds362 = getDatasetOut(WebConfigurationManager.AppSettings["dataset_Sampling_dates_id"], username).Result;
@@ -255,8 +252,9 @@ namespace BEXIS.ASM.Services
                 client.BaseAddress = new Uri(url);
                 var responseTask = await client.PostAsync(url+ data, stringContent);
                 result = await responseTask.Content.ReadAsStringAsync();
+                result = result.Replace("\n", string.Empty).Replace("\r", String.Empty).Replace("\t", String.Empty);
             }
-            return JObject.Parse(result);
+            return result;
         }
 
         private async Task<string> getDatasetOut(string id, string username)

@@ -586,6 +586,7 @@
     <Compile Include="Models\Dataset_analysis.cs" />
     <Compile Include="Models\Data_container_analytics.cs" />
     <Compile Include="Models\SamplingSummaryModelView.cs" />
+    <Compile Include="Models\SpecialDataset_analysis.cs" />
     <Compile Include="Models\Variable_analytics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AsmModule.cs" />
@@ -914,8 +915,7 @@
     <Content Include="Views\DataSetSummary\Summary.cshtml" />
     <Content Include="Views\SummaryAnalysis\classify.cshtml" />
     <Content Include="Views\SummaryAnalysis\CategoralAnalysisAsync.cshtml" />
-    <Content Include="Views\SummaryAnalysis\Specialdatasetanalysis.cshtml" />
-    <Content Include="Views\SummaryAnalysis\SpecialdatasetanalysisV2.cshtml" />
+    <Content Include="Views\SummaryAnalysis\SpecialdatasetanalysisV1.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

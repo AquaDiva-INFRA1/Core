@@ -103,12 +103,12 @@ namespace BExIS.Modules.ASM.UI.Controllers
         public async System.Threading.Tasks.Task<ActionResult> CategoralAnalysisAsync(long id)
         {
             //debugging file
-            ViewData["id"] = id.ToString();
+            ViewData["id"] = id.ToString(); //Dataset ID
             if (id == 361)
             {
                 return RedirectToAction("Specialdatasetanalysis");
             }
-            ViewData["error"] = "";
+            ViewData["error"] = ""; //no error
             DatasetManager datasetManager = new DatasetManager();
             try
             {
@@ -287,15 +287,15 @@ namespace BExIS.Modules.ASM.UI.Controllers
                     }
 
 
-                    ViewData["headers"] = headers;
-                    ViewData["table"] = results;
+                    ViewData["headers"] = headers;  //header:attribute name, avg cat probability, category : basically the categorisation of every attribute 
+                    ViewData["table"] = results;    //result rows of header: ex time , 100, non cat
 
-                    ViewData["values"] = values;
-                    ViewData["labels"] = labels;
+                    ViewData["values"] = values;    //value vs counts for a given attribute: x axis header vs y axis header
+                    ViewData["labels"] = labels;    // labels: the attribute name vs y axis header 
 
-                    ViewData["column_types"] = column_types;
+                    ViewData["column_types"] = column_types; //the type of datain the df
                     ViewData["data_ranges"] = data_ranges;
-                    ViewData["nullsCount"] = nullsCount;
+                    ViewData["nullsCount"] = nullsCount;    //count of null 
 
                     //ViewData["header"] = header;
                     //ViewData["data_lines"] = data_lines;

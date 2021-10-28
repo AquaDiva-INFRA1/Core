@@ -6,7 +6,6 @@
 @using Telerik.Web.Mvc.UI;
 
 @{
-    //Dictionary<string, List<string>> project_list_names = (Dictionary<string, List<string>>)ViewData["project_list_names"];
 
     Dictionary<int, string> seasons = new Dictionary<int, string>() {
         {1,"Spring" },
@@ -109,7 +108,6 @@
             </div>
             <div class="form-group">
                 <label for="YearFIlter">Year</label>
-
                 <ul id="YearFIlter">
                     @{
                         for (int x = 2013; x < 2020; x++)
@@ -136,8 +134,8 @@
                         }
                     }
                 </ul>
-                <!--<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>-->
             </div>
+
             <div class="form-group">
                 <label for="GroupFIlter">Group</label>
                 <ul id="GroupFIlter">
@@ -193,18 +191,18 @@
 
     <div class="row" id="dataaa">
         <div class="centerBlock">
-            <br /><br />
+            <br />
             <div id="spinner_loader" hidden="true">
                 <center><i class="fa fa-spinner fa-spin" style="font-size:100px" id="spinner"></i></center>
             </div>
-            </br></br>
+            </br>
         </div>
         <div class="centerBlock">
             <div id="summary" align="center">
             </div>
         </div>
         <div class="centerBlock">
-            <div id="hashtags" class="float-sm-right"></div><br /><br />
+            <div id="hashtags" class="float-sm-right"></div><br />
             <div id="table_result" class="table_result">
                 <table class="table">
                     <thead>
@@ -228,32 +226,11 @@
             </div>
             <div id="datasets_list" hidden="true">
             </div>
-            <!--
-            <div class="modal" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLongTitle"><h1 class="display-4">Related Datasets</h1> </h5>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">Related Datasets</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div id="results">error occured, please contact the administrator!</div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            -->
         </div>
     </div>
 </div>
 
-@*
-    <script src='@Url.Content("/Scripts/chartJs/leaflet.js")'></script>
-*@
+
 <script type="text/javascript">
 
     $('div[data-toggle="tooltip"]').tooltip({
@@ -288,6 +265,7 @@
 
     map_coordinates = [50.911870, 10.866840];
     var zoom = 10;
+
     $("#locationFilter li").click(function () {
         var listItems = document.getElementById("locationFilter").getElementsByTagName("li");
         var locationFilter = [];
@@ -344,9 +322,6 @@
             x[i].style.backgroundColor = "";
             x[i].removeAttribute("bgcolor");
         }
-        //$('#aaaa').on('click','td', function () {
-        //    $(this).css('backgroundColor', '#DDDDDD');
-        //});
 
         var seasonFIlter = {};
         var YearFIlter = [];
@@ -398,21 +373,24 @@
         console.log("column selected : " + column);
 
         $.ajax({
-            url: '/ASM/SummaryAnalysis/Filter_ApplyAsync',
+			url: '/ASM/SummaryAnalysis/Filter_ApplyAsync',
             type: 'POST',
             data: {
                 'welllocation': welllocation, 'year': YearFIlter.toString(), 'filtersize': FilterFilter.toString(), 'GroupName': GroupFIlter.toString(),
                 'NameFIlter': NameFIlter.toString().replace('ü', 'u').replace('ö', 'o').replace('ä', 'a'), 'Season_dict': JSON.stringify(seasonFIlter),
-                'column': column, 'row': row, 'flag': 'true'
+                'column': column.toString(), 'row': row.toString(), 'flag': 'true'
             },
             error: function (xhr) {
                 alert('Error occured, please contact your administrator');
                 document.getElementById("spinner_loader").setAttribute("hidden", true);
             },
             success: function (result) {
+
                 console.log("results : " + result);
                 document.getElementById("spinner_loader").setAttribute("hidden", true);
+
                 if (result != "") {
+
                     document.getElementById("pnk_notif_id").removeAttribute("hidden");
 
                     var jsonObject = JSON.parse(result);
@@ -428,12 +406,14 @@
                     //console.log(bodz);
                     //console.log(xx);
                     samples = "";
+
                     for (var i = 0; i < bodz.length; i++) {
                         if (bodz[i] != "0") {
                             //console.log(xx[i]);
                             samples = samples + " <button onclick=\"show_dataset_pnk(\'" + header[i] + "\') ; \" type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\"  data-target=\"#exampleModalLong\" > "
                                 + bodz[i] + " <span class=\"badge\">" + header[i] + "</span></button> ";
                             //samples = samples + header[i] + " - ";
+
                         }
                     }
                     samples = samples.substring(0, samples.length - 2);
@@ -441,12 +421,14 @@
                     var popuptext = document.getElementById("pnks_list_id");
                     //console.log(popuptext.innerHTML);
                     popuptext.innerHTML = samples;
+
                     //console.log(popuptext.innerHTML);
                     //$('#pnks_list_id').html(samples);
                     //$('#pnks_list_id').show();
                     console.log($('#pnks_list_id'));
                 }
                 else {
+
                     samples = "No Samples Yet";
                     var popuptext = document.getElementById("pnks_list_id");
                     //console.log(popuptext.innerHTML);
@@ -652,12 +634,15 @@
                     $("#table_result").html(html);
                 }
                 else {
+
                     document.getElementById("spinner_loader").setAttribute("hidden", true);
                     var jsonObject = JSON.parse(result);
+                    //var jsonObject = JSON.parse(jsonObject["key1"]);
                     const ordered = {};
                     Object.keys(jsonObject).sort().forEach(function (key) {
                         ordered[key] = jsonObject[key];
                     });
+
                     console.log(ordered);
                     //var html = "<table class=\"table\" id =\"aaaa\"> <thead> <tr> ";
                     //var column = 0;
@@ -671,6 +656,7 @@
                     var b = true;
                     var row = 0;
                     var col = 0;
+
                     for (var key in ordered) {
                         if (ordered.hasOwnProperty(key)) {
                             console.log(key);
@@ -711,6 +697,7 @@
                         }
                         row = row + 1;
                     }
+
                     html = html + " </tbody> </table> <br/> <center>number of analysis: " + col + " distributed on " + row + " wells</center> "
                     //console.log(" -> " + html);
                     $("#table_result").html(html);
@@ -863,7 +850,7 @@
 
                         marker.on('mouseover', function (e) {
                             $.ajax({
-                                url: '/ASM/DataSetSummary/parse_Json_location',
+								url: '/ASM/DataSetSummary/parse_Json_location',
                                 type: 'POST',
                                 data: { 'location_coordinates': e.latlng.toString() },
                                 error: function (xhr) {

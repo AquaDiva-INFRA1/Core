@@ -34,17 +34,16 @@ namespace BExIS.Modules.Asm.UI.Models
         public List<Non_categorical> non_Categorical { get; set; } 
     }
 
-    public class Categorical{
-
-        public List<int> counts { get; set; }
+    public class Categorical
+    {
+        public List<float> counts { get; set; }
         public string name { get; set; }
-        public List<float> values { get; set; }
+        public List<object> values { get; set; }
     }
 
     public class Non_categorical
     {
-
-        public List<int> counts { get; set; }
+        public List<float> counts { get; set; }
         public string name { get; set; }
         public List<float> values { get; set; }
     }
