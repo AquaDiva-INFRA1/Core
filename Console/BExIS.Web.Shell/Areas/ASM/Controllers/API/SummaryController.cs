@@ -5,8 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using BEXIS.ASM.Services;
-
-//using System.Linq.Dynamic;
+using BExIS.Modules.Asm.UI.Models;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -71,7 +70,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         [HttpPost]
         [PostRoute("api/Summary/getSamplingSummary")]
         [GetRoute("api/Summary/getSamplingSummary")]
-        public async Task<JObject> getSamplingSummary()
+        public async Task<String> getSamplingSummary()
         {
             string res = this.Request.Content.ReadAsStringAsync().Result.ToString();
             Dictionary<string, string> dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(res);
@@ -82,7 +81,12 @@ namespace BExIS.Modules.ASM.UI.Controllers
             dict.TryGetValue("username", out username);
 
             JObject jsonObj_ = await _summary.get_sampling_summary(data, username);
-            return jsonObj_;
+            
+            Dictionary<string, Newtonsoft.Json.Linq.JToken> dict_res = JsonConvert.DeserializeObject<Dictionary<string, Newtonsoft.Json.Linq.JToken>>
+                (Newtonsoft.Json.JsonConvert.SerializeObject(jsonObj_));
+
+            //return JObject.Parse(JsonConvert.SerializeObject(dict_res, Newtonsoft.Json.Formatting.Indented));
+            return JsonConvert.SerializeObject(dict_res, Newtonsoft.Json.Formatting.Indented).Replace("\r\n","").Replace("\\","");
         }
     }
 

@@ -19,6 +19,10 @@
 				.Selected(true)
 				.Text("Old Analysis")
 				.LoadContentFrom("Specialdatasetanalysis", "DataSetSummary");
+			tabs.Add()
+				.Text("Categoral Analysis")
+				.LoadContentFrom("CategoralAnalysisAsync", "SummaryAnalysis", new { area = "asm", id = id })
+				.HtmlAttributes(new { id = "CategoralAnalysis" });		
 		}
 		else {
 
