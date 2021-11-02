@@ -160,7 +160,7 @@ Matched terms :
                     var clickedNodes = nodes.get(ids);
                     console.log('clicked nodes:', clickedNodes[0].label);
                     $.ajax({
-                        url: '/ASM/DataSetSummary/get_datasets_from_annot',
+                        url: '/ASM/SummaryAnalysis/get_datasets_from_annot',
                         type: 'POST',
                         data: {
                             'annot': clickedNodes[0].label

@@ -577,7 +577,6 @@
     </Compile>
     <Compile Include="Controllers\API\StatisticsController.cs" />
     <Compile Include="Controllers\API\SummaryController.cs" />
-    <Compile Include="Controllers\DataSetSummaryController.cs" />
     <Compile Include="Controllers\PortalStatisticsController.cs" />
     <Compile Include="Controllers\SummaryAnalysisController.cs" />
     <Compile Include="Helpers\AsmSeedDataGenerator.cs" />
@@ -900,8 +899,6 @@
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Views\DataSetSummary\showDataSetAnalysis.cshtml" />
-    <Content Include="Views\DataSetSummary\Specialdatasetanalysis.cshtml" />
     <Content Include="Views\PortalStatistics\DataAttributeStruct_list.cshtml" />
     <Content Include="Views\PortalStatistics\EditUnitModel_list.cshtml" />
     <Content Include="Views\PortalStatistics\index.cshtml" />
@@ -909,10 +906,9 @@
     <Content Include="Scripts\leaflet\leaflet-src.esm.js.map" />
     <Content Include="Scripts\leaflet\leaflet-src.js.map" />
     <Content Include="Scripts\leaflet\leaflet.js.map" />
-    <Content Include="Views\DataSetSummary\classificationAsync.cshtml" />
     <Content Include="Scripts\vis\vis.js.map" />
     <Content Include="Scripts\vis\vis.map" />
-    <Content Include="Views\DataSetSummary\Summary.cshtml" />
+    <Content Include="Views\SummaryAnalysis\Summary.cshtml" />
     <Content Include="Views\SummaryAnalysis\classify.cshtml" />
     <Content Include="Views\SummaryAnalysis\CategoralAnalysisAsync.cshtml" />
     <Content Include="Views\SummaryAnalysis\SpecialdatasetanalysisV1.cshtml" />

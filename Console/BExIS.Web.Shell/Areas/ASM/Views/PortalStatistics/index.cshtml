@@ -284,13 +284,16 @@
     }
 
     function refresh_stats() {
-		$.ajax({
-			url: '@Url.Action("reset", "PortalStatistics", "ASM")',
+        alert("Refresh in process");
+        $.ajax({
+
+			url: '@Url.Action("refresh_stats", "PortalStatistics", "ASM")',
             type: "GET",
             async: true,
 			success: function (e) {
-			    alert("Refresh in process");
-			}
+			    
+            },
+            async: false
 		})
     }
 </script>

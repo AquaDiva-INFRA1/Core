@@ -110,7 +110,7 @@
                 <label for="YearFIlter">Year</label>
                 <ul id="YearFIlter">
                     @{
-                        for (int x = 2013; x < 2020; x++)
+                        for (int x = 2013; x < 2022; x++)
                         {
                             <li>
                                 <input type="checkbox" name="YearFIlter_li_" id="YearFIlter_li_"
@@ -446,7 +446,7 @@
         document.getElementById("datasets_list").setAttribute("hidden", true);
 
         $.ajax({
-            url: '/ASM/DataSetSummary/get_datasets_from_pnk',
+            url: '/ASM/SummaryAnalysis/get_datasets_from_pnk',
             type: 'POST',
             data: {
                 'pnk': xx
@@ -828,7 +828,7 @@
         }).addTo(mymap);
 
         $.ajax({
-            url: '/ASM/DataSetSummary/parse_Json_location',
+            url: '/ASM/SummaryAnalysis/parse_Json_location',
             type: 'POST',
             data: { 'location_coordinates': "" },
             error: function (xhr) {
@@ -850,7 +850,7 @@
 
                         marker.on('mouseover', function (e) {
                             $.ajax({
-								url: '/ASM/DataSetSummary/parse_Json_location',
+                                url: '/ASM/SummaryAnalysis/parse_Json_location',
                                 type: 'POST',
                                 data: { 'location_coordinates': e.latlng.toString() },
                                 error: function (xhr) {

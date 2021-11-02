@@ -2,7 +2,6 @@
 using BExIS.Aam.Services;
 using BExIS.Dlm.Services.Data;
 using BExIS.Modules.Asm.UI.Models;
-using BExIS.Security.Services.Subjects;
 using F23.StringSimilarity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,7 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web;
 using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
@@ -33,8 +31,15 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
         public static Dictionary<string, List<string>> dict_ = new Dictionary<string, List<string>>();
 
-        #region classification
+        static String dataset_pnk = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "PNK dataset_links.csv");
+
         public ActionResult Summary(long id)
+        {
+            return PartialView("Summary", id);
+        }
+
+        #region classification
+        public ActionResult SemanticSummary(long id)
         {
             return PartialView("classify", id);
         }
@@ -201,6 +206,66 @@ namespace BExIS.Modules.Asm.UI.Controllers
                         }
                         ), JsonRequestBehavior.AllowGet);
         }
+
+        public ActionResult get_datasets_from_annot(string annot)
+        {
+            List<long> datasets = new List<long>();
+            List<string> URIs = new List<string>();
+            Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
+            Aam_UriManager aam_manag = new Aam_UriManager();
+            List<Aam_Dataset_column_annotation> annots = aam.get_all_dataset_column_annotation();
+            if (!annot.Contains("http"))
+            {
+                foreach (Aam_Uri uri in aam_manag.get_all_Aam_Uri().FindAll(x => x.label == annot))
+                    URIs.Add(uri.URI);
+            }
+            foreach (string uri in URIs)
+            {
+                foreach (Aam_Dataset_column_annotation aa in annots.FindAll(x => x.entity_id.URI == uri.Trim()))
+                {
+                    if (!datasets.Contains(aa.Dataset.Id))
+                        datasets.Add(aa.Dataset.Id);
+                }
+                foreach (Aam_Dataset_column_annotation aa in annots.FindAll(x => x.characteristic_id.URI == uri.Trim()))
+                {
+                    if (!datasets.Contains(aa.Dataset.Id))
+                        datasets.Add(aa.Dataset.Id);
+                }
+            }
+
+            ViewData["label"] = "No Label for URI";
+            if (!annot.Contains("http"))
+            {
+                ViewData["label"] = annot;
+            }
+            else
+            {
+                try
+                {
+                    if (annots.Find(x => x.entity_id.URI == annot.Trim()).entity_id.label != "")
+                        ViewData["label"] = annots.Find(x => x.entity_id.URI == annot.Trim()).entity_id.label;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+                try
+                {
+                    if (annots.Find(x => x.characteristic_id.URI == annot.Trim()).characteristic_id.label != "")
+                        ViewData["label"] = annots.Find(x => x.characteristic_id.URI == annot.Trim()).characteristic_id.label;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+            }
+
+            string sJSONResponse = JsonConvert.SerializeObject(datasets);
+            Dictionary<string, string> json = new Dictionary<string, string>();
+            json.Add((string)ViewData["label"], sJSONResponse);
+            return Json(JsonConvert.SerializeObject(json), JsonRequestBehavior.AllowGet);
+        }
+
         private double similarity(string a, string b)
         {
             List<double> similarities = new List<double>();
@@ -428,7 +493,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
             return ("");
         }
 
-        private String parse_Json_location(String location_coordinates)
+        public String parse_Json_location(String location_coordinates)
         {
             String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
             //"LatLng(51.080258, 10.42626)"
@@ -465,6 +530,42 @@ namespace BExIS.Modules.Asm.UI.Controllers
             }
             return "";
         }
+
+        public string get_datasets_from_pnk(string pnk)
+        {
+            List<string> datasets_ids = new List<string>();
+            //dataset_pnk
+            try
+            {
+                using (var reader = new StreamReader(dataset_pnk))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        List<string> tmp = line.Split(',').ToList<string>();
+                        if (tmp.Count > 1)
+                        {
+                            if (tmp[0].ToLower().Trim() == pnk.ToLower().Trim())
+                            {
+                                for (int i = 1; i < tmp.Count; i++)
+                                {
+                                    if (tmp[i] != "") datasets_ids.Add(tmp[i]);
+                                    i++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("The File could not be read:");
+                Console.WriteLine(e.Message);
+            }
+            string output = new JavaScriptSerializer().Serialize(datasets_ids);
+            return output;
+        }
+
         #endregion
     }
 }
