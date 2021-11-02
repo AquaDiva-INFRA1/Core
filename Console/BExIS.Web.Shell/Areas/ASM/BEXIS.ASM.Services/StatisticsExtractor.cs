@@ -103,7 +103,6 @@ namespace BExIS.ASM.Services
             string json_string = JsonConvert.SerializeObject(res);
             return JObject.Parse(json_string);
         }
-
         private async Task<Boolean> refresh_stats_async()
         {
             List<Dataset> datasets = new List<Dataset>();
@@ -302,7 +301,6 @@ namespace BExIS.ASM.Services
             return JObject.Parse(json);
 
         }
-
         public JObject allMetadata_extract()
         {
             Dictionary<long, JObject> result = new Dictionary<long, JObject>();
