@@ -175,9 +175,9 @@ namespace BExIS.Modules.Rpm.UI.Models
             this.Id = dataAttribute.Id;
             this.Name = dataAttribute.Name;
             this.Description = dataAttribute.Description;
-            this.Unit.Id = dataAttribute.Unit.Id;
-            this.Unit.Name = dataAttribute.Unit.Name;
-            this.Unit.Description = dataAttribute.Unit.Abbreviation;
+            this.Unit.Id = dataAttribute.Unit?.Id ?? 0 ;
+            this.Unit.Name = dataAttribute.Unit?.Name ?? "No unit related";
+            this.Unit.Description = dataAttribute.Unit?.Abbreviation ?? "No unit related";
             this.DataType = dataAttribute.DataType.Name;
             this.Dimension = dataAttribute.Unit.Dimension.Name;
 
