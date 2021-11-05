@@ -40,31 +40,7 @@
                             @Html.ValidationMessageFor(m => m.Identifier)
                         </td>
                     </tr>
-                    @if (Convert.ToBoolean(ConfigurationManager.AppSettings["OAC_Selectable_Data_Structure_Id"]))
-                    {
-                        <tr>
-                            <td style="width: 300px;">
-                                @Html.LabelFor(m => m.SelectedDataStructureId) <span class="bx bx-required" title="Required"></span>
-                            </td>
-                            <td>
-                                @(Html.Telerik().DropDownList()
-                                  .Name("SelectedDataStructureId")
-                                  .Placeholder("Select")
-                                  .HtmlAttributes(new
-                                          {
-                                      title = "Select the " + Html.DisplayNameFor(m => m.SelectedDataStructureId),
-                                      @class = "bx-dropdown"
-                                          })
-                                  .SelectedIndex(0)
-                                  .BindTo(new SelectList(Model.DataStructureViewList, "Id", "Title", Model.SelectedDataStructureId))
-                            )
-                            </td>
-                            <td>
-                                @Html.ValidationMessageFor(m => m.SelectedDataStructureId)
-                            </td>
-
-                        </tr>
-                    }
+                    
                     <tr>
                         <td style="width: 300px;">
                             @Html.LabelFor(m => m.SelectedDataSourceId) <span class="bx bx-required" title="Required"></span>
@@ -200,10 +176,10 @@
             }
 
             function onChangeSource(e) {
-
+                /*
                 // get the selected source
                 var selectedSource = e.value || -1
-
+                
                 // grap the mapping possibilities for it
                 $.post("QueryAvailableMappings", { SelectedDataSourceId: selectedSource }, function (data) {
 
@@ -224,6 +200,7 @@
                         }
                     })
                 });
+                */
 
             }
 

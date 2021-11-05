@@ -134,15 +134,21 @@ namespace BExIS.OAC.Services
                 var json_array_data = new List<string[]>();
                 temp_file_path = temp_file_to_save_json_as_csv + ds.Id + ".csv";
 
-                string data_csv = new AccessionMetadataV2().Initialise_header(temp_file_path);
-                json_array_data.Add(data_csv.Split(','));
+                //string data_csv = new AccessionMetadataV2().Initialise_header(temp_file_path);
+                string data_csv_ = new AccessionMetadataV2().Initialise_header(temp_file_path, false);
+
+                //json_array_data.Add(data_csv.Split(','));
+                json_array_data.Add(data_csv_.Split(','));
 
                 foreach (KeyValuePair<string, string> kvp in xx)
                 {
                     string accessionValue = kvp.Value.Replace("\r\n", "");
                     string json_string_ = JsonConvert.SerializeObject(accessionValue);
                     AccessionMetadataV2 EBIresponseModel = JsonConvert.DeserializeObject<AccessionMetadataV2>(accessionValue);
-                    data_csv = data_csv + EBIresponseModel.convertToCSV(EBIresponseModel, temp_file_path);
+
+                    //data_csv = data_csv + EBIresponseModel.convertToCSV(EBIresponseModel, temp_file_path);
+                    data_csv_ = data_csv_ + EBIresponseModel.convertToCSV(EBIresponseModel, temp_file_path, false);
+
                     json_array_data.Add(EBIresponseModel.convertToCSV(EBIresponseModel, "").Split(','));
                 }
                 //json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(json_array_data);
@@ -164,7 +170,7 @@ namespace BExIS.OAC.Services
                 }
                 int[] areaHeaderValues = JsonConvert.DeserializeObject<int[]>(selectedHeaderAreaJsonArray);
                 Orientation orientation = Orientation.columnwise;
-                String worksheetUri = temp_file_path;
+                //String worksheetUri = temp_file_path;
                 int batchSize = (new Object()).GetUnitOfWork().PersistenceManager.PreferredPushSize;
                 int batchnr = 1;
 
@@ -211,16 +217,16 @@ namespace BExIS.OAC.Services
 
 
                         AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload(sds, afri);
-                        FileStream Stream = reader_.Open(temp_file_path);
-                        rows = reader_.ReadFile(Stream, System.IO.Path.GetFileName(temp_file_path), Json_table_, afri, sds, ds.Id, packageSize, fri);
-                        Stream.Close();
+                        //FileStream Stream = reader_.Open(temp_file_path);
+                        rows = reader_.ReadFile(null , System.IO.Path.GetFileName(temp_file_path), Json_table_, afri, sds, ds.Id, packageSize, fri);
+                        //Stream.Close();
                         if (rows != null)
                         {
                             dm.EditDatasetVersion(workingCopy, rows.ToList(), null, null);
                         }
 
                         //Close the Stream so the next ExcelReader can open it again
-                        Stream.Close();
+                        //Stream.Close();
 
                         //Debug information
                         int lines = (areaDataValues[2] + 1) - (areaDataValues[0] + 1);

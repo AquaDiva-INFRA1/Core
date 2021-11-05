@@ -49,6 +49,7 @@ namespace BExIS.OAC.Services
             this.DatasetId = datasetId;
 
             // Check params
+            /*
             if (this.FileStream == null)
             {
                 this.ErrorMessages.Add(new Error(ErrorType.Other, "File not exist"));
@@ -57,6 +58,7 @@ namespace BExIS.OAC.Services
             {
                 this.ErrorMessages.Add(new Error(ErrorType.Other, "File is not readable"));
             }
+            */
             if (this.Info.Variables <= 0)
             {
                 this.ErrorMessages.Add(new Error(ErrorType.Other, "Startrow of Variable can´t be 0"));

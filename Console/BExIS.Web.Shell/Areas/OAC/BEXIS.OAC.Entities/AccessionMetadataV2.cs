@@ -227,7 +227,7 @@ namespace BEXIS.OAC.Entities
         [JsonProperty("SAMPLE_ATTRIBUTES")]
         public readonly SAMPLEATTRIBUTES SAMPLEATTRIBUTES;
 
-        public string convertToCSV(AccessionMetadataV2 model, string tempfile)
+        public string convertToCSV(AccessionMetadataV2 model, string tempfile, bool save_output = true)
         {
 
             string x = "";
@@ -249,7 +249,8 @@ namespace BEXIS.OAC.Entities
                 LoggerFactory.GetFileLogger().LogCustom(e.Message);
                 LoggerFactory.GetFileLogger().LogCustom(e.StackTrace);
             }
-            
+            if (!save_output) return x;
+
             if (tempfile != "")
             {
                 if (!File.Exists(tempfile))
@@ -267,13 +268,15 @@ namespace BEXIS.OAC.Entities
             return x;
         }
 
-        public string Initialise_header(string tempfile)
+        public string Initialise_header(string tempfile, bool save_output = false)
         {
 
             string data_csv = "Accession,Alias,Center Name, Primary ID (IDENTIFIERS),Namespace (IDENTIFIERS),Text (IDENTIFIERS)," +
                 "Title,Taxon ID (SAMPLE_NAME),Scientific Name (SAMPLE_NAME),Description,DB (XREF_LINK)," +
                 "cData (XREF_LINK),ID (XREF_LINK),Tag(SAMPLE_ATTRIBUTE)," +
                 "Value(SAMPLE_ATTRIBUTE),Units(SAMPLE_ATTRIBUTE)";
+            
+            if (!save_output) return data_csv;
 
             if (tempfile != "")
             {
