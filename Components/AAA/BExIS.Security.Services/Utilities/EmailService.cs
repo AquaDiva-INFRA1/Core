@@ -22,27 +22,34 @@ namespace BExIS.Security.Services.Utilities
 
         public void Send(MimeMessage message)
         {
-            using (var client = new SmtpClient())
-            {
-                // 2021-03-16 by Sven
-                // Because of trouble for specific server certificates, the system rejects handshakes.
-                client.CheckCertificateRevocation = bool.Parse(ConfigurationManager.AppSettings["Email_Host_CertificateRevocation"]);
-
-                // @2020-01-18 by Sven
-                // With this line, the service should accept every certificate.
-                client.ServerCertificateValidationCallback = (s, c, h, e) => { return true; };
-
-                client.Connect(ConfigurationManager.AppSettings["Email_Host_Name"], int.Parse(ConfigurationManager.AppSettings["Email_Host_Port"]), (SecureSocketOptions)int.Parse(ConfigurationManager.AppSettings["Email_Host_SecureSocketOptions"]));
-                
-                if(!bool.Parse(ConfigurationManager.AppSettings["Email_Host_Anonymous"]))
+            try {
+                using (var client = new SmtpClient())
                 {
-                    client.Authenticate(ConfigurationManager.AppSettings["Email_Account_Name"], ConfigurationManager.AppSettings["Email_Account_Password"]);
+                    // 2021-03-16 by Sven
+                    // Because of trouble for specific server certificates, the system rejects handshakes.
+                    client.CheckCertificateRevocation = bool.Parse(ConfigurationManager.AppSettings["Email_Host_CertificateRevocation"]);
+
+                    // @2020-01-18 by Sven
+                    // With this line, the service should accept every certificate.
+                    client.ServerCertificateValidationCallback = (s, c, h, e) => { return true; };
+
+                    client.Connect(ConfigurationManager.AppSettings["Email_Host_Name"], int.Parse(ConfigurationManager.AppSettings["Email_Host_Port"]), (SecureSocketOptions)int.Parse(ConfigurationManager.AppSettings["Email_Host_SecureSocketOptions"]));
+
+                    if (!bool.Parse(ConfigurationManager.AppSettings["Email_Host_Anonymous"]))
+                    {
+                        client.Authenticate(ConfigurationManager.AppSettings["Email_Account_Name"], ConfigurationManager.AppSettings["Email_Account_Password"]);
+                    }
+
+                    client.Send(message);
+
+                    client.Disconnect(true);
                 }
-
-                client.Send(message);
-
-                client.Disconnect(true);
             }
+            catch (Exception exception)
+            {
+                //throw exception;
+            }
+            
         }
 
         public void Send(string subject, string body, List<string> destinations, List<string> ccs = null, List<string> bccs = null, List<string> replyTos = null)
