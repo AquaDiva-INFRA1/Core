@@ -3,9 +3,9 @@ variables:
   MSI_RELEASE_FOLDER: '\home\administrator\CI-CD_Output_Test\Setup\bin\Release'
   TEST_FOLDER: '\home\administrator\CI-CD_Output_Test\Tests\bin\Release'
   DEPLOY_FOLDER: '\home\administrator\CI-CD_Output_Test\Projects\YourApp\Builds'
-  NUGET_PATH: '/usr/bin/nuget'
-  MSBUILD_PATH: '/usr/bin/msbuild'
-  NUNIT_PATH: '/usr/bin/nunit-console'
+  NUGET_PATH: '\usr\bin\nuget'
+  MSBUILD_PATH: '\usr\bin\msbuild'
+  NUNIT_PATH: '\usr\bin\nunit-console'
 
 stages:
   - build
