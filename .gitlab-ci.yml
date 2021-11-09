@@ -1,5 +1,0 @@
-demo_job_1: 
-  script: 
-    - echo hello world
-  tags: 
-    - runner_Demo_1
