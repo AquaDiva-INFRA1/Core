@@ -14,6 +14,7 @@ using VDS.RDF.Query;
 using Npgsql;
 using System.Configuration;
 using System.Diagnostics;
+using Vaiona.Logging;
 
 namespace BExIS.Aam.Services
 {
@@ -496,8 +497,10 @@ namespace BExIS.Aam.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.Message);
-                    errors.Add(ex.Message);
+                    Debug.WriteLine(ex.Message + " - " + cmd);
+                    errors.Add(cmd);
+                    LoggerFactory.GetFileLogger().LogCustom(ex.Message + " - " + cmd);
+                    LoggerFactory.GetFileLogger().LogCustom(ex.Message + " - " + cmd);
                 }
                 
             }
@@ -516,8 +519,10 @@ namespace BExIS.Aam.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.Message);
-                    errors.Add(ex.Message);
+                    Debug.WriteLine(ex.Message + " - " + cmd);
+                    errors.Add(cmd);
+                    LoggerFactory.GetFileLogger().LogCustom(ex.Message + " - " + cmd);
+                    LoggerFactory.GetFileLogger().LogCustom(ex.Message + " - " + cmd);
                 }
             }
             MyCnx.Close();
