@@ -399,15 +399,23 @@
                         ordered[key] = jsonObject[key];
                     });
                     console.log(ordered);
-                    //console.log(ordered[Object.keys(ordered)[row]]);
-                    header = ordered[Object.keys(ordered)[Object.keys(ordered).length - 1]]
-                    //xx = ordered[Object.keys(ordered)[row-1]];
-                    bodz = ordered[Object.keys(ordered)[0]];
-                    //console.log(bodz);
-                    //console.log(xx);
                     samples = "";
+                    for (var key of Object.keys(ordered)) {
+                        console.log(key + " -> " + ordered[key]);
+                        samples = samples + " <button onclick=\"show_dataset_pnk(\'" + key + "\') ; \" type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\"  data-target=\"#exampleModalLong\" > "
+                            + key + " <span class=\"badge\">" + ordered[key] + "</span></button> ";
+                    }
+                    /*
+                    header = ordered[Object.keys(ordered)[Object.keys(ordered).length - 1]]
+                    xx = ordered[Object.keys(ordered)[row-1]];
+                    bodz = ordered[Object.keys(ordered)[0]];
+                    console.log(bodz);
+                    console.log(xx);
 
                     for (var i = 0; i < bodz.length; i++) {
+                        samples = samples + " <button onclick=\"show_dataset_pnk(\'" + header[i] + "\') ; \" type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\"  data-target=\"#exampleModalLong\" > "
+                            + bodz[i] + " <span class=\"badge\">" + header[i] + "</span></button> ";
+                        
                         if (bodz[i] != "0") {
                             //console.log(xx[i]);
                             samples = samples + " <button onclick=\"show_dataset_pnk(\'" + header[i] + "\') ; \" type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\"  data-target=\"#exampleModalLong\" > "
@@ -415,8 +423,10 @@
                             //samples = samples + header[i] + " - ";
 
                         }
+                        
                     }
                     samples = samples.substring(0, samples.length - 2);
+                    */
                     //$("#pnks_list_id").html(samples);
                     var popuptext = document.getElementById("pnks_list_id");
                     //console.log(popuptext.innerHTML);
