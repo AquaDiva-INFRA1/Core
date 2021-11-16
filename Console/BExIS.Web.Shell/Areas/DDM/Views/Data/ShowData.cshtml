@@ -151,11 +151,14 @@
                                           //ToDo Recator Modularity -> load metadata from from dcm
 
                                           // Allways show Metadata and data structure tab
+                                          if (!(show_tabs["show_tabs_deactivated"] == "false" && @Model.ViewAccess == false))
+                                          {
+                                              tabs.Add()
+                                            .Text("Metadata")
+                                            .LoadContentFrom("ShowMetadata", "Data", new { area = "ddm", entityId = @Model.Id, title = @Model.Title, metadatastructureId = @Model.MetadataStructureId, datastructureId = @Model.DataStructureId, researchplanId = @Model.ResearchPlanId, sessionKeyForMetadata = "ShowDataMetadata", latest = Model.LatestVersion, isValid = ViewBag.isValid })
+                                            .HtmlAttributes(new { id = "metadata" });
+                                          }
 
-                                          tabs.Add()
-                                             .Text("Metadata")
-                                             .LoadContentFrom("ShowMetadata", "Data", new { area = "ddm", entityId = @Model.Id, title = @Model.Title, metadatastructureId = @Model.MetadataStructureId, datastructureId = @Model.DataStructureId, researchplanId = @Model.ResearchPlanId, sessionKeyForMetadata = "ShowDataMetadata", latest = Model.LatestVersion, isValid = ViewBag.isValid })
-                                             .HtmlAttributes(new { id = "metadata" });
 
                                           if (show_tabs["show_primary_data_tab"] == "true" && !(show_tabs["show_tabs_deactivated"] == "false" && @Model.ViewAccess == false))
                                           {
@@ -174,13 +177,14 @@
                                                   .LoadContentFrom("ShowPreviewDataStructure", "Data", new { area = "ddm", datasetID = @Model.Id })
                                                   .HtmlAttributes(new { id = "datastructure" })
                                                   .Enabled(false);
-
+                                          }
+                                          if (show_tabs["show_primary_data_tab"] == "true" && !(show_tabs["show_tabs_deactivated"] == "false" && @Model.ViewAccess == false))
+                                          {
                                               tabs.Add()
                                               .Text("Summary")
                                               .LoadContentFrom("Summary", "SummaryAnalysis", new { area = "asm", id = @Model.Id })
                                               .HtmlAttributes(new { id = "Summary" })
                                               .Enabled(false);
-
 
                                           }
                                           if (show_tabs["show_link_tab"] == "true")
@@ -232,7 +236,10 @@
                     @Html.ValidationSummary(true);
                 }
             }
-            <script type="text/javascript">
+
+
+
+<script type="text/javascript">
 
 	function grid_subjects_onDataBound() {
 		addTooltips();
