@@ -438,7 +438,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                 XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
                                 for (int i = 0; i < elemList_.Count; i++)
                                 {
-                                    concatenated_values = concatenated_values + " " + elemList_[i].InnerText;
+                                    concatenated_values = concatenated_values + " " + elemList_[i].InnerText.Trim();
                                     list.Add(elemList_[i].InnerText);
                                 }
                                 list.Add(Environment.NewLine + Environment.NewLine);
@@ -455,6 +455,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         {
                             if (list.Count > 0)
                             {
+                                list.Sort();
                                 int idx = list.IndexOf(Environment.NewLine + Environment.NewLine);
                                 int k = 0;
                                 while (k < idx)
