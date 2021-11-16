@@ -21,6 +21,7 @@ using System.Configuration;
 using BExIS.Modules.Ddm.UI.Helpers;
 using BExIS.Aam.Services;
 using BExIS.Aam.Entities.Mapping;
+using System.Web.Configuration;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -35,12 +36,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         static List<HeaderItem> headerItems;
         static HeaderItem idHeader;
-        
-        static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "mappings.txt");
-        static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
+
+        static String ad_ontology_merged_owl = WebConfigurationManager.AppSettings["ad-ontology-merged.owl"];
+        String ADOntologyPath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", ad_ontology_merged_owl);
+
         static String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
-        static String WellsImagePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "Wells.png");
-        static String DebugFilePath = System.IO.Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Debug.txt");
 
         // start page - wellcome page for the interactive search 
         // checks if the request is coming from a refresh page or from another feature controller to reset the data table or keep the old search
@@ -66,8 +66,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
 
-            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
-            ontologies.Add(new OntologyNamePair(path, "ADOntology"));
+            ontologies.Add(new OntologyNamePair(ADOntologyPath, "ADOntology"));
 
             String results_ = "";
             //Just for testing purposes
@@ -366,8 +365,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
 
-            String path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
-            ontologies.Add(new OntologyNamePair(path, "ADOntology"));
+            ontologies.Add(new OntologyNamePair(ADOntologyPath, "ADOntology"));
 
             String results_ = "";
             //Just for testing purposes

@@ -43,13 +43,18 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         static ShowSemanticResultModel model;
         static List<HeaderItem> headerItems;
+
         static String semanticSearchURL = WebConfigurationManager.AppSettings["semanticSearchURL"];//"http://localhost:2607/bexis-0.1/search/";
+        static String ad_ontology_merged_obda = WebConfigurationManager.AppSettings["ad-ontology-merged.obda"];
+        static String ad_ontology_merged_owl = WebConfigurationManager.AppSettings["ad-ontology-merged.owl"];
+        String ADOntologyPath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", ad_ontology_merged_owl);
+
         static String semedicoSearchURL = WebConfigurationManager.AppSettings["semedicoSearchURL"];//"http://aquadiva-semeddev.inf-bb.uni-jena.de:8080/";
         static String semedicoSearchURLAD = WebConfigurationManager.AppSettings["semedicoSearchURLAD"];//"http://aquadiva-semeddev.inf-bb.uni-jena.de:8080/";
         static HeaderItem idHeader;
 
         static Dictionary<String, List<OntologyMapping>> mappingDic;
-        String ADOntologyPath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "Ontologies", "ad-ontology-merged.owl");
+        
         static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "mappings.txt");
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
         static String extendedautocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "extendedAutocompletion.txt");
