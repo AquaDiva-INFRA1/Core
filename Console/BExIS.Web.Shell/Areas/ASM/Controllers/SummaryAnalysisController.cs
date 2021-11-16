@@ -32,6 +32,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         public static Dictionary<string, List<string>> dict_ = new Dictionary<string, List<string>>();
 
         static String dataset_pnk = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "PNK dataset_links.csv");
+        static String well_coordinates = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
 
         public ActionResult Summary(long id)
         {
@@ -403,12 +404,12 @@ namespace BExIS.Modules.Asm.UI.Controllers
             String Season_dict = "", string column = "-1", string row = "-1", string flag = "false")
         {
             string row_ = "";
-            dict_ = dict_.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+            //dict_ = dict_.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
             if (row != "-1")
-                row_ = dict_.ElementAt(dict_.Count - Int32.Parse(row) - 1).Key;
+                row_ = dict_.ElementAt(Int32.Parse(row)).Key;
             string col = "";
             if (column != "-1")
-                col = dict_.ElementAt(dict_.Count - 1).Value[Int32.Parse(column) - 1];
+                col = dict_.ElementAt(0).Value[Int32.Parse(column) - 1];
             string param = "?year=" + year + "&filtersize=" + filtersize + "&GroupName=" + GroupName + "&Season_dict=" + Season_dict + "&column=" + col + "&row=" + row_;
             if (welllocation != "")
                 param = param + "&welllocation=" + parse_Json_location(welllocation);
@@ -434,15 +435,12 @@ namespace BExIS.Modules.Asm.UI.Controllers
             }
 
             SpecialDataset_analysis keys = new SpecialDataset_analysis(JObject.Parse((string)JToken.Parse(result)));
-            if ((keys.key2.Count > 10) || (keys.key1.Count > 10))
+            if ((keys.key2.Count > 2 ) || (keys.key1.Count > 2 ))
                 try
                 {
-                    Dictionary<string, List<string>> backup_dict_ = new Dictionary<string, List<string>>();
-                    if (flag == "true")
-                        backup_dict_ = dict_;
-                    dict_ = new Dictionary<string, List<string>>();
                     if (column == "-1" )
-                    { 
+                    {
+                        dict_ = new Dictionary<string, List<string>>();
                         foreach (var element in keys.key1)
                         {
                             var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
@@ -457,31 +455,29 @@ namespace BExIS.Modules.Asm.UI.Controllers
                             }
                         }
                         dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
+                        dict_.Remove("id");
+
                         string ss = JsonConvert.SerializeObject(dict_);
-                        if (flag == "true")
-                            dict_ = backup_dict_;
                         return ss;
                     }
                     else 
                     {
+                        Dictionary<string, string> dict_PNKs = new Dictionary<string, string>();
                         foreach (var element in keys.key2)
                         {
-                            var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
-                            foreach (KeyValuePair<string, string> kvp in dict)
+                            //var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
+                            JObject obj = element.Value;
+                            foreach (JToken kvp in obj.Children())
                             {
-                                if (!dict_.ContainsKey(kvp.Key))
-                                    dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
-                                List<string> value = new List<string>();
-                                dict_.TryGetValue(kvp.Key, out value);
-                                value.Add(kvp.Value);
-                                dict_[kvp.Key] = value;
+                                if (!dict_PNKs.ContainsKey(kvp.ToString()))
+                                {
+                                    dict_PNKs.Add(((Newtonsoft.Json.Linq.JProperty)kvp).Name, ((Newtonsoft.Json.Linq.JProperty)kvp).Value.ToString());
+                                }
                             }
                         }
-                        dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
-                        dict_.Remove("id");
-                        string ss = JsonConvert.SerializeObject(dict_);
-                        if (flag == "true")
-                            dict_ = backup_dict_;
+                        //dict_PNKs = dict_PNKs.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
+                        dict_PNKs.Remove("id");
+                        string ss = JsonConvert.SerializeObject(dict_PNKs);
                         return ss;
                     }
                 }
@@ -495,7 +491,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
 
         public String parse_Json_location(String location_coordinates)
         {
-            String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "D03_well coordinates_20180525.json");
+            String Gps_coordinates_for_wells = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", well_coordinates);
             //"LatLng(51.080258, 10.42626)"
             using (StreamReader r = new StreamReader(Gps_coordinates_for_wells))
             {

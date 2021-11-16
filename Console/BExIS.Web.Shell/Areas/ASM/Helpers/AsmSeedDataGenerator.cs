@@ -45,7 +45,7 @@ namespace BExIS.Modules.Asm.UI.Helpers
                 if (!operationManager.Exists("ASM", "PortalStatistics", "*")) 
                     operationManager.Create("ASM", "PortalStatistics", "*", portalstatistics);
 
-
+                /*
                 Feature summary = features.FirstOrDefault(f =>
                     f.Name.Equals("Dataset Summary") &&
                     f.Parent != null &&
@@ -53,7 +53,7 @@ namespace BExIS.Modules.Asm.UI.Helpers
                 if (summary == null) summary = featureManager.Create("Dataset Summary", "Dataset Summary", ASM);
                 if (!operationManager.Exists("ASM", "DataSetSummary", "*")) 
                     operationManager.Create("ASM", "DataSetSummary", "*", summary);
-
+                
 
                 Feature classification = features.FirstOrDefault(f =>
                     f.Name.Equals("Dataset Classification") &&
@@ -62,6 +62,7 @@ namespace BExIS.Modules.Asm.UI.Helpers
                 if (classification == null) classification = featureManager.Create("Dataset Classification", "Dataset Classification", ASM);
                 if (!operationManager.Exists("ASM", "DataSetSummary", "classification"))
                     operationManager.Create("ASM", "DataSetSummary", "classification", classification);
+                */
 
                 ////////// new for new summary controller 
                 Feature SummaryAnalysis = features.FirstOrDefault(f =>
