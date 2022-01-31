@@ -23,6 +23,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Vaiona.Logging;
 using Vaiona.Persistence.Api;
 
 /// <summary>
@@ -390,6 +391,44 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             reIndex = false;
         }
 
+
+        private List<string> Extract_nodes(ref string concatenated_values, string metadataElementName, XmlDocument metadataDoc)
+        {
+            //check if the element name is mapped to a group of nodes depending on the datastructure
+            List<string> metadataElementName_group = metadataElementName.Split(';').ToList();
+            //concat all the values in one single variable to be written by the indexer
+            //each metadataElementName can provide more than one value for that node in the XML file
+            //the idea is to concat the val 1 of the xpath 1 with the val 1 of the xpath 2 and so on...
+            concatenated_values = "";
+            List<string> list = new List<string>();
+            foreach (string s in metadataElementName_group)
+            {
+                if (s.Trim() != "")
+                {
+                    try
+                    {
+                        XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
+                        for (int i = 0; i < elemList_.Count; i++)
+                        {
+                            if (elemList_[i].InnerText.Trim() != "")
+                            {
+                                concatenated_values = concatenated_values + " " + elemList_[i].InnerText.Trim();
+                                list.Add(elemList_[i].InnerText);
+                            }
+                            
+                        }
+                        //list.Add(Environment.NewLine + Environment.NewLine);
+                    }
+                    catch (Exception e)
+                    {
+                        LoggerFactory.GetFileLogger().LogCustom(e.Message);
+                        LoggerFactory.GetFileLogger().LogCustom(e.StackTrace);
+                    }
+                }
+            }
+            return list;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -403,7 +442,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             string docId = id.ToString();//metadataDoc.GetElementsByTagName("bgc:id")[0].InnerText;
 
             var dataset = new Document();
-            List<XmlNode> facetNodes = facetXmlNodeList;
+            
             dataset.Add(new Field("doc_id", docId, Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.NOT_ANALYZED));
             ///
             /// Add a field to indicte whether the dataset is public, this will be used for the public datasets' search page.
@@ -413,74 +452,31 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
             dataset.Add(new Field("gen_entity_name", xmlDatasetHelper.GetEntityName(id), Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.NOT_ANALYZED));
 
-
+            List<XmlNode> facetNodes = facetXmlNodeList;
             foreach (XmlNode facet in facetNodes)
             {
                 String multivalued = facet.Attributes.GetNamedItem("multivalued").Value;
                 string[] metadataElementNames = facet.Attributes.GetNamedItem("metadata_name").Value.Split(',');
                 String lucene_name = facet.Attributes.GetNamedItem("lucene_name").Value;
-
+                
                 foreach (string metadataElementName in metadataElementNames)
                 {
-                    //check if the element name is mapped to a group of nodes depending on the datastructure
-                    List<string> metadataElementName_group = metadataElementName.Split(';').ToList();
-                    //concat all the values in one single variable to be written by the indexer
-                    //each metadataElementName can provide more than one value for that node in the XML file
-                    //the idea is to concat the val 1 of the xpath 1 with the val 1 of the xpath 2 and so on...
                     string concatenated_values = "";
-                    List<string> list = new List<string>();
-                    foreach (string s in metadataElementName_group)
+                    List<string> list  = Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc);
+                    list.Sort();
+                    string res = "";
+                    int i = 0;
+                    while (i < list.Count())
                     {
-                        if (s != "")
-                        {
-                            try
-                            {
-                                XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
-                                for (int i = 0; i < elemList_.Count; i++)
-                                {
-                                    concatenated_values = concatenated_values + " " + elemList_[i].InnerText.Trim();
-                                    list.Add(elemList_[i].InnerText);
-                                }
-                                list.Add(Environment.NewLine + Environment.NewLine);
-                            }
-                            catch (Exception exc)
-                            {
-                                throw;
-                            }
-                        }
-                    }
-                    try
-                    {
-                        if (!concatenated_values.Trim().Equals(""))
-                        {
-                            if (list.Count > 0)
-                            {
-                                list.Sort();
-                                int idx = list.IndexOf(Environment.NewLine + Environment.NewLine);
-                                int k = 0;
-                                while (k < idx)
-                                {
-                                    string res = "";
-                                    int i = k;
-                                    while (i < list.Count())
-                                    {
-                                        res = res + " " + list[i];
-                                        i = i + idx + 1;
-                                    }
-                                    k++;
-                                    dataset.Add(new Field("facet_" + lucene_name, res,
-                                        Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
-                                    dataset.Add(new Field("ng_all", res,
-                                        Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
-                                    writeAutoCompleteIndex(docId, lucene_name, res);
-                                    writeAutoCompleteIndex(docId, "ng_all", res);
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception exc)
-                    {
-                        throw;
+                        res = list[i];
+                        i = i + 1;
+
+                        dataset.Add(new Field("facet_" + lucene_name, res,
+                            Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                        dataset.Add(new Field("ng_all", res,
+                            Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
+                        writeAutoCompleteIndex(docId, lucene_name, res);
+                        writeAutoCompleteIndex(docId, "ng_all", res);
                     }
                 }
             }
@@ -494,17 +490,8 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
                 foreach (string metadataElementName in metadataElementNames)
                 {
-                    //check if the element name is mapped to a group of nodes depending on the datastructure
-                    List<string> metadataElementName_group = metadataElementName.Split(';').ToList();
-                    //concat all the values in one single variable to be written by the indexer
-                    //each metadataElementName can provide more than one value for that node in the XML file
-                    //the idea is to concat the val 1 of the xpath 1 with the val 1 of the xpath 2 and so on...
                     string concatenated_values = "";
-                    foreach (string s in metadataElementName_group)
-                    {
-                        XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
-                        concatenated_values = concatenated_values + " " + elemList_[0].InnerText;
-                    }
+                    List<string> list  = Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc);
                     if (concatenated_values.Trim() != "")
                     {
                         String primitiveType = property.Attributes.GetNamedItem("primitive_type").Value;
@@ -567,8 +554,9 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     }
                 }
             }
+            
+            
             List<XmlNode> categoryNodes = categoryXmlNodeList;
-
             // add categories to index
             foreach (XmlNode category in categoryNodes)
             {
@@ -605,40 +593,24 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         //each metadataElementName can provide more than one value for that node in the XML file
                         //the idea is to concat the val 1 of the xpath 1 with the val 1 of the xpath 2 and so on...
                         string concatenated_values = "";
-                        foreach (string s in metadataElementName_group)
+                        List<string> list = Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc);
+                        list.Sort();
+                        string res = "";
+                        int i = 0;
+                        while (i < list.Count())
                         {
-                            try
-                            {
-                                XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
-                                for (int i = 0; i < elemList_.Count; i++)
-                                {
-                                    concatenated_values = concatenated_values + " " + elemList_[i].InnerText;
-                                }
+                            res = list[i];
+                            i = i + 1;
 
-                            }
-                            catch (Exception exc)
-                            {
-                                throw;
-                            }
-                        }
-                        try
-                        {
-                            if (!concatenated_values.Trim().Equals(""))
-                            {
-                                Field a = new Field("category_" + lucene_name, concatenated_values, toStore, toAnalyse);
-                                a.Boost = boosting;
-                                dataset.Add(a);
-                                dataset.Add(new Field("ng_" + lucene_name, concatenated_values,
-                                    Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.ANALYZED));
-                                dataset.Add(new Field("ng_all", concatenated_values,
-                                    Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.ANALYZED));
-                                writeAutoCompleteIndex(docId, lucene_name, concatenated_values);
-                                writeAutoCompleteIndex(docId, "ng_all", concatenated_values);
-                            }
-                        }
-                        catch (Exception exc)
-                        {
-                            throw;
+                            Field a = new Field("category_" + lucene_name, res, toStore, toAnalyse);
+                            a.Boost = boosting;
+                            dataset.Add(a);
+                            dataset.Add(new Field("ng_" + lucene_name, res,
+                                Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.ANALYZED));
+                            dataset.Add(new Field("ng_all", res,
+                                Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.ANALYZED));
+                            writeAutoCompleteIndex(docId, lucene_name, res);
+                            writeAutoCompleteIndex(docId, "ng_all", res);
                         }
                     }
 
@@ -687,38 +659,22 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     //each metadataElementName can provide more than one value for that node in the XML file
                     //the idea is to concat the val 1 of the xpath 1 with the val 1 of the xpath 2 and so on...
                     string concatenated_values = "";
-                    foreach (string s in metadataElementName_group)
+                    List<string> list = Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc);
+                    string res = "";
+                    int i = 0;
+                    while (i < list.Count())
                     {
-                        try
-                        {
-                            XmlNodeList elemList_ = metadataDoc.SelectNodes(s);
-                            for (int i = 0; i < elemList_.Count; i++)
-                            {
-                                concatenated_values = concatenated_values + " " + elemList_[i].InnerText;
-                            }
+                        res = res + " " + list[i];
+                        i = i  + 1;
 
-                        }
-                        catch (Exception exc)
-                        {
-                            throw;
-                        }
+                        Field a = new Field(lucene_name, res, toStore, toAnalyse);
+                        a.Boost = boosting;
+                        dataset.Add(a);
+                        dataset.Add(new Field("ng_all", res, Lucene.Net.Documents.Field.Store.NO, Field.Index.ANALYZED));
+                        writeAutoCompleteIndex(docId, lucene_name, res);
+                        writeAutoCompleteIndex(docId, "ng_all", res);
                     }
-                    try
-                    {
-                        if (!concatenated_values.Trim().Equals(""))
-                        {
-                            Field a = new Field(lucene_name, concatenated_values, toStore, toAnalyse);
-                            a.Boost = boosting;
-                            dataset.Add(a);
-                            dataset.Add(new Field("ng_all", concatenated_values, Lucene.Net.Documents.Field.Store.NO, Field.Index.ANALYZED));
-                            writeAutoCompleteIndex(docId, lucene_name, concatenated_values);
-                            writeAutoCompleteIndex(docId, "ng_all", concatenated_values);
-                        }
-                    }
-                    catch (Exception exc)
-                    {
-                        throw ;
-                    }
+                    
                 }
 
             }
