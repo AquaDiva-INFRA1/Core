@@ -136,6 +136,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Libraries\Vaiona\Vaiona.Entities.dll</HintPath>
     </Reference>
+    <Reference Include="Vaiona.Logging, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Vaiona\Vaiona.Logging.dll</HintPath>
+    </Reference>
     <Reference Include="Vaiona.Persistence.Api, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Libraries\Vaiona\Vaiona.Persistence.Api.dll</HintPath>
@@ -261,6 +265,15 @@
     <Error Condition="!Exists('..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props'))" />
     <Error Condition="!Exists('..\..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props'))" />
   </Target>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>C:\Windows\System32\xcopy "$(SolutionDir)Console\BExIS.Web.Shell\Areas\DDM\bin\BExIS.Ddm.Providers.LuceneProvider.dll" "$(SolutionDir)Console\BExIS.Web.Shell\bin\BExIS.Ddm.Providers.LuceneProvider.dll" /C /Y /I
+C:\Windows\System32\xcopy "$(SolutionDir)Console\BExIS.Web.Shell\Areas\DDM\bin\BExIS.Ddm.Providers.LuceneProvider.dll.config" "$(SolutionDir)Console\BExIS.Web.Shell\bin\BExIS.Ddm.Providers.LuceneProvider.dll.config" /C /Y /I
+C:\Windows\System32\xcopy "$(SolutionDir)Console\BExIS.Web.Shell\Areas\DDM\bin\BExIS.Ddm.Providers.LuceneProvider.pdb" "$(SolutionDir)Console\BExIS.Web.Shell\bin\BExIS.Ddm.Providers.LuceneProvider.pdb" /C /Y /I</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
