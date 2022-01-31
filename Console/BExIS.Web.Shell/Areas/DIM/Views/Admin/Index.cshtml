@@ -20,17 +20,17 @@
 @if(@Model != null)
 {
 	@(Html.Telerik().TabStrip()
-			.Name("ShowDataTabStrip")
-			.SelectedIndex(0)
-			.Items(tabs =>
-			{
-				foreach (var metadataStructure in Model.MetadataStructuresDic)
-				{
-					tabs.Add()
-						.Text(metadataStructure.Value)
-						.LoadContentFrom("LoadMetadataStructureTab", "Admin", new {Id = metadataStructure.Key });
-				}
+            .Name("ShowDataTabStrip")
+            .SelectedIndex(0)
+            .Items(tabs =>
+            {
+                foreach (var metadataStructure in Model.MetadataStructuresDic)
+                {
+                    tabs.Add()
+                        .Text(metadataStructure.Value)
+                        .LoadContentFrom("LoadMetadataStructureTab", "Admin", new { Id = metadataStructure.Key });
+                }
 
-			})
+            })
 	)
 }

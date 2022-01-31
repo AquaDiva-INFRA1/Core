@@ -1,22 +1,27 @@
-﻿@model BExIS.Modules.Dim.UI.Models.MetadataStructureModel
+﻿
+
+
+@model BExIS.Modules.Dim.UI.Models.MetadataStructureModel
 @using Telerik.Web.Mvc.UI;
 
 @{
     ViewBag.Title = @Model.Displayname;
 
-    string id = "DIM-"+Model.Id.ToString();
+    string id = "DIM-" + Model.Id.ToString();
     string all_id = "all_" + id;
     string none_id = "none_" + id;
     string convert_id = "convert_" + id;
     string preloader_id = "preloader_" + id;
 }
-<div id="@id" class="dim-export-metadata" exportIAvailable ="@Model.ExportIsAvailable" button="@convert_id">
 
-<div class="row">
-    <div class="col-lg-12">
-        @Model.Description
+
+<div id="@id" class="dim-export-metadata" exportIAvailable="@Model.ExportIsAvailable" button="@convert_id">
+
+    <div class="row">
+        <div class="col-lg-12">
+            @Model.Description
+        </div>
     </div>
-</div>
 
     <div style="text-align: left; padding: 5px 0;">
         <button id="@convert_id" type="button" class="bx-button bx-disabled function" value="Convert" name="button" onclick="dim_OnClickConvert(this)" disabled="disabled">Export</button>
@@ -30,7 +35,7 @@
                 .PageSize(20, new int[] { 10, 20, 50, 100, 500 })
                 .Position(GridPagerPosition.Both)
                 .PageTo(1))
-                
+
 
             .Columns(columns =>
             {
@@ -48,7 +53,7 @@
                     )
                     .HtmlAttributes(new {@class="xyz"})
                     .HeaderHtmlAttributes(new {@class="xyz"});
-                    
+
                 columns.Bound(o => o.DatasetId).Title("Dataset id").Width(120);
                 columns.Bound(o => o.DatasetVersionId).Title("Datasetversion id").Width(180);
                 columns.Bound(o => o.Title).Title("Dataset Title")
@@ -69,27 +74,24 @@
 
             }
         ))
-        
+
 </div>
+
+
 <style type="text/css">
 
-    #datasetversionsConvertGrid .t-status
-    {
-        display:none;
+    #datasetversionsConvertGrid .t-status {
+        display: none;
     }
 
-    #datasetversionsConvertGrid 
-    {
-        text-align:left;
+    #datasetversionsConvertGrid {
+        text-align: left;
     }
 
-    #datasetversionsConvertGrid .xyz
-    {
-        padding-left:0;
-        text-align:center;
-    }
-    
-
+        #datasetversionsConvertGrid .xyz {
+            padding-left: 0;
+            text-align: center;
+        }
 </style>
 
 
@@ -119,7 +121,7 @@
         if ($("#" + id + " input:checkbox:checked").length > 0 && exportIsAvailable == "True") {
             console.log("some are checked");
 
-            
+
             $(bt).removeAttr("disabled");
             $(bt).removeClass("bx-disabled");
 

@@ -65,6 +65,9 @@ namespace BExIS.Modules.Aam.UI.Controllers
                     new Aam_UriManager().get_Aam_Uri_by_id(Int64.Parse(standards))
                     );
                 dca_m.creeate_dataset_column_annotation(dca);
+
+                dca_m.Dispose();
+                dsm.Dispose();
                 return RedirectToAction("Index");
             }
             catch (Exception ex)

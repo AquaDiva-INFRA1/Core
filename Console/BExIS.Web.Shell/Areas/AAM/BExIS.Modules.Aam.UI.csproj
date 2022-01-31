@@ -828,10 +828,6 @@
       <Project>{44DD2A5E-0D2F-4FAB-B297-4211441030B7}</Project>
       <Name>BExIS.Modules.Dcm.UI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DDM\BExIS.Modules.Ddm.UI.csproj">
-      <Project>{44DD2A5E-0D2F-4FAB-B297-4211441030B6}</Project>
-      <Name>BExIS.Modules.Ddm.UI</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_GlobalResources\UploadLocalization.zh-CN.resx">
