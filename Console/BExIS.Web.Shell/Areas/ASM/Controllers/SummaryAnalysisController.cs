@@ -358,7 +358,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
             int k = 0;
             foreach (var item in analytics.categorical)
             {
-                JArray Xarray = new JArray { item.name, "['" + string.Join("','", item.counts) + "']" };
+                JArray Xarray = new JArray { item.name, "['" + string.Join("','", item.values) + "']" };
                 JArray Yarray = new JArray { "count", "['" + string.Join("','", item.counts) + "']" };
 
                 JArray jArray = new JArray { Xarray, Yarray };
@@ -438,48 +438,42 @@ namespace BExIS.Modules.Asm.UI.Controllers
             if ((keys.key2.Count > 2 ) || (keys.key1.Count > 2 ))
                 try
                 {
-                    if (column == "-1" )
+                    dict_ = new Dictionary<string, List<string>>();
+                    foreach (var element in keys.key1)
                     {
-                        dict_ = new Dictionary<string, List<string>>();
-                        foreach (var element in keys.key1)
+                        var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
+                        foreach (KeyValuePair<string, string> kvp in dict)
                         {
-                            var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
-                            foreach (KeyValuePair<string, string> kvp in dict)
-                            {
-                                if (!dict_.ContainsKey(kvp.Key))
-                                    dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
-                                List<string> value = new List<string>();
-                                dict_.TryGetValue(kvp.Key, out value);
-                                value.Add(kvp.Value);
-                                dict_[kvp.Key] = value;
-                            }
+                            if (!dict_.ContainsKey(kvp.Key))
+                                dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
+                            List<string> value = new List<string>();
+                            dict_.TryGetValue(kvp.Key, out value);
+                            value.Add(kvp.Value);
+                            dict_[kvp.Key] = value;
                         }
-                        dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
-                        dict_.Remove("id");
+                    }
+                    dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
+                    dict_.Remove("id");
 
-                        string ss = JsonConvert.SerializeObject(dict_);
-                        return ss;
-                    }
-                    else 
+                    Dictionary<string, int> dict_PNKs = new Dictionary<string, int>();
+                    foreach (var element in keys.key2)
                     {
-                        Dictionary<string, string> dict_PNKs = new Dictionary<string, string>();
-                        foreach (var element in keys.key2)
+                        JObject obj = element.Value;
+                        foreach (JToken kvp in obj.Children())
                         {
-                            //var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
-                            JObject obj = element.Value;
-                            foreach (JToken kvp in obj.Children())
+                            if (!dict_PNKs.ContainsKey(((Newtonsoft.Json.Linq.JProperty)kvp).Name.ToString()))
                             {
-                                if (!dict_PNKs.ContainsKey(kvp.ToString()))
-                                {
-                                    dict_PNKs.Add(((Newtonsoft.Json.Linq.JProperty)kvp).Name, ((Newtonsoft.Json.Linq.JProperty)kvp).Value.ToString());
-                                }
+                                dict_PNKs.Add(((Newtonsoft.Json.Linq.JProperty)kvp).Name, Int32.Parse(((Newtonsoft.Json.Linq.JProperty)kvp).Value.ToString()));
+                            }
+                            else
+                            {
+                                dict_PNKs[((Newtonsoft.Json.Linq.JProperty)kvp).Name] += Int32.Parse(((Newtonsoft.Json.Linq.JProperty)kvp).Value.ToString());
                             }
                         }
-                        //dict_PNKs = dict_PNKs.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
-                        dict_PNKs.Remove("id");
-                        string ss = JsonConvert.SerializeObject(dict_PNKs);
-                        return ss;
                     }
+                    dict_PNKs.Remove("id");
+                    string ss = JsonConvert.SerializeObject(new { dict_, dict_PNKs });
+                    return ss;
                 }
                 catch (Exception ex)
                 {
@@ -497,7 +491,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
             {
                 string json = r.ReadToEnd();
                 List<coordinates_GPS> items = JsonConvert.DeserializeObject<List<coordinates_GPS>>(json);
-                if (location_coordinates.Length > 0)
+                if (location_coordinates.Length>0 )
                 {
                     string lon = location_coordinates.Substring(location_coordinates.IndexOf('(') + 1, location_coordinates.IndexOf(',') - location_coordinates.IndexOf('(') - 1);
                     string lat = location_coordinates.Substring(location_coordinates.IndexOf(", ") + 2, location_coordinates.IndexOf(')') - location_coordinates.IndexOf(',') - 2);
@@ -527,7 +521,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
             return "";
         }
 
-        public string get_datasets_from_pnk(string pnk)
+        public string get_datasets_from_pnk(string[] pnk)
         {
             List<string> datasets_ids = new List<string>();
             //dataset_pnk
@@ -541,11 +535,12 @@ namespace BExIS.Modules.Asm.UI.Controllers
                         List<string> tmp = line.Split(',').ToList<string>();
                         if (tmp.Count > 1)
                         {
-                            if (tmp[0].ToLower().Trim() == pnk.ToLower().Trim())
+                            if (pnk.ToList<string>().Where(x=>x.ToLower().Trim() == tmp[0].ToLower().Trim()).Count()>0)
                             {
                                 for (int i = 1; i < tmp.Count; i++)
                                 {
-                                    if (tmp[i] != "") datasets_ids.Add(tmp[i]);
+                                    if ((tmp[i] != "")&&(!datasets_ids.Contains(tmp[i]))) 
+                                        datasets_ids.Add(tmp[i]);
                                     i++;
                                 }
                             }
