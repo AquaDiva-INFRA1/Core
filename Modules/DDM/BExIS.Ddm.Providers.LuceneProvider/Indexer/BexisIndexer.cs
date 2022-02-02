@@ -417,7 +417,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                             }
                             
                         }
-                        //list.Add(Environment.NewLine + Environment.NewLine);
+                        if (list.Count()>0) list.Add(Environment.NewLine + Environment.NewLine);
                     }
                     catch (Exception e)
                     {
@@ -426,7 +426,24 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     }
                 }
             }
-            return list;
+            List<string> ordered_list = new List<string>();
+            if (list.Count > 0)
+            {
+                int p = list.IndexOf(Environment.NewLine + Environment.NewLine)+1;
+                Int32 count = (Int32) (list.Count() / p);
+                int jumps = 0;
+                while (jumps < count-1)
+                {
+                    jumps++;
+                    string res = "";
+                    for (int i = 0; i < list.Count(); i = i + count)
+                    {
+                        res = res + " " + list[i];
+                    }
+                    ordered_list.Add(res);
+                }
+            }
+            return ordered_list;
         }
 
         /// <summary>
@@ -463,7 +480,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 {
                     string concatenated_values = "";
                     List<string> list  = Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc);
-                    list.Sort();
+                    //list.Sort();
                     string res = "";
                     int i = 0;
                     while (i < list.Count())
