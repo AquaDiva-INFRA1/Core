@@ -412,8 +412,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         {
                             if (elemList_[i].InnerText.Trim() != "")
                             {
-                                concatenated_values = concatenated_values + " " + elemList_[i].InnerText.Trim();
-                                list.Add(elemList_[i].InnerText);
+                                list.Add(elemList_[i].InnerText.Trim());
                             }
                             
                         }
@@ -429,21 +428,22 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             List<string> ordered_list = new List<string>();
             if (list.Count > 0)
             {
-                int p = list.IndexOf(Environment.NewLine + Environment.NewLine)+1;
-                Int32 count = (Int32) (list.Count() / p);
+                int p = list.IndexOf(Environment.NewLine + Environment.NewLine);
                 int jumps = 0;
-                while (jumps < count-1)
+                while (jumps < p)
                 {
-                    jumps++;
                     string res = "";
-                    for (int i = 0; i < list.Count(); i = i + count)
+                    for (int i = jumps; i < list.Count(); i = i + p+1)
                     {
                         res = res + " " + list[i];
                     }
+                    jumps++;
                     ordered_list.Add(res);
+                    concatenated_values = concatenated_values + " " + res;
                 }
             }
-            return ordered_list;
+            ordered_list.Sort();
+            return (List<string>)ordered_list.Distinct().ToList<string>();
         }
 
         /// <summary>
@@ -459,7 +459,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             string docId = id.ToString();//metadataDoc.GetElementsByTagName("bgc:id")[0].InnerText;
 
             var dataset = new Document();
-            
+
             dataset.Add(new Field("doc_id", docId, Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.NOT_ANALYZED));
             ///
             /// Add a field to indicte whether the dataset is public, this will be used for the public datasets' search page.
@@ -475,29 +475,20 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 String multivalued = facet.Attributes.GetNamedItem("multivalued").Value;
                 string[] metadataElementNames = facet.Attributes.GetNamedItem("metadata_name").Value.Split(',');
                 String lucene_name = facet.Attributes.GetNamedItem("lucene_name").Value;
-                
                 foreach (string metadataElementName in metadataElementNames)
                 {
-                    string concatenated_values = "";
-                    List<string> list  = Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc);
-                    //list.Sort();
-                    string res = "";
-                    int i = 0;
-                    while (i < list.Count())
+                    string concatenated_values = "";                
+                    foreach (string res in Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc))
                     {
-                        res = list[i];
-                        i = i + 1;
-
                         dataset.Add(new Field("facet_" + lucene_name, res,
-                            Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                                Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
                         dataset.Add(new Field("ng_all", res,
                             Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
                         writeAutoCompleteIndex(docId, lucene_name, res);
                         writeAutoCompleteIndex(docId, "ng_all", res);
                     }
-                }
+                } 
             }
-
             List<XmlNode> propertyNodes = propertyXmlNodeList;
             foreach (XmlNode property in propertyNodes)
             {
@@ -610,13 +601,11 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         //each metadataElementName can provide more than one value for that node in the XML file
                         //the idea is to concat the val 1 of the xpath 1 with the val 1 of the xpath 2 and so on...
                         string concatenated_values = "";
-                        List<string> list = Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc);
-                        list.Sort();
-                        string res = "";
+                        List<string> list = (List<string>)Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc);
                         int i = 0;
                         while (i < list.Count())
                         {
-                            res = list[i];
+                            string res = list[i];
                             i = i + 1;
 
                             Field a = new Field("category_" + lucene_name, res, toStore, toAnalyse);
