@@ -260,7 +260,7 @@
         }
         $("#locationFilter li").click();
         onMapClick();
-        
+
     });
 
     map_coordinates = [50.911870, 10.866840];
@@ -373,7 +373,7 @@
         console.log("column selected : " + column);
 
         $.ajax({
-			url: '/ASM/SummaryAnalysis/Filter_ApplyAsync',
+            url: '/ASM/SummaryAnalysis/Filter_ApplyAsync',
             type: 'POST',
             data: {
                 'welllocation': welllocation, 'year': YearFIlter.toString(), 'filtersize': FilterFilter.toString(), 'GroupName': GroupFIlter.toString(),
@@ -415,7 +415,7 @@
                     for (var i = 0; i < bodz.length; i++) {
                         samples = samples + " <button onclick=\"show_dataset_pnk(\'" + header[i] + "\') ; \" type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\"  data-target=\"#exampleModalLong\" > "
                             + bodz[i] + " <span class=\"badge\">" + header[i] + "</span></button> ";
-                        
+
                         if (bodz[i] != "0") {
                             //console.log(xx[i]);
                             samples = samples + " <button onclick=\"show_dataset_pnk(\'" + header[i] + "\') ; \" type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\"  data-target=\"#exampleModalLong\" > "
@@ -423,7 +423,7 @@
                             //samples = samples + header[i] + " - ";
 
                         }
-                        
+
                     }
                     samples = samples.substring(0, samples.length - 2);
                     */

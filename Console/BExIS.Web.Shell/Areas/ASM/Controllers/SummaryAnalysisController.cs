@@ -182,7 +182,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
                             keywords = keywords,
                             class_results = classification_results
                         }
-                        );
+                    );
                     return Json(json_, JsonRequestBehavior.AllowGet);
 
                     //ViewData["id"] = dataset;
@@ -293,6 +293,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         public async System.Threading.Tasks.Task<ActionResult> CategoralAnalysisAsync(long id)
         {
             string result = "";
+            string bexis_analysis_dataset = "";
             Dataset_analysis analytics;
             using (var client = new HttpClient())
             {
@@ -310,7 +311,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 var responseTask = await client.PostAsync(url, stringContent);
                 result = await responseTask.Content.ReadAsStringAsync();
                 //result = "\"{  \\\"categorical\\\": [],   \\\"classification\\\": [    {      \\\"Attribute Name\\\": \\\"time\\\",       \\\"Average Categorization Probability\\\": 100.0,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"False\\\"    },     {      \\\"Attribute Name\\\": \\\"Blank 1\\\",       \\\"Average Categorization Probability\\\": 100.0,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"Blank 1 volumetric dilution\\\",       \\\"Average Categorization Probability\\\": 1.0416666666666665,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"Blank 2\\\",       \\\"Average Categorization Probability\\\": 100.0,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"Blank 2 volumetric dilution\\\",       \\\"Average Categorization Probability\\\": 1.0416666666666665,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz 1\\\",       \\\"Average Categorization Probability\\\": 100.0,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz 1 volumetric dilution\\\",       \\\"Average Categorization Probability\\\": 1.0416666666666665,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz 2\\\",       \\\"Average Categorization Probability\\\": 100.0,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz 2 volumetric dilution\\\",       \\\"Average Categorization Probability\\\": 1.0416666666666665,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz-illite 1\\\",       \\\"Average Categorization Probability\\\": 100.0,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz-illite 1 volumetric dilution\\\",       \\\"Average Categorization Probability\\\": 1.0416666666666665,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz-illite 2\\\",       \\\"Average Categorization Probability\\\": 100.0,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz-illite 2 volumetric dilution\\\",       \\\"Average Categorization Probability\\\": 1.0416666666666665,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz-goethite 1\\\",       \\\"Average Categorization Probability\\\": 100.0,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz-goethite 1 volumetric dilution\\\",       \\\"Average Categorization Probability\\\": 1.0416666666666665,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz-goethite 2\\\",       \\\"Average Categorization Probability\\\": 100.0,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    },     {      \\\"Attribute Name\\\": \\\"quartz-goethite 2 volumetric dilution\\\",       \\\"Average Categorization Probability\\\": 1.0416666666666665,       \\\"Category\\\": \\\"Non Categorical\\\",       \\\"drawable\\\": \\\"True\\\"    }  ],   \\\"non_categorical\\\": [    {      \\\"counts\\\": [        0,         0,         1,         0,         0,         0,         0,         84,         8      ],       \\\"name\\\": \\\"Blank 1\\\",       \\\"values\\\": [        -0.0,         0.1,         0.21,         0.31,         0.42,         0.52,         0.63,         0.73,         0.84,         0.95      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         0,         0      ],       \\\"name\\\": \\\"Blank 1 volumetric dilution\\\",       \\\"values\\\": [        0.79,         0.79,         0.79,         0.79,         0.79,         0.79,         0.79,         0.79,         0.79,         0.79      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         1,         92      ],       \\\"name\\\": \\\"Blank 2\\\",       \\\"values\\\": [        -0.0,         0.08,         0.17,         0.26,         0.35,         0.44,         0.52,         0.61,         0.7,         0.79      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         0,         0      ],       \\\"name\\\": \\\"Blank 2 volumetric dilution\\\",       \\\"values\\\": [        0.79,         0.79,         0.79,         0.79,         0.79,         0.79,         0.79,         0.79,         0.79,         0.79      ]    },     {      \\\"counts\\\": [        3,         0,         0,         0,         0,         0,         0,         91,         2      ],       \\\"name\\\": \\\"quartz 1\\\",       \\\"values\\\": [        -0.01,         0.09,         0.19,         0.29,         0.38,         0.48,         0.58,         0.67,         0.77,         0.87      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         0,         0      ],       \\\"name\\\": \\\"quartz 1 volumetric dilution\\\",       \\\"values\\\": [        0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         92,         1      ],       \\\"name\\\": \\\"quartz 2\\\",       \\\"values\\\": [        -0.0,         0.09,         0.19,         0.29,         0.39,         0.49,         0.59,         0.69,         0.79,         0.89      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         0,         0      ],       \\\"name\\\": \\\"quartz 2 volumetric dilution\\\",       \\\"values\\\": [        0.85,         0.85,         0.85,         0.85,         0.85,         0.85,         0.85,         0.85,         0.85,         0.85      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         85,         6,         2,         0      ],       \\\"name\\\": \\\"quartz-illite 1\\\",       \\\"values\\\": [        -0.0,         0.1,         0.2,         0.3,         0.41,         0.51,         0.61,         0.72,         0.82,         0.92      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         0,         0      ],       \\\"name\\\": \\\"quartz-illite 1 volumetric dilution\\\",       \\\"values\\\": [        0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84      ]    },     {      \\\"counts\\\": [        3,         0,         0,         0,         0,         84,         6,         2,         1      ],       \\\"name\\\": \\\"quartz-illite 2\\\",       \\\"values\\\": [        -0.01,         0.1,         0.22,         0.33,         0.44,         0.55,         0.66,         0.77,         0.88,         0.99      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         0,         0      ],       \\\"name\\\": \\\"quartz-illite 2 volumetric dilution\\\",       \\\"values\\\": [        0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         27,         66      ],       \\\"name\\\": \\\"quartz-goethite 1\\\",       \\\"values\\\": [        -0.0,         0.09,         0.19,         0.29,         0.38,         0.48,         0.58,         0.68,         0.77,         0.87      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         0,         0      ],       \\\"name\\\": \\\"quartz-goethite 1 volumetric dilution\\\",       \\\"values\\\": [        0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         35,         59      ],       \\\"name\\\": \\\"quartz-goethite 2\\\",       \\\"values\\\": [        -0.0,         0.09,         0.19,         0.29,         0.38,         0.48,         0.58,         0.67,         0.77,         0.87      ]    },     {      \\\"counts\\\": [        0,         0,         0,         0,         0,         0,         0,         0,         0      ],       \\\"name\\\": \\\"quartz-goethite 2 volumetric dilution\\\",       \\\"values\\\": [        0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84,         0.84      ]    }  ]}\"";
-
+                bexis_analysis_dataset = (JObject.Parse(JToken.Parse(result).ToString())["dataset"]).ToString();
                 analytics = new Dataset_analysis(JObject.Parse((string)JToken.Parse(result)), (int)id);
             }
             
@@ -330,10 +331,12 @@ namespace BExIS.Modules.Asm.UI.Controllers
             List<List<string>> results = new List<List<string>>();
             foreach(var item in analytics.category_Classifications)
             {
-                results.Add(new List<string> { item.name, item.categorization_probability.ToString(), item.category });
+                //results.Add(new List<string> { item.name, item.categorization_probability.ToString(), item.category });
+                results.Add(new List<string> { item.name, item.categorization_probability.ToString() });
             }
             List<List<string>> headers = new List<List<string>>();
-            headers.Add(new List<string> { "Attribute Name", "Average Categorisation Probability", "Category" });
+            //headers.Add(new List<string> { "Attribute Name", "Average Categorisation Probability", "Category" });
+            headers.Add(new List<string> { "Attribute Name", "Average Categorisation Probability" });
 
             ViewData["id"] = analytics.id.ToString();
             ViewData["error"] = "";
@@ -342,14 +345,25 @@ namespace BExIS.Modules.Asm.UI.Controllers
             ViewData["headers"] = headers;
             ViewData["table"] = results;
 
-            List<List<KeyValuePair<int, object>>> data_ranges = new List<List<KeyValuePair<int, object>>>();
+            List<KeyValuePair<int, Object>> data_ranges = new List<KeyValuePair<int, Object>>();
             List<double> nullsCount = new List<double>();
+            
             for (int index__ = 0; index__ < results.Count; index__++)
             {
-                data_ranges.Add(new List<KeyValuePair<int, object>>());
-                nullsCount.Add(0);
+                string var_name = results[index__][0];
+                JToken obj = JToken.Parse(bexis_analysis_dataset).Where(x => x["VariableName"].ToString() == var_name).FirstOrDefault();
+                nullsCount.Add ( JToken.Parse(bexis_analysis_dataset).Where(x => x["VariableName"].ToString() == var_name).FirstOrDefault()["missingValues"].Count() );
+                string min = obj["min"].ToString();
+                string max = obj["max"].ToString();
+                var data_range = new
+                {
+                    min = min,
+                    max = max
+                };
+                ;
+                data_ranges.Add(new KeyValuePair<int, Object>(index__, JObject.Parse(new JavaScriptSerializer().Serialize(data_range))));
             }
-
+            //var json = new JavaScriptSerializer().Serialize(data_ranges[0].Value)
             ViewData["data_ranges"] = data_ranges;
             ViewData["nullsCount"] = nullsCount;
 
@@ -399,7 +413,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
         }
 
         public async System.Threading.Tasks.Task<string> Filter_ApplyAsync(
-            string welllocation = "", string year = "", string filtersize = "", 
+            string welllocation = "", string year = "", string filtersize = "",
             string GroupName = "", string NameFIlter = "",
             String Season_dict = "", string column = "-1", string row = "-1", string flag = "false")
         {
@@ -428,52 +442,58 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 client.BaseAddress = new Uri(url);
 
                 var json = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);
-                var stringContent = new StringContent(json, System.Text.Encoding.UTF8,"application/json");
+                var stringContent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 var responseTask = await client.PostAsync(url, stringContent);
                 result = await responseTask.Content.ReadAsStringAsync();
             }
 
             SpecialDataset_analysis keys = new SpecialDataset_analysis(JObject.Parse((string)JToken.Parse(result)));
-            if ((keys.key2.Count > 2 ) || (keys.key1.Count > 2 ))
+            if ((keys.key2.Count > 2) || (keys.key1.Count > 2))
                 try
                 {
-                    dict_ = new Dictionary<string, List<string>>();
-                    foreach (var element in keys.key1)
+                    if (column == "-1")
                     {
-                        var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
-                        foreach (KeyValuePair<string, string> kvp in dict)
+                        dict_ = new Dictionary<string, List<string>>();
+                        foreach (var element in keys.key1)
                         {
-                            if (!dict_.ContainsKey(kvp.Key))
-                                dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
-                            List<string> value = new List<string>();
-                            dict_.TryGetValue(kvp.Key, out value);
-                            value.Add(kvp.Value);
-                            dict_[kvp.Key] = value;
+                            var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
+                            foreach (KeyValuePair<string, string> kvp in dict)
+                            {
+                                if (!dict_.ContainsKey(kvp.Key))
+                                    dict_.Add(kvp.Key.Replace(',', ' '), new List<string>());
+                                List<string> value = new List<string>();
+                                dict_.TryGetValue(kvp.Key, out value);
+                                value.Add(kvp.Value);
+                                dict_[kvp.Key] = value;
+                            }
                         }
-                    }
-                    dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
-                    dict_.Remove("id");
+                        dict_ = dict_.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
+                        dict_.Remove("id");
 
-                    Dictionary<string, int> dict_PNKs = new Dictionary<string, int>();
-                    foreach (var element in keys.key2)
+                        string ss = JsonConvert.SerializeObject(dict_);
+                        return ss;
+                    }
+                    else
                     {
-                        JObject obj = element.Value;
-                        foreach (JToken kvp in obj.Children())
+                        Dictionary<string, string> dict_PNKs = new Dictionary<string, string>();
+                        foreach (var element in keys.key2)
                         {
-                            if (!dict_PNKs.ContainsKey(((Newtonsoft.Json.Linq.JProperty)kvp).Name.ToString()))
+                            //var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
+                            JObject obj = element.Value;
+                            foreach (JToken kvp in obj.Children())
                             {
-                                dict_PNKs.Add(((Newtonsoft.Json.Linq.JProperty)kvp).Name, Int32.Parse(((Newtonsoft.Json.Linq.JProperty)kvp).Value.ToString()));
-                            }
-                            else
-                            {
-                                dict_PNKs[((Newtonsoft.Json.Linq.JProperty)kvp).Name] += Int32.Parse(((Newtonsoft.Json.Linq.JProperty)kvp).Value.ToString());
+                                if (!dict_PNKs.ContainsKey(kvp.ToString()))
+                                {
+                                    dict_PNKs.Add(((Newtonsoft.Json.Linq.JProperty)kvp).Name, ((Newtonsoft.Json.Linq.JProperty)kvp).Value.ToString());
+                                }
                             }
                         }
+                        //dict_PNKs = dict_PNKs.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);
+                        dict_PNKs.Remove("id");
+                        string ss = JsonConvert.SerializeObject(dict_PNKs);
+                        return ss;
                     }
-                    dict_PNKs.Remove("id");
-                    string ss = JsonConvert.SerializeObject(new { dict_, dict_PNKs });
-                    return ss;
                 }
                 catch (Exception ex)
                 {
@@ -491,7 +511,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
             {
                 string json = r.ReadToEnd();
                 List<coordinates_GPS> items = JsonConvert.DeserializeObject<List<coordinates_GPS>>(json);
-                if (location_coordinates.Length>0 )
+                if (location_coordinates.Length > 0)
                 {
                     string lon = location_coordinates.Substring(location_coordinates.IndexOf('(') + 1, location_coordinates.IndexOf(',') - location_coordinates.IndexOf('(') - 1);
                     string lat = location_coordinates.Substring(location_coordinates.IndexOf(", ") + 2, location_coordinates.IndexOf(')') - location_coordinates.IndexOf(',') - 2);
@@ -521,7 +541,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
             return "";
         }
 
-        public string get_datasets_from_pnk(string[] pnk)
+        public string get_datasets_from_pnk(string pnk)
         {
             List<string> datasets_ids = new List<string>();
             //dataset_pnk
@@ -535,12 +555,11 @@ namespace BExIS.Modules.Asm.UI.Controllers
                         List<string> tmp = line.Split(',').ToList<string>();
                         if (tmp.Count > 1)
                         {
-                            if (pnk.ToList<string>().Where(x=>x.ToLower().Trim() == tmp[0].ToLower().Trim()).Count()>0)
+                            if (tmp[0].ToLower().Trim() == pnk.ToLower().Trim())
                             {
                                 for (int i = 1; i < tmp.Count; i++)
                                 {
-                                    if ((tmp[i] != "")&&(!datasets_ids.Contains(tmp[i]))) 
-                                        datasets_ids.Add(tmp[i]);
+                                    if (tmp[i] != "") datasets_ids.Add(tmp[i]);
                                     i++;
                                 }
                             }
