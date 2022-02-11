@@ -1002,10 +1002,6 @@
       <Project>{cac933a2-6849-4c61-82b4-cbf4052210cc}</Project>
       <Name>BExIS.Dim.Services</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DDM\BExIS.Modules.Ddm.UI.csproj">
-      <Project>{44DD2A5E-0D2F-4FAB-B297-4211441030B6}</Project>
-      <Name>BExIS.Modules.Ddm.UI</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RPM\BExIS.Modules.Rpm.UI.csproj">
       <Project>{76702a4f-d6e5-416f-bd81-58447514af05}</Project>
       <Name>BExIS.Modules.Rpm.UI</Name>

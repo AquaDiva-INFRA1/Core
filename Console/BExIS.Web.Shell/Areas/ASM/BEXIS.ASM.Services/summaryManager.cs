@@ -203,6 +203,7 @@ namespace BEXIS.ASM.Services
         {
             string url = WebConfigurationManager.AppSettings["summary_adress"] + "/categoricalAnalysis";
             client.BaseAddress = new Uri(url);
+            string res = await getDataset(dataset, username).ConfigureAwait(true);
             var stringContent = new StringContent(await getDataset(dataset, username).ConfigureAwait(true), Encoding.UTF8, "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -210,7 +211,12 @@ namespace BEXIS.ASM.Services
 
             string result = await responseTask.Content.ReadAsStringAsync();
             result = result.Replace("\n", string.Empty).Replace("\r", String.Empty).Replace("\t", String.Empty);
-            return result;
+            var json_res = new
+            {
+                result = result,
+                dataset = res
+            };
+            return JsonConvert.SerializeObject(json_res);
         }
 
         private async Task<string> getDataset(string id, string username)

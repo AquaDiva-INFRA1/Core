@@ -1,171 +1,163 @@
 ﻿@using Telerik.Web.Mvc.UI
 @using System.Linq;
+@using Newtonsoft.Json.Linq;
 
 @section Information
 {
-	This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.
-	<br />
-	It reflects the distribution of the categoral attributes and its values within the dataset.
+    This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.
+    <br />
+    It reflects the distribution of the categoral attributes and its values within the dataset.
 
 }
 
 @{
-	Layout = null;
+    Layout = null;
 
-	//List<string> header = (List<string>)ViewData["header"];
-	//List<List<string>> data_lines = (List<List<string>>)ViewData["data_lines"];
+    //List<string> header = (List<string>)ViewData["header"];
+    //List<List<string>> data_lines = (List<List<string>>)ViewData["data_lines"];
 
-	List<List<string>> values = (List<List<string>>)ViewData["values"];
-	List<List<string>> labels = (List<List<string>>)ViewData["labels"];
+    List<List<string>> values = (List<List<string>>)ViewData["values"];
+    List<List<string>> labels = (List<List<string>>)ViewData["labels"];
 
-	List<List<string>> table = (List<List<string>>)ViewData["table"];
-	List<List<string>> headers = (List<List<string>>)ViewData["headers"];
+    List<List<string>> table = (List<List<string>>)ViewData["table"];
+    List<List<string>> headers = (List<List<string>>)ViewData["headers"];
 
-	List<List<KeyValuePair<int, object>>> data_ranges = (List<List<KeyValuePair<int, object>>>)ViewData["data_ranges"];
-	List<double> nullsCount = (List<double>)ViewData["nullsCount"];
+    List<KeyValuePair<int, object>> data_ranges = (List<KeyValuePair<int, object>>)ViewData["data_ranges"];
+    List<double> nullsCount = (List<double>)ViewData["nullsCount"];
 
-	string id_for_class = (string)ViewData["id"];
+    string id_for_class = (string)ViewData["id"];
 
-	string graphData = (string)ViewData["graphData"];
+    string graphData = (string)ViewData["graphData"];
 
-	string error = (string)ViewData["error"];
-	if (error.Length > 1)
-	{
-		<script type="text/javascript">
+    string error = (string)ViewData["error"];
+    if (error.Length > 1)
+    {
+        <script type="text/javascript">
 			alert("@error");
-		</script>
-	}
+        </script>
+    }
 
-	int number_of_graphs = labels.Count;
-	int number_of_rows = (int)Math.Round((float)(1 / 2) + (float)number_of_graphs / (float)5);
-	Int32 index = 0;
+    int number_of_graphs = labels.Count;
+    int number_of_rows = (int)Math.Round((float)(1 / 2) + (float)number_of_graphs / (float)5);
+    Int32 index = 0;
 }
 
 
 @section head {
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-	<!--
-	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-	<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.0"></script>
-	-->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.0"></script>
+    -->
 
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" />
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
 
-	<link href='@Url.Content("~/Scripts/vis/vis-network.min.css")' rel="stylesheet" type="text/css" />
+    <link href='@Url.Content("~/Scripts/vis/vis-network.min.css")' rel="stylesheet" type="text/css" />
 
 }
 
 
 <div>
-	<h1 class="display-4">Dataset Summary</h1>
-	<h3>
-		This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.<br />
-		<small class="text-muted">It reflects the distribution of the categoral attributes and its values within the dataset.</small>
-	</h3>
-	<div id="spinner_" hidden="true">
-		<center><i class="fa fa-spinner fa-spin" style="font-size:50px" id="spinner_"></i></center>
-	</div>
+    <h1 class="display-4">Dataset Summary</h1>
+    <h3>
+        This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.<br />
+        <small class="text-muted">It reflects the distribution of the categoral attributes and its values within the dataset.</small>
+    </h3>
+    <div id="spinner_" hidden="true">
+        <center><i class="fa fa-spinner fa-spin" style="font-size:50px" id="spinner_"></i></center>
+    </div>
 </div>
 
 <div id="classification">
 </div>
 
-@*
-		@{
-		Html.RenderAction("classification", "DataSetSummary", new { ds = id_for_class });
-	}
-*@
 
+    <div class="jumbotron">
+        @{
+            if (@table.Count > 0)
+            {
+                <table class="table">
+                    <thead>
+                        @foreach (List<string> s in headers)
+                        {
+                        <tr>
+                            @foreach (string ss in s)
+                            {
+                                <th scope="col">@ss</th>
+                            }
+                            <th>Numerical distribution</th>
+                            <th>Nulls / Missing values</th>
+                        </tr>
+                        }
+                    </thead>
+                    <tbody id="classification">
 
-
-<div class="jumbotron">
-	@{
-		if (@table.Count > 0)
-		{
-			<table class="table">
-				<thead>
-					@foreach (List<string> s in headers)
-					{
-						<tr>
-							@foreach (string ss in s)
-							{
-								<th scope="col">@ss</th>
-							}
-							<th>Numerical distribution</th>
-							<th>Nulls / Missing values</th>
-						</tr>
-					}
-				</thead>
-				<tbody id="classification">
-
-					@for (int ind = 0; ind < table.Count; ind++) //List<string> s in table)
-					{
-						List<string> s = table[ind];
-						<tr>
-							@foreach (string ss in s)
-							{
-								<td>@ss</td>
-							}
-							<td>
-								@if (@data_ranges[ind].Count > 0)
-								{
-									@Html.Raw(String.Format("{0:0.00}", @data_ranges[ind][0].Value) + " --> " + String.Format("{0:0.00}", @data_ranges[ind][@data_ranges[ind].Count - 1].Value))
-								}
-								else
-								{
-									@Html.Raw("--");
-								}
-
-							</td>
-							<td>
-								<div class="chart-container" style="position: relative; height:40vh; width:80vw">
-									<canvas id="Pie_@ind" Value="@Html.Raw(nullsCount[ind])"></canvas>
-								</div>
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-		}
-	}
-</div>
+                        @for (int ind = 0; ind < table.Count; ind++) //List<string> s in table)
+                        {
+                            List<string> s = table[ind];
+                        <tr>
+                            @foreach (string ss in s)
+                            {
+                                <td>@ss</td>
+                            }
+                        <td>
+                            @*
+                            <b>Min : </b> @JToken.Parse(data_ranges[ind].Value.ToString())["min"].ToString().Trim())!="" ? @JToken.Parse(data_ranges[ind].Value.ToString())["min"] : @Html.Raw("No Entry")
+                            <b>Max :</b> @JToken.Parse(data_ranges[ind].Value.ToString())["max"].ToString().Trim())!= "" ? @JToken.Parse(data_ranges[ind].Value.ToString())["max"] : @Html.Raw("No Entry")
+                            *@
+                            <b>Min : </b> @JToken.Parse(data_ranges[ind].Value.ToString())["min"].ToString().Trim()
+                            <br /><b>Max :</b> @JToken.Parse(data_ranges[ind].Value.ToString())["max"].ToString().Trim()
+                            
+                        </td>
+                            <td>
+                                <div class="chart-container" style="position: relative; height:40vh; width:80vw">
+                                    <canvas id="Pie_@ind" Value="@Html.Raw(nullsCount[ind])"></canvas>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    </div>
 
 
 
 @if (number_of_graphs < 1)
 {
-	<div class="alert alert-warning" role="alert">
-		No Categoral Analysis / Summary was extracted from this dataset.
-	</div>
+    <div class="alert alert-warning" role="alert">
+        No Categoral Analysis / Summary was extracted from this dataset.
+    </div>
 }
 else
 {
-	<button onclick="myFunction()">Hide / View Graphs</button>
-	<!-- Create a div where the graph will take place style="display:none" -->
-	<div id="table">
-		<table>
-			@while (index <= number_of_graphs)
-			{
-				<tr>
-					@for (int k = 0; k < 3; k++)
-					{
-						<td>
+    <button onclick="myFunction()">Hide / View Graphs</button>
+    <!-- Create a div where the graph will take place style="display:none" -->
+    <div id="table">
+        <table>
+            @while (index <= number_of_graphs)
+            {
+                <tr>
+                    @for (int k = 0; k < 3; k++)
+                    {
+                        <td>
+                            <div style="height: 300px ; width: 500px">
+                                <canvas id="myChart_@index"></canvas>
+                            </div>
+                        </td>
+                        index = index + 1;
+                    }
+                </tr>
+                <br>
+            }
 
-							<canvas id="myChart_@index" width="500" height="350"></canvas>
 
-						</td>
-						index = index + 1;
-					}
-				</tr>
-				<br>
-			}
-
-
-		</table>
-	</div>
+        </table>
+    </div>
 }
 
 
@@ -207,11 +199,11 @@ else
 
     function start() {
         var myJSON = JSON.parse(@Html.Raw(Json.Encode(graphData)));
-        
+
         console.debug(myJSON);
 
         Object.keys(myJSON).forEach(function (entry) {
-            
+
             var element = myJSON[entry];
 
             var xdata = element[0];
@@ -221,7 +213,7 @@ else
             var ydata = element[1];
             var ylabel = ydata[0];
             var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
-            
+
             //if (xlabel != ylabel){
             var data_ = [];
 
@@ -237,9 +229,9 @@ else
 			}
             var yvalues_int = yvalues.map(convert_toInt);
 
-            
 
-               
+
+
             for (var z = 0; z < yvalues.length; z++) {
                 data_.push({ x: xvalues[z], y: yvalues[z] });
             }
@@ -249,13 +241,7 @@ else
             for (var i = 0; i < yvalues.length; i++) {
                 colors.push(getRandomColor());
             };
-			
-            var scatterChartData = {
-                datasets:
-                    [{
-                        data: data_
-                    }]
-            };
+
             //check which type of data chart to use :
 
             if (graphType == "histogram") {
@@ -272,12 +258,15 @@ else
 					},
                     options: {
                         scales: {
-                            xAxes: [{
+                            xAxes:
+                            [{
                                 display: false,
-                                barPercentage: 1.5,                                ticks: {
+                                barPercentage: 1.5,
+                                ticks: {
                                     max: 5,
 								}
-                            }, {
+                            },
+                            {
 								scaleLabel: {
 									display: true,
 									labelString: xlabel,
@@ -287,7 +276,7 @@ else
 								ticks: {
                                     autoSkip: false,
                                     max: 5,
-								},
+						        }
 							}],
 							yAxes: [{
 								ticks: {
@@ -299,11 +288,13 @@ else
 									labelString: 'Count',
 									fontColor: 'black'
 								}
-							}]			
+							}]
                         },
 						legend: {
 							display: false
-						}
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
 					}
                 });
             }
@@ -354,7 +345,9 @@ else
                         },
                         legend: {
                             display: false
-                        }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
                     }
                 });
             }
@@ -367,7 +360,7 @@ else
         for (var i = 0; i < 2; i++) {
             colors.push(getRandomColor());
         }
-
+        
         for (var i = 0; i <  @table.Count; i++) {
             var xx = document.getElementById('Pie_' + i);
             var nulls_per = (xx.getAttribute("Value") * 100).toFixed(2);
@@ -397,7 +390,7 @@ else
                 }
             });
         }
-
+        
     }
 
 

@@ -12,7 +12,10 @@ namespace BExIS.Modules.Asm.UI.Models
         public Dataset_analysis(JToken jtok, int id)
         {
             this.id = id;
-            foreach (JProperty xx in jtok)
+            category_Classifications = new List<Category_classification>();
+            categorical = new List<Categorical>();
+            non_Categorical = new List<Non_categorical>();
+            foreach (JProperty xx in JToken.Parse(jtok["result"].ToString()))
             {
                 var name = xx.Name;
                 if (xx.Name == "classification")
@@ -22,10 +25,6 @@ namespace BExIS.Modules.Asm.UI.Models
                 else if (xx.Name == "non_categorical")
                     non_Categorical = JsonConvert.DeserializeObject<List<Non_categorical>>(xx.Value.ToString());
             }
-
-            category_Classifications = JsonConvert.DeserializeObject<List<Category_classification>>(jtok["classification"].ToString());
-            categorical = JsonConvert.DeserializeObject<List<Categorical>>(jtok["categorical"].ToString()); 
-            non_Categorical = JsonConvert.DeserializeObject<List<Non_categorical>>(jtok["non_categorical"].ToString()); 
         }
 
         public int id;
