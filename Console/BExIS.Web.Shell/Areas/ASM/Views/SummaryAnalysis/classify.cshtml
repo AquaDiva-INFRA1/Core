@@ -107,9 +107,9 @@ Matched terms :
                         }
                     }*/
 					for (var k = 0; k < jsonObject['class_results'].length; k++) {
-						var ell = jsonObject['class_results'][k]['predition_bestMatches'];
-                        var ell_lst = ell.split(';');
+                        var ell = jsonObject['class_results'][k]['predition_bestMatches'];
                         console.debug('ellMatches:' + ell)
+                        var ell_lst = ell.split(';');
 						for (var kk = 0; kk < ell_lst.length; kk++) {
 							if (!class_res.includes(parseInt(ell_lst[kk])) && (ell_lst[kk] != "\" \"") && (ell_lst[kk] != " ")) {
 								class_res.push(parseInt(ell_lst[kk]));
