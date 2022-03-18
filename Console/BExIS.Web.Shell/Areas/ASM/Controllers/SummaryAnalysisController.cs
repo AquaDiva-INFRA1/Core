@@ -173,17 +173,22 @@ namespace BExIS.Modules.Asm.UI.Controllers
                             }
                         }
                     }
-                    var json_ = new JavaScriptSerializer().Serialize(
-                        new
-                        {
-                            nodes = nodes,
-                            links = paths,
-                            id=dataset,
-                            keywords = keywords,
-                            class_results = classification_results
-                        }
-                    );
-                    return Json(json_, JsonRequestBehavior.AllowGet);
+
+                    JavaScriptSerializer js = new JavaScriptSerializer();
+                    js.MaxJsonLength = Int32.MaxValue;
+                    var vr = new
+                    {
+                        nodes = nodes.ToArray(),
+                        links = paths.ToArray(),
+                        id = dataset,
+                        keywords = keywords,
+                        class_results = classification_results
+                    };
+
+                    var json_ = js.Serialize(vr);
+                    JsonResult jr = Json(json_, JsonRequestBehavior.AllowGet);
+                    jr.MaxJsonLength = Int32.MaxValue;
+                    return jr;
 
                     //ViewData["id"] = dataset;
                     //ViewData["label"] = "";
