@@ -6,9 +6,9 @@
 
 <div id="DIM_MappingContainer">
 
-@{
-    ViewBag.Title = "Metadata Structure Mapping";
-}
+    @{
+        ViewBag.Title = "Metadata Structure Mapping";
+    }
     @section Information
     {
         Here you are able to create/edit mappings between two metadata structures or a metadata structure and system information defined in other modules (e.g. party package).
@@ -18,8 +18,10 @@
 
     @section Scripts{
 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
         <link href="@Url.Content("~/Areas/DIM/Content/DIM/bexis-dim.css")" rel="stylesheet" type="text/css" />
-        
+
         <script src="@Url.Content("~/Areas/DIM/Scripts/DIM/bexis.dim.mapping.js")"></script>
         <script src="@Url.Content("~/Areas/DIM/Scripts/DIM/isotope.pkgd.min.js")"></script>
         <script src="@Url.Content("~/Areas/DIM/Scripts/DIM/jsPlumb-2.2.8-min.js")"></script>
@@ -28,13 +30,13 @@
     @section LeftPane
     {
         @*<span>
-            @(Html.Telerik().DropDownList()
-                                .Name("SelectSource")
-                                .Placeholder("Select")
-                                .HtmlAttributes(new { @class = "bx-dropdown", style = "width:100%;" })
-                                .ClientEvents(events => events.OnChange("onChangeSourceDropDown"))
-                                .BindTo(new SelectList(Model.SelectionList, "Id", "Name", Model.Source.ElementId + "_" + Model.Source.Type)))
-        </span>*@
+                @(Html.Telerik().DropDownList()
+                                    .Name("SelectSource")
+                                    .Placeholder("Select")
+                                    .HtmlAttributes(new { @class = "bx-dropdown", style = "width:100%;" })
+                                    .ClientEvents(events => events.OnChange("onChangeSourceDropDown"))
+                                    .BindTo(new SelectList(Model.SelectionList, "Id", "Name", Model.Source.ElementId + "_" + Model.Source.Type)))
+            </span>*@
 
         @if (Model.Source != null)
         {
@@ -42,12 +44,12 @@
         }
     }
 
-    @Html.ActionLink(" ", "Switch", "Mapping", new 
+    @Html.ActionLink(" ", "Switch", "Mapping", new
     {
-        sourceId =   Model.Source.Id,
-        targetId =  Model.Target.Id,
-        sourceType =Model.Source.Type,
-        targetType =Model.Target.Type,
+        sourceId = Model.Source.Id,
+        targetId = Model.Target.Id,
+        sourceType = Model.Source.Type,
+        targetType = Model.Target.Type,
 
     }, new
     {
@@ -55,12 +57,12 @@
     })
 
 
-    @Html.Partial("Mappings",Model.ParentMappings)
+    @Html.Partial("Mappings", Model.ParentMappings)
 
 
     @section RightPane
     {
-        @*<span>
+        <span>
             @(Html.Telerik().DropDownList()
                             .Name("SelectTarget")
                             .Placeholder("Select")
@@ -68,7 +70,7 @@
                             .ClientEvents(events => events.OnChange("onChangeTargetDropDown"))
                             .BindTo(new SelectList(Model.SelectionList,"Id","Name", Model.Target.ElementId+"_"+ Model.Target.Type)))
 
-        </span>*@
+        </span>
 
         @if (Model.Target != null)
         {
@@ -95,7 +97,7 @@
         var sourceType = $(sourceInfo).find("#Type").text();
 
         var target = $("#le-root-target");
-        console.log(target);
+
         var targetId = $(target).attr("id").split("_")[1];
         var targetInfo = $(target).find(".le-root-info")[0];
         var targetType = $(targetInfo).find("#Type").text();
@@ -104,13 +106,13 @@
         //long sourceId, long targetId = 0, LinkElementType type = LinkElementType.System
         var sendData =
         {
-            "sourceId": sourceId,
-            "targetId": targetId,
+            "sourceId": @Model.Source.Id,
+            "targetId": id,
             "sourceType": sourceType,
-            "targetType": targetType,
-            "position":"Source"
+            "targetType": type,
+            "position":"Target"
         }
-
+        console.log(sendData);
         $("#le-root-target").preloader(12,"Loading Target");
 
         $("#dim-mapping-middle").preloader(12,"Loading Mappings");
@@ -118,6 +120,8 @@
         reloadSite("le-root-target", sendData);
 
         reloadMapping("dim-mapping-middle", sendData);
+
+        reloadmetadata(sendData);
 
     }
 
@@ -147,7 +151,6 @@
             "position": "Source"
 
         }
-
         $("#le-root-source").preloader(12, "Loading Source");
 
         $("#dim-mapping-middle").preloader(12, "Loading Mappings");
@@ -155,7 +158,6 @@
         reloadSite("le-root-source", sendData);
 
         reloadMapping("dim-mapping-middle", sendData);
-
     }
 
     function reloadSite(id,senddata) {
@@ -185,4 +187,14 @@
             error: function (data) { alert("error") }
         });
     }
+
+    function reloadmetadata(senddata) {
+
+        window.location.href = window.location.origin + window.location.pathname + "/mapping" +
+        "?sourceId=" + senddata.sourceId +
+            "&targetId=" + senddata.targetId +
+            "&sourceType=" + senddata.sourceType +
+            "&targetType=" + senddata.targetType;
+    }
+
 </script>
