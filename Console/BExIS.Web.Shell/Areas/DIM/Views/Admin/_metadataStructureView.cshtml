@@ -25,6 +25,11 @@
 
     <div style="text-align: left; padding: 5px 0;">
         <button id="@convert_id" type="button" class="bx-button bx-disabled function" value="Convert" name="button" onclick="dim_OnClickConvert(this)" disabled="disabled">Export</button>
+        
+    </div>
+
+    <div style="text-align: right; padding: 5px 0;">
+        <button id="@convert_id" type="button" class="bx-button function" value="Migrate" name="button" onclick="OnclickMigrate(this)">Migrate Metadata</button>
     </div>
 
     @(Html.Telerik().Grid(Model.DatasetVersions)
@@ -102,6 +107,9 @@
         resetAllTelerikIconTitles();
         addTooltips();
         //setExportBT();
+        if (document.getElementById("MetadataStructuresDic").style.display != 'none') {
+            document.getElementById("MetadataStructuresDic").style.display = 'none';
+        }
     });
 
 
@@ -188,5 +196,75 @@
         setExportBT(obj);
     }
 
+    function OnclickMigrate(obj) {
+        var selectedDatasetIds = "";
+        var idString = obj.id.split('_')[1];
+        var id = idString.split('-')[1];
+
+        $("#" + idString + " input:checkbox:checked").each(function () {
+
+            if (this.id.indexOf("all") == -1) {
+                if (selectedDatasetIds == "")
+                    selectedDatasetIds = this.id;
+                else
+                    selectedDatasetIds += "," + this.id;
+
+                $(this).closest("tr").find(".download-button").preloader(12, "Converting dataset " + this.id);
+            }
+        })
+
+        if (selectedDatasetIds.length == 0) {
+            alert("please select a dataset");
+            document.getElementById("MetadataStructuresDic").style.display = 'none';
+            return;
+        }
+
+        if (document.getElementById("MetadataStructuresDic").style.display == 'none') {
+            document.getElementById("MetadataStructuresDic").style.display = 'block';
+            alert("showing target metadata ....");
+        }
+        else {
+            alert("migrating ....");
+            var targetId = document.getElementById("MetadataStructuresDic").value;
+            if (targetId == '') {
+                alert("please select a Target Metadata");
+                return;
+            }
+            var sendData =
+            {
+                "dataset_ids": selectedDatasetIds,
+                "sourceId": id,
+                "targetId": targetId
+            }
+            console.log(sendData);
+            $.ajax({
+                type: "POST",
+                url: "/DIM/Mapping/Convertdatasetmetadata",
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: JSON.stringify(sendData),
+                success: function (data) {
+                    _result = JSON.parse(data);
+                    if (_result.length != 0) {
+                        alert("succes");
+                        $.each(_result, function (index) {
+                            
+                            url = window.location.origin + '/ddm/data/Showdata?id=' + index
+                            console.log(url);
+                            window.open(url,'_blank');
+                            window.location.reload();
+                        });
+                    }
+                },
+                error: function (data) {
+                    alert("error !! "+
+                        "possible solutions : Mapping file not existing ...please create one and proceed to migrtion of dataset metadata."+
+                        "Contact portal administrator in case of further issues")
+                }
+            });
+            
+        }
+        
+    }
 
 </script>

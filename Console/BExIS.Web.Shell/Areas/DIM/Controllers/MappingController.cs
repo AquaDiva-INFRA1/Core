@@ -1,12 +1,23 @@
 ﻿using BExIS.Dim.Entities.Mapping;
 using BExIS.Dim.Helpers.Mapping;
 using BExIS.Dim.Services;
+using BExIS.Dlm.Entities.Administration;
+using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.MetadataStructure;
+using BExIS.Dlm.Services.Data;
+using BExIS.Dlm.Services.MetadataStructure;
 using BExIS.Modules.Dim.UI.Helper;
 using BExIS.Modules.Dim.UI.Models.Mapping;
+using BExIS.Xml.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using System.Xml;
+using System.Xml.Linq;
+using Vaiona.Persistence.Api;
 
 namespace BExIS.Modules.Dim.UI.Controllers
 {
@@ -59,7 +70,6 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
                     }
                 }
-
                 return View(model);
             }
  
@@ -160,7 +170,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
             });
         }
 
-        public ActionResult ReloadTarget(long sourceId = 1, long targetId = 0, LinkElementType sourceType = LinkElementType.System, LinkElementType targetType = LinkElementType.System, LinkElementPostion position = LinkElementPostion.Target)
+        public ActionResult ReloadTarget(long sourceId , long targetId , LinkElementType sourceType , LinkElementType targetType , LinkElementPostion position = LinkElementPostion.Target)
         {
             MappingManager mappingManager = new MappingManager();
 
@@ -195,7 +205,9 @@ namespace BExIS.Modules.Dim.UI.Controllers
             }
         }
 
-        public ActionResult ReloadMapping(long sourceId = 1, long targetId = 0, LinkElementType sourceType = LinkElementType.System, LinkElementType targetType = LinkElementType.System, LinkElementPostion position = LinkElementPostion.Target)
+        //public ActionResult ReloadMapping(long sourceId = 1, long targetId = 0, LinkElementType sourceType = LinkElementType.System, LinkElementType targetType = LinkElementType.System, LinkElementPostion position = LinkElementPostion.Target)
+
+        public ActionResult ReloadMapping(long sourceId , long targetId , LinkElementType sourceType , LinkElementType targetType , LinkElementPostion position = LinkElementPostion.Target)
         {
 
             MappingManager mappingManager = new MappingManager();
@@ -258,8 +270,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
                         }
                     }
                 }
-
-
+                
                 return PartialView("Mappings", model);
             }
             finally
@@ -363,5 +374,96 @@ namespace BExIS.Modules.Dim.UI.Controllers
             }
         }
 
+        [HttpPost]
+        public string Convertdatasetmetadata(string dataset_ids, long sourceId, long targetId)
+        {
+            Dictionary <long,string> datasets_return = new Dictionary<long,string>();
+            using (MetadataStructureManager msm = new MetadataStructureManager())
+            {
+                MetadataStructure ms = msm.Repo.Get().FirstOrDefault(x => x.Id == targetId);
+                using (DatasetManager dm = new DatasetManager())
+                {
+                    if (dataset_ids == null)
+                    {
+                        List<long> datasets = dm.GetDatasetLatestIds().Where(x => (dm.GetDataset(x).MetadataStructure.Id == sourceId) && 
+                            (dm.GetDataset(x).Status== DatasetStatus.CheckedIn)).ToList<long> ();
+                        datasets_return = datasets.ToDictionary(keySelector: m => m, elementSelector: m => dm.GetDatasetLatestVersion(m).Title);
+                        return JsonConvert.SerializeObject(datasets_return);
+                    }
+                    using (MappingManager mappingManager = new MappingManager())
+                    {
+                        List<Mapping> mappings = mappingManager.GetChildMapping(
+                            mappingManager.GetMappings().FirstOrDefault(x => x.Source.ElementId == sourceId && x.Target.ElementId == targetId).Source,
+                            mappingManager.GetMappings().FirstOrDefault(x => x.Source.ElementId == sourceId && x.Target.ElementId == targetId).Target
+                            ).ToList<Mapping>();
+
+                        foreach (string dataset_id in dataset_ids.Split(','))
+                        {
+                            long datasetId = long.Parse(dataset_id);
+
+                            if (dm.GetDataset(datasetId) == null)
+                                datasetId = dm.GetDatasetVersion(datasetId).Dataset.Id;
+
+                            dm.CheckOutDataset(datasetId, GetUsernameOrDefault());
+                            XmlDocument metadataDoc = dm.GetDatasetLatestMetadataVersion(datasetId);
+
+                            XmlMetadataWriter xmlMetadatWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
+                            XDocument metadataX = xmlMetadatWriter.CreateMetadataXml(targetId);
+                            XmlDocument metadataXml_target = XmlMetadataWriter.ToXmlDocument(metadataX);
+                            
+                            foreach (Mapping mapping in mappings)
+                            {
+                                try
+                                {
+                                    if (mapping.Source.XPath.Trim() != "")
+                                    {
+                                        XmlNodeList elemList_target = metadataXml_target.SelectNodes(mapping.Target.XPath); int index = 0;
+                                        foreach (XmlNode node in metadataDoc.SelectNodes(mapping.Source.XPath))
+                                        {
+                                            string source_value = node.InnerText.Trim();
+                                            elemList_target[index].InnerText = source_value;
+                                            index++;
+                                        }
+                                        
+                                    }
+                                }
+                                catch (NullReferenceException ex)
+                                {
+                                    //Reference of the title node is missing
+                                    throw new NullReferenceException("The extra-field of this metadata-structure is missing the title-node-reference!");
+                                }
+                            }
+
+                            DatasetVersion dsv = dm.GetDatasetWorkingCopy(datasetId);
+                            dsv.Metadata = metadataXml_target;
+                            dm.EditDatasetVersion(dsv, null, null, null);
+                            dm.CheckInDataset(datasetId, "Metadata Imported", GetUsernameOrDefault());
+
+                            using (IUnitOfWork unitOfWork = this.GetUnitOfWork())
+                            {
+                                Dataset ds = unitOfWork.GetReadOnlyRepository<Dataset>().Get().FirstOrDefault(x=>x.Id==datasetId);
+                                ds.MetadataStructure = ms;
+                                unitOfWork.Commit();
+                                datasets_return.Add(ds.Id, dm.GetDatasetLatestVersion(ds.Id).Title);
+                            }
+
+                        }
+                    }
+                }
+            }
+            return JsonConvert.SerializeObject(datasets_return);
+        }
+        
+        public string GetUsernameOrDefault()
+        {
+            string username = string.Empty;
+            try
+            {
+                username = HttpContext.User.Identity.Name;
+            }
+            catch { }
+
+            return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
+        }
     }
 }

@@ -5,21 +5,36 @@
 @section Information
 {
 
-    On this page you are able to export metadata to a standard compliant XML file, i.e. ABCD or EML.<br />
+    On this page you are able to export metadata to a standard compliant XML file, i.e. ABCD or EML.
+    <br />
     <ul>
         <li>Please select a metadata structure first (tab)</li>
         <li>Select one or more datasets to export</li>
         <li>Click the export button to create XML files</li>
     </ul>
-<p>
-    @* change this to an action link. Javad *@
-    <a href="/DIM/Help/Index" class="bx-informationLink" title="go to help" target="_blank">More</a>
-</p>
+    <p>
+        @* change this to an action link. Javad *@
+        <a href="/DIM/Help/Index" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
 }
 
-@if(@Model != null)
+@Html.DropDownListFor(m => m.MetadataStructuresDic, // Store selected value in Model.State
+
+                      // This argument needs some explanation - here we take a Distionary<string, string>
+                      // and turn it into an instance of SelectList, see blog post for more details
+                      new SelectList(Model.MetadataStructuresDic, "Key", "Value"),
+
+                      // Text for the first 'default' option
+                      "- Please select your target metadata structure to migrate the selected datasets -",
+
+                      // A class name to put on the "<select>"
+                      new { @class = "form-control" }
+                      )
+<br />
+
+@if (@Model != null)
 {
-	@(Html.Telerik().TabStrip()
+    @(Html.Telerik().TabStrip()
             .Name("ShowDataTabStrip")
             .SelectedIndex(0)
             .Items(tabs =>
