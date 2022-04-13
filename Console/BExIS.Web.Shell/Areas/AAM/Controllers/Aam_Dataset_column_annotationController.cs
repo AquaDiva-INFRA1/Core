@@ -51,23 +51,26 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 string characs = Convert.ToString(collection["characs"]);
                 string standards = Convert.ToString(collection["standards"]);
 
-                Aam_Dataset_column_annotationManager dca_m = new Aam_Dataset_column_annotationManager();
+                using (Aam_Dataset_column_annotationManager dca_m = new Aam_Dataset_column_annotationManager())
+                {
+                    using (DataStructureManager dsm = new DataStructureManager())
+                    {
+                        Variable variable = dsm.VariableRepo.Get().ToList<Variable>().FirstOrDefault(x => x.Id == int.Parse(DataAttributes));
 
-                DataStructureManager dsm = new DataStructureManager();
-                Variable variable = dsm.VariableRepo.Get().ToList<Variable>().FirstOrDefault(x => x.Id == int.Parse(DataAttributes));
+                        Aam_Dataset_column_annotation dca = new Aam_Dataset_column_annotation(
+                            new DatasetManager().GetDataset(Int64.Parse(datasets)),
+                            new DatasetManager().GetDatasetLatestVersion(Int64.Parse(datasets)),
+                            variable,
+                            new Aam_UriManager().get_Aam_Uri_by_id(Int64.Parse(entites)),
+                            new Aam_UriManager().get_Aam_Uri_by_id(Int64.Parse(characs)),
+                            new Aam_UriManager().get_Aam_Uri_by_id(Int64.Parse(standards))
+                            );
+                        dca_m.creeate_dataset_column_annotation(dca);
 
-                Aam_Dataset_column_annotation dca = new Aam_Dataset_column_annotation(
-                    new DatasetManager().GetDataset(Int64.Parse(datasets)),
-                    new DatasetManager().GetDatasetLatestVersion(Int64.Parse(datasets)),
-                    variable,
-                    new Aam_UriManager().get_Aam_Uri_by_id(Int64.Parse(entites)),
-                    new Aam_UriManager().get_Aam_Uri_by_id(Int64.Parse(characs)),
-                    new Aam_UriManager().get_Aam_Uri_by_id(Int64.Parse(standards))
-                    );
-                dca_m.creeate_dataset_column_annotation(dca);
-
-                dca_m.Dispose();
-                dsm.Dispose();
+                        dca_m.Dispose();
+                        dsm.Dispose();
+                    }
+                }
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -103,17 +106,17 @@ namespace BExIS.Modules.Aam.UI.Controllers
                     if (uri.type_uri.ToLower() == "entity")
                     {
                         dca_M.entites.TryGetValue(uri.Id, out k);
-                        if (k == null) dca_M.entites.Add(uri.Id, uri.Id + " - " + uri.URI);
+                        if (k == null) dca_M.entites.Add(uri.Id, uri.label + " - " + uri.URI + " - " + uri.Id);
                     }
                     if (uri.type_uri.ToLower() == "charachteristic")
                     {
                         dca_M.characs.TryGetValue(uri.Id, out k);
-                        if (k == null) dca_M.characs.Add(uri.Id, uri.Id + " - " + uri.URI);
+                        if (k == null) dca_M.characs.Add(uri.Id, uri.label + " - " + uri.URI + " - " + uri.Id);
                     }
                     if (uri.type_uri.ToLower() == "standard")
                     {
                         dca_M.standards.TryGetValue(uri.Id, out k);
-                        if (k == null) dca_M.standards.Add(uri.Id, uri.Id + " - " + uri.URI);
+                        if (k == null) dca_M.standards.Add(uri.Id, uri.label + " - " + uri.URI + " - " + uri.Id);
                     }
                 }
                 catch (Exception ex)
@@ -122,6 +125,9 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 }
 
             }
+            dca_M.entites = dca_M.entites.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value); ;
+            dca_M.standards = dca_M.standards.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value); 
+            dca_M.characs = dca_M.characs.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value); ;
             urim.Dispose();
         }
 

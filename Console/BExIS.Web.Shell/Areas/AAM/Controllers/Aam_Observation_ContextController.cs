@@ -59,9 +59,9 @@ namespace BExIS.Modules.Aam.UI.Controllers
                     if (uri.type_uri.ToLower() == "entity")
                     {
                         oca_M.Contextualized_entity.TryGetValue(uri.Id, out k);
-                        if (k == null) oca_M.Contextualized_entity.Add(uri.Id, uri.Id+" - " + uri.URI);
+                        if (k == null) oca_M.Contextualized_entity.Add(uri.Id, uri.label+" - "+ uri.URI + " - " + uri.Id);
                         oca_M.Contextualizing_entity.TryGetValue(uri.Id, out k);
-                        if (k == null) oca_M.Contextualizing_entity.Add(uri.Id, uri.Id +" - "+uri.URI);
+                        if (k == null) oca_M.Contextualizing_entity.Add(uri.Id, uri.label + " - " + uri.URI + " - " + uri.Id);
                     }
                 }
                 catch (Exception ex)
@@ -70,6 +70,8 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 }
 
             }
+            oca_M.Contextualized_entity = oca_M.Contextualized_entity.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value); ;
+            oca_M.Contextualizing_entity = oca_M.Contextualizing_entity.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
             urim.Dispose();
         }
 
