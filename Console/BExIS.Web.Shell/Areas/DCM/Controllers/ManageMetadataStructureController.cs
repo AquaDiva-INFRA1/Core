@@ -31,13 +31,15 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             using (DatasetManager dm = new DatasetManager())
             {
-                var s = dm.DatasetVersionRepo.Get().Where( x=> 
-                        x.ChangeDescription.Contains("Metadata was submited")
+                var all = dm.DatasetVersionRepo.Get();
+                DatasetVersion dv = all.FirstOrDefault(x =>
+                        x.ChangeDescription != null
+                        && x.ChangeDescription.Contains("Metadata was submited")
                         && x.Metadata.DocumentElement.Attributes[0] != null
-                        && long.Parse(x.Metadata.DocumentElement.Attributes[0].Value) == id
-                    );
+                        && long.Parse(x.Metadata.DocumentElement.Attributes[0].Value.ToString()) == id
+                        );
 
-                if (s.Any())
+                if (dv!=null)
                     return Json(false);
             }
 
