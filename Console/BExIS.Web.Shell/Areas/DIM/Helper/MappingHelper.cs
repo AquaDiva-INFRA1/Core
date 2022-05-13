@@ -852,7 +852,8 @@ namespace BExIS.Modules.Dim.UI.Helper
                     .FirstOrDefault(le =>
                     le.ElementId.Equals(leModel.ElementId) &&
                     le.Type.Equals(leModel.Type) &&
-                    le.Complexity.Equals(leModel.Complexity)
+                    le.Complexity.Equals(leModel.Complexity) &&
+                    le.XPath == leModel.XPath
                     //le.Parent.Id.Equals(parentId)
                     );
             }
@@ -1029,7 +1030,8 @@ namespace BExIS.Modules.Dim.UI.Helper
                 if (mappingManager.LinkElementRepo.Get()
                     .Any(le => le.ElementId.Equals(leModel.ElementId) &&
                     le.Type.Equals(leModel.Type) &&
-                    le.Complexity.Equals(leModel.Complexity)))
+                    le.Complexity.Equals(leModel.Complexity) &&
+                    le.XPath == leModel.XPath))
                 {
                     return true;
                 }
