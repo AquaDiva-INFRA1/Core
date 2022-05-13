@@ -40,10 +40,17 @@ namespace BExIS.Aam.Services
 
 
         private IUnitOfWork guow = null;
-        private IRepository<Aam_Dataset_column_annotation> AnnotationRepo;
+        private List<Aam_Dataset_column_annotation> AnnotationRepo;
 
         public Aam_Dataset_column_annotationManager()
         {
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                var Aam_Dataset_column_annotationRepo = uow.GetReadOnlyRepository<Aam_Dataset_column_annotation>();
+
+                // the requested version is earlier than the latest regardless of check-in/ out status or its the latest version and the dataset is checked in.
+                AnnotationRepo = Aam_Dataset_column_annotationRepo.Get().ToList<Aam_Dataset_column_annotation>();
+            }
 
         }
 
@@ -169,20 +176,16 @@ namespace BExIS.Aam.Services
 
         public List<Aam_Dataset_column_annotation> get_all_dataset_column_annotationByVariableLabel(String variableLabel)
         {
-            using (IUnitOfWork uow = this.GetUnitOfWork())
-            {
-                IRepository<Aam_Dataset_column_annotation> repo = uow.GetRepository<Aam_Dataset_column_annotation>();
-                var all = repo.Get();
-                return all.Where(an => an.variable_id.Label.ToLower().Equals(variableLabel.ToLower())).ToList();
-            }
+            return (List<Aam_Dataset_column_annotation>)AnnotationRepo.Where(an => (an.variable_id != null ) && (an.variable_id.Label.ToLower().Equals(variableLabel.ToLower()))).ToList();
+
         }
 
         public List<Aam_Dataset_column_annotation> get_all_dataset_column_annotationBy_Variable_measures(String variableLabel)
         {
             List<Aam_Dataset_column_annotation> annotation_suggestion = new List<Aam_Dataset_column_annotation>();
-            if (this.get_all_dataset_column_annotationByVariableLabel(variableLabel).Count > 0) annotation_suggestion.AddRange((List<Aam_Dataset_column_annotation>)this.get_all_dataset_column_annotationByVariableLabel(variableLabel));
-            if (this.get_all_dataset_column_annotationByVariable_DataStructure(variableLabel).Count > 0) annotation_suggestion.AddRange((List<Aam_Dataset_column_annotation>)this.get_all_dataset_column_annotationByVariable_DataStructure(variableLabel));
-            if (this.get_all_dataset_column_annotationByVariable_Unit(variableLabel).Count > 0) annotation_suggestion.AddRange((List<Aam_Dataset_column_annotation>)this.get_all_dataset_column_annotationByVariable_Unit(variableLabel));
+            annotation_suggestion.AddRange((List<Aam_Dataset_column_annotation>)this.get_all_dataset_column_annotationByVariableLabel(variableLabel));
+            annotation_suggestion.AddRange((List<Aam_Dataset_column_annotation>)this.get_all_dataset_column_annotationByVariable_DataStructure(variableLabel));
+            annotation_suggestion.AddRange((List<Aam_Dataset_column_annotation>)this.get_all_dataset_column_annotationByVariable_Unit(variableLabel));
             return annotation_suggestion;
         }
         public List<Aam_Dataset_column_annotation> get_all_dataset_column_annotationByVariable_DataStructure(String variableLabel)
@@ -190,13 +193,13 @@ namespace BExIS.Aam.Services
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 DataStructureManager dsm = new DataStructureManager();
-                IRepository<Aam_Dataset_column_annotation> repo = uow.GetRepository<Aam_Dataset_column_annotation>();
+                //IRepository<Aam_Dataset_column_annotation> repo = uow.GetRepository<Aam_Dataset_column_annotation>();
                 List<Variable> variables = (List<Variable>)dsm.VariableRepo.Get().ToList<Variable>().Where(x => x.Label.ToLower() == variableLabel.ToLower()).ToList<Variable>();
 
                 List<Aam_Dataset_column_annotation> List = new List<Aam_Dataset_column_annotation>();
                 foreach (Variable v in variables)
                 {
-                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)repo.Get().Where(an => an.variable_id.DataStructure == v.DataStructure).ToList();
+                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)AnnotationRepo.Where(an => (an.variable_id != null) && (an.variable_id.DataStructure == v.DataStructure)).ToList();
                     l.ForEach(x => List.Add(x));
                 }
                 dsm.Dispose();
@@ -209,13 +212,13 @@ namespace BExIS.Aam.Services
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 DataStructureManager dsm = new DataStructureManager();
-                IRepository<Aam_Dataset_column_annotation> repo = uow.GetRepository<Aam_Dataset_column_annotation>();
+                //IRepository<Aam_Dataset_column_annotation> repo = uow.GetRepository<Aam_Dataset_column_annotation>();
                 List<Variable> variables = (List<Variable>)dsm.VariableRepo.Get().ToList<Variable>().Where(x => x.Label.ToLower() == variableLabel.ToLower()).ToList<Variable>();
 
                 List<Aam_Dataset_column_annotation> List = new List<Aam_Dataset_column_annotation>();
                 foreach (Variable v in variables)
                 {
-                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)repo.Get().Where(an => an.variable_id.DataAttribute.Unit == v.DataAttribute.Unit).ToList();
+                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)AnnotationRepo.Where(an => (an.variable_id != null) && (an.variable_id.DataAttribute.Unit == v.DataAttribute.Unit)).ToList();
                     l.ForEach(x => List.Add(x));
                 }
                 dsm.Dispose();
