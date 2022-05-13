@@ -21,11 +21,15 @@ using System.Threading.Tasks;
 using System.Web.Configuration;
 using System.Xml;
 using Vaiona.Persistence.Api;
+using Vaiona.Logging;
+using System.IO;
+using Vaiona.Utils.Cfg;
 
 namespace BEXIS.ASM.Services
 {
     public class summaryManager : ISummary
     {
+        private string trainig_path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "training.csv");
         private XmlDatasetHelper xmlDatasetHelper ;
         HttpClient client;
         public summaryManager()
@@ -64,120 +68,129 @@ namespace BEXIS.ASM.Services
             StringBuilder str = new StringBuilder();
             str.AppendLine("datasetID;Datasetversion_id;variable_id;unit;type;entity_id;entity;charachteristic_id;charachteristic;" +
                 "standard_id;standard;dataset_title;owner;project;variable_id_from_table;variable_value");
-
+            write_out(str.ToString(),true);
             DataStructureManager dsm = new DataStructureManager();
             DatasetManager dm = new DatasetManager();
             Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
             List<Aam_Dataset_column_annotation> all_annot = aam.get_all_dataset_column_annotation();
+            var structureRepo = dsm.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
 
-            try
-            {
-                List<string> temp = datasetids.Split(';').ToList<string>();
+            List<string> temp = datasetids.Split(';').ToList<string>();
                 List<Int64> req_ds = temp.Select(s => Int64.Parse(s)).ToList();
                 foreach (Int64 id in req_ds)
                 {
-                    all_annot = (List<Aam_Dataset_column_annotation>)all_annot.FindAll(x => req_ds.Contains(x.Dataset.Id));
-                    var structureRepo = dsm.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
-                    StructuredDataStructure ds = structureRepo.Get(dm.GetDataset(id).DataStructure.Id);
-                    if (ds.Self.GetType() == typeof(StructuredDataStructure))
+                    Debug.WriteLine("parsing dataset : " + id);
+                    try
                     {
-                        #region metadat extraction
-                        XmlDocument xmlDoc = dm.GetDatasetLatestMetadataVersion(id);
-                        XmlNode root = xmlDoc.DocumentElement;
-                        string idMetadata = root.Attributes["id"].Value;
-                        string owner = "none";
-                        string project = "none";
-                        string title = xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) != "" ?
-                            xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) : "No title";
-                        if (idMetadata == "1")
+                        StructuredDataStructure ds = structureRepo.Get(dm.GetDataset(id).DataStructure.Id);
+                        if (ds.Self.GetType() == typeof(StructuredDataStructure))
                         {
-                            XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Givenname/Name");
-                            XmlNodeList nodeList_Surname = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Surname/Name");
-                            owner = nodeList_givenName[0].InnerText + " " + nodeList_Surname[0].InnerText;
-                            XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Title/Title");
-                            XmlNodeList nodeList_Personnelgivenname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelgivenname/Name");
-                            XmlNodeList nodeList_Personnelsurname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelsurname/Name");
-                            project = nodeList_Title[0].InnerText + "/" + nodeList_Personnelgivenname[0].InnerText + " " + nodeList_Personnelsurname[0].InnerText;
-                        }
-                        else if (idMetadata == "2")
-                        {
-                            XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Owner/Owner/FullName/Name");
-                            owner = nodeList_givenName[0].InnerText;
-                            XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Owner/Owner/Role/Role");
-                            XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceInstitutionID/Id");
-                            XmlNodeList nodeList_SourceID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceID/Id");
-                            XmlNodeList nodeList_UnitID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/UnitID/Id");
-                            project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText + " - " + nodeList_SourceID[0].InnerText + " - " + nodeList_UnitID[0].InnerText;
-                        }
-                        else if (idMetadata == "3")
-                        {
-                            XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Person/PersonName/FullName/FullNameType");
-                            foreach (XmlElement node in nodeList_givenName)
+                            #region metadat extraction
+                            XmlDocument xmlDoc = dm.GetDatasetLatestMetadataVersion(id);
+                            XmlNode root = xmlDoc.DocumentElement;
+                            string idMetadata = root.Attributes["id"].Value;
+                            string owner = "none";
+                            string project = "none";
+                            string title = xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) != "" ?
+                                xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) : "No title";
+                            if (idMetadata == "1")
                             {
-                                owner = node.InnerText + " - " + owner;
+                                XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Givenname/Name");
+                                XmlNodeList nodeList_Surname = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Surname/Name");
+                                owner = nodeList_givenName[0].InnerText + " " + nodeList_Surname[0].InnerText;
+                                XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Title/Title");
+                                XmlNodeList nodeList_Personnelgivenname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelgivenname/Name");
+                                XmlNodeList nodeList_Personnelsurname = xmlDoc.SelectNodes("/Metadata/Project/ProjectEML/Personnelsurname/Name");
+                                project = nodeList_Title[0].InnerText + "/" + nodeList_Personnelgivenname[0].InnerText + " " + nodeList_Personnelsurname[0].InnerText;
                             }
-                            XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/Name/Label/Representation/RepresentationType/Text/TextType");
-                            XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/OrgUnits/OrgUnitsType/OrgUnit/OrgUnitType");
-                        }
-                        #endregion
-
-                        foreach (Variable var in ds.Variables)
-                        {
-                            #region entity and characteristics extraction
-                            Aam_Dataset_column_annotation variable_annotation = all_annot.Where(x => (x.variable_id.Id == var.Id) && (x.Dataset.Id == id)).FirstOrDefault();
-                            #endregion
-
-                            #region create file content
-                            string ch = id + ";";
-                            ch = ch + dm.GetDatasetLatestVersion(id).Id + ";";
-                            ch = ch + var.Id + ";";
-                            ch = ch + var.Unit.Name + ";";
-                            ch = ch + var.DataAttribute.DataType.Name + ";";
-                            ch = ch + variable_annotation?.entity_id.Id + ";";
-                            ch = ch + variable_annotation?.entity_id.URI + ";";
-                            ch = ch + variable_annotation?.characteristic_id.Id + ";";
-                            ch = ch + variable_annotation?.characteristic_id.URI + ";";
-                            ch = ch + variable_annotation?.standard_id.Id + ";";
-                            ch = ch + variable_annotation?.standard_id.URI + ";";
-                            ch = ch + title.Replace(';', ' ') + " ; " + owner.Replace(';', ' ') + " ; " + project.Replace(';', ' ') + " ; ";
-                            #endregion
-
-                            #region #region extract primary data
-                            DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
-                            int n = 0;
-                            string values = "";
-                            for (int i = 0; i < table.Columns.Count; i++)
+                            else if (idMetadata == "2")
                             {
-                                if (table.Rows[i]["var" + var.Id].ToString().Replace(';', ' ').Trim().Length != 0)
+                                XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Owner/Owner/FullName/Name");
+                                owner = nodeList_givenName[0].InnerText;
+                                XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Owner/Owner/Role/Role");
+                                XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceInstitutionID/Id");
+                                XmlNodeList nodeList_SourceID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/SourceID/Id");
+                                XmlNodeList nodeList_UnitID = xmlDoc.SelectNodes("/Metadata/Unit/Unit/UnitID/Id");
+                                project = nodeList_Title[0].InnerText + "/" + nodeList_SourceInstitutionID[0].InnerText + " - " + nodeList_SourceID[0].InnerText + " - " + nodeList_UnitID[0].InnerText;
+                            }
+                            else if (idMetadata == "3")
+                            {
+                                XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Person/PersonName/FullName/FullNameType");
+                                foreach (XmlElement node in nodeList_givenName)
                                 {
-                                    if (!(values.Contains(table.Rows[i]["var" + var.Id].ToString().Replace(';', ' ').Trim())))
+                                    owner = node.InnerText + " - " + owner;
+                                }
+                                XmlNodeList nodeList_Title = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/Name/Label/Representation/RepresentationType/Text/TextType");
+                                XmlNodeList nodeList_SourceInstitutionID = xmlDoc.SelectNodes("/Metadata/Metadata/MetadataType/Owners/OwnersType/Owner/Contact/Organisation/Organisation/OrgUnits/OrgUnitsType/OrgUnit/OrgUnitType");
+                            }
+                            #endregion
+
+                            foreach (Variable var in ds.Variables)
+                            {
+                                #region entity and characteristics extraction
+                                Aam_Dataset_column_annotation variable_annotation = all_annot.Where(x => (x.variable_id.Id == var.Id) && (x.Dataset.Id == id)).FirstOrDefault();
+                                #endregion
+
+                                #region create file content
+                                string ch = id + ";";
+                                ch = ch + dm.GetDatasetLatestVersion(id).Id + ";";
+                                ch = ch + var?.Id + ";";
+                                ch = ch + var?.Unit?.Name + ";";
+                                ch = ch + var?.DataAttribute?.DataType?.Name + ";";
+                                ch = ch + variable_annotation?.entity_id.Id + ";";
+                                ch = ch + variable_annotation?.entity_id.URI + ";";
+                                ch = ch + variable_annotation?.characteristic_id.Id + ";";
+                                ch = ch + variable_annotation?.characteristic_id.URI + ";";
+                                ch = ch + variable_annotation?.standard_id.Id + ";";
+                                ch = ch + variable_annotation?.standard_id.URI + ";";
+                                ch = ch + title?.Replace(';', ' ') + " ; " + owner?.Replace(';', ' ') + " ; " + project?.Replace(';', ' ') + " ; ";
+                                #endregion
+
+                                #region #region extract primary data
+                                DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
+                                int n = 0;
+                                string values = "";
+                                for (int i = 0; i < table.Columns.Count; i++)
+                                {
+                                    if ((table.Rows.Count>0)&&(table.Rows[i]["var" + var.Id].ToString().Replace(';', ' ').Trim().Length != 0))
                                     {
-                                        values = values + table.Rows[i]["var" + var.Id].ToString().Replace(';', ' ').Trim() + "-";
-                                        n = n + 1;
+                                        if (!(values.Contains(table.Rows[i]["var" + var.Id].ToString().Replace(';', ' ').Trim())))
+                                        {
+                                            values = values + table.Rows[i]["var" + var.Id].ToString().Replace(';', ' ').Trim() + "-";
+                                            n = n + 1;
+                                        }
+                                    }
+                                    if (n % 30 == 0)
+                                    {
+                                        str.AppendLine(ch + var?.Label?.Replace(';', ' ') + " ; " + values + " ; ");
+                                        write_out(ch + var?.Label?.Replace(';', ' ') + " ; " + values + " ; ", false);
+                                        values = "";
                                     }
                                 }
-                                if (n % 30 == 0)
-                                {
-                                    str.AppendLine(ch + var.Label.Replace(';', ' ') + " ; " + values + " ; ");
-                                    values = "";
+                                if (values != "") {
+                                    str.AppendLine(ch + var?.Label?.Replace(';', ' ') + " ; " + values + " ; ");
+                                    write_out(ch + var?.Label?.Replace(';', ' ') + " ; " + values + " ; " , false);
                                 }
+                                #endregion
                             }
-                            if (values != "") str.AppendLine(ch + var.Label.Replace(';', ' ') + " ; " + values + " ; ");
-                            #endregion
+
                         }
-
                     }
-                    
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-
             return str.ToString();
         }
 
+        private void write_out(string ch, bool init)
+        {
+            using (StreamWriter writer = new StreamWriter(trainig_path, !init))
+            {
+                writer.WriteLine(ch);
+            }
+        }
         private string csv_to_json(string content)
         {
             StringBuilder sb = new StringBuilder();
@@ -187,6 +200,14 @@ namespace BEXIS.ASM.Services
                     w.Write(p);
             }
             return sb.ToString();
+        }
+
+        public async Task<string> export_training_summary()
+        {
+            using (DatasetManager dm = new DatasetManager())
+            {
+                return prepare_for_classification(String.Join(";", dm.GetDatasetIds()));
+            }
         }
         #endregion
 

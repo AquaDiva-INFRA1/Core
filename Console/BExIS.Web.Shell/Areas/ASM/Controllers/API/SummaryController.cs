@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Web.Configuration;
 using System.Web.Http;
 using Newtonsoft.Json.Linq;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.ASM.UI.Controllers
 {
@@ -39,13 +40,30 @@ namespace BExIS.Modules.ASM.UI.Controllers
             string res = this.Request.Content.ReadAsStringAsync().Result.ToString();
             Dictionary<string, string> dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(res);
 
-            string dataset; 
+            string dataset;
             dict.TryGetValue("data", out dataset);
-            string username; 
+            string username;
             dict.TryGetValue("username", out username);
 
             string result = await _summary.get_analysisAsync(dataset, username);
             return result;
+        }
+
+        [BExISApiAuthorize]
+        [HttpPost]
+        [PostRoute("api/Summary/export_training_summary")]
+        [GetRoute("api/Summary/export_training_summary")]
+        public async void export_training_summary()
+        {
+            /*
+            string result_ = await _summary.export_training_summary();
+            
+            var result = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(result_)
+            };
+            */
+            await _summary.export_training_summary();
         }
 
         [BExISApiAuthorize]
