@@ -75,7 +75,7 @@ namespace BExIS.Modules.Asm.UI.Helpers
 
                 //// APIs
                 Feature API = featureManager.FeatureRepository.Get().FirstOrDefault(f => 
-                    f.Name.Equals("API") &&
+                    f.Name.Equals("ASM API") &&
                     f.Parent != null &&
                     f.Parent.Equals(ASM));
                 if (API == null) API = featureManager.Create("ASM API", "ASM API", ASM);
