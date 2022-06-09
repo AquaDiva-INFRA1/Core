@@ -10,17 +10,20 @@
 
 
 </head>
-Connected Terminologies :
-<div class="row" id="terminoloies">
-	<span class="badge badge-light">No Match</span><br>
+
+
+<div class="row" id="terminoloies"hidden="true">
+    
+    <span class="badge badge-light">No Match</span><br>
 </div>
 <br />
-Matched terms :
-<div class="row" id="matched_terms">
-	<span class="badge badge-light">No Match</span><br>
-	<br />
+
+<div class="row" id="matched_terms" hidden="true">
+    <span class="badge badge-light">No Match</span><br>
+    <br />
 </div>
 <br />
+
 <div class="row">
 	<div id="map">
 		<center>
@@ -85,7 +88,7 @@ Matched terms :
                     }
                     console.debug('links:' + links)
                     // matched terms extraction
-                    var matched_terms = "";
+                    var matched_terms = "Matched terms : ";
                     for (var k = 0; k < jsonObject['keywords'].length; k++) {
                         var ell = jsonObject['keywords'][k];
                         console.log("keyword :  " + ell)
@@ -94,6 +97,7 @@ Matched terms :
                     }
 					console.debug('matched_terms: ' + matched_terms)
                     document.getElementById("matched_terms").innerHTML = matched_terms;
+                    document.getElementById("matched_terms").removeAttribute("hidden");
 
                     // terminologies extracttion
                     domains = ["Sites", "BioGeoChemichals", "Cycles", "Matter Cycles",
@@ -118,7 +122,7 @@ Matched terms :
 						}
                     }
 					console.debug('classRes: ' + class_res)
-                    terminoloies = "";
+                    terminoloies = "Connected Terminologies : ";
                     //getting corresponding class name??
                     //for (var k = 0; k < class_res.length; k++) {
                     //    var ell = jsonObject['keywords'][k];
@@ -133,7 +137,8 @@ Matched terms :
                     }
 					console.debug(terminoloies)
                     //document.getElementById("matched_terms").innerText = terminoloies;
-					document.getElementById("terminoloies").innerHTML = terminoloies;
+                    document.getElementById("terminoloies").innerHTML = terminoloies;
+                    document.getElementById("terminoloies").removeAttribute("hidden");
                 }
             },
             complete: function () {
@@ -152,8 +157,21 @@ Matched terms :
                 };
                 console.log(data);
 
-                var options = {}
+
+                var options = {
+                    physics: {
+                        stabilization: {
+                            enabled: false
+                        }
+                    }
+                };
+
                 var network = new vis.Network(container, data, options);
+                network.setOptions(options);
+
+                $("#mynetwork").height(500);
+                $("#mynetwork").css('border', '3px solid black');
+
                 network.on('click', function (properties) {
                     document.getElementById("datasets_list").setAttribute("hidden", true);
                     var ids = properties.nodes;
@@ -197,9 +215,6 @@ Matched terms :
                     document.getElementById("datasets_list").removeAttribute("hidden");
 
                 })
-                $("#mynetwork").height(500);
-                $("#mynetwork").css('border', '3px solid black');
-
             }
         });
         }
@@ -236,6 +251,7 @@ Matched terms :
             return (el.from == elem.from) && (el.to == elem.to);
       });
 }
+
 
 
 </script>
