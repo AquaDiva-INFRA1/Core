@@ -14,6 +14,7 @@ using BExIS.Xml.Helpers;
 using F23.StringSimilarity;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Entities.Authorization;
+using Vaiona.Logging;
 
 namespace BExIS.Aam.Services
 {
@@ -135,7 +136,7 @@ namespace BExIS.Aam.Services
             }
         }
 
-        public Aam_Dataset_column_annotation get_dataset_column_annotation_by_variable(Variable id)
+        public List<Aam_Dataset_column_annotation> get_dataset_column_annotation_by_variable(Variable id)
         {
             try
             {
@@ -144,13 +145,15 @@ namespace BExIS.Aam.Services
                     var Aam_Dataset_column_annotationRepo = uow.GetReadOnlyRepository<Aam_Dataset_column_annotation>();
 
                     // the requested version is earlier than the latest regardless of check-in/ out status or its the latest version and the dataset is checked in.
-                    Aam_Dataset_column_annotation an = Aam_Dataset_column_annotationRepo.Query(p => p.variable_id == id).FirstOrDefault();
+                    List<Aam_Dataset_column_annotation> an = Aam_Dataset_column_annotationRepo.Query(p => p.variable_id == id).ToList<Aam_Dataset_column_annotation>();
                     return (an);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return new Aam_Dataset_column_annotation();
+                LoggerFactory.GetFileLogger().LogCustom(e.Message);
+                LoggerFactory.GetFileLogger().LogCustom(e.StackTrace);
+                return new List<Aam_Dataset_column_annotation>();
             }
         }
 

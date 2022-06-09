@@ -32,7 +32,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         }
 
         [BExISApiAuthorize]
-        [HttpPost]
+        [HttpPost,HttpGet]
         [PostRoute("api/Summary/getSummary")]
         [GetRoute("api/Summary/getSummary")]
         public async Task<string> getSummary()
