@@ -488,10 +488,10 @@ namespace BExIS.Aam.Services
                 {
                     index++;
                     cmd = " INSERT INTO dataset_column_annotation VALUES ( " +
-                        annot.Dataset.Id + ", " + dsm.GetDatasetLatestVersion(annot.Dataset.Id).Id + " , " + annot.Dataset.VersionNo + ", \'" + annot.variable_id.Id + "\' , \' " +
-                        annot.entity_id.URI + " \' , \' " + annot.characteristic_id.URI + "\' , \' " + annot.standard_id.URI + "\' ,  " +
+                        annot.Dataset.Id + ", " + dsm.GetDatasetLatestVersion(annot.Dataset.Id).Id + " , " + annot.Dataset.VersionNo + ", \'" + annot.variable_id.Id + "\' , \'" +
+                        clean_entity_URI_for_insert(annot.entity_id.URI) + "\' , \'" + clean_entity_URI_for_insert(annot.characteristic_id.URI) + "\' , \'" + clean_entity_URI_for_insert(annot.standard_id.URI) + "\' ,  " +
                        annot.entity_id.Id + " , " + annot.characteristic_id.Id + ", " + annot.standard_id.Id + ", " + index + " ,  \'" +
-                        annot.entity_id.label + " \' ,  \' " + annot.characteristic_id.label + " \' , \' " + annot.standard_id.label + " \' )";
+                        annot.entity_id.label + "\' ,  \'" + annot.characteristic_id.label + "\' , \'" + annot.standard_id.label + "\' )";
                     MyCmd = new NpgsqlCommand(cmd, MyCnx);
                     b = MyCmd.ExecuteNonQuery();
                 }
@@ -512,7 +512,7 @@ namespace BExIS.Aam.Services
                     index++;
                     cmd = "INSERT INTO observation_contexts VALUES (" +
                     obs.Dataset.Id + ", " + dsm.GetDatasetLatestVersion(obs.Dataset.Id).Id + ",  \'" 
-                    + obs.Contextualized_entity.URI + "\' ,  \'" + obs.Contextualizing_entity.URI +"\' , " + 
+                    + clean_entity_URI_for_insert(obs.Contextualized_entity.URI) + "\' ,  \'" + clean_entity_URI_for_insert(obs.Contextualizing_entity.URI) +"\' , " + 
                     obs.Contextualized_entity.Id + " , " + obs.Contextualizing_entity.Id  +", " + index + " )";
                     MyCmd = new NpgsqlCommand(cmd, MyCnx);
                     b = MyCmd.ExecuteNonQuery();
@@ -529,6 +529,11 @@ namespace BExIS.Aam.Services
             return errors;
         }
 
+
+        private string clean_entity_URI_for_insert(string uri)
+        {
+            return uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", "").Replace(" ","").Replace("'","");
+        }
 
         #region (Private) Helper functions
         /// <summary>

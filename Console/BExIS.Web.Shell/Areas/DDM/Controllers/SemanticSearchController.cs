@@ -34,6 +34,8 @@ using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Aam.Services;
 using BExIS.Aam.Entities.Mapping;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -125,7 +127,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 //Merge the results from the semantic search with the results from the normal bexis-search
                 //Alternative: Skip the merging: 
-                model.semanticComponent = semanticSearch(searchTerm, Seamntic_depth,  Error_distance);
+                model.semanticComponent = semanticSearchAsync(searchTerm, Seamntic_depth,  Error_distance).Result;
                 //model.semanticComponent = searchAndMerge(semanticSearch(searchTerm), searchTerm);
             }
 
@@ -712,231 +714,124 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         /* Calls the search-Server which returns DatasetIDs and VersionIDs
             * Then looks for the specified DatasetVersion and displays it
             * */
-        private System.Data.DataTable semanticSearch(String searchTerm, string Seamntic_depth, string Error_distance)
+        private async Task<DataTable> semanticSearchAsync(String searchTerm, string Seamntic_depth, string Error_distance)
         {
-            //debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+            using (var client = new HttpClient())
             {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " semanticSearch is called ");
-            }
+                Dictionary<string, string> dict_data = new Dictionary<string, string>();
+                dict_data.Add("key", string.Join(" , ", searchTerm));
+                dict_data.Add("depth", Seamntic_depth);
+                dict_data.Add("error-distance", Error_distance);
 
-            #region Load mapping dictionary from file
-            string[] lines = global::System.IO.File.ReadAllLines(mappingDictionaryFilePath);
-            string json = String.Join("", lines);
-
-            //debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Read All Lines from  : " + mappingDictionaryFilePath);
-            }
-
-            mappingDic = JsonConvert.DeserializeObject<Dictionary<String, List<OntologyMapping>>>(json, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Objects,
-                TypeNameAssemblyFormat = global::System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple,
-            });
-            #endregion
-
-            #region Check dictionary for hits
-            //Split searchTerm into Tokens
-            List<String> tokens = searchTerm.Split(',').ToList();
-            //Trim tokens
-            List<String> trimmedTokens = tokens.Select(x => x.Trim()).ToList<String>();
-            //Filter out empty Tokens
-            trimmedTokens = trimmedTokens.Where(x => x != "").ToList<String>();
-            //Lower case for all tokens
-            trimmedTokens = trimmedTokens.Select(x => x.ToLower()).ToList<String>();
-
-            //debugging file
-            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-            {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Trimmed tokens : " + String.Join(String.Empty, trimmedTokens.ToArray()));
-            }
-
-            //Search for each Token in the dictionary and build API parameters
-            StringBuilder paramBuilder = new StringBuilder();
-            paramBuilder.Append("query=");
-            foreach (String token in trimmedTokens)
-            {
-                List<OntologyMapping> mappingList;
-                if ((!(mappingDic == null)) && (mappingDic.TryGetValue(token, out mappingList)))
+                var json_ = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);
+                using (var stringContent = new StringContent("["+json_+"]" , Encoding.UTF8, "application/json"))
                 {
-                    if (mappingList.Count >= 1)
+                    string output = "";
+                    try
                     {
-                        //debugging file
-                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                        {
-                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : token : " + token + " has matched with the mapping file : \n ");
-                        }
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        var responseTask = client.PostAsync(semanticSearchURL, stringContent).Result;
+                        output = await responseTask.Content.ReadAsStringAsync();
+                    }
+                    catch (SocketException e)
+                    {
+                        model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
+                    }
+                    catch (AggregateException e)
+                    {
+                        model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
+                    }
+                    //JObject json_class = JObject.Parse((string)JToken.Parse(output));
+                    model.serachFlag = true;
+                    model.semanticComponent = CreateDataTable(headerItems);
+                    //Parse the search-output
+                    object obj = null;
+                    try
+                    {
+                        obj = JsonConvert.DeserializeObject<object>(output);
 
-                        foreach (OntologyMapping mapping in mappingList)
+                    }
+                    catch (Newtonsoft.Json.JsonSerializationException)
+                    {
+                        //Do nothing when the Server states that it didn't find any results
+                        model.semanticSearchServerError = "No results found.";
+                    }
+
+                    System.Data.DataTable m;
+                    m = CreateDataTable(headerItems);
+
+                    #region find metadata and fill DataTable
+                    if (obj != null)
+                    {
+                        #region cleaning ids of datasets so they can be put in the table as id should be unique
+                        List<JObject> clean_ids = new List<JObject>();
+                        foreach (JObject res in (JArray) obj)
                         {
-                            paramBuilder.Append(mapping.getDisplayName() + "+" + mapping.getMappedConceptGroup() + "+"
-                        + mapping.getMappedConceptUri() + "+" + mapping.getBaseUri());
-                            paramBuilder.Append("--");
-                            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                            Boolean b = false;
+                            foreach (JObject r in clean_ids)
                             {
-                                sw.WriteLine(mapping.getDisplayName() + " -> " + mapping.getMappedConceptGroup() + " -> " + mapping.getMappedConceptUri() + " -> " + mapping.getBaseUri() + "\n");
+                                if (r["dataset_id"] == res["dataset_id"])
+                                {
+                                    b = true;
+                                    break;
+                                }
                             }
+                            if (!b) clean_ids.Add(res);
                         }
-                    }
+                        #endregion
 
-                }
-                else
-                {
-                    paramBuilder.Append(token + "+" + "empty" + "+" + "empty" + "+" + "empty");
-                    paramBuilder.Append("--");
-                }
-            }
-            paramBuilder.Append("&params=" + Seamntic_depth + "--" + Error_distance);
-            Debug.WriteLine(paramBuilder.ToString());
-
-
-            #endregion
-
-            #region Http-Request and result-Parsing
-            //Construct a HttpClient for the search-Server
-            using (HttpClient client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(semanticSearchURL);
-
-                //Set the searchTerm as query-String
-                //String param = HttpUtility.UrlEncode(paramBuilder.ToString().Replace(" ", " "));
-                String param = HttpUtility.UrlEncode(paramBuilder.ToString());
-
-                //debugging file
-                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                {
-                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Parameters passed to the semantic Search API : " + param);
-                }
-                string output = "";
-
-                try
-                {
-                    HttpResponseMessage response = client.GetAsync(paramBuilder.ToString()).Result;  // Blocking call!
-                    if (response.IsSuccessStatusCode)
-                    {
-                        model.serachFlag = true;
-                        // Get the response body. Blocking!
-                        output = response.Content.ReadAsStringAsync().Result;
-
-                        model.semanticComponent = CreateDataTable(headerItems);
-
-                        //debugging file
-                        using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                        foreach (JObject r in (JArray)obj)
                         {
-                            sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : REsponse Correct from Semantic search with results: " + output);
-                        }
+                            DataRow row = m.NewRow();
+                            row["ID"] = Int64.Parse((string)r["dataset_id"]);
+                            //row["VersionID"] = Int64.Parse(r.versionno);
 
-                    }
-                }
-                catch (SocketException e)
-                {
-                    model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
-                    //debugging file
-                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                    {
-                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Socket exception in Semantic Search: " + e.Message);
-                    }
-                }
-                catch (AggregateException e)
-                {
-                    model.semanticSearchServerError = "An error occured when trying to connect to the Semantic Search Server. Please try again later.";
-                    //debugging file
-                    using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                    {
-                        sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Aggregate Exception in Semantic Search: " + e.Message);
-                    }
-                }
+                            //Grab the Metadata of the current ID
+                            long datasetID = long.Parse((string)r["dataset_id"]);
+                            string description = "";
+                            string title = "";
+                            string owner = "";
 
-                //Parse the search-output
-                SemanticSearchResultIds ids = null;
-                try
-                {
-                    ids = JsonConvert.DeserializeObject<SemanticSearchResultIds>(output);
-                }
-                catch (Newtonsoft.Json.JsonSerializationException)
-                {
-                    //Do nothing when the Server states that it didn't find any results
-                    model.semanticSearchServerError = "No results found.";
-                }
-
-                #endregion
-                System.Data.DataTable m;
-                m = CreateDataTable(headerItems);
-
-                #region find metadata and fill DataTable
-                if (ids != null && ids.result != null)
-                {
-                    #region cleaning ids of datasets so they can be put in the table as id should be unique
-                    List<Result> clean_ids = new List<Result>();
-                    foreach (Result res in ids.result)
-                    {
-                        Boolean b = false;
-                        foreach (Result r in clean_ids)
-                        {
-                            if (r.dataset_id == res.dataset_id)
+                            Dataset dataset = null;
+                            using (IUnitOfWork uow = this.GetUnitOfWork())
                             {
-                                b = true;
-                                break;
+                                var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
+                                dataset = datasetRepo.Get(datasetID);
                             }
+
+                            try
+                            {
+                                if (dataset != null)
+                                {
+                                    //Grab the Metadata
+                                    XmlDatasetHelper helper = new XmlDatasetHelper();
+                                    description = helper.GetInformation(datasetID, NameAttributeValues.description);
+                                    title = helper.GetInformation(datasetID, NameAttributeValues.title);
+                                    owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
+
+                                    row["Title"] = title;
+                                    row["Datasetdescription"] = description;
+                                    row["Owner"] = owner;
+
+                                    m.Rows.Add(row);
+                                }
+                            }
+                            catch (Exception exception)
+                            {
+                                using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
+                                {
+                                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Aggregate Exception in Semantic Search: " + exception.Message);
+                                }
+                            }
+
+
                         }
-                        if (!b) clean_ids.Add(res);
                     }
                     #endregion
-
-                    foreach (Result r in ids.result)
-                    {
-                        DataRow row = m.NewRow();
-                        row["ID"] = Int64.Parse(r.dataset_id);
-                        //row["VersionID"] = Int64.Parse(r.versionno);
-
-                        //Grab the Metadata of the current ID
-                        long datasetID = long.Parse(r.dataset_id);
-                        string description = "";
-                        string title = "";
-                        string owner = "";
-
-                        Dataset dataset = null;
-                        using (IUnitOfWork uow = this.GetUnitOfWork())
-                        {
-                            var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
-                            dataset = datasetRepo.Get(datasetID);
-                        }
-
-                        try
-                        {
-                            if (dataset != null)
-                            {
-                                //Grab the Metadata
-                                XmlDatasetHelper helper = new XmlDatasetHelper();
-                                description = helper.GetInformation(datasetID, NameAttributeValues.description);
-                                title = helper.GetInformation(datasetID, NameAttributeValues.title);
-                                owner = helper.GetInformation(datasetID, NameAttributeValues.owner);
-
-                                row["Title"] = title;
-                                row["Datasetdescription"] = description;
-                                row["Owner"] = owner;
-
-                                m.Rows.Add(row);
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
-                            {
-                                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Semantic Search Aggregate Exception in Semantic Search: " + exception.Message);
-                            }
-                        }
-
-
-                    }
+                    if (m.Rows.Count > 0) return m;
+                    return searchAndMerge(m, searchTerm);
                 }
-                #endregion
-                if (m.Rows.Count > 0) return m;
-                return searchAndMerge(m, searchTerm);
             }
-            //return m;
         }
 
         /*
@@ -1570,6 +1465,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         */
         #endregion
 
-        
+
     }
 }

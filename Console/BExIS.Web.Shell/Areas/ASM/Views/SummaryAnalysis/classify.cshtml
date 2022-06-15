@@ -1,19 +1,19 @@
 ﻿@model Int64
 @using BExIS.Modules.Asm.UI.Models;
-
+@using System.Web.Mvc;
 
 
 <head>
-	<script type="text/javascript" src='@Url.Content("~/Scripts/vis/vis.js")'></script>
+    <script type="text/javascript" src='@Url.Content("~/Scripts/vis/vis.js")'></script>
 
-	<link href='@Url.Content("~/Scripts/vis/vis-network.min.css")' rel="stylesheet" type="text/css" />
+    <link href='@Url.Content("~/Scripts/vis/vis-network.min.css")' rel="stylesheet" type="text/css" />
 
 
 </head>
 
 
-<div class="row" id="terminoloies"hidden="true">
-    
+<div class="row" id="terminoloies" hidden="true">
+
     <span class="badge badge-light">No Match</span><br>
 </div>
 <br />
@@ -25,201 +25,28 @@
 <br />
 
 <div class="row">
-	<div id="map">
-		<center>
-			<div id="mynetwork"></div>
-		</center>
-	</div>
-	<div class="row">
-		<div id="datasets_list" hidden="true">
-		</div>
-	</div>
+    <div id="map">
+        <center>
+            <div id="mynetwork"></div>
+        </center>
+    </div>
+    <div class="row">
+        <div id="datasets_list" hidden="true">
+        </div>
+    </div>
 </div>
 
 <div id="spinner_loader" hidden="true">
-	<center><i class="fa fa-spinner fa-spin" style="font-size:50px" id="spinner_loader"></i></center>
+    <center><i class="fa fa-spinner fa-spin" style="font-size:50px" id="spinner_loader"></i></center>
 </div>
 
 
 <script type="text/javascript">
 
-    classify();
-    // create an array with nodes
-        function classify() {
+    var g = null
+    //classify();
 
-        document.getElementById("spinner_loader").removeAttribute("hidden");
-        //document.getElementById("mynetwork").setAttribute("hidden", true);
-        var nodes_ = [];
-            var links = [];
-            var class_res = [];
-        $.ajax({
-            url: '/ASM/SummaryAnalysis/classify',
-            type: 'POST',
-            data: {
-                'dataset': @Model.ToString()
-            },
-            error: function (xhr) {
-                alert('Error occured, please contact your administrator');
-            },
-            success: function (result) {
-                if (result != "") {
-                    console.debug("I am here debug");
-                    var jsonObject = JSON.parse(result);
-                    console.log(jsonObject)
-                    // nodes end extraction
-                    for (var k = 0; k < jsonObject['nodes'].length; k++) {
-                        var key = jsonObject['nodes'][k];
-                        var elem = { id: k, label: jsonObject['nodes'][k] }
-                        nodes_.push(elem);
-                        console.debug('elemNode: ' + elem.id + " : " + elem.label)
-                    }
-					console.debug('nodes: ' + nodes_)
-                    // links for the map extraction
-                    for (var k = 0; k < jsonObject['links'].length; k++) {
-                        var ell = jsonObject['links'][k];
-                        for (var kk = 0; kk < ell.length - 1; kk++) {
-                            var elem = { from: ell[kk], to: ell[kk + 1] }
-                            console.log(elem, " is ", links.includes(elem), " - ", links.includes(elem))
-                            if (!elemExists(elem, links)) {
-                                links.push(elem);
-                                console.debug('elemLinks: ' + elem.from + " to " + elem.to)
-                            }
-                        }
-                    }
-                    console.debug('links:' + links)
-                    // matched terms extraction
-                    var matched_terms = "Matched terms : ";
-                    for (var k = 0; k < jsonObject['keywords'].length; k++) {
-                        var ell = jsonObject['keywords'][k];
-                        console.log("keyword :  " + ell)
-                        matched_terms = matched_terms + "<span class=\"badge badge-light\"> #" + ell + "</span>";
-						console.debug("keyword :  " + ell)
-                    }
-					console.debug('matched_terms: ' + matched_terms)
-                    document.getElementById("matched_terms").innerHTML = matched_terms;
-                    document.getElementById("matched_terms").removeAttribute("hidden");
-
-                    // terminologies extracttion
-                    domains = ["Sites", "BioGeoChemichals", "Cycles", "Matter Cycles",
-                        "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways"];
-                    ////is best match prediction beig extracted here?
-                    /*for (var k = 0; k < jsonObject['class_results'].length; k++) {
-                        var ell = jsonObject['keywords'][k];
-                        for (var kk = 0; kk < ell.split(';').length - 1; kk++) {
-                            if ( !class_res.includes(ell) && (ell!= "\" \"") )
-                                class_res.push(elem);
-                        }
-                    }*/
-					for (var k = 0; k < jsonObject['class_results'].length; k++) {
-                        var ell = jsonObject['class_results'][k]['predition_bestMatches'];
-                        console.debug('ellMatches:' + ell)
-                        var ell_lst = ell.split(';');
-						for (var kk = 0; kk < ell_lst.length; kk++) {
-							if (!class_res.includes(parseInt(ell_lst[kk])) && (ell_lst[kk] != "\" \"") && (ell_lst[kk] != " ")) {
-								class_res.push(parseInt(ell_lst[kk]));
-								console.debug('elemClassRes: ' + parseInt(ell_lst[kk]))
-                            }
-						}
-                    }
-					console.debug('classRes: ' + class_res)
-                    terminoloies = "Connected Terminologies : ";
-                    //getting corresponding class name??
-                    //for (var k = 0; k < class_res.length; k++) {
-                    //    var ell = jsonObject['keywords'][k];
-                    //    terminoloies = terminoloies + "<span class=\"badge badge-light\"> #" + ell + "</span><br>";
-                    //    console.log("class_result :  " + domains[ell])
-                    //}
-                    for (var k = 0; k < class_res.length; k++) {
-						var ell = domains[parseInt(class_res[k])];
-						terminoloies = terminoloies + "<span class=\"badge badge-light\"> #" + ell + "</span>";
-                        console.log("class_result :  " + ell)
-						console.debug("class_result :  " + ell)
-                    }
-					console.debug(terminoloies)
-                    //document.getElementById("matched_terms").innerText = terminoloies;
-                    document.getElementById("terminoloies").innerHTML = terminoloies;
-                    document.getElementById("terminoloies").removeAttribute("hidden");
-                }
-            },
-            complete: function () {
-                document.getElementById("spinner_loader").setAttribute("hidden", true);
-                //document.getElementById("mynetwork").removeAttribute("hidden");
-                var nodes = new vis.DataSet(nodes_);
-                // create an array with edges
-                var edges = new vis.DataSet(links);
-                // create a network
-                var container = document.getElementById('mynetwork');
-
-                // provide the data in the vis format
-                var data = {
-                    nodes: nodes,
-                    edges: edges
-                };
-                console.log(data);
-
-
-                var options = {
-                    physics: {
-                        stabilization: {
-                            enabled: false
-                        }
-                    }
-                };
-
-                var network = new vis.Network(container, data, options);
-                network.setOptions(options);
-
-                $("#mynetwork").height(500);
-                $("#mynetwork").css('border', '3px solid black');
-
-                network.on('click', function (properties) {
-                    document.getElementById("datasets_list").setAttribute("hidden", true);
-                    var ids = properties.nodes;
-                    var clickedNodes = nodes.get(ids);
-                    console.log('clicked nodes:', clickedNodes[0].label);
-                    $.ajax({
-                        url: '/ASM/SummaryAnalysis/get_datasets_from_annot',
-                        type: 'POST',
-                        data: {
-                            'annot': clickedNodes[0].label
-                        },
-                        error: function (xhr) {
-                            alert('Error occured, please contact your administrator');
-                        },
-                        success: function (result) {
-                            if (result.length > 0) {
-                                var jsonObject = JSON.parse(result);
-                                var res = "<center>";
-                                for (var key of Object.keys(jsonObject)) {
-                                    res = res + " <h3>" + key + "</h3><br>";
-                                    elem = JSON.parse(jsonObject[key])
-                                    for (var key_ of Object.keys(elem)) {
-                                        res = res + "<a id=\"" + elem[key_] + "\" onclick=\"onclickDataset(this)\" class=\"mylink\" > <span class=\"badge badge-pill badge-warning\"> " + elem[key_] + "</span></a> ";
-                                    }
-                                }
-                                $('#datasets_list').html(res + "</center>");
-
-                                //document.getElementById("datasets_list").removeAttribute("class");
-                                //document.getElementById("datasets_list").setAttribute("class" , "col-md-2");
-                                //document.getElementById("map").removeAttribute("class");
-                                //document.getElementById("map").setAttribute("class" , "col-md-8");
-                            }
-                            else {
-                                //document.getElementById("datasets_list").removeAttribute("class");
-                                //document.getElementById("map").removeAttribute("class");
-                                //document.getElementById("map").setAttribute("class" , "col-md-10");
-                            }
-
-                        },
-                    });
-                    document.getElementById("datasets_list").removeAttribute("hidden");
-
-                })
-            }
-        });
-        }
-
-        function onclickDataset(e) {
+    function onclickDataset(e) {
         //checked
             var id = e.getAttribute("id");
             var data = {
@@ -249,10 +76,331 @@
     function elemExists(elem, arr) {
         return arr.some(function (el) {
             return (el.from == elem.from) && (el.to == elem.to);
-      });
-}
+        })
+    }
+    function elemExists_(elem, arr) {
+        return arr.some(function (el) {
+            return (el.label == elem);
+        })
+    }
+    function return_id(elem, arr) {
+        arr.find(function (element) {
+            if (element.label == elem) {
+                return element;
+            }
+        })
+        return null;
+    }
+    function return_id_(elem, arr) {
+        return arr.find((element) => element.label == elem)
+    }
+
+    async function getsimilarity(x , y ) {
+        $.ajax({
+            url: '/ASM/SummaryAnalysis/similarity_',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                'a': x,
+                'b' : y
+            },
+            success: function (result) {
+                return result;
+            }
+        })
+    }
 
 
+    async function functABC() {
+        return new Promise(function (resolve, reject) {
+           $.ajax({
+                url: '/ASM/SummaryAnalysis/classify',
+                type: 'POST',
+                async: true,
+                dataType: 'json',
+                data: {
+                    'dataset': @Model.ToString()
+                },
+                success: function (result) {
+                    resolve(result)
+                }
+
+            })
+        });
+    }
+
+    document.getElementById("spinner_loader").removeAttribute("hidden");
+    functABC().then(function (result) {
+        g = result
+        var domains = ["Sites", "BioGeoChemichals", "Cycles", "Matter Cycles", "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways", " ", " ", " ", " "]
+        var global_results;
+
+        var nodes = [];
+        var links = [];
+        var predictions = [];
+        var keywords = [];
+        if (result != "") {
+
+            global_results = result
+            terminologies = x = JSON.parse(result.terminologies);
+            x = JSON.parse(result.data);
+
+            let i = 0; // index of the nodes for Vis graph
+            for (var key of Object.keys(x)) {
+
+                //predicted_class //predictions
+                x[key]['predicted_class'].split(',').forEach(
+                    (element) => {
+                        if (!predictions.includes(element)) {
+                            for (let k in element.split(",")) {
+                                if (!predictions.includes(domains[k])) {
+                                    predictions.push(domains[k])
+                                }
+                            }
+
+                        }
+                    }
+                )
+
+                //terminologies // keywords
+                JSON.parse(global_results.terminologies).forEach(
+                    (Element) => {
+                        cells = Element.split(",");
+                        console.log("cells 1 : " + cells[1])
+                        predictions.forEach(
+                            (elem) => {
+                                console.log("predictions : " + elem)
+                                if (cells[1].toLowerCase().trim() == elem.toLowerCase().trim()) {
+                                    keywords_ = cells[2].replace("  ", " ").split('"')
+                                    keywords_.forEach((e) => {
+                                        if (e.trim() != "") {
+                                            console.log("keywords : " + key + e)
+                                            if (getsimilarity(key, e) > 0.5) {
+                                                keywords.push(elem)
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+                        )
+                    }
+                )
+
+                //db_match //onto_match // nodes
+                props = ["db_match", "onto_match"]
+                props.forEach((key_) => {
+                    JSON.parse(x[key][key_]).forEach(
+                        (element) => {
+                            path_of_nodes = element.replace("[", "").replace("]", "").replace("'", "").replace('"', "").replace(" ", "").split(',');
+                            if (path_of_nodes.includes('nan')) {
+                                path_of_nodes.splice(path_of_nodes.indexOf('nan'), 1);
+                            }
+                            for (let index = 0; index < path_of_nodes.length - 1; index++) {
+
+                                //nodes
+                                sub_element = path_of_nodes[index]
+                                if (!elemExists_(sub_element, nodes)) {
+                                    elem_node = { id: i, label: sub_element }
+                                    nodes.push(elem_node)
+                                    i++;
+                                }
+
+                                next_element = path_of_nodes[index + 1].replace("'", "").trim()
+                                if (!elemExists_(next_element, nodes)) {
+                                    elem_node = { id: i, label: next_element }
+                                    nodes.push(elem_node)
+                                    i++;
+                                }
+
+                                //links
+                                var elem_link = { from: return_id_(sub_element, nodes).id, to: return_id_(next_element, nodes).id }
+                                if (!elemExists(elem_link, links)) {
+                                    links.push(elem_link)
+                                }
+                            }
+                        }
+                    )
+                })
+            }
+
+            global_results.predictions = predictions;
+            global_results.keywords = keywords;
+            global_results.nodes = nodes;
+            global_results.links = links;
+
+            document.getElementById("matched_terms").innerHTML = global_results.keywords;
+            document.getElementById("matched_terms").removeAttribute("hidden");
+
+            document.getElementById("terminoloies").innerHTML = global_results.predictions;
+            document.getElementById("terminoloies").removeAttribute("hidden");
+
+            document.getElementById("spinner_loader").setAttribute("hidden", true);
+            //document.getElementById("mynetwork").removeAttribute("hidden");
+            var nodes = new vis.DataSet(global_results.nodes);
+            // create an array with edges
+            var edges = new vis.DataSet(global_results.links);
+            // create a network
+            var container = document.getElementById('mynetwork');
+
+            // provide the data in the vis format
+            var data = {
+                nodes: nodes,
+                edges: edges
+            };
+
+            var options = {
+                physics: {
+                    stabilization: {
+                        enabled: true
+                    }
+                }
+            };
+
+            var options_ = {
+                edges: {
+                    smooth: false
+                },
+                physics: {
+                    stabilization: {
+                        enabled: true
+                    },
+                    repulsion: {
+                        nodeDistance: 100000 // Put more distance between the nodes.
+                    }
+                },
+                interaction: {
+                    dragNodes: true,// do not allow dragging nodes
+                    dragView: true  // do not allow dragging
+                }
+            };
+
+            var options__ = {
+                physics: {
+                    enabled: true,
+                    barnesHut: {
+                        gravitationalConstant: -2000,
+                        centralGravity: 0.3,
+                        springLength: 95,
+                        springConstant: 0.04,
+                        damping: 0.09,
+                        avoidOverlap: 0
+                    },
+                    forceAtlas2Based: {
+                        gravitationalConstant: -50,
+                        centralGravity: 0.01,
+                        springConstant: 0.08,
+                        springLength: 100,
+                        damping: 0.4,
+                        avoidOverlap: 0
+                    },
+                    repulsion: {
+                        centralGravity: 0.2,
+                        springLength: 200,
+                        springConstant: 0.05,
+                        nodeDistance: 100,
+                        damping: 0.09
+                    },
+                    hierarchicalRepulsion: {
+                        centralGravity: 0.0,
+                        springLength: 100,
+                        springConstant: 0.01,
+                        nodeDistance: 120,
+                        damping: 0.09
+                    },
+                    maxVelocity: 50,
+                    minVelocity: 0.1,
+                    solver: 'barnesHut',
+                    stabilization: {
+                        enabled: true,
+                        iterations: 1000,
+                        updateInterval: 100,
+                        onlyDynamicEdges: true,
+                        fit: true
+                    },
+                    timestep: 0.5,
+                    adaptiveTimestep: true
+                }
+            }
+
+            var optionss = {
+                layout: {
+                    hierarchical: {
+                        enabled: true,
+                        levelSeparation: 1000,
+                        nodeSpacing: 1000,
+                        treeSpacing: 1000,
+                        blockShifting: true,
+                        edgeMinimization: true,
+                        parentCentralization: true
+                    },
+                    randomSeed: 191006,
+                    improvedLayout: true
+                },
+                edges: {
+                    smooth: {
+                        enabled: false,
+                        type: 'continuous'
+                    }
+                },
+                nodes: {
+                    borderWidth: 1,
+                    borderWidthSelected: 2,
+                    physics: true,
+                    shadow: {
+                        enabled: false,
+                        color: '#C11818',
+                        size: 10,
+                        x: 5,
+                        y: 5
+                    },
+                    mass: 1,
+                },
+                //physics: {
+                //    stabilization: false,
+                //},
+            };
+
+            var network = new vis.Network(container, data, options__);
+            network.stabilize();
+            $("#mynetwork").height(700);
+            $("#mynetwork").css('border', '3px solid black');
+
+            network.on('click', function (properties) {
+                document.getElementById("datasets_list").setAttribute("hidden", true);
+                var ids = properties.nodes;
+                var clickedNodes = nodes.get(ids);
+                console.log('clicked nodes:', clickedNodes[0].label);
+                $.ajax({
+                    url: '/ASM/SummaryAnalysis/get_datasets_from_annot',
+                    type: 'POST',
+                    data: {
+                        'annot': clickedNodes[0].label
+                    },
+                    error: function (xhr) {
+                        alert('Error occured, please contact your administrator');
+                    },
+                    success: function (result) {
+                        if (result.length > 0) {
+                            var jsonObject = JSON.parse(result);
+                            var res = "<center>";
+                            for (var key of Object.keys(jsonObject)) {
+                                res = res + " <h3>" + key + "</h3><br>";
+                                elem = JSON.parse(jsonObject[key])
+                                for (var key_ of Object.keys(elem)) {
+                                    res = res + "<a id=\"" + elem[key_] + "\" onclick=\"onclickDataset(this)\" class=\"mylink\" > <span class=\"badge badge-pill badge-warning\"> " + elem[key_] + "</span></a> ";
+                                }
+                            }
+                            $('#datasets_list').html(res + "</center>");
+                        }
+
+                    },
+                });
+                document.getElementById("datasets_list").removeAttribute("hidden");
+            });
+        }
+    })
+    .catch(function (err) {
+        console.log(err)
+    })
 
 </script>
-
