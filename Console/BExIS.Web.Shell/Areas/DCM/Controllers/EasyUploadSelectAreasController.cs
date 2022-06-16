@@ -4,10 +4,13 @@ using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Models;
 using BExIS.UI.Helpers;
 using BExIS.Utils.Models;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Vaiona.Logging;
@@ -36,45 +39,84 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
             FileStream fis = null;
             string jsonTable = "[]";
+            List<String[]> Json_table = new List<string[]>();
 
             SelectAreasModel model = new SelectAreasModel();
 
             try
             {
-                //FileStream for the users file
-                fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-
-                //Grab the sheet format from the bus
-                string sheetFormatString = Convert.ToString(TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT]);
-                SheetFormat CurrentSheetFormat = 0;
-                Enum.TryParse<SheetFormat>(sheetFormatString, true, out CurrentSheetFormat);
-
-                //Transforms the content of the file into a 2d-json-array
-                JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
-                //If the active worksheet was never changed, we default to the first one
-                string activeWorksheet;
-                if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ACTIVE_WOKSHEET_URI))
+                string fileExt = System.IO.Path.GetExtension(filePath);
+                if ((fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("txt")))
                 {
-                    activeWorksheet = EUEReader.GetFirstWorksheetUri().ToString();
-                    TaskManager.AddToBus(EasyUploadTaskManager.ACTIVE_WOKSHEET_URI, activeWorksheet);
+                    //fis = new FileStream(Parse_csv_to_xlsx(filePath), FileMode.Open, FileAccess.Read);
+                    // generating the JSONTABLEARRAY to select areas
+
+                    String[] all_lines = System.IO.File.ReadAllLines(filePath);
+
+                    foreach (string line in all_lines)
+                    {
+                        String[] tabs = Regex.Split(line, TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString());
+                        Json_table.Add(tabs);
+                    }
+                    //If the active worksheet was never changed, we default to the first one
+                    string activeWorksheet;
+                    if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ACTIVE_WOKSHEET_URI))
+                    {
+                        activeWorksheet = filePath;
+                        TaskManager.AddToBus(EasyUploadTaskManager.ACTIVE_WOKSHEET_URI, activeWorksheet);
+                    }
+                    else
+                    {
+                        activeWorksheet = TaskManager.Bus[EasyUploadTaskManager.ACTIVE_WOKSHEET_URI].ToString();
+                    }
+
+                    //Save the worksheet uris to the model
+                    Dictionary<Uri, string> _dict = new Dictionary<Uri, string>();
+                    _dict.Add(new Uri(filePath), "Sheet");
+                    model.SheetUriDictionary = _dict;
+
+                    TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, JsonConvert.SerializeObject(Json_table.ToArray()));
+
+                    //Add uri of the active sheet to the model to be able to preselect the correct option in the dropdown
+                    model.activeSheetUri = activeWorksheet;
                 }
                 else
                 {
-                    activeWorksheet = TaskManager.Bus[EasyUploadTaskManager.ACTIVE_WOKSHEET_URI].ToString();
+                    //FileStream for the users file
+                    fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
+                    //Grab the sheet format from the bus
+                    string sheetFormatString = Convert.ToString(TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT]);
+                    SheetFormat CurrentSheetFormat = 0;
+                    Enum.TryParse<SheetFormat>(sheetFormatString, true, out CurrentSheetFormat);
+
+                    //Transforms the content of the file into a 2d-json-array
+                    JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
+                    //If the active worksheet was never changed, we default to the first one
+                    string activeWorksheet;
+                    if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.ACTIVE_WOKSHEET_URI))
+                    {
+                        activeWorksheet = EUEReader.GetFirstWorksheetUri().ToString();
+                        TaskManager.AddToBus(EasyUploadTaskManager.ACTIVE_WOKSHEET_URI, activeWorksheet);
+                    }
+                    else
+                    {
+                        activeWorksheet = TaskManager.Bus[EasyUploadTaskManager.ACTIVE_WOKSHEET_URI].ToString();
+                    }
+                    //Generate the table for the active worksheet
+                    jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
+
+                    //Save the worksheet uris to the model
+                    model.SheetUriDictionary = EUEReader.GetWorksheetUris();
+
+                    if (!String.IsNullOrEmpty(jsonTable))
+                    {
+                        TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, jsonTable);
+                    }
+
+                    //Add uri of the active sheet to the model to be able to preselect the correct option in the dropdown
+                    model.activeSheetUri = activeWorksheet;
                 }
-                //Generate the table for the active worksheet
-                jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
-
-                //Save the worksheet uris to the model
-                model.SheetUriDictionary = EUEReader.GetWorksheetUris();
-
-                if (!String.IsNullOrEmpty(jsonTable))
-                {
-                    TaskManager.AddToBus(EasyUploadTaskManager.SHEET_JSON_DATA, jsonTable);
-                }
-
-                //Add uri of the active sheet to the model to be able to preselect the correct option in the dropdown
-                model.activeSheetUri = activeWorksheet;
             }
             catch (Exception ex)
             {
@@ -227,6 +269,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             #region Generate table for selected sheet
 
             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
+
+            string fileExt = System.IO.Path.GetExtension(filePath);
+            if ((fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("txt")))
+            {
+                return Content((string)TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA], "application/json");
+            }
+
             FileStream fis = null;
             string jsonTable = "[]";
 
@@ -354,13 +403,25 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             try
             {
-                //FileStream for the users file
-                fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                string fileExt = System.IO.Path.GetExtension(filePath);
+                if ((fileExt.ToLower().Contains("csv")) || (fileExt.ToLower().Contains("txt")))
+                {
+                    Dictionary<Uri, string> _dict = new Dictionary<Uri, string>();
+                    _dict.Add(new Uri(filePath), "Sheet");
+                    model.SheetUriDictionary = _dict;
+                    model.activeSheetUri = filePath;
+                }
+                else
+                {
+                    //FileStream for the users file
+                    fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 
-                JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
+                    JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
 
-                //Get the worksheet uris and save them to the model
-                model.SheetUriDictionary = EUEReader.GetWorksheetUris();
+                    //Get the worksheet uris and save them to the model
+                    model.SheetUriDictionary = EUEReader.GetWorksheetUris();
+                }
+
             }
             catch (Exception ex)
             {
@@ -379,6 +440,94 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             model.StepInfo = TaskManager.Current();
 
             return PartialView("SelectAreas", model);
+
+        }
+
+        /////////////////////////////////
+        private string Parse_csv_to_xlsx(string filePath)
+        {
+            String output_path = Path.GetDirectoryName(filePath) +
+                    Path.DirectorySeparatorChar +
+                    Path.GetFileNameWithoutExtension(filePath) + ".xlsx";
+
+            using (SpreadsheetDocument spreedDoc = SpreadsheetDocument.Create(output_path, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook))
+            {
+                WorkbookPart wbPart = spreedDoc.WorkbookPart;
+                if (wbPart == null)
+                {
+                    wbPart = spreedDoc.AddWorkbookPart();
+                    wbPart.Workbook = new DocumentFormat.OpenXml.Spreadsheet.Workbook();
+
+                    wbPart.AddNewPart<SharedStringTablePart>();
+                    wbPart.SharedStringTablePart.SharedStringTable = new SharedStringTable() { Count = 1, UniqueCount = 1 };
+
+                    wbPart.SharedStringTablePart.SharedStringTable.AppendChild(new SharedStringItem(new Text("test")));
+                    wbPart.SharedStringTablePart.SharedStringTable.Save();
+
+                    WorkbookStylesPart stylesheet = wbPart.AddNewPart<WorkbookStylesPart>();
+                    Stylesheet workbookstylesheet = new Stylesheet();
+                    stylesheet.Stylesheet = workbookstylesheet;
+                    stylesheet.Stylesheet.Save();
+                }
+
+                string sheetName = "sheet";
+                WorksheetPart worksheetPart = null;
+                worksheetPart = wbPart.AddNewPart<WorksheetPart>();
+                var sheetData = new DocumentFormat.OpenXml.Spreadsheet.SheetData();
+
+                worksheetPart.Worksheet = new DocumentFormat.OpenXml.Spreadsheet.Worksheet(sheetData);
+
+                if (wbPart.Workbook.Sheets == null)
+                {
+                    wbPart.Workbook.AppendChild<DocumentFormat.OpenXml.Spreadsheet.Sheets>(new DocumentFormat.OpenXml.Spreadsheet.Sheets());
+                }
+
+                var sheet = new DocumentFormat.OpenXml.Spreadsheet.Sheet()
+                {
+                    Id = wbPart.GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = sheetName
+                };
+
+                var workingSheet = ((WorksheetPart)wbPart.GetPartById(sheet.Id)).Worksheet;
+
+                String[] all_lines = System.IO.File.ReadAllLines(filePath);
+
+                int rowindex = 1;
+                foreach (string line in all_lines)
+                {
+                    DocumentFormat.OpenXml.Spreadsheet.Row row_ = new DocumentFormat.OpenXml.Spreadsheet.Row();
+                    row_.RowIndex = (UInt32)rowindex;
+
+                    String[] tabs = line.Split(';');
+                    foreach (string tab in tabs)
+                    {
+                        row_.AppendChild(AddCellWithText(tab));
+                    }
+                    sheetData.AppendChild(row_);
+                    rowindex++;
+                }
+                wbPart.Workbook.Sheets.AppendChild(sheet);
+                wbPart.Workbook.Save();
+            }
+            return output_path;
+        }
+
+        static Cell AddCellWithText(string text)
+        {
+            Cell c1 = new Cell();
+            c1.DataType = CellValues.InlineString;
+
+            InlineString inlineString = new InlineString();
+            Text t = new Text();
+            t.Text = text;
+
+            inlineString.AppendChild(t);
+
+            c1.AppendChild(inlineString);
+
+            return c1;
+
         }
     }
 }

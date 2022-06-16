@@ -1,4 +1,6 @@
-﻿using BExIS.Dcm.UploadWizard;
+﻿using BExIS.Aam.Entities.Mapping;
+using BExIS.Aam.Services;
+using BExIS.Dcm.UploadWizard;
 using BExIS.Dlm.Entities.Administration;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
@@ -15,6 +17,7 @@ using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Subjects;
 using BExIS.Xml.Helpers;
 using Newtonsoft.Json;
 using System;
@@ -312,7 +315,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     }
 
                     if (!foundReusableDataStructure)
-                        sds = dsm.CreateStructuredDataStructure(title, title + " " + timestamp, "", "", DataStructureCategory.Generic);
+                        sds = dsm.CreateStructuredDataStructure(title+ "_" + timestamp, title + " " + timestamp, "", "", DataStructureCategory.Generic);
 
                     TaskManager.AddToBus(EasyUploadTaskManager.DATASTRUCTURE_ID, sds.Id);
                     TaskManager.AddToBus(EasyUploadTaskManager.DATASTRUCTURE_TITLE, title + " " + timestamp);
@@ -448,10 +451,35 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             throw new NullReferenceException("The extra-field of this metadata-structure is missing the title-node-reference!");
                         }
                         dm.EditDatasetVersion(dsv, null, null, null);
+                        dm.CheckInDataset(ds.Id, "Metadata Imported", GetUsernameOrDefault());
                     }
 
                     #region security
+                    if (GetUsernameOrDefault() != "DEFAULT")
+                    {
+                        UserPiManager upm = new UserPiManager();
 
+                        //Full permissions for the user
+                        entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                        //Get PIs of the current user
+                        List<User> piList = upm.GetPisFromUserByName(GetUsernameOrDefault()).ToList();
+                        foreach (User pi in piList)
+                        {
+                            //Full permissions for the pis
+                            entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                            //Get all users with the same pi
+                            List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                            //Give view and download rights to the members
+                            foreach (User piMember in piMembers)
+                            {
+                                entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
+                                        RightType.Read
+                                });
+                            }
+                        }
+                    }
                     // add security
                     if (GetUsernameOrDefault() != "DEFAULT")
                     {
@@ -468,7 +496,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     #endregion security
 
-                    #region excel reader
+                    #region excel and csv reader
 
                     int packageSize = 100000;
                     int numberOfRows = 0;
@@ -555,15 +583,48 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 Orientation = orientation
                             };
                             //Create a new reader each time because the reader saves ALL tuples it read and therefore the batch processing wouldn't work
-                            EasyUploadExcelReader reader = new EasyUploadExcelReader(sds, fri);
-                            // open file
-                            Stream = reader.Open(TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString());
+                            if (new IOUtility().IsSupportedAsciiFile(TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString()))
+                            {
+                                #region csv / txt parsing to get data tuples and variables
+                                AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
 
-                            //Set variable identifiers because they might differ from the variable names in the file
-                            reader.setSubmittedVariableIdentifiers(identifiers);
+                                afri.Seperator = ((string)TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER] == ";") ? TextSeperator.semicolon : TextSeperator.comma;
+                                afri.Seperator = ((string)TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER] == " ") ? TextSeperator.tab : TextSeperator.comma;
+                                afri.Seperator = ((string)TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER] == " ") ? TextSeperator.space : TextSeperator.comma;
+                                // doesnt matter cauz the delimiter is already used to fill the JSONtable and to finish the upload it is using the JSON Table instead of reading the data again
 
-                            //Read the rows and convert them to DataTuples
-                            rows = reader.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(), fri, (int)datasetId, worksheetUri);
+                                List<String[]> Json_table_ = JsonConvert.DeserializeObject<List<String[]>>
+                                    (TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA].ToString());
+
+                                AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload(sds, afri);
+                                Stream = reader_.Open(TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString());
+                                //rows = reader_.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(), ds.Id).ToArray();
+                                rows = reader_.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(), Json_table_, afri, sds, ds.Id, packageSize, fri);
+                                Stream.Close();
+
+                                if (reader_.ErrorMessages.Count > 0)
+                                {
+                                    foreach (var err in reader_.ErrorMessages)
+                                    {
+                                        temp.Add(new Error(ErrorType.Dataset, err.GetMessage()));
+                                    }
+                                    //return temp;
+                                }
+                                #endregion csv parsing to get data tuples and variables 
+                            }
+                            else
+                            {
+                                EasyUploadExcelReader reader = new EasyUploadExcelReader(sds, fri);
+                                // open file
+                                Stream = reader.Open(TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString());
+
+                                //Set variable identifiers because they might differ from the variable names in the file
+                                reader.setSubmittedVariableIdentifiers(identifiers);
+
+                                //Read the rows and convert them to DataTuples
+                                rows = reader.ReadFile(Stream, TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString(), fri, (int)datasetId, worksheetUri);
+                            }
+
 
                             //After reading the rows, add them to the dataset
                             if (rows != null)
@@ -599,14 +660,28 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                     dm.CheckInDataset(ds.Id, "Import " + numberOfRows + " rows", GetUsernameOrDefault());
 
-                    //Reindex search
-                    if (this.IsAccessible("DDM", "SearchIndex", "ReIndexSingle"))
+
+
+                    //Reindex search and create the annotations
+                    try
                     {
-                        this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", datasetId } });
+                        if (this.IsAccessible("DDM", "SearchIndex", "ReIndexSingle"))
+                        {
+                            this.Run("DDM", "SearchIndex", "ReIndexSingle", new RouteValueDictionary() { { "id", datasetId } });
+                        }
+
+                        TaskManager.AddToBus(EasyUploadTaskManager.DATASET_ID, ds.Id);
+
+                        using (Aam_Dataset_column_annotationManager aam_manag = new Aam_Dataset_column_annotationManager())
+                        {
+                            Aam_Uri charac = (Aam_Uri)TaskManager.Bus[EasyUploadTaskManager.ANNOTATION_CHARACHTERISTIC];
+                            Aam_Uri entity = (Aam_Uri)TaskManager.Bus[EasyUploadTaskManager.ANNOTATION_ENTITY];
+                        }
                     }
-
-                    TaskManager.AddToBus(EasyUploadTaskManager.DATASET_ID, ds.Id);
-
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
                     return temp;
                 }
             }

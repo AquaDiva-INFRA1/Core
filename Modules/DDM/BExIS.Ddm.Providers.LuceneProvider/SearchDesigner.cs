@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Vaiona.Logging;
 
 namespace BExIS.Ddm.Providers.LuceneProvider
 {
@@ -238,9 +239,10 @@ namespace BExIS.Ddm.Providers.LuceneProvider
             {
                 bexisIndexer.ReIndex();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                throw;
+                LoggerFactory.GetFileLogger().LogCustom(e.Message);
+                LoggerFactory.GetFileLogger().LogCustom(e.StackTrace);
             }
         }
 

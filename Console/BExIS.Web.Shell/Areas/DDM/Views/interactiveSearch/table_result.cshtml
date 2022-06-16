@@ -1,0 +1,567 @@
+﻿@model System.Data.DataTable
+@using BExIS.Utils.Models;
+@using System.Data;
+@using BExIS.Dlm.Entities.DataStructure;
+@using Telerik.Web.Mvc.UI;
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+
+@{
+
+    int PageSize = Convert.ToInt16(ViewData["PageSize"]);
+    int CurrentPage = Convert.ToInt16(ViewData["CurrentPage"]);
+    List<HeaderItem> DefaultHeaderList = (List<HeaderItem>)ViewData["DefaultHeaderList"];
+    HeaderItem Id = (HeaderItem)ViewData["ID"];
+
+
+
+    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
+    pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
+    pagerStyles |= GridPagerStyles.Numeric;
+
+}
+
+
+<!--Search bar and search results-->
+@{
+    @(Html.Telerik().Grid<System.Data.DataRow>()
+                                            .Name("resultGrid")
+
+                                                .DataBinding(dataBinding => dataBinding
+                                                .Ajax()
+                                                .Select("_CustomBinding", "InteractiveSearch", new { area = "DDM" })
+                                                )
+
+                                                .EnableCustomBinding(true)
+                                                .HtmlAttributes(new { @class = "result-grid" })
+                                                .Columns(columns =>
+                                                {
+                                                    for (int i = 0; i < Model.Columns.Count; i++)
+                                                    {
+                                                        DataColumn column = Model.Columns[i];
+                                                        if (DefaultHeaderList.Any(p => p.Name.Equals(column.ColumnName)))
+                                                        {
+                                                            string title;
+                                                            if (column.Caption == "")
+                                                            {
+                                                                title = column.ColumnName;
+                                                            }
+                                                            else
+                                                            {
+                                                                title = column.Caption;
+                                                            }
+
+                                                            columns.Bound(column.DataType, column.ColumnName)
+                                                        .Title(title);
+                                                        }
+                                                        else
+                                                        {
+                                                            columns.Bound(column.DataType, column.ColumnName).Hidden()
+                                                           .Title(column.Caption);
+
+                                                        }
+                                                    }
+
+
+                                                    //Additional column with the "View Details"-Button
+                                                    columns.Bound("").Width(100).ClientTemplate(
+                                                                     "<div>  <center> " +
+                                                                         "<a>" +
+                                                                             "<i class=\"far fa-newspaper fa-2x \"  " +
+                                                                             "data-toggle=\"modal\" " +
+                                                                             "data-target=\"#exampleModalLong\" " +
+                                                                             "onclick='get_dataset_related_papers_by_ID(this)' " +
+                                                                             "id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>'" +
+                                                                             "title=\"Load Related Publication\" ></i> " +
+                                                                         "</a>" +
+
+                                                                     "</center> </div>"
+                                                                         )
+                                                                .Title("Publications")
+                                                                 .Groupable(false)
+                                                                 .Sortable(false)
+                                                                 .Filterable(false);
+
+                                                    //Additional column with the "View Details"-Button
+                                                    columns.Bound("").Width(50).ClientTemplate(
+                                                                "<div class='searchResultFunctionDiv'>" +
+                                                                "<a target='_blank'  id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>' " +
+                                                                "class = 'bx bx-grid-function bx-show' title = 'View details' onclick='onclickDataset(this)'></a>" +
+                                                                "</div>"
+                                                                )
+                                                                .Title("View")
+                                                               .Groupable(false)
+                                                               .Sortable(false)
+                                                               .Filterable(false);
+
+
+
+                                                })
+
+                                                .ClientEvents(events => events
+                                                            .OnRowDataBound("resultGrid_OnRowDataBound")
+                                                            .OnDataBound("onDataBound")
+                                                            .OnColumnShow("resultGrid_OnColumnChanged")
+                                                            .OnColumnHide("resultGrid_OnColumnChanged")
+
+                                                            )
+                                                .Sortable()
+                                                .Pageable(paging => paging.Style(pagerStyles))
+                                                .ColumnContextMenu()
+
+
+    )
+}
+
+
+<!-- Modal -->
+<div id="papers">
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" style="padding-top: 3cm;">
+        <div class="modal-dialog" tabindex="-1" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle"><h1 class="display-4">RELATED PUBLICATIONS</h1> </h5>
+                    <!--
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    -->
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="row col-md-6">
+                            <h5 class="modal-title" id="exampleModalLongTitle"><h1 class="display-4">CRC AquaDiva</h1> </h5>
+                            <div id="resultsAD">
+                                <h3> Error Occured, please contact the Portal's administrator</h3>
+                            </div>
+                        </div>
+                        <div class="row col-md-6">
+                            <h5 class="modal-title" id="exampleModalLongTitle"><h1 class="display-4">PubMed</h1> </h5>
+                            <div id="results">
+                                <h3> Error Occured, please contact the Portal's administrator</h3>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <!--<button type="button" class="btn btn-secondary" data-dismiss="modal" id="Close_button">Close</button>-->
+                    <button id="previous" type="button" style="float: right" onclick="get_dataset_related_papers_by_ID('','nextpage')">
+                        <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Next
+                    </button>
+                    <button id="next" type="button" style="float: left" onclick="get_dataset_related_papers_by_ID('','prevpage')">
+                        <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Previous
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- loader : spinner  -->
+<div id="spinner_" hidden="true">
+    <div class="container">
+        <div class="row">
+            <div id="loader">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="lading"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $('document').ready(function () {
+
+        $('.t-filter').attr("title", "Filter");
+
+    })
+
+    function resultGrid_OnColumnChanged(e) {
+    }
+
+
+    function resultGrid_OnRowDataBound(e) {
+
+    }
+
+    function onclickDataset(e) {
+
+        //checked
+        var id = e.getAttribute("id");
+
+
+        var data = {
+            id: id
+        }
+
+        $.ajax({
+            url: '/DDM/Data/IsDatasetCheckedIn',
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            error: function (xhr) {
+                alert('Error: ' + xhr.statusText);
+
+            },
+            success: function (result) {
+                if (result) {
+                    window.open("/DDM/Data/ShowData/" + id, '_blank');
+                } else {
+
+                    alert("Dataset is locked. Please try again later.");
+                }
+            }
+        });
+    }
+
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+    function refresh_observation_context() {
+        $.ajax({
+            url: '/DDM/SemanticSearch/insert_into_DB_URI_Label',
+            type: 'GET',
+            success: function (result) {
+                alert("refresh successful");
+            }
+        })
+    }
+
+    function get_dataset_related_papers_by_ID(e, behaviour) {
+
+        document.getElementById("spinner_").removeAttribute("hidden");
+
+        document.addEventListener("click", handler, true);
+        
+        $('#button').prop('disabled', true);
+        $('#Close_button').prop('disabled', true);
+
+        //$('#previous').prop('disabled', true);
+        //$('#next').prop('disabled', true);
+
+        $('#results').hide();
+
+        $('#papers').hide();
+
+        var id = null;
+        if (e) {
+            id = e.getAttribute("id");
+        }
+        $.ajax({
+            url: '/DDM/SemanticSearch/get_dataset_related_papers_by_ID',
+            type: 'POST',
+            data: { 'id': id, 'flag': behaviour },
+            success: function (_result) {
+                if (_result == "") {
+                    var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
+                    $('#results').html(text);
+                    console.log("check the labes or annotations table that are sent to the semedico server !!");
+                    return true;
+                }
+                try {
+                    _result = JSON.parse(_result);
+                    l = _result.subsetstart;
+                    result = _result.Semedico_Result
+                    resultAD = _result.Semedico_Result_AD
+                    console.log(l)
+                    console.log(result)
+                    console.log(resultAD)
+                    console.log(result)
+                    if (l == 0) {
+                        $('#next').prop('disabled', true);
+                    }
+                    else {
+                        $('#previous').prop('disabled', false);
+                        $('#next').prop('disabled', false);
+                    }
+
+                    // PubMed publication
+                    res = JSON.parse(result);
+                    if (result.length == 0) {
+                        var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
+                        $('#results').html(text);
+                    }
+                    else {
+                        //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
+                        var text = "<ol>";
+                        for (i = 0; i < res.hits.length; i++) {
+                            text = text + "<li><strong><b> <a href='" + res.hits[i].url + "'target=_blank>" + res.hits[i].title + "</a></b></strong></li>";
+
+                            text = text + "<a id=\"_abstract" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>ABSTRACT</b></h5> </a>";
+                            text = text + "<div id=\"abstract" + i + "\"  hidden=\"true\"> ";
+                            text = text + "<h5><p align=\"justify\">" + res.hits[i].abstract + "</p></h5>";
+                            text = text + "</div>";
+
+                            text = text + "<a id=\"_publication" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>PUBLICATION</b></h5> </a>";
+                            text = text + "<div id=\"publication" + i + "\"  hidden=\"true\"> ";
+                            text = text + "<h5><p align=\"justify\"> Title: " + res.hits[i].journal + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Volume: " + res.hits[i].volume + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Issue : " + res.hits[i].issue + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.hits[i].pages + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Date: " + res.hits[i].year + "</p></h5>";
+                            text = text + "</div>";
+
+
+                            text = text + "<a id=\"_authors" + i + "\" href=\"#\"  onclick='show_region(this,i)'> <h5><b>AUTHORS</b></h5> </a>";
+                            text = text + "<div id=\"authors" + i + "\" hidden=\"true\" >";
+                            text = text + "<ul>";
+                            console.log(res.hits[i].author)
+                            for (j = 0; j < res.hits[i].author.split(';').length; j++) {
+                                text = text + "<li>" + res.hits[i].author.split(";")[j] + "</li>";
+                            }
+                            text = text + "</ul></div><br>";
+
+                            console.log("Article => " + res.hits[i].title);
+                        }
+                        text = text + "</ol>";
+                        console.log("text => " + text);
+                        $('#results').html(text);
+                    }
+                    //AquaDiva publications 
+                    res = JSON.parse(resultAD);
+                    if (resultAD.length == 0) {
+                        var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
+                        $('#resultsAD').html(text);
+                    }
+                    else {
+                        //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
+                        var text = "<ol>";
+                        for (i = 0; i < res.hits.length; i++) {
+                            text = text + "<li><strong><b> <a href='" + res.hits[i].url + "' target=_blank>" + res.hits[i].title + "</a></b></strong></li>";
+
+                            text = text + "<a id=\"_abstractAD" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>ABSTRACT</b></h5> </a>";
+                            text = text + "<div id=\"abstractAD" + i + "\"  hidden=\"true\"> ";
+                            text = text + "<h5><p align=\"justify\">" + res.hits[i].abstract + "</p></h5>";
+                            text = text + "</div>";
+
+                            text = text + "<a id=\"_publicationAD" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>PUBLICATION</b></h5> </a>";
+                            text = text + "<div id=\"publicationAD" + i + "\"  hidden=\"true\"> ";
+                            text = text + "<h5><p align=\"justify\"> Title: " + res.hits[i].journal + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Volume: " + res.hits[i].volume + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Issue : " + res.hits[i].issue + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Pages: " + res.hits[i].pages + "</p></h5>";
+                            text = text + "<h5><p align=\"justify\"> Date: " + res.hits[i].year + "</p></h5>";
+                            text = text + "</div>";
+
+
+                            text = text + "<a id=\"_authorsAD" + i + "\" href=\"#\"  onclick='show_region(this,i)'> <h5><b>AUTHORS</b></h5> </a>";
+                            text = text + "<div id=\"authorsAD" + i + "\" hidden=\"true\" >";
+                            text = text + "<ul>";
+                            console.log(res.hits[i].author)
+                            for (j = 0; j < res.hits[i].author.split(';').length; j++) {
+                                text = text + "<li>" + res.hits[i].author.split(";")[j] + "</li>";
+                            }
+                            text = text + "</ul></div><br>";
+
+                            console.log("Article => " + res.hits[i].title);
+                        }
+                        text = text + "</ol>";
+                        console.log("text => " + text);
+                        $('#resultsAD').html(text);
+                    }
+                }
+                catch (er) {
+                    console.log("ERROR => " + er);
+                    var text = "<h3> Error </h3> <h4>Please a report the error</h4>";
+                    $('#results').html(text);
+                    $('#resultsAD').html(text);
+                    document.getElementById("spinner_").setAttribute("hidden", true);
+                }
+            },
+            complete: function () {
+                $('#results').show();
+                $('#resultsAD').show();
+                $('#Close_button').prop('disabled', false);
+                document.getElementById("spinner_").setAttribute("hidden", true);
+                $('#button').prop('disabled', true);
+                $('#papers').show();
+            },
+        });
+        return true;
+    }
+
+    function show_region(e, i) {
+        var id = e.getAttribute("id");
+        id = id.substring(1, id.length);
+
+        if (document.getElementById(id).getAttribute("hidden")) {
+            document.getElementById(id).removeAttribute("hidden");
+        } else {
+            document.getElementById(id).setAttribute("hidden", true);
+        }
+    }
+
+</script>
+
+<style type="text/css">
+    #resultGrid .t-grid-content {
+        position: relative;
+        height: auto !important;
+        max-height: 450px;
+        /*overflow:auto;*/
+    }
+
+    #resultGrid .t-status,
+    #resultGrid .t-status-text {
+    }
+
+    #resultGrid .searchResultFunctionDiv {
+        text-align: right;
+    }
+
+    .fa-newspaper {
+        color: green;
+    }
+
+        .fa-newspaper:hover {
+            color: red;
+        }
+</style>
+
+
+
+
+@*
+    <!-- maps view-->
+    <style type="text/css">
+        /* Always set the map height explicitly to define the size of the div
+                * element that contains the map. */
+        #map {
+            height: 400px;
+            width: 400px;
+            margin: auto;
+            margin-left: auto;
+            margin-right: auto;
+            border: 3px solid black;
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+
+    <div id="map"></div>
+    <script>
+        var map;
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 10,
+                center: { lat: 51.080258, lng: 10.426260 },
+                mapTypeId: 'terrain'
+            });
+
+            // Create a <script> tag and set the USGS URL as the source.
+            var script = document.createElement('script');
+
+
+            script.src = 'https://developers.google.com/maps/documentation/javascript/examples/json/earthquake_GeoJSONP.js';
+            document.getElementsByTagName('head')[0].appendChild(script);
+
+            map.data.setStyle(function (feature) {
+                var magnitude = feature.getProperty('mag');
+                return {
+                    icon: getCircle(magnitude)
+                };
+            });
+        }
+
+        function getCircle(magnitude) {
+            return {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: 'red',
+                fillOpacity: .2,
+                scale: Math.pow(2, magnitude) / 2,
+                strokeColor: 'white',
+                strokeWeight: .5
+            };
+        }
+
+        function eqfeed_callback(results) {
+            map.data.addGeoJson(results);
+        }
+    </script>
+
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCSVWSy9l71v-E-ZGrODvnvr7KkP9W1XYU&callback=initMap">
+    </script>
+    <!-- end of maps view-->
+*@
+
+
+@*
+    <!-- maps version2-->
+    <style type="text/css">
+        /* Always set the map height explicitly to define the size of the div
+                * element that contains the map. */
+        #map_div {
+            height: 400px;
+            width: 400px;
+            margin: auto;
+            margin-left: auto;
+            margin-right: auto;
+            border: 3px solid black;
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+
+    <div id="map_div"></div>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        $(window).resize(function () {
+            $("#map_div").width(($(window).width())-50).height(400);
+        });
+
+        google.charts.load("current", {
+            "packages": ["map"],
+            "mapsApiKey": "AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY"
+        });
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Lat', 'Long', 'Name'],
+                [51.080258, 10.426260, 'H1']
+            ]);
+
+            var options = {
+                icons: {
+                    default: {
+                        normal: 'https://icons.iconarchive.com/icons/icons-land/vista-map-markers/48/Map-Marker-Ball-Azure-icon.png',
+                        selected:'https://icons.iconarchive.com/icons/icons-land/vista-map-markers/48/Map-Marker-Ball-Right-Azure-icon.png'
+                    }
+                },
+                showTooltip: true,
+                showInfoWindow: true,
+                showTooltip: true,
+                showInfoWindow: true,
+                useMapTypeControl: true,
+                zoomLevel: 12
+            };
+            var map = new google.visualization.Map(document.getElementById('map_div'));
+            map.draw(data, options);
+            google.visualization.events.addListener(map, 'select', clickPEN);
+
+            function clickPEN(e) {
+                alert('hey ' + e);
+                alert('map.getSelection() results ' + JSON.stringify(map.getSelection())e);
+            }
+        }
+
+    </script>
+    <!-- end of maps version2-->
+*@

@@ -1,0 +1,168 @@
+﻿@model System.Data.DataTable
+@using BExIS.Utils.Models;
+@using System.Data;
+@using BExIS.Dlm.Entities.DataStructure;
+@using Telerik.Web.Mvc.UI;
+@using Vaiona.Utils.Cfg;
+
+<header>
+    <script type="text/javascript" src="/Scripts/trunk8.js"></script>
+    <script type="text/javascript" src="/Scripts/jquery.ba-resize.min.js"></script>
+</header>
+
+@section Information
+{
+    <p>Click on the <b>Well location</b> to retreive <b>the dataset</b> that have samples from that location..</p>
+    <p>
+        Datasets from <b>Aquadiva</b> that are connected to the selected location are displayed in a table under the map.<br />
+        To view the details of a dataset, click the <b>View Details</b> button available at the end of each row.
+    </p>
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<div id="searchContent">
+    @{
+        String WellsImagePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Interactive Search", "Wells.png");
+
+        //Everything went well, display the result if there is one
+        // && (Model.Rows.Count > 0)
+        if ((Model != null))
+        {
+            @Html.Partial("table_result", Model)
+
+        }
+    }
+
+
+
+
+    <!-- map version3 using leaflet js-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+          integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+          crossorigin="" />
+    <div id="map-container">
+        <div id="mapid"></div>
+    </div>
+    <br />
+    <div id="spinner_loader" hidden="true">
+        <center><i class="fa fa-spinner fa-spin" style="font-size:100px" id="spinner"></i></center>
+    </div>
+
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+        integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+        crossorigin=""></script>
+
+
+<style type="text/css">
+    /* Always set the map height explicitly to define the size of the div
+            * element that contains the map. */
+    #mapid {
+        height: 400px;
+        width: 2000px;
+        border: 3px solid black;
+    }
+
+    #mapcontainer {
+    }
+
+</style>
+
+
+<script type="text/javascript">
+            $(document).ready(function () {
+                $("#mapid").width(($(window).width()) - 50).height(400);
+            });
+            $(window).resize(function () {
+                $("#mapid").width(($(window).width()) - 50).height(400);
+            });
+</script>
+
+<script type="text/javascript">
+
+            var mymap = L.map('mapid').setView([51.111821, 10.430585], 10);
+
+            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                //maxZoom: 13,
+                //minZoom:14,
+                id: 'mapbox.streets',
+                accessToken: 'pk.eyJ1IjoiaGFtZGkxOTkyIiwiYSI6ImNqaGtmbGllejJzYzUzZG03dHdqOXoya3YifQ.pivL63h1QhfDBe7EQBKfXg'
+            }).addTo(mymap);
+
+            $.ajax({
+                url: '/DDM/InteractiveSearch/parse_Json_location',
+                type: 'POST',
+                data: { 'location_coordinates': "" },
+                error: function (xhr) {
+                    alert('Error Occured, please contact the portal\'s administrator');
+                },
+                success: function (result) {
+                    jsonObject = JSON.parse(result);
+                    for (i = 0; i < jsonObject.length; i++) {
+                        if ((jsonObject[i].Lat != null) && (jsonObject[i].Lon != null)) {
+
+                            var lat = parseFloat(jsonObject[i].Lat);
+                            var lon = parseFloat(jsonObject[i].Lon);
+
+                            var lat = jsonObject[i].Lat;
+                            var lon = jsonObject[i].Lon;
+
+                            var marker = L.marker([lat, lon]).addTo(mymap).on('click', onMapClick);
+
+                            marker.on('mouseover', function (e) {
+
+                                var latlng = mymap.mouseEventToLatLng(e.originalEvent);
+                                var popup_coordinates = L.latLng(latlng.lat,latlng.lng - 0,5);
+                                $.ajax({
+                                    url: '/DDM/InteractiveSearch/parse_Json_location',
+                                    type: 'POST',
+                                    data: { 'location_coordinates': e.latlng.toString() },
+                                    error: function (xhr) {
+                                        alert('Error Occured, please contact the portal\'s administrator');
+                                    },
+                                    success: function (result) {
+                                        var popup = L.popup()
+                                            .setLatLng(popup_coordinates)
+                                            .setContent(result)
+                                            .openOn(mymap);
+                                    }
+                                });
+
+                            });
+                        }
+
+                    }
+                }
+            });
+
+            var popup = L.popup();
+
+            function onMapClick(e) {
+                document.getElementById("spinner_loader").removeAttribute("hidden");
+
+                var latlng = mymap.mouseEventToLatLng(e.originalEvent);
+                var popup_coordinates = L.latLng(latlng.lat, latlng.lng - 0, 5);
+
+                popup.setLatLng(popup_coordinates)
+                    .setContent("please wait to retreive datasets collected from this site")
+                    .openOn(mymap);
+                $.ajax({
+                    url: '/DDM/InteractiveSearch/fill_data_table_for_binding',
+                    type: 'POST',
+                    data: { 'location_coordinates': e.latlng.toString() },
+                    error: function (xhr) {
+                        alert('Error Occured, please contact the portal\'s administrator');
+                        document.getElementById("spinner_loader").setAttribute("hidden", true);
+                    },
+                    success: function (result) {
+                        document.getElementById("spinner_loader").setAttribute("hidden", true);
+                        document.location.href = '/ddm/interactiveSearch/index';
+                        //window.location.reload();
+                    }
+                });
+            }
+
+</script>
+<!-- end of map version3-->

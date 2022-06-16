@@ -823,7 +823,8 @@ namespace BExIS.Xml.Helpers
     {
         title,
         description,
-        active
+        active,
+        owner
     }
 
     public enum AttributeNames

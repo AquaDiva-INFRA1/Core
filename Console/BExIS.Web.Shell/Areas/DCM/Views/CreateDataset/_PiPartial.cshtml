@@ -1,0 +1,21 @@
+﻿@using BExIS.Utils.WebHelpers;
+@model BExIS.Modules.Dcm.UI.Models.UserSelectListModel
+
+<div class="piRow editor-field">
+    @{ 
+        if(Model.UserList.Count == 0)
+        {
+            @Html.Raw("<p>It seems like there are no PIs assigned to you.</p>")
+        }
+        else
+        {
+            using (Html.BeginCollectionItem("Pis"))
+            {
+                @Html.DropDownListFor(m => m, new SelectList(Model.UserList, "Id", "Name", Model.Id))
+                @Html.ValidationMessageFor(m => m)
+                <a href="#" class="removePi">delete</a>
+            }
+        }
+    }
+    
+</div>

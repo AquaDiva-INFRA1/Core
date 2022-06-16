@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Manifest moduleId="ASM" displayName="Analytics and Statistics Module" version="1.0.1" builtin="false">
+  <Description>
+    Analytics and Statistics Module
+  </Description>
+  <Assemblies>
+    <!--<Assembly fullName="BExIS.Modules.Asm.UI" role="UI"/>-->
+  </Assemblies>
+  <Dependencies>
+    <!--<Dependency moduleId="asm" version="*.*.*" />-->
+  </Dependencies>
+  <Exports>
+    <!--
+    <Export tag="settings" id="exportMetadata" order="1"
+            title="Export Metadata" description="Export metadata to other formats and standards" icon=""
+            controller="admin" action="index"
+            extends="./settingsRoot"
+            />
+    -->    
+    <Export tag="lunchbar" id="helpAsm" order="1"
+            title="Portal Statistics" description="Portal Statistics relating data attributes and semantic coverage" icon=""
+            controller="PortalStatistics" action="Index"
+            extends="./lunchbarRoot/help"
+            />
+
+    <Export tag="internalApi" id="Summary"
+            title="Summary" description="Summary" icon=""
+            controller="Summary" action="*"
+            extends="" />
+   
+  </Exports>
+</Manifest>

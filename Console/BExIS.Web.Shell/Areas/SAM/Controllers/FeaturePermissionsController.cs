@@ -177,7 +177,9 @@ namespace BExIS.Modules.Sam.UI.Controllers
                     var hasAccess = userHasAccessDic[item.Key];
 
                     featurePermissions.Add(FeaturePermissionGridRowModel.Convert(subject, featureId, rightType, hasAccess));
+
                 }
+
 
                 return View(new GridModel<FeaturePermissionGridRowModel> { Data = featurePermissions, Total = count });
             }

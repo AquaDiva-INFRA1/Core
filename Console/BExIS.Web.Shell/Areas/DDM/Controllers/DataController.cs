@@ -205,6 +205,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         researchPlanId = dsv.Dataset.ResearchPlan.Id;
                         metadata = dsv.Metadata;
 
+                        string metadatastruct_id = metadata.DocumentElement.Attributes[0].Value;
+                        if (long.Parse(metadatastruct_id) != metadataStructureId) metadataStructureId = long.Parse(metadatastruct_id);
+
                         // check if the user has download rights
                         downloadAccess = entityPermissionManager.HasEffectiveRight(HttpContext.User.Identity.Name, typeof(Dataset), id, RightType.Read);
 
