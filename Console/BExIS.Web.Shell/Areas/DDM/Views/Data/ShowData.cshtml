@@ -52,7 +52,7 @@
 <link href="@Url.Content("~/Areas/Dcm/Content/bexis-metadata.css")" rel="stylesheet" type="text/css" />
 <link href="@Url.Content("~/Areas/DDM/Content/ddm.css")" rel="stylesheet" type="text/css" />
 
-@if (Model != null && ((Model.IsPublic == true || User.Identity.Name != "") || check_public_metadata == "false"))
+@if (Model != null && ((Model.IsPublic == true || User.Identity.Name != "") || check_public_metadata != "false"))
 {
 
     <div id="showData">
@@ -151,11 +151,14 @@
                                           //ToDo Recator Modularity -> load metadata from from dcm
 
                                           // Allways show Metadata and data structure tab
-
-                                          tabs.Add()
-                                             .Text("Metadata")
-                                             .LoadContentFrom("ShowMetadata", "Data", new { area = "ddm", entityId = @Model.Id, title = @Model.Title, metadatastructureId = @Model.MetadataStructureId, datastructureId = @Model.DataStructureId, researchplanId = @Model.ResearchPlanId, sessionKeyForMetadata = "ShowDataMetadata", latest = Model.LatestVersion, isValid = ViewBag.isValid })
-                                             .HtmlAttributes(new { id = "metadata" });
+                                          if (!(show_tabs["show_tabs_deactivated"] == "false" && @Model.ViewAccess == false))
+                                          {
+                                              tabs.Add()
+                                            .Text("Metadata")
+                                            .LoadContentFrom("ShowMetadata", "Data", new { area = "ddm", entityId = @Model.Id, title = @Model.Title, metadatastructureId = @Model.MetadataStructureId, datastructureId = @Model.DataStructureId, researchplanId = @Model.ResearchPlanId, sessionKeyForMetadata = "ShowDataMetadata", latest = Model.LatestVersion, isValid = ViewBag.isValid })
+                                            .HtmlAttributes(new { id = "metadata" })
+											.Enabled(false);
+                                          }
 
                                           if (show_tabs["show_primary_data_tab"] == "true" && !(show_tabs["show_tabs_deactivated"] == "false" && @Model.ViewAccess == false))
                                           {
@@ -174,6 +177,14 @@
                                                   .LoadContentFrom("ShowPreviewDataStructure", "Data", new { area = "ddm", datasetID = @Model.Id })
                                                   .HtmlAttributes(new { id = "datastructure" })
                                                   .Enabled(false);
+                                          }
+                                          if (show_tabs["show_primary_data_tab"] == "true" && !(show_tabs["show_tabs_deactivated"] == "false" && @Model.ViewAccess == false))
+                                          {
+                                              tabs.Add()
+                                              .Text("Summary")
+                                              .LoadContentFrom("Summary", "SummaryAnalysis", new { area = "asm", id = @Model.Id })
+                                              .HtmlAttributes(new { id = "Summary" })
+                                              .Enabled(false);
 
 
                                           }
@@ -284,8 +295,7 @@
 			//console.log(viewAccess);
 			//console.log(grantAccess);
 
-            $("li#datastructure").removeClass("t-state-disabled");
-            $("li#showreferences").removeClass("t-state-disabled");
+
 			//console.log($(tabStrip).find("li #datastructure"));
 
 			if (viewAccess === "True") {
@@ -293,7 +303,10 @@
 				$("li#prepare").removeClass("t-state-disabled");
 				$("li#attachements").removeClass("t-state-disabled");
 				$("li#attachements").removeClass("t-state-disabled");
-
+				$("li#Summary").removeClass("t-state-disabled");
+				$("li#datastructure").removeClass("t-state-disabled");
+				$("li#showreferences").removeClass("t-state-disabled");
+				$("li#metadata").removeClass("t-state-disabled");
 			}
 
 			if (grantAccess === "True") {

@@ -45,12 +45,14 @@ namespace BExIS.Dcm.UploadWizard
         public static string SHEET_DATA_AREA = "SheetDataArea";
         public static string SHEET_JSON_DATA = "SheetJsonData";
         public static string ACTIVE_WOKSHEET_URI = "ActiveWorksheetUri";
+        public static string CSV_DELIMITER = "CsvDelimiter";
 
         //Easy Upload Data Validation
         public static string VERIFICATION_AVAILABLEUNITS = "VerificationAvailableUnits";
         public static string VERIFICATION_HEADERFIELDS = "VerificationHeaderFields";
         public static string VERIFICATION_MAPPEDHEADERUNITS = "VerificationMappedHeaderUnits";
         public static string VERIFICATION_ATTRIBUTESUGGESTIONS = "VerificationAttributeSuggestions";
+        public static string ANNOTATIONMAPPING = "AnnotationMapping"; //Structure: Dictionary<Tuple<int:headerID, String:category>, Tuple<String:conceptURI, Boolean:userSelected>>
 
         public static string ROWS = "ROWS";
         public static string ALL_DATATYPES = "ALL_DATATYPES";
@@ -58,6 +60,12 @@ namespace BExIS.Dcm.UploadWizard
         public static string NUMBERSOFROWS = "NUMBERSOFROWS";
         public static string CURRENTPACKAGE = "CURRENTPACKAGE";
         public static string CURRENTPACKAGESIZE = "CURRENTPACKAGE";
+
+        public static string ANNOTATION_ENTITY = "ANNOTATION_ENTITY";
+        public static string ANNOTATION_CHARACHTERISTIC = "ANNOTATION_CHARACHTERISTIC";
+
+        //Annotation related
+        public static string NOCONCEPTSFOUND = "NoConceptsFound"; //Structure: List<Tuple<int:headerId, String:Category>>
 
         /// <summary>
         /// 

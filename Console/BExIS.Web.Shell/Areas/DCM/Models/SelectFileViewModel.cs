@@ -19,6 +19,8 @@ namespace BExIS.Modules.Dcm.UI.Models
         public Stream fileStream;
         public DataStructureType DataStructureType;
 
+        public String csvDelimiter = "";
+
         public List<string> SupportedFileExtentions = new List<string>();
 
 

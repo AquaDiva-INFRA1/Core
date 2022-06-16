@@ -23,6 +23,8 @@
             fileExtListAsString = s;
         }
     }
+
+    string displayCsvDelimiterInput = (Model.SelectedFileName.ToLower().EndsWith(".csv") || Model.SelectedFileName.ToLower().EndsWith(".txt")) ? "block" : "none";
 }
 
 <div id="Step1" class="uploadWizardStep">
@@ -78,7 +80,6 @@
                                     .Name("SelectedServerFileName")
                                     .BindTo(new SelectList(Model.serverFileList))
                                     .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
-
                         @*@Html.DropDownListFor(m => m.SelectedServerFileName, new SelectList(Model.serverFileList), "Select")*@@*, new { disabled = "disabled" })*@
                     </td>
                     <td>
@@ -86,6 +87,20 @@
                     </td>
                 </tr>
             </table>
+            <div id="CsvDelimiter" style="display: @displayCsvDelimiterInput">
+                <!--
+        <input type="text" class="form-control" placeholder="CSV file delimiter" value="@Model.csvDelimiter"
+            aria-describedby="sizing-addon1" id="csv_delimiter_text_box" onchange="selectedDelimiter(this)">
+                -->
+                <select name="delimiter" size="1" id="delimiter" onchange="selectedDelimiter(this)">
+                    <option>Choose the delimiter here </option>
+                    <option value=";">semicolon   ";"</option>
+                    <option value=",">comma   ","</option>
+                    <option value=" ">space   " "</option>
+                    <option value="\t">tab   "    "</option>
+                    <option value=".">point   "."</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -130,6 +145,12 @@
                 e.preventDefault();
                 return false;
             }
+            if ((file.extension == ".csv") || (file.extension == ".txt")) {
+                $('#CsvDelimiter').show();
+            }
+            else {
+                $('#CsvDelimiter').hide();
+            }
             Parameters.push("Extention:" + file.extension);
         }
     }
@@ -167,15 +188,33 @@
     {
 
         var value = $(this).val();
-
+        if ((value.indexOf(".csv") > 0) || (value.indexOf(".txt") > 0)) {
+            //document.getElementById("CsvDelimiter").removeAttribute("hidden");
+            $('#CsvDelimiter').show();
+        }
+        else {
+            $('#CsvDelimiter').hide();
+        }
 
         $.post('@Url.Action("SelectFileFromServerProcess", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })', { fileName: value }, function (response)
         {
-
-
             $('.uploadWizardStep_Error').empty();
             $('#fileNameDiv').text(value);
         })
     }
 
+    function selectedDelimiter() {
+        //delimiter = document.getElementById('csv_delimiter_text_box').value;
+        delimiter = document.getElementById("delimiter").value;
+        //if (delimiter != null) {
+        //    if ( delimiter.length != 1 ) {
+        //        alert("please put the delimiter as one single character")
+        //        return false;
+        //    }
+        //}
+        $.post('@Url.Action("AddDelimiterToBus", @Model.StepInfo.PostActionInfo.ControllerName , new RouteValueDictionary { { "area", "DCM" } })',{ delimiter: delimiter }, function (response)
+        {
+
+        })
+    }
 </script>

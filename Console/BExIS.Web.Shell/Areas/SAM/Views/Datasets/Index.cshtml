@@ -29,6 +29,21 @@
 <p style="width:100%; text-align: -webkit-right;">
     @Html.ActionLink("Sync All", "SyncAll", new { area = "Sam" }, new { @class = "bx-button function"})
 </p>
+
+@{ 
+    long data_points = 0;
+    int ds_count = 0;
+    foreach (DatasetStatModel dsModel in Model)
+    {
+        ds_count = ds_count + 1;
+        data_points = data_points + (dsModel.NoOfRows * dsModel.NoOfCols);
+    }
+}
+<div>
+    Dataset Count : @Html.Raw(ds_count)
+    <br />
+    Number of data points : @Html.Raw(data_points)
+</div>
 <table>
     <tr>
         <th>ID</th>

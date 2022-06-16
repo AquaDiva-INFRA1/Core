@@ -1,0 +1,73 @@
+﻿@model  BExIS.Modules.Aam.UI.Models.Aam_Observation_Context_Model
+@using BExIS.Aam.Entities.Mapping;
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+@{
+    Int64 dataset_id = (Int64)ViewData["dataset"];
+    Int64 Contextualized_entity_id = (Int64)ViewData["Contextualized_entity"];
+    Int64 Contextualizing_entity_id = (Int64)ViewData["Contextualizing_entity"];
+}
+
+<h2>Edit</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Aam_Observation_Context</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.datasets, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.datasets,
+                new SelectList(Model.datasets, "Key", "Value", @dataset_id ),
+                new { htmlAttributes = new { @class = "form-control" } }
+                )
+                @Html.ValidationMessageFor(model => model.datasets, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Contextualized_entity, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.Contextualized_entity,
+                new SelectList(Model.Contextualized_entity, "Key", "Value", Contextualized_entity_id ),
+                new { htmlAttributes = new { @class = "form-control" } }
+                )
+                @Html.ValidationMessageFor(model => model.Contextualized_entity, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Contextualizing_entity, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.Contextualizing_entity,
+                new SelectList(Model.Contextualizing_entity, "Key", "Value", Contextualizing_entity_id ),
+                new { htmlAttributes = new { @class = "form-control" } }
+                )
+                @Html.ValidationMessageFor(model => model.Contextualizing_entity, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>

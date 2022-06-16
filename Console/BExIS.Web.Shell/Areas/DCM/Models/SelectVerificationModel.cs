@@ -3,6 +3,7 @@ using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Helpers;
 using System;
 using System.Collections.Generic;
+using BExIS.Aam.Entities.Mapping;
 
 namespace BExIS.Modules.Dcm.UI.Models
 {
@@ -10,10 +11,12 @@ namespace BExIS.Modules.Dcm.UI.Models
     {
         public StepInfo StepInfo { get; set; }
         public String[] HeaderFields { get; set; }
-        //public Dictionary<int, List<EasyUploadSuggestion>> Suggestions { get; set; } //Item1 = Attribute Name, Item2 = UnitID, Item3 = DataTypeID, Item4 = Unit Name, Item5 = DataType
-        //public List<UnitInfo> AvailableUnits { get; set; }
-        //public List<DataAttrInfo> AvailableDataAttributes { get; set; }
-        //public List<Tuple<int, string, UnitInfo>> AssignedHeaderUnits { get; set; }
+        public Dictionary<int, List<EasyUploadSuggestion>> Suggestions { get; set; } //Item1 = Attribute Name, Item2 = UnitID, Item3 = DataTypeID, Item4 = Unit Name, Item5 = DataType
+        public List<UnitInfo> AvailableUnits { get; set; }
+        public List<EasyUploadVariableInformation> HeaderVariableInformation { get; set; }
+
+        public List<DataAttrInfo> AvailableDataAttributes { get; set; }
+        public List<Tuple<int, string, UnitInfo>> AssignedHeaderUnits { get; set; }
 
         public List<RowModel> Rows { get; set; }
 
@@ -22,6 +25,9 @@ namespace BExIS.Modules.Dcm.UI.Models
         public SelectVerificationModel()
         {
             ErrorList = new List<Error>();
+            AvailableUnits = new List<UnitInfo>();
+            HeaderVariableInformation = new List<EasyUploadVariableInformation>();
+
             Rows = new List<RowModel>();
         }
     }
@@ -39,13 +45,19 @@ namespace BExIS.Modules.Dcm.UI.Models
         public List<DataAttrInfo> AvailableDataAttributes { get; set; }
         public List<DataTypeInfo> AvailableDataTypes { get; set; }
 
+        public List<Aam_Dataset_column_annotation> annotation_suggestions { get; set; }
+        public Dictionary<Aam_Uri, double> annotation_suggestion_by_similarity { get; set; }
+        public Aam_Uri selected_entity = new Aam_Uri();
+        public Aam_Uri selected_charac = new Aam_Uri();
+
         public RowModel()
         {
             AvailableUnits = new List<UnitInfo>();
             AvailableDataAttributes = new List<DataAttrInfo>();
         }
 
-        public RowModel(int index, string name, DataAttrInfo selectedDataAttribute, UnitInfo selectedUnit, DataTypeInfo selectedDataType, List<EasyUploadSuggestion> suggestions, List<UnitInfo> availableUnits, List<DataAttrInfo> availableDataAttributes, List<DataTypeInfo> availableDataTypes)
+        public RowModel(int index, string name, DataAttrInfo selectedDataAttribute, UnitInfo selectedUnit, DataTypeInfo selectedDataType, List<EasyUploadSuggestion> suggestions, List<UnitInfo> availableUnits, List<DataAttrInfo> availableDataAttributes, List<DataTypeInfo> availableDataTypes,
+            List<Aam_Dataset_column_annotation> annotation_suggestions, Dictionary<Aam_Uri, double> annotation_suggestion_by_similarity)
         {
             Index = index;
             Name = name;
@@ -56,6 +68,8 @@ namespace BExIS.Modules.Dcm.UI.Models
             AvailableUnits = availableUnits;
             AvailableDataAttributes = availableDataAttributes;
             AvailableDataTypes = availableDataTypes;
+            this.annotation_suggestions = annotation_suggestions;
+            this.annotation_suggestion_by_similarity = annotation_suggestion_by_similarity;
         }
 
     }

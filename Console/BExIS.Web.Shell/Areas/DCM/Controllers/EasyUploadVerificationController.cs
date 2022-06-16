@@ -1,4 +1,6 @@
-﻿using BExIS.Dcm.UploadWizard;
+﻿using BExIS.Aam.Entities.Mapping;
+using BExIS.Aam.Services;
+using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.DataStructure;
@@ -131,7 +133,21 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
 
                 //Setall Data AttrInfos to Session -> default
-                allDataAttributes.ForEach(d => dataAttributeInfos.Add(new DataAttrInfo(d.Id, d.Unit.Id, d.DataType.Id, d.Description, d.Name, d.Unit.Dimension.Id)));
+                
+                foreach (DataAttribute d in allDataAttributes)
+                {
+                    try
+                    {
+                        DataAttrInfo dainfo = new DataAttrInfo(d.Id, d.Unit.Id, d.DataType.Id, d.Description, d.Name, d.Unit.Dimension.Id);
+                        dataAttributeInfos.Add(dainfo);
+                    }
+                    catch (Exception ex)
+                    {
+                        ViewData["errors"] = ViewData["errors"] + " - " + ex.Message;
+                    }
+                }
+                
+                //allDataAttributes.ForEach(d => dataAttributeInfos.Add(new DataAttrInfo(d.Id, d.Unit.Id, d.DataType.Id, d.Description, d.Name, d.Unit.Dimension.Id)));
                 Session["DataAttributes"] = dataAttributeInfos;
 
 
@@ -141,62 +157,71 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 FileStream fis = null;
                 fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                using (ExcelPackage ep = new ExcelPackage(fis))
+
+                string sheetFormatString = Convert.ToString(TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT]);
+                SheetFormat sheetFormat = 0;
+                Enum.TryParse<SheetFormat>(sheetFormatString, true, out sheetFormat);
+                if (TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString() != ".csv")
                 {
-                    fis.Close();
-
-                    ExcelWorkbook excelWorkbook = ep.Workbook;
-                    ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
-
-                    string sheetFormatString = Convert.ToString(TaskManager.Bus[EasyUploadTaskManager.SHEET_FORMAT]);
-
-                    SheetFormat sheetFormat = 0;
-                    Enum.TryParse<SheetFormat>(sheetFormatString, true, out sheetFormat);
-
-                    headers = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson);
-
-                    headers = makeHeaderUnique(headers);
-
-                    suggestions = new List<EasyUploadSuggestion>();
-
-                    if (!model.Rows.Any())
+                    using (ExcelPackage ep = new ExcelPackage(fis))
                     {
+                        fis.Close();
+                        ExcelWorkbook excelWorkbook = ep.Workbook;
+                        ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
+                        headers = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson);
+                    }
+                }
+                else
+                {
+                    headers = GetExcelHeaderFields(sheetFormat, selectedHeaderAreaJson);
+                }
 
-                        foreach (string varName in headers)
-                        {
-                            #region suggestions
+                headers = makeHeaderUnique(headers);
+
+                suggestions = new List<EasyUploadSuggestion>();
+                Aam_Dataset_column_annotationManager amm_manager = new Aam_Dataset_column_annotationManager();
+
+                if (!model.Rows.Any())
+                {
+                    foreach (string varName in headers)
+                    {
+                        #region suggestions
 
                             //Add a variable to the suggestions if the names are similar
                             suggestions = getSuggestions(varName, dataAttributeInfos);
 
                             #endregion
 
-                            //set rowmodel
-                            RowModel row = new RowModel(
-                                headers.IndexOf(varName),
-                                varName,
-                                null,
-                                null,
-                                null,
-                                suggestions,
-                                unitInfos,
-                                dataAttributeInfos,
-                                dataTypeInfos
-                                );
+                        //set rowmodel
+                        RowModel row = new RowModel(
+                            headers.IndexOf(varName),
+                            varName,
+                            null,
+                            null,
+                            null,
+                            suggestions,
+                            unitInfos,
+                            dataAttributeInfos,
+                            dataTypeInfos,
+                            amm_manager.get_all_dataset_column_annotationBy_Variable_measures(varName),
+                            amm_manager.get_all_dataset_column_annotationByVariable_label_matching(varName)
+                            );
 
-                            model.Rows.Add(row);
+                        model.Rows.Add(row);
 
-                            TaskManager.AddToBus(EasyUploadTaskManager.ROWS, model.Rows);
-                            TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, RowsToTuples());
-                        }
+                        TaskManager.AddToBus(EasyUploadTaskManager.ROWS, model.Rows);
+                        TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, RowsToTuples());
                     }
-
-                    TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, headers);
-
-                    model.StepInfo = TaskManager.Current();
-
-                    return PartialView(model);
                 }
+
+                amm_manager.Dispose();
+                TaskManager.AddToBus(EasyUploadTaskManager.VERIFICATION_MAPPEDHEADERUNITS, headers);
+
+                model.StepInfo = TaskManager.Current();
+
+                return PartialView(model);
+
+            
             }
         }
 
@@ -259,7 +284,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveSelection(int index, long selectedUnit, long selectedDataType, long selectedAttribute, string varName, string lastSelection)
+        public ActionResult SaveSelection(int index, long selectedUnit, long selectedDataType, long selectedAttribute, string varName, string lastSelection, string selectedEntity, string selectedCharachteristic)
         {
             /**
              * if selectedAttribute == -1 == Unknown
@@ -274,6 +299,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             List<EasyUploadSuggestion> suggestions = new List<EasyUploadSuggestion>();
             List<string> headers = new List<string>();
 
+            List<Aam_Dataset_column_annotation> annot_list_by_variable_unit_type = new List<Aam_Dataset_column_annotation>();
+            Dictionary<Aam_Uri, double> annot_Dict_by_variable_string_similarities = new Dictionary<Aam_Uri, double>();
 
             EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
 
@@ -308,6 +335,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             if (selectedAttribute > 0) currentDataAttrInfo = dataAttributeInfos.FirstOrDefault(da => da.Id.Equals(selectedAttribute));
             if (selectedAttribute == -1) currentDataAttrInfo = new DataAttrInfo(-1, 0, 0, "Unknown", "Unknow", 1);
             if (selectedAttribute == -2) currentDataAttrInfo = new DataAttrInfo(-2, 0, 0, "Not found", "Not found", 1); ;
+
+            Aam_UriManager aam_manag = new Aam_UriManager();
+            Aam_Uri selected_entity = aam_manag.get_Aam_Uri_by_id(Int64.Parse(selectedEntity));
+            Aam_Uri selected_char = aam_manag.get_Aam_Uri_by_id(Int64.Parse(selectedCharachteristic));
+            aam_manag.Dispose();
 
             #endregion
 
@@ -398,7 +430,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             }
 
 
-
+            #region update the annotations with every selection
+            string temp_var_name_from_suggestions = (currentDataAttrInfo != null) ? currentDataAttrInfo.Name.ToLower() : varName; // if current Data Attribute has changed selection (currentDataAttrInfo != null)
+            Aam_Dataset_column_annotationManager amm_manager = new Aam_Dataset_column_annotationManager();
+            annot_list_by_variable_unit_type = amm_manager.get_all_dataset_column_annotationBy_Variable_measures(temp_var_name_from_suggestions);
+            annot_Dict_by_variable_string_similarities = amm_manager.get_all_dataset_column_annotationByVariable_label_matching(temp_var_name_from_suggestions);
+            amm_manager.Dispose();
+            #endregion
             #endregion
 
 
@@ -411,13 +449,44 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     suggestions,
                     unitInfos,
                     dataAttributeInfos,
-                    dataTypeInfos
-                );
+                    dataTypeInfos,
 
+                    annot_list_by_variable_unit_type,
+                    annot_Dict_by_variable_string_similarities
+                );
+            model.selected_entity = (selected_entity != null) ? selected_entity : new Aam_Uri();
+            model.selected_charac = (selected_char != null) ? selected_char : new Aam_Uri();
+            TaskManager.AddToBus(EasyUploadTaskManager.ANNOTATION_ENTITY, selected_entity);
+            TaskManager.AddToBus(EasyUploadTaskManager.ANNOTATION_CHARACHTERISTIC, selected_entity);
             //update row in the bus of the taskmanager
             UpdateRowInBus(model);
 
             return PartialView("Row", model);
+
+        }
+
+        private void UpdateRowInBus(RowModel row)
+        {
+            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+
+            if (TaskManager != null && TaskManager.Bus[EasyUploadTaskManager.ROWS] != null)
+            {
+                List<RowModel> rows = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
+                if (rows.Any(r => r.Index.Equals(row.Index)))
+                {
+                    for (int i = 0; i < rows.Count; i++)
+                    {
+                        RowModel tmp = rows.ElementAt(i);
+                        if (tmp.Index.Equals(row.Index))
+                        {
+                            rows[i] = row;
+                            break;
+                        }
+                    }
+                }
+
+                TaskManager.AddToBus(EasyUploadTaskManager.ROWS, rows);
+            }
 
         }
 
@@ -625,117 +694,55 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 dtm.Dispose();
             }
         }
+        
+        private List<Tuple<int, String, UnitInfo>> RowsToTuples()
+        {
+            List<Tuple<int, String, UnitInfo>> tmp = new List<Tuple<int, string, UnitInfo>>();
+            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
 
-        ///// <summary>
-        ///// Calcualtes the Levenshtein distance between two strings
-        ///// </summary>
-        ///// Source: https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.23
-        ///// Explanation: https://en.wikipedia.org/wiki/Levenshtein_distance
-        //private Int32 levenshtein(String a, String b)
-        //{
+            if (TaskManager != null && TaskManager.Bus[EasyUploadTaskManager.ROWS] != null)
+            {
+                List<RowModel> rows = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
 
-        //    if (string.IsNullOrEmpty(a))
-        //    {
-        //        if (!string.IsNullOrEmpty(b))
-        //        {
-        //            return b.Length;
-        //        }
-        //        return 0;
-        //    }
+                foreach (var row in rows)
+                {
+                    tmp.Add(RowToTuple(row));
+                }
+            }
 
-        //    if (string.IsNullOrEmpty(b))
-        //    {
-        //        if (!string.IsNullOrEmpty(a))
-        //        {
-        //            return a.Length;
-        //        }
-        //        return 0;
-        //    }
+            return tmp;
+        }
 
-        //    Int32 cost;
-        //    Int32[,] d = new int[a.Length + 1, b.Length + 1];
-        //    Int32 min1;
-        //    Int32 min2;
-        //    Int32 min3;
+        private Tuple<int, String, UnitInfo> RowToTuple(RowModel row)
+        {
+            return new Tuple<int, string, UnitInfo>((int)row.Index, row.Name, row.SelectedUnit);
+        }
 
-        //    for (Int32 i = 0; i <= d.GetUpperBound(0); i += 1)
-        //    {
-        //        d[i, 0] = i;
-        //    }
+        private List<string> makeHeaderUnique(List<string> header)
+        {
+            List<string> temp = new List<string>();
 
-        //    for (Int32 i = 0; i <= d.GetUpperBound(1); i += 1)
-        //    {
-        //        d[0, i] = i;
-        //    }
-
-        //    for (Int32 i = 1; i <= d.GetUpperBound(0); i += 1)
-        //    {
-        //        for (Int32 j = 1; j <= d.GetUpperBound(1); j += 1)
-        //        {
-        //            cost = Convert.ToInt32(!(a[i - 1] == b[j - 1]));
-
-        //            min1 = d[i - 1, j] + 1;
-        //            min2 = d[i, j - 1] + 1;
-        //            min3 = d[i - 1, j - 1] + cost;
-        //            d[i, j] = Math.Min(Math.Min(min1, min2), min3);
-        //        }
-        //    }
-
-        //    return d[d.GetUpperBound(0), d.GetUpperBound(1)];
-
-        //}
-
-        ///// <summary>
-        ///// String-similarity computed with levenshtein-distance
-        ///// </summary>
-        //private double similarityLevenshtein(string a, string b)
-        //{
-        //    if (a.Equals(b))
-        //    {
-        //        return 1.0;
-        //    }
-        //    else
-        //    {
-        //        if (!(a.Length == 0 || b.Length == 0))
-        //        {
-        //            double sim = 1 - (levenshtein(a, b) / Convert.ToDouble(Math.Min(a.Length, b.Length)));
-        //            return sim;
-        //        }
-        //        else
-        //            return 0.0;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// String-similarity computed with Dice Coefficient
-        ///// </summary>
-        ///// Source: https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Dice%27s_coefficient#C.23
-        ///// Explanation: https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
-        //private double similarityDiceCoefficient(string a, string b)
-        //{
-        //    //Workaround for |a| == |b| == 1
-        //    if (a.Length <= 1 && b.Length <= 1)
-        //    {
-        //        if (a.Equals(b))
-        //            return 1.0;
-        //        else
-        //            return 0.0;
-        //    }
-
-        //    HashSet<string> setA = new HashSet<string>();
-        //    HashSet<string> setB = new HashSet<string>();
-
-        //    for (int i = 0; i < a.Length - 1; ++i)
-        //        setA.Add(a.Substring(i, 2));
-
-        //    for (int i = 0; i < b.Length - 1; ++i)
-        //        setB.Add(b.Substring(i, 2));
-
-        //    HashSet<string> intersection = new HashSet<string>(setA);
-        //    intersection.IntersectWith(setB);
-
-        //    return (2.0 * intersection.Count) / (setA.Count + setB.Count);
-        //}
+            foreach (string s in header)
+            {
+                if (temp.Contains(s))
+                {
+                    string tmp;
+                    int i = 1;
+                    do
+                    {
+                        tmp = s + " (" + i + ")";
+                        i++;
+                    }
+                    while (temp.Contains(tmp));
+                    temp.Add(tmp);
+                }
+                else
+                {
+                    temp.Add(s);
+                }
+            }
+            return (temp);
+        }
 
         /// <summary>
         /// Combines multiple String-similarities with equal weight
@@ -791,80 +798,101 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             return suggestions;
         }
 
-        private List<Tuple<int, String, UnitInfo>> RowsToTuples()
+        /// <summary>
+        /// Store the information about not found concepts in the Bus.
+        /// Structure in the bus: List<(headerfieldId, category)>
+        /// </summary>
+        /// <param name="headerfieldId"></param>
+        /// <param name="category"></param>
+        /// <param name="checkboxChecked"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public Boolean NoConceptFound(int headerfieldId, string category, Boolean checkboxChecked)
         {
-            List<Tuple<int, String, UnitInfo>> tmp = new List<Tuple<int, string, UnitInfo>>();
-            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-
-            if (TaskManager != null && TaskManager.Bus[EasyUploadTaskManager.ROWS] != null)
+            EasyUploadTaskManager TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+            if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.NOCONCEPTSFOUND))
             {
-                List<RowModel> rows = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
-
-                foreach (var row in rows)
-                {
-                    tmp.Add(RowToTuple(row));
-                }
+                TaskManager.AddToBus(EasyUploadTaskManager.NOCONCEPTSFOUND, new List<Tuple<int, String>>());
             }
 
-            return tmp;
-        }
-
-        private Tuple<int, String, UnitInfo> RowToTuple(RowModel row)
-        {
-            return new Tuple<int, string, UnitInfo>((int)row.Index, row.Name, row.SelectedUnit);
-        }
-
-        private void UpdateRowInBus(RowModel row)
-        {
-            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
-
-            if (TaskManager != null && TaskManager.Bus[EasyUploadTaskManager.ROWS] != null)
+            if (checkboxChecked)
             {
-                List<RowModel> rows = (List<RowModel>)TaskManager.Bus[EasyUploadTaskManager.ROWS];
-                if (rows.Any(r => r.Index.Equals(row.Index)))
-                {
-                    for (int i = 0; i < rows.Count; i++)
-                    {
-                        RowModel tmp = rows.ElementAt(i);
-                        if (tmp.Index.Equals(row.Index))
-                        {
-                            rows[i] = row;
-                            break;
-                        }
-                    }
-                }
+                //The checkbox was checked so add the new information to the bus
+                List<Tuple<int, String>> unicorn = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
+                unicorn.Add(new Tuple<int, string>(headerfieldId, category));
+                TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND] = unicorn;
+            }
+            else
+            {
+                //The checkbox was unchecked, remove the respective tuple from our bus
+                List<Tuple<int, String>> unicorn = (List<Tuple<int, String>>)TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND];
+                unicorn.RemoveAll(tuple => tuple.Item1 == headerfieldId && tuple.Item2 == category);
+                TaskManager.Bus[EasyUploadTaskManager.NOCONCEPTSFOUND] = unicorn;
+            }
+            Session["TaskManager"] = TaskManager;
+            return true;
+        }
 
-                TaskManager.AddToBus(EasyUploadTaskManager.ROWS, rows);
+        private List<String> GetExcelHeaderFields(SheetFormat sheetFormat, string selectedAreaJsonArray)
+        {
+            List<String> headerValues = new List<string>();
+
+            int[] areaValues = JsonConvert.DeserializeObject<int[]>(selectedAreaJsonArray);
+
+            if (areaValues.Length != 4)
+            {
+                throw new InvalidOperationException("Given JSON string for selected area got an invalid length of [" + Convert.ToString(areaValues.Length) + "]");
             }
 
-        }
+            SheetArea selectedArea = new SheetArea(areaValues[1], areaValues[3], areaValues[0], areaValues[2]);
 
-        private List<string> makeHeaderUnique(List<string> header)
-        {
-            List<string> temp = new List<string>();
 
-            foreach (string s in header)
+            switch (sheetFormat)
             {
-                if (temp.Contains(s))
-                {
-                    string tmp;
-                    int i = 1;
-                    do
-                    {
-                        tmp = s + " (" + i + ")";
-                        i++;
-                    }
-                    while (temp.Contains(tmp));
-                    temp.Add(tmp);
-                }
-                else
-                {
-                    temp.Add(s);
-                }
+                case SheetFormat.TopDown:
+                    headerValues = GetExcelHeaderFieldsTopDown(selectedArea);
+                    break;
+                case SheetFormat.LeftRight:
+                    headerValues = GetExcelHeaderFieldsLeftRight(selectedArea);
+                    break;
+                case SheetFormat.Matrix:
+                    headerValues.AddRange(GetExcelHeaderFieldsTopDown(selectedArea));
+                    headerValues.AddRange(GetExcelHeaderFieldsLeftRight(selectedArea));
+                    break;
+                default:
+                    break;
             }
-            return (temp);
-        }
 
+            return headerValues;
+        }
+        private List<String> GetExcelHeaderFieldsTopDown(SheetArea selectedArea)
+        {
+            List<String> headerValues = new List<string>();
+
+            String jsonTableString = TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA].ToString();
+            String[][] jsonTable = JsonConvert.DeserializeObject<string[][]>(jsonTableString);
+
+            for (int i = selectedArea.StartColumn; i <= selectedArea.EndColumn; i++)
+            {
+                headerValues.Add(jsonTable[selectedArea.StartRow][i]);
+            }
+
+            return headerValues;
+        }
+        private List<String> GetExcelHeaderFieldsLeftRight(SheetArea selectedArea)
+        {
+            List<String> headerValues = new List<string>();
+
+            String jsonTableString = TaskManager.Bus[EasyUploadTaskManager.SHEET_JSON_DATA].ToString();
+            String[][] jsonTable = JsonConvert.DeserializeObject<string[][]>(jsonTableString);
+
+            for (int row = selectedArea.StartRow; row <= selectedArea.EndColumn; row++)
+            {
+                headerValues.Add(jsonTable[row][selectedArea.StartColumn]);
+            }
+
+            return headerValues;
+        }
         #endregion
     }
 }

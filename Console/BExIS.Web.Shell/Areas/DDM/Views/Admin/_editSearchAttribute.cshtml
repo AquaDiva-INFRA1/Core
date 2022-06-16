@@ -113,6 +113,20 @@
                                 {
                                     foreach (var xpath in Model.metadataNames)
                                     {
+                                        if (xpath.Contains(";"))
+                                        {
+                                            string[] list_composed_xpath = xpath.Split(';');
+                                            foreach (var s in list_composed_xpath)
+                                            {
+                                                Html.RenderPartial("_metadataNode", s);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Html.RenderPartial("_metadataNode", xpath);
+                                            //@Html.ActionLink(" ", "AddMetadataNode", null, new { id = "addNode", @class = "bx-add bx-function", title="Corresponding metadata node to be used for the Lucene index." })
+
+                                        }
                                         Html.RenderPartial("_metadataNode", xpath);
                                     }
                                 }

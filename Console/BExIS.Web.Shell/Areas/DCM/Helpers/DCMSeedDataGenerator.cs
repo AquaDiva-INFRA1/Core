@@ -99,8 +99,8 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                 else
                 {
                     XmlDocument xmlDoc = new XmlDocument();
-
-                    if (entity.Extra != null) xmlDoc.AppendChild(entity.Extra);
+                    
+                    if (entity.Extra != null) xmlDoc.LoadXml(String.Format(entity.Extra.OuterXml));
 
                     //update to Extra
                     XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
@@ -243,10 +243,16 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                     ImportSchema("GBIF", "eml.xsd", "Dataset", entity.Name, entity.EntityType.FullName, titleXPath,
                         descriptionXpath);
                 }
-                //if (!metadataStructureManager.Repo.Get().Any(m => m.Name.Equals("Basic Eml")))
-                //    ImportSchema("Basic Eml", "eml-dataset.xsd", entity.Name, entity.Name, entity.EntityType.FullName);
+                if (!metadataStructureManager.Repo.Get().Any(m => m.Name.Equals("idiv")))
+                {
+                    string titleXPath = "DatasetLevelMetadata/Dataset/Title";
+                    string descriptionXpath = "DatasetLevelMetadata/Dataset/Abstract";
+
+                    ImportSchema("idiv", "iDiv.xsd", "Dataset", entity.Name, entity.EntityType.FullName, titleXPath, descriptionXpath);
+                }
 
                 #endregion Add Metadata
+                
             }
             catch (Exception ex)
             {

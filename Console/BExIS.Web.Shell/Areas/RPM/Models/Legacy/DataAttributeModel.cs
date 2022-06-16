@@ -34,7 +34,21 @@ namespace BExIS.Modules.Rpm.UI.Models
             {
                 dataContainerManager = new DataContainerManager();
                 DataAttributeModel = new DataAttributeModel(showConstraints);
-                dataContainerManager.DataAttributeRepo.Get().ToList().ForEach(da => DataAttributeStructs.Add(new DataAttributeStruct() { Id = da.Id, Name = da.Name, ShortName = da.ShortName, Description = da.Description, DataType = da.DataType.Name, Unit = da.Unit.Name, InUse = inUse(da), FormalDescriptions = getFormalDescriptions(da) }));
+                foreach (DataAttribute da in dataContainerManager.DataAttributeRepo.Get().ToList())
+                {
+                    try
+                    {
+                        DataAttributeStruct dainfo = new DataAttributeStruct()
+                            { Id = da.Id, Name = da.Name, ShortName = da.ShortName, Description = da.Description, 
+                                DataType = da.DataType.Name, Unit = da.Unit.Name, InUse = inUse(da), FormalDescriptions = getFormalDescriptions(da) };
+                        DataAttributeStructs.Add(dainfo);
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+                //dataContainerManager.DataAttributeRepo.Get().ToList().ForEach(da => DataAttributeStructs.Add(new DataAttributeStruct() { Id = da.Id, Name = da.Name, ShortName = da.ShortName, Description = da.Description, DataType = da.DataType.Name, Unit = da.Unit.Name, InUse = inUse(da), FormalDescriptions = getFormalDescriptions(da) }));
             }
             finally
             {

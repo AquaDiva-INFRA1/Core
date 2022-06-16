@@ -1,0 +1,50 @@
+﻿@using Telerik.Web.Mvc.UI;
+
+<!--Search bar and search button-->
+<div id="searchHeader">
+    @using (Html.BeginForm("Index", "SemanticSearch", new { area = "DDM" }))
+    {
+        <table>
+            <tr>
+                <td>
+                    <!--Search bar-->
+                    @(Html.Telerik().AutoComplete().Multiple()
+                                    .Name("searchTerm")
+                                    .DataBinding(dataBinding => dataBinding
+                                        .Ajax().Select("getAutocompletionFromFile", "SemanticSearch")
+                                        .Cache(false))
+                                    .Filterable(filtering =>
+                                    {
+                                        filtering.FilterMode(AutoCompleteFilterMode.StartsWith);
+                                        filtering.MinimumChars(3);
+                                    })
+                    )
+                </td>
+                <td>
+                    <label>Semantic depth</label>
+                    @Html.DropDownList("Seamntic_depth", new List<SelectListItem>
+                    {
+                        new SelectListItem {Text = "0", Value = "0"},
+                        new SelectListItem {Text = "1", Value = "1"},
+                        new SelectListItem {Text = "2", Value = "2"},
+                        new SelectListItem {Text = "3", Value = "3"},
+                    })
+                </td>
+                <td>
+                    <label>Error distance</label>
+                    @Html.DropDownList("Error_distance", new List<SelectListItem>
+                    {
+                        new SelectListItem {Text = "0", Value = "0"},
+                        new SelectListItem {Text = "1", Value = "1"},
+                        new SelectListItem {Text = "2", Value = "2"},
+                        new SelectListItem {Text = "3", Value = "3"},
+                    })
+                </td>
+                <td>
+                    <!--Search button-->
+                    <button class="bx-button function" type="submit">Search</button>
+                </td>
+            </tr>
+        </table>
+    }
+</div>

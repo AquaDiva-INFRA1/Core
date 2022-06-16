@@ -179,6 +179,7 @@ namespace BExIS.Security.Services.Utilities
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.AppendLine($"Data request for dataset <b>\"{title}\"</b> with id <b>{datasetid}</b> rejected.<br/>");
 
+
             return stringBuilder.ToString();
         }
 

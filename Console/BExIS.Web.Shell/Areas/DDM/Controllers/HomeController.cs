@@ -37,7 +37,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             try
             {
                 ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>();
-
+                 
                 provider.WorkingSearchModel.CriteriaComponent.Clear();
                 provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent);
 

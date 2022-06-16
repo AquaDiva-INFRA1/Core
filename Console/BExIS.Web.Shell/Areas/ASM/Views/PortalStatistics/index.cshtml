@@ -1,0 +1,299 @@
+﻿@using BExIS.Modules.Asm.UI.Models;
+@using Telerik.Web.Mvc.UI;
+@using BExIS.Modules.Rpm.UI.Models;
+@using BExIS.Dlm.Entities.DataStructure;
+@using Newtonsoft.Json.Linq;
+
+<header>
+    <script type="text/javascript" src="/Scripts/trunk8.js"></script>
+    <script type="text/javascript" src="/Scripts/jquery.ba-resize.min.js"></script>
+</header>
+
+
+@section Information
+{
+    <p>Click on the <b>Well location</b> to retreive <b>the dataset</b> that have samples from that location..</p>
+    <p>
+        Datasets from <b>Aquadiva</b> that are connected to the selected location are displayed in a table under the map.<br />
+        To view the details of a dataset, click the <b>View Details</b> button available at the end of each row.
+    </p>
+}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div id="searchContent">
+
+    @{
+        JObject Json_res = (JObject)ViewData["Json_res"];
+    }
+    Dataset count : @Json_res["extra_stats"]["dataset_count"] <br />
+    Data points count :@Json_res["extra_stats"]["datapoints"]<br />
+    <button id="refresh_stats" class="bx-button function" title="Refresh portal stats" onclick="refresh_stats()">Refresh Portal stats (data points and datasets)</button>
+    <br />
+
+    <h3> Variable Templates Report</h3>
+
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Variables in use</th>
+                <th scope="col">Variables not used</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataAttributeStruct_list_in_use"] </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataAttributeStruct_list_non_use"] </a></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3> Units Report</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Units in use</th>
+                <th scope="col">Units not used</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["EditUnitModel_list_in_use"] </a></td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["EditUnitModel_list_non_use"] </a></td>
+
+            </tr>
+
+        </tbody>
+    </table>
+
+    <h3> Data Type Report</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Data Type in use</th>
+                <th scope="col">Data Type not used</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataType_in_use"]</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataType_non_use"]</td>
+
+            </tr>
+
+        </tbody>
+    </table>
+
+    <h3> Data Structure Report</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Data Structure in use</th>
+                <th scope="col">Data Structure not used</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataStruct_in_use"]</td>
+                <td><a data-toggle="modal" data-target="#exampleModalLong">@Json_res["extra_stats"]["DataStruc_non_use"]</td>
+
+            </tr>
+
+        </tbody>
+    </table>
+
+
+    <h3> General Report related to semantic coverage ofthe portal</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Dataset Count</th>
+                <th scope="col">Variables Count</th>
+                <th scope="col">Total Variable Coverage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+
+                <tr>
+                    <td>@Json_res["extra_stats"]["dataset_count"]</td>
+                    <td>@Json_res["extra_stats"]["counting"]</td>
+                    <td>@Json_res["extra_stats"]["counting"] /  @Json_res["extra_stats"]["DataAttributeStruct_list_in_use"]</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    <br />
+
+    @*
+        <button id="downloadCsvButton" class="bx-button function" title="Csv download" onclick="download()">Download Semantic Coverage Report</button>
+        <br />
+    *@
+
+    <h3> Detailed Report related to semantic coverage ofthe portal</h3>
+    <table>
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Dataset id</th>
+                <th scope="col">Data Structure id</th>
+                <th scope="col">Dataset Owner</th>
+                <th scope="col">Project</th>
+                <th scope="col">Variables id</th>
+                <th scope="col">Variables label</th>
+                <th scope="col">Concepts URI</th>
+                <th scope="col">Characteristics URI</th>
+                <th scope="col">Unit</th>
+                <th scope="col">Data type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                foreach (KeyValuePair<string, JToken> kvp in (JObject)Json_res["primary_stats"])
+                {
+                    JObject obj = (JObject)Json_res["primary_stats"][kvp.Key];
+                    JArray arr = (JArray)obj["Variables"];
+                    if (arr != null )
+                    { 
+                        foreach (JObject objct in arr)
+                        {
+                            <tr>
+                                <td>@kvp.Key</td>
+                                <td>@obj["Id"]</td>
+                                <td>@obj["owner"]</td>
+                                <td>@obj["project"]</td>
+                                <td>@objct["Id"] </td>
+                                <td>@objct["Label"] </td>
+                                <td>@objct["entity_id"] </td>
+                                <td>@objct["characteristic_id"] </td>
+                                <td>@objct["Unit"]</td>
+                                <td>@objct["DataType"] </td>
+                            </tr>
+                        }
+                    }
+
+
+                }
+
+                @*
+                    List<Variable_analytics> VA_list = (List<Variable_analytics>)ViewData["VA_list"];
+
+                    foreach (Variable_analytics va in VA_list)
+                    {
+                        if (va.variable_id.Count > 0)
+                        {
+                            int Concepts_count = 0;
+                            int Caracteristics_count = 0;
+
+
+                            foreach (String s in va.variable_concept_entity)
+                            {
+                                if (s != "No Annotation")
+                                {
+                                    Concepts_count = Concepts_count + 1;
+                                }
+                            }
+                            foreach (String s in va.variable_concept_caracteristic)
+                            {
+                                if (s != "No Annotation")
+                                {
+                                    Caracteristics_count = Caracteristics_count + 1;
+                                }
+                            }
+
+                            <tr>
+                                <td rowspan="@va.variable_id.Count">@va.dataset_id</td>
+                                <td rowspan="@va.variable_id.Count">@va.datastructure_id</td>
+                                <td rowspan="@va.variable_id.Count">@va.owner</td>
+                                <td rowspan="@va.variable_id.Count">@va.project</td>
+                                <td rowspan="@va.variable_id.Count">Concept Coverage : @Concepts_count/@va.variable_id.Count <br /> Characteristics Coverage : @Caracteristics_count/@va.variable_id.Count</td>
+                                <td>@va.variable_id[0] </td>
+                                <td>@va.variable_label[0] </td>
+                                <td>@va.variable_concept_entity[0] </td>
+                                <td>@va.variable_concept_caracteristic[0] </td>
+                                <td>@va.unit[0] </td>
+                                <td>@va.dataType[0] </td>
+
+                            </tr>
+
+                            for (int kk = 1; kk < @va.variable_id.Count; kk++)
+                            {
+                                <tr>
+                                    <td>@va.variable_id[kk] </td>
+                                    <td>@va.variable_label[kk] </td>
+                                    <td>@va.variable_concept_entity[kk] </td>
+                                    <td>@va.variable_concept_caracteristic[kk] </td>
+                                    <td>@va.unit[kk] </td>
+                                    <td>@va.dataType[kk] </td>
+                                </tr>
+                            }
+                        }
+                    }
+                *@
+            }
+
+        </tbody>
+    </table>
+
+
+</div>
+
+
+<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Variable Templates</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="ModalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function download() {
+		$.ajax({
+			url: '@Url.Action("Download_Report", "PortalStatistics", "ASM")',
+			contentType: 'application/json; charset=utf-8',
+			datatype: 'json',
+			type: "GET",
+			success: function (e) {
+
+			    if (e) {
+			        window.location = '@Url.Action("Download_Report", "PortalStatistics", "ASM")';
+			    }
+			    else {
+			        alert("We can not generate file right now, report the error please");
+			    }
+
+			}
+		})
+    }
+
+    function refresh_stats() {
+        alert("Refresh in process");
+        $.ajax({
+
+			url: '@Url.Action("refresh_stats", "PortalStatistics", "ASM")',
+            type: "GET",
+            async: true,
+			success: function (e) {
+			    
+            },
+            async: false
+		})
+    }
+</script>

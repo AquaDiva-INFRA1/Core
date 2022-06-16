@@ -121,6 +121,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
         /// <seealso cref=""/>
         private static void init()
         {
+            isInit = false;
             if (!isInit) { BexisIndexSearcherInit(); isInit = true; }
         }
 

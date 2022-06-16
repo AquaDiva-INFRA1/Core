@@ -211,6 +211,7 @@ namespace BExIS.Web.Shell.Controllers
         public ActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
+            return RedirectToAction("Login", "LDAP");
             return View();
         }
 
