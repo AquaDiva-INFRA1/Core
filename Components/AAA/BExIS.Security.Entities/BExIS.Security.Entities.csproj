@@ -101,6 +101,7 @@
     <Compile Include="Subjects\Group.cs" />
     <Compile Include="Subjects\Subject.cs" />
     <Compile Include="Subjects\User.cs" />
+    <Compile Include="Subjects\UserPis.cs" />
     <Compile Include="Versions\Version.cs" />
   </ItemGroup>
   <ItemGroup>

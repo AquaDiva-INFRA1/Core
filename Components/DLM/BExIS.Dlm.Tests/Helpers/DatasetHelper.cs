@@ -455,8 +455,6 @@ namespace BExIS.Dlm.Tests.Helpers
                 return source;
         }
 
-
-
         public ResearchPlan CreateResearchPlan()
         {
             ResearchPlanManager researchPlanManager = new ResearchPlanManager();

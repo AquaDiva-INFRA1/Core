@@ -1,0 +1,61 @@
+﻿@model  List<BExIS.Modules.Aam.UI.Models.AnnotationModel>
+@using BExIS.Modules.Aam.UI.Models
+@section Information
+{
+    <p>This page shows a list of all current annotations.</p>
+}
+
+@section Scripts{
+    <link rel="stylesheet" type="text/css" href="@Url.Content("~/Areas/AAM/Content/AAM/datatables.min.css")" />
+    <script src="@Url.Content("~/Areas/AAM/Scripts/AAM/datatables.min.js")"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#annotationTable').DataTable();
+        });
+    </script>
+
+    <style>
+        #updateButtonContainer{
+            margin: 20px;
+        }
+    </style>
+}
+
+    <div id="main">
+        <table id="annotationTable">
+            <thead>
+                <tr>
+                    <th>Dataset</th>
+                    <th>DatasetVersion</th>
+                    <th>Variable</th>
+                    <th>Entity</th>
+                    <th>Entity Label</th>
+                    <th>Characteristic</th>
+                    <th>Characteristic Label</th>
+                    <th>Standard</th>
+                    <th>Standard Label</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (AnnotationModel ann in Model)
+                {
+                    <tr>
+                        <td>@ann.DatasetId</td>
+                        <td>@ann.DatasetVersionId</td>
+                        <td>@ann.VariableLabel</td>
+                        <td>@ann.Entity</td>
+                        <td>@ann.EntityLabel</td>
+                        <td>@ann.Characteristic</td>
+                        <td>@ann.CharacteristicLabel</td>
+                        <td>@ann.Standard</td>
+                        <td>@ann.StandardLabel</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        
+        <div id="updateButtonContainer">
+            @Html.ActionLink("Update labels", "FillLabelsInAnnotationTable", "Annotation", new { @class = "bx-button action", @title = "Update labels for all annotations in the database." })
+        </div>
+    </div>

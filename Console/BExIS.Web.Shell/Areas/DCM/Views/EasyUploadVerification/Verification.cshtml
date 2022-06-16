@@ -24,12 +24,14 @@
                         <th class="first-header">Datatype</th>
                         <th class="first-header">Unit</th>
                         <th class="first-header">Means</th>
+                        <th colspan="2" class="first-header">Ontology mapping</th>
                     </tr>
                     <tr>
                         <th class="second-header">The variable [Name]</th>
                         <th class="second-header">is of [Datatype]</th>
                         <th class="second-header">has [Unit]</th>
                         <th class="second-header">and means [Attribute]</th>
+                        <th colspan="2" class="second-header">semantically refers to: charac || entity </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -171,6 +173,8 @@
             var selectedDataType = 0;
             var selectedAttribute = 0;
             var varName = "";
+            var selected_entity = "";
+            var selected_charac = "";
 
             //set unit id
             console.log($(e).attr("name"));
@@ -182,12 +186,16 @@
             var dataTypeContainer = $(parent).find('select.datatype');
             var unitContainer = $(parent).find('select.unit');
             var dataAttrContainer = $(parent).find('select.dataattribute');
-            var lastSelection = $(e).attr("name");
+        var entityContainer = $(parent).find('select.entity');
+        var charachteristicContainer = $(parent).find('select.charachteristic');
+        var lastSelection = $(e).attr("name");
 
             selectedDataType = $($(dataTypeContainer).find(":selected")[0]).val();
             selectedUnit = $($(unitContainer).find(":selected")[0]).val();
             selectedAttribute = $($(dataAttrContainer).find(":selected")[0]).val();
-            varName = $($(parent).find(".name")[0]).attr("varName");
+        selectedEntity = $($(entityContainer).find(":selected")[0]).val();
+        selectedCharachteristic = $($(charachteristicContainer).find(":selected")[0]).val();
+        varName = $($(parent).find(".name")[0]).attr("varName");
             index = $($(parent).find(".name")[0]).attr("index");
 
             //console.log(selectedDataType);
@@ -207,7 +215,9 @@
                 selectedDataType,
                 selectedAttribute,
                 varName,
-                lastSelection
+                lastSelection,
+                selectedEntity,
+                selectedCharachteristic
 
             }, function (response) {
 

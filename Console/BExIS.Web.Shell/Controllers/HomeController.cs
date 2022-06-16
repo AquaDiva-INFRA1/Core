@@ -14,6 +14,20 @@ using BExIS.Security.Services.Versions;
 using BExIS.Web.Shell.Models;
 using BExIS.Xml.Helpers;
 using Vaiona.Utils.Cfg;
+using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Services.Data;
+using Npgsql;
+using System.Collections.Generic;
+using System.Linq;
+using BExIS.Modules.Rpm.UI.Models;
+using System.Configuration;
+using System.IO;
+using System.Xml.Linq;
+using BExIS.Security.Services.Versions;
+using BExIS.Web.Shell.Models;
+using BExIS.Xml.Helpers;
+using Vaiona.Utils.Cfg;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Subjects;
@@ -22,6 +36,8 @@ namespace BExIS.Web.Shell.Controllers
 {
     public class HomeController : Controller
     {
+        static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
+
         [DoesNotNeedDataAccess]
         public ActionResult Index()
         {
@@ -83,11 +99,13 @@ namespace BExIS.Web.Shell.Controllers
 
             //if the landingPage is null and the action is not accessible forward to shell/home/index
             if (landingPage == null || !this.IsAccessible(landingPage.Item1, landingPage.Item2, landingPage.Item3))
-                return View(); // open shell/home/index
+                return RedirectToAction("Login","LDAP");
+            //return View();
 
             // return result of defined landing page
             var result = this.Render(landingPage.Item1, landingPage.Item2, landingPage.Item3);  
             return Content(result.ToHtmlString(), "text/html");
+            //return RedirectToAction(landingPage.Item3, landingPage.Item2, new { area = landingPage.Item1 });
         }
         
         [DoesNotNeedDataAccess]
@@ -136,6 +154,19 @@ namespace BExIS.Web.Shell.Controllers
             }
         }
 
+        [DoesNotNeedDataAccess]
+        public ActionResult RedirectToWiki()
+        {
+            return Redirect("https://aquadiva-trac1.inf-bb.uni-jena.de/wiki/doku.php");
+        }
+
+        [DoesNotNeedDataAccess]
+        public ActionResult RedirectToBugtracker()
+        {
+            return Redirect("https://aquadiva-trac1.inf-bb.uni-jena.de/mantis/bug_report_page.php");
+            return RedirectToAction("Index");
+        }
+
         protected bool checkPermission(Tuple<string, string, string> LandingPage)
         {
             var featurePermissionManager = new FeaturePermissionManager();
@@ -177,5 +208,6 @@ namespace BExIS.Web.Shell.Controllers
                 userManager.Dispose();
             }
         }
+
     }
 }

@@ -8,7 +8,10 @@ using BExIS.IO;
 using BExIS.IO.Transform.Input;
 using BExIS.IO.Transform.Output;
 using BExIS.IO.Transform.Validation.Exceptions;
+using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Subjects;
 using BExIS.Security.Services.Utilities;
 using BExIS.Utils.Data.Upload;
 using BExIS.Utils.Models;
@@ -27,6 +30,8 @@ using Vaiona.Entities.Common;
 using Vaiona.Logging.Aspects;
 using Vaiona.Persistence.Api;
 using Vaiona.Utils.Cfg;
+using BExIS.Security.Services.Authorization;
+using Vaiona.Logging;
 
 namespace BExIS.Modules.Dcm.UI.Helpers
 {
@@ -379,6 +384,8 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                         }
                         catch (Exception e)
                         {
+                            LoggerFactory.GetFileLogger().LogCustom(e.Message);
+                            LoggerFactory.GetFileLogger().LogCustom(e.StackTrace);
                             temp.Add(new Error(ErrorType.Other, "Can not upload. : " + e.Message));
                             var es = new EmailService();
                             es.Send(MessageHelper.GetErrorHeader(),
@@ -466,6 +473,7 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                     }
 
                     #endregion unstructured data
+
                 }
                 else
                 {
@@ -484,9 +492,12 @@ namespace BExIS.Modules.Dcm.UI.Helpers
             }
             catch (Exception ex)
             {
+                LoggerFactory.GetFileLogger().LogCustom(ex.Message);
+                LoggerFactory.GetFileLogger().LogCustom(ex.StackTrace);
                 temp.Add(new Error(ErrorType.Dataset, ex.Message));
 
                 dm.CheckInDataset(id, "no update on data tuples", User.Name, ViewCreationBehavior.None);
+
             }
             finally
             {

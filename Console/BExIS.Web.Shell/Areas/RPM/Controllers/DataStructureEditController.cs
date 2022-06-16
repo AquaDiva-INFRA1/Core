@@ -354,7 +354,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                             variable.DataAttribute = dataContainerManager.DataAttributeRepo.Get(svs.AttributeId);
                             variable.IsValueOptional = svs.isOptional;
 
-
+                            
                             List<MissingValue> missingValues = missingValueManager.Repo.Query(mv => mv.Variable.Id.Equals(svs.Id)).ToList();
                             foreach (MissingValue mv in missingValues)
                             {
@@ -387,6 +387,9 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                             }
                         }
                     }
+
+                    dataStructure = dataStructureManager.UpdateStructuredDataStructure(dataStructure);
+                    DataStructureIO.setVariableOrder(dataStructure, variables.Select(svs => svs.Id).ToList());
                 }
                 else
                 {

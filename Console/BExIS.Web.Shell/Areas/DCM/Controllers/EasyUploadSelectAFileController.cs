@@ -1,5 +1,6 @@
 ﻿using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
+using BExIS.IO;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Models;
 using System;
@@ -17,7 +18,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
     {
 
         private EasyUploadTaskManager TaskManager;
-        private List<String> supportedExtensions = new List<string>() { ".xlsx", ".xlsm" };
+        private List<String> supportedExtensions = new List<string>() { ".xlsx", ".xlsm", ".csv" };
 
         [HttpGet]
         public ActionResult SelectAFile(int index)
@@ -35,6 +36,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 model.SelectedFileName = TaskManager.Bus[EasyUploadTaskManager.FILENAME].ToString();
             }
 
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.CSV_DELIMITER))
+            {
+                model.csvDelimiter = TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString();
+            }
+
             //get datastuctureType
             model.SupportedFileExtentions = supportedExtensions;
 
@@ -42,6 +48,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             model.StepInfo = TaskManager.Current();
 
             model.serverFileList = GetServerFileList();
+            
+            TextSeperator text_delimiter = new TextSeperator();
+            ViewData["text_delimiter"] = text_delimiter;
 
             return PartialView(model);
         }
@@ -70,11 +79,27 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         try
                         {
                             string filePath = TaskManager.Bus[EasyUploadTaskManager.FILEPATH].ToString();
-
+                            
                             //TaskManager.AddToBus(EasyUploadTaskManager.IS_TEMPLATE, "false");
-
-                            TaskManager.Current().SetValid(true);
-
+                            
+                            string extension = TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString();
+                            if ((extension.ToLower().Contains(".csv")) || (extension.ToLower().Contains(".txt")))
+                            {
+                                if (!TaskManager.Bus.ContainsKey(EasyUploadTaskManager.CSV_DELIMITER))
+                                {
+                                    //No delimiter was entered
+                                    model.ErrorList.Add(new Error(ErrorType.Other, "Please enter a delimiter character for the csv file."));
+                                }
+                                else
+                                {
+                                    TaskManager.Current().SetValid(true);
+                                }
+                            }
+                            else
+                            {
+                                //Not a csv so we don't need a delimiter
+                                TaskManager.Current().SetValid(true);
+                            }
                         }
                         catch
                         {
@@ -103,10 +128,22 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 }
             }
 
+            if (TaskManager.Bus.ContainsKey(EasyUploadTaskManager.CSV_DELIMITER))
+            {
+                model.csvDelimiter = TaskManager.Bus[EasyUploadTaskManager.CSV_DELIMITER].ToString();
+
+            }
+
             model.serverFileList = GetServerFileList();
             model.SupportedFileExtentions = supportedExtensions;
 
             return PartialView(model);
+        }
+
+        public void AddDelimiterToBus(string delimiter)
+        {
+            TaskManager = (EasyUploadTaskManager)Session["TaskManager"];
+            TaskManager.AddToBus(EasyUploadTaskManager.CSV_DELIMITER.ToString(), delimiter);
         }
 
         #region private methods

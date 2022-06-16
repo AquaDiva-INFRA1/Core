@@ -4,22 +4,29 @@
 @{
     ViewBag.Title = @Model.Displayname;
 
-    string id = "DIM-"+Model.Id.ToString();
+    string id = "DIM-" + Model.Id.ToString();
     string all_id = "all_" + id;
     string none_id = "none_" + id;
     string convert_id = "convert_" + id;
     string preloader_id = "preloader_" + id;
 }
-<div id="@id" class="dim-export-metadata" exportIAvailable ="@Model.ExportIsAvailable" button="@convert_id">
 
-<div class="row">
-    <div class="col-lg-12">
-        @Model.Description
+
+<div id="@id" class="dim-export-metadata" exportIAvailable="@Model.ExportIsAvailable" button="@convert_id">
+
+    <div class="row">
+        <div class="col-lg-12">
+            @Model.Description
+        </div>
     </div>
-</div>
 
     <div style="text-align: left; padding: 5px 0;">
         <button id="@convert_id" type="button" class="bx-button bx-disabled function" value="Convert" name="button" onclick="dim_OnClickConvert(this)" disabled="disabled">Export</button>
+        
+    </div>
+
+    <div style="text-align: right; padding: 5px 0;">
+        <button id="@convert_id" type="button" class="bx-button function" value="Migrate" name="button" onclick="OnclickMigrate(this)">Migrate Metadata</button>
     </div>
 
     @(Html.Telerik().Grid(Model.DatasetVersions)
@@ -30,7 +37,7 @@
                 .PageSize(20, new int[] { 10, 20, 50, 100, 500 })
                 .Position(GridPagerPosition.Both)
                 .PageTo(1))
-                
+
 
             .Columns(columns =>
             {
@@ -48,7 +55,7 @@
                     )
                     .HtmlAttributes(new {@class="xyz"})
                     .HeaderHtmlAttributes(new {@class="xyz"});
-                    
+
                 columns.Bound(o => o.DatasetId).Title("Dataset id").Width(120);
                 columns.Bound(o => o.DatasetVersionId).Title("Datasetversion id").Width(180);
                 columns.Bound(o => o.Title).Title("Dataset Title")
@@ -69,27 +76,24 @@
 
             }
         ))
-        
+
 </div>
+
+
 <style type="text/css">
 
-    #datasetversionsConvertGrid .t-status
-    {
-        display:none;
+    #datasetversionsConvertGrid .t-status {
+        display: none;
     }
 
-    #datasetversionsConvertGrid 
-    {
-        text-align:left;
+    #datasetversionsConvertGrid {
+        text-align: left;
     }
 
-    #datasetversionsConvertGrid .xyz
-    {
-        padding-left:0;
-        text-align:center;
-    }
-    
-
+        #datasetversionsConvertGrid .xyz {
+            padding-left: 0;
+            text-align: center;
+        }
 </style>
 
 
@@ -100,6 +104,9 @@
         resetAllTelerikIconTitles();
         addTooltips();
         //setExportBT();
+        if (document.getElementById("MetadataStructuresDic").style.display != 'none') {
+            document.getElementById("MetadataStructuresDic").style.display = 'none';
+        }
     });
 
 
@@ -119,7 +126,7 @@
         if ($("#" + id + " input:checkbox:checked").length > 0 && exportIsAvailable == "True") {
             console.log("some are checked");
 
-            
+
             $(bt).removeAttr("disabled");
             $(bt).removeClass("bx-disabled");
 
@@ -186,5 +193,75 @@
         setExportBT(obj);
     }
 
+    function OnclickMigrate(obj) {
+        var selectedDatasetIds = "";
+        var idString = obj.id.split('_')[1];
+        var id = idString.split('-')[1];
+
+        $("#" + idString + " input:checkbox:checked").each(function () {
+
+            if (this.id.indexOf("all") == -1) {
+                if (selectedDatasetIds == "")
+                    selectedDatasetIds = this.id;
+                else
+                    selectedDatasetIds += "," + this.id;
+
+                $(this).closest("tr").find(".download-button").preloader(12, "Converting dataset " + this.id);
+            }
+        })
+
+        if (selectedDatasetIds.length == 0) {
+            alert("please select a dataset");
+            document.getElementById("MetadataStructuresDic").style.display = 'none';
+            return;
+        }
+
+        if (document.getElementById("MetadataStructuresDic").style.display == 'none') {
+            document.getElementById("MetadataStructuresDic").style.display = 'block';
+            alert("showing target metadata ....");
+        }
+        else {
+            alert("migrating ....");
+            var targetId = document.getElementById("MetadataStructuresDic").value;
+            if (targetId == '') {
+                alert("please select a Target Metadata");
+                return;
+            }
+            var sendData =
+            {
+                "dataset_ids": selectedDatasetIds,
+                "sourceId": id,
+                "targetId": targetId
+            }
+            console.log(sendData);
+            $.ajax({
+                type: "POST",
+                url: "/DIM/Mapping/Convertdatasetmetadata",
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: JSON.stringify(sendData),
+                success: function (data) {
+                    _result = JSON.parse(data);
+                    if (_result.length != 0) {
+                        alert("succes");
+                        $.each(_result, function (index) {
+                            
+                            url = window.location.origin + '/ddm/data/Showdata?id=' + index
+                            console.log(url);
+                            window.open(url,'_blank');
+                            window.location.reload();
+                        });
+                    }
+                },
+                error: function (data) {
+                    alert("error !! "+
+                        "possible solutions : Mapping file not existing ...please create one and proceed to migrtion of dataset metadata."+
+                        "Contact portal administrator in case of further issues")
+                }
+            });
+            
+        }
+        
+    }
 
 </script>

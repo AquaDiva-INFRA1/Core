@@ -10,7 +10,9 @@ using BExIS.IO.Transform.Output;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Helpers;
 using BExIS.Modules.Dcm.UI.Models;
+using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Subjects;
 using BExIS.Security.Services.Utilities;
 using BExIS.Utils.Data.Upload;
@@ -116,7 +118,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             {
 
                 Task.Run(() => asyncUploadHelper.FinishUpload());
-
+                
                 // send email after starting the upload
                 var es = new EmailService();
                 var user = GetUser();
@@ -157,6 +159,41 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             model = updateModel(model);
 
             #endregion set summary
+
+            if (_user.Name != "DEFAULT")
+            {
+                UserPiManager upm = new UserPiManager();
+
+                //Full permissions for the user
+                EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+                entityPermissionManager.Create<User>(_user.Name, "Dataset", typeof(Dataset),
+                    id,
+                    Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList()
+                    );
+
+                //Get PIs of the current user
+                List<User> piList = upm.GetPisFromUserByName(_user.Name).ToList();
+                foreach (User pi in piList)
+                {
+                    //Full permissions for the pis
+                    entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset),
+                        id,
+                        Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                    //Get all users with the same pi
+                    List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                    //Give view and download rights to the members
+                    foreach (User piMember in piMembers)
+                    {
+                        entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset),
+                            id,
+                            new List<RightType> {
+                                        RightType.Read
+                            });
+                    }
+                }
+                entityPermissionManager.Dispose();
+            }
 
             return PartialView(model);
         }

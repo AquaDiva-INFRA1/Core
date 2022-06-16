@@ -1,4 +1,5 @@
-﻿using BExIS.Dlm.Entities.MetadataStructure;
+﻿using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.MetadataStructure;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.MetadataStructure;
 using BExIS.IO.Transform.Output;
@@ -15,6 +16,7 @@ using System.Linq;
 using System.Web.Mvc;
 using System.Xml;
 using Telerik.Web.Mvc.Extensions;
+using Vaiona.Persistence.Api;
 using Vaiona.Utils.Cfg;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
@@ -27,8 +29,22 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
         public ActionResult Delete(long id)
         {
-            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
+            using (DatasetManager dm = new DatasetManager())
+            {
+                var all = dm.DatasetVersionRepo.Get();
+                DatasetVersion dv = all.FirstOrDefault(x =>
+                        x.ChangeDescription != null
+                        && x.ChangeDescription.Contains("Metadata was submited")
+                        && x.Metadata.DocumentElement.Attributes[0] != null
+                        && long.Parse(x.Metadata.DocumentElement.Attributes[0].Value.ToString()) == id
+                        );
 
+                if (dv!=null)
+                    return Json(false);
+            }
+
+            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
+            
             try
             {
                 MetadataStructure metadataStructure = metadataStructureManager.Repo.Get(id);

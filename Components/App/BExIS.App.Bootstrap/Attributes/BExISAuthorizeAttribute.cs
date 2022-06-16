@@ -21,7 +21,7 @@ namespace BExIS.App.Bootstrap.Attributes
                 var areaName = "Shell";
                 try
                 {
-                    areaName = filterContext.RouteData.DataTokens["area"].ToString();
+                     areaName = filterContext.RouteData.DataTokens["area"].ToString();
                 }
                 catch
                 {

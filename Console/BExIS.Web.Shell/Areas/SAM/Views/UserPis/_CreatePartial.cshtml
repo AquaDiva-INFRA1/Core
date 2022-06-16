@@ -1,0 +1,38 @@
+﻿@model BExIS.Modules.Sam.UI.Models.UserPiCreateModel
+@using (Ajax.BeginForm("Create", "UserPis", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "contentCreate", OnSuccess = "userPiCreate_onSuccess" }))
+{
+    @Html.ValidationSummary(true)
+
+    <div id="contentDetails">
+        <table>
+            <tr>
+                <td>
+                    User
+                </td>
+                <td>
+                    @Html.DropDownListFor(m => m.SelectedUserName, new SelectList(Model.UserList.Select(p=>p.Name)))
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Pi
+                </td>
+                <td>
+                    @Html.DropDownListFor(m => m.SelectedPiName, new SelectList(Model.PiUserList.Select(p=>p.Name)))
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <p>
+        <button style="float: left; margin-right: 1px" type="submit" class="t-button">Save</button>
+        <button style="float: right; margin-left: 1px" type="button" onclick="windowCreate_onCancel()" class="t-button">Cancel</button>
+        
+    </p>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.validator.unobtrusive.parse("#contentCreate");
+    });
+</script>

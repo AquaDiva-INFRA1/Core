@@ -3,6 +3,7 @@ using NUnit.Framework;
 
 namespace BExIS.Security.Services.Tests.Subjects
 {
+    
     [TestFixture]
     public class GroupManagerTests
     {

@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Manifest moduleId="AAM" displayName="Aquadiva Annotation Module" version="1.0.0" builtin="false">
+  <Description>
+    AAM provides the ability to manage dataset annotations for the Aquadiva project.
+  </Description>
+  <Assemblies>
+    <Assembly fullName="BExIS.Aam.Entities" role="" />
+    <Assembly fullName="BExIS.Aam.Model" role="" />
+    <Assembly fullName="BExIS.Aam.Services" role="" />
+  </Assemblies>
+  <Dependencies>
+    <!--<Dependency moduleId="dcm" version="*.*.*" />-->
+  </Dependencies>
+  <Exports>
+    <!--add proper menu items-->
+    <!--
+    <Export tag="settings" id="manageAnnotations" order="1"
+						title="Manage Annotations" description="" icon=""
+						controller="Annotation" action="index"
+						extends="./settingsRoot" />
+    -->
+    <Export tag="settings" id="AnnotationBackEnd" order="1"
+						title="Annotation Back End" description="" icon=""
+						controller="Aam_Uri" action="index"
+						extends="./settingsRoot" />
+
+    <!-- INTERNAL-->
+    <Export tag="internalApi" id="update_semantics"
+              title="update_semantics" description="update_semantics" icon=""
+              controller="Aam_Api" action="update_semantics"
+              extends="" />
+
+    <Export tag="internalApi" id="CreateAnnotation"
+        title="Create Annotation" description="Create and persist a new annotation" icon=""
+        controller="Annotation" action="CreateAnnotation"
+        extends="" />
+
+    <Export tag="internalApi" id="CreateAnnotationWithoutStandard"
+        title="Create Annotation Without Standard" description="Create and persist a new annotation" icon=""
+        controller="Annotation" action="CreateAnnotationWithoutStandard"
+        extends="" />
+
+    <Export tag="internalApi" id="GetAnnotationsForVariableName"
+        title="Get Annotations for Variable Name" description="Get all Annotations for a given Variable Name" icon=""
+        controller="Annotation" action="GetExistingAnnotationsByVariableLabel"
+        extends="" />
+
+    <Export tag="internalApi" id="GetExistingAnnotationsByUnitAndDatatype"
+        title="Get Annotations for Unit and Datatype" description="Get all Annotations for a given Unit and Datatype" icon=""
+        controller="Annotation" action="GetExistingAnnotationsByUnitAndDatatype"
+        extends="" />
+
+    <!--<Export tag="lunchbar" id="helpAam" order="1"
+						title="Annotations" description="Annotations Help Manual" icon=""
+						controller="Help" action="index"
+						extends="./lunchbarRoot/help"
+						/>-->
+    <!-- Settings Example-->
+    <!--<Export tag="settings" id="manageMetadata" order="1"
+						title="Manage Metadata Structure" description="Edit or Importa new Metadata Structure" icon=""
+						controller="ManageMetadataStructure" action="Index" argument=""
+						extends="./settingsRoot"
+						/>-->
+    <!-- Menubar Example-->
+    <!--<Export tag="menubar" id="createDataset" order="1"
+						title="Create Dataset" description="Create new Dataset" icon=""
+						controller="CreateDataset" action="index"
+						extends="./menubarRoot/collect" />-->
+
+    <!-- Api Example-->
+    <!-- <Export tag="api" id="tntList"
+						title="No thing" description="Change me!" icon=""
+						controller="home" action="index"
+						extends="./apiRoot"
+						/>-->
+  </Exports>
+</Manifest>

@@ -311,6 +311,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 }
 
                 Model.DatasetId = entityId;
+                //Model.StepModelHelpers = stepInfoModelHelpers;
                 Model.Created = false;
 
                 //check if a metadatastructure has a import mapping
@@ -3302,7 +3303,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             long parentPartyId = 0;
             // if the complex xml element has a partyid its mapped and all dependend simmple attributes must set
             bool complexIsMapped = false;
-            if (complexElement.Attributes().Any(a => a.Name.LocalName.ToLowerInvariant().Equals("partyid")))
+            if (complexElement?.Attributes().Any(a => a.Name.LocalName.ToLowerInvariant().Equals("partyid")) ?? false )
             {
                 complexIsMapped = true;
                 

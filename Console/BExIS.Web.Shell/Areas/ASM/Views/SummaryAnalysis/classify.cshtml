@@ -1,0 +1,242 @@
+﻿@model Int64
+@using BExIS.Modules.Asm.UI.Models;
+
+
+
+<head>
+	<script type="text/javascript" src='@Url.Content("~/Scripts/vis/vis.js")'></script>
+
+	<link href='@Url.Content("~/Scripts/vis/vis-network.min.css")' rel="stylesheet" type="text/css" />
+
+
+</head>
+Connected Terminologies :
+<div class="row" id="terminoloies">
+	<span class="badge badge-light">No Match</span><br>
+</div>
+<br />
+Matched terms :
+<div class="row" id="matched_terms">
+	<span class="badge badge-light">No Match</span><br>
+	<br />
+</div>
+<br />
+<div class="row">
+	<div id="map">
+		<center>
+			<div id="mynetwork"></div>
+		</center>
+	</div>
+	<div class="row">
+		<div id="datasets_list" hidden="true">
+		</div>
+	</div>
+</div>
+
+<div id="spinner_loader" hidden="true">
+	<center><i class="fa fa-spinner fa-spin" style="font-size:50px" id="spinner_loader"></i></center>
+</div>
+
+
+<script type="text/javascript">
+
+    classify();
+    // create an array with nodes
+        function classify() {
+
+        document.getElementById("spinner_loader").removeAttribute("hidden");
+        //document.getElementById("mynetwork").setAttribute("hidden", true);
+        var nodes_ = [];
+            var links = [];
+            var class_res = [];
+        $.ajax({
+            url: '/ASM/SummaryAnalysis/classify',
+            type: 'POST',
+            data: {
+                'dataset': @Model.ToString()
+            },
+            error: function (xhr) {
+                alert('Error occured, please contact your administrator');
+            },
+            success: function (result) {
+                if (result != "") {
+                    console.debug("I am here debug");
+                    var jsonObject = JSON.parse(result);
+                    console.log(jsonObject)
+                    // nodes end extraction
+                    for (var k = 0; k < jsonObject['nodes'].length; k++) {
+                        var key = jsonObject['nodes'][k];
+                        var elem = { id: k, label: jsonObject['nodes'][k] }
+                        nodes_.push(elem);
+                        console.debug('elemNode: ' + elem.id + " : " + elem.label)
+                    }
+					console.debug('nodes: ' + nodes_)
+                    // links for the map extraction
+                    for (var k = 0; k < jsonObject['links'].length; k++) {
+                        var ell = jsonObject['links'][k];
+                        for (var kk = 0; kk < ell.length - 1; kk++) {
+                            var elem = { from: ell[kk], to: ell[kk + 1] }
+                            console.log(elem, " is ", links.includes(elem), " - ", links.includes(elem))
+                            if (!elemExists(elem, links)) {
+                                links.push(elem);
+                                console.debug('elemLinks: ' + elem.from + " to " + elem.to)
+                            }
+                        }
+                    }
+                    console.debug('links:' + links)
+                    // matched terms extraction
+                    var matched_terms = "";
+                    for (var k = 0; k < jsonObject['keywords'].length; k++) {
+                        var ell = jsonObject['keywords'][k];
+                        console.log("keyword :  " + ell)
+                        matched_terms = matched_terms + "<span class=\"badge badge-light\"> #" + ell + "</span>";
+						console.debug("keyword :  " + ell)
+                    }
+					console.debug('matched_terms: ' + matched_terms)
+                    document.getElementById("matched_terms").innerHTML = matched_terms;
+
+                    // terminologies extracttion
+                    domains = ["Sites", "BioGeoChemichals", "Cycles", "Matter Cycles",
+                        "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways"];
+                    ////is best match prediction beig extracted here?
+                    /*for (var k = 0; k < jsonObject['class_results'].length; k++) {
+                        var ell = jsonObject['keywords'][k];
+                        for (var kk = 0; kk < ell.split(';').length - 1; kk++) {
+                            if ( !class_res.includes(ell) && (ell!= "\" \"") )
+                                class_res.push(elem);
+                        }
+                    }*/
+					for (var k = 0; k < jsonObject['class_results'].length; k++) {
+                        var ell = jsonObject['class_results'][k]['predition_bestMatches'];
+                        console.debug('ellMatches:' + ell)
+                        var ell_lst = ell.split(';');
+						for (var kk = 0; kk < ell_lst.length; kk++) {
+							if (!class_res.includes(parseInt(ell_lst[kk])) && (ell_lst[kk] != "\" \"") && (ell_lst[kk] != " ")) {
+								class_res.push(parseInt(ell_lst[kk]));
+								console.debug('elemClassRes: ' + parseInt(ell_lst[kk]))
+                            }
+						}
+                    }
+					console.debug('classRes: ' + class_res)
+                    terminoloies = "";
+                    //getting corresponding class name??
+                    //for (var k = 0; k < class_res.length; k++) {
+                    //    var ell = jsonObject['keywords'][k];
+                    //    terminoloies = terminoloies + "<span class=\"badge badge-light\"> #" + ell + "</span><br>";
+                    //    console.log("class_result :  " + domains[ell])
+                    //}
+                    for (var k = 0; k < class_res.length; k++) {
+						var ell = domains[parseInt(class_res[k])];
+						terminoloies = terminoloies + "<span class=\"badge badge-light\"> #" + ell + "</span>";
+                        console.log("class_result :  " + ell)
+						console.debug("class_result :  " + ell)
+                    }
+					console.debug(terminoloies)
+                    //document.getElementById("matched_terms").innerText = terminoloies;
+					document.getElementById("terminoloies").innerHTML = terminoloies;
+                }
+            },
+            complete: function () {
+                document.getElementById("spinner_loader").setAttribute("hidden", true);
+                //document.getElementById("mynetwork").removeAttribute("hidden");
+                var nodes = new vis.DataSet(nodes_);
+                // create an array with edges
+                var edges = new vis.DataSet(links);
+                // create a network
+                var container = document.getElementById('mynetwork');
+
+                // provide the data in the vis format
+                var data = {
+                    nodes: nodes,
+                    edges: edges
+                };
+                console.log(data);
+
+                var options = {}
+                var network = new vis.Network(container, data, options);
+                network.on('click', function (properties) {
+                    document.getElementById("datasets_list").setAttribute("hidden", true);
+                    var ids = properties.nodes;
+                    var clickedNodes = nodes.get(ids);
+                    console.log('clicked nodes:', clickedNodes[0].label);
+                    $.ajax({
+                        url: '/ASM/SummaryAnalysis/get_datasets_from_annot',
+                        type: 'POST',
+                        data: {
+                            'annot': clickedNodes[0].label
+                        },
+                        error: function (xhr) {
+                            alert('Error occured, please contact your administrator');
+                        },
+                        success: function (result) {
+                            if (result.length > 0) {
+                                var jsonObject = JSON.parse(result);
+                                var res = "<center>";
+                                for (var key of Object.keys(jsonObject)) {
+                                    res = res + " <h3>" + key + "</h3><br>";
+                                    elem = JSON.parse(jsonObject[key])
+                                    for (var key_ of Object.keys(elem)) {
+                                        res = res + "<a id=\"" + elem[key_] + "\" onclick=\"onclickDataset(this)\" class=\"mylink\" > <span class=\"badge badge-pill badge-warning\"> " + elem[key_] + "</span></a> ";
+                                    }
+                                }
+                                $('#datasets_list').html(res + "</center>");
+
+                                //document.getElementById("datasets_list").removeAttribute("class");
+                                //document.getElementById("datasets_list").setAttribute("class" , "col-md-2");
+                                //document.getElementById("map").removeAttribute("class");
+                                //document.getElementById("map").setAttribute("class" , "col-md-8");
+                            }
+                            else {
+                                //document.getElementById("datasets_list").removeAttribute("class");
+                                //document.getElementById("map").removeAttribute("class");
+                                //document.getElementById("map").setAttribute("class" , "col-md-10");
+                            }
+
+                        },
+                    });
+                    document.getElementById("datasets_list").removeAttribute("hidden");
+
+                })
+                $("#mynetwork").height(500);
+                $("#mynetwork").css('border', '3px solid black');
+
+            }
+        });
+        }
+
+        function onclickDataset(e) {
+        //checked
+            var id = e.getAttribute("id");
+            var data = {
+                id: id
+            }
+
+        $.ajax({
+            url: '/DDM/Data/IsDatasetCheckedIn',
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            error: function (xhr) {
+                alert('Error: ' + xhr.statusText);
+
+            },
+            success: function (result) {
+                if (result) {
+                    window.open("/ddm/Data/Show/" + id, "_blank");
+                } else {
+                    alert("Dataset is locked. Please try again later.");
+                }
+            }
+        });
+    }
+
+    function elemExists(elem, arr) {
+        return arr.some(function (el) {
+            return (el.from == elem.from) && (el.to == elem.to);
+      });
+}
+
+
+</script>
+
