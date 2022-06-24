@@ -12,11 +12,12 @@
                                     .Name("searchTerm")
                                     .DataBinding(dataBinding => dataBinding
                                         .Ajax().Select("getAutocompletionFromFile", "SemanticSearch")
-                                        .Cache(false))
+                                        .Cache(false)
+                                    )
                                     .Filterable(filtering =>
                                     {
                                         filtering.FilterMode(AutoCompleteFilterMode.StartsWith);
-                                        filtering.MinimumChars(3);
+                                        filtering.MinimumChars(2);
                                     })
                     )
                 </td>

@@ -719,7 +719,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             using (var client = new HttpClient())
             {
                 Dictionary<string, string> dict_data = new Dictionary<string, string>();
-                dict_data.Add("key", string.Join(" , ", searchTerm));
+                dict_data.Add("key", string.Join(" , ", searchTerm.ToLower()));
                 dict_data.Add("depth", Seamntic_depth);
                 dict_data.Add("error-distance", Error_distance);
 
