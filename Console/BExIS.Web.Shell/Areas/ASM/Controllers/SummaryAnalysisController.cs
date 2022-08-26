@@ -25,8 +25,6 @@ namespace BExIS.Modules.Asm.UI.Controllers
     {
         static string BaseAdress = WebConfigurationManager.AppSettings["BaseAdress"];
 
-        List<string> domains = new List<string>() { "Sites", "BioGeoChemichals", "Cycles", "Matter Cycles",
-            "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways"," "," "," "," " };
         static String projectTerminolgies = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Project-terminologies.csv");
 
         public static Dictionary<string, List<string>> dict_ = new Dictionary<string, List<string>>();
@@ -44,12 +42,13 @@ namespace BExIS.Modules.Asm.UI.Controllers
         {
             return PartialView("classify", id);
         }
-        public async System.Threading.Tasks.Task<ActionResult> classify(string dataset)
+        public async System.Threading.Tasks.Task<ActionResult> classify(string dataset, Boolean semantic_flag)
         {
             string username = this.ControllerContext.HttpContext.User.Identity.Name;
             Dictionary<string, string> dict_data = new Dictionary<string, string>();
             dict_data.Add("username", username);
             dict_data.Add("data", dataset);
+            dict_data.Add("semantic_flag", semantic_flag.ToString());
 
             try
             {
