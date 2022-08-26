@@ -45,16 +45,20 @@ namespace BEXIS.ASM.Services
         }
 
         #region classification
-        public async Task<string> get_analysisAsync(string dataset, string username)
+        public async Task<string> get_analysisAsync(string dataset, string username, Boolean semantic_flag)
         {
             string content = prepare_for_classification(dataset);
-            
+
             //Dictionary<string, string> dict_data = new Dictionary<string, string>();
             //dict_data.Add("username", username);
             //dict_data.Add("data", csv_to_json(content) );
 
             //var json = JsonConvert.SerializeObject(sb.ToString(), Newtonsoft.Json.Formatting.Indented);
-            var stringContent = new StringContent(csv_to_json(content).Replace("[],", "\"\","), Encoding.UTF8, "application/json");
+            string content_csv = csv_to_json(content).Replace("[],", "\"\",");
+            Dictionary<string, string> params_ = new Dictionary<string, string>();
+            params_.Add("content_csv", content_csv);
+            params_.Add("semantic_flag", semantic_flag.ToString());
+            var stringContent = new StringContent(JsonConvert.SerializeObject(params_, Newtonsoft.Json.Formatting.Indented), Encoding.UTF8, "application/json");
 
             string url = WebConfigurationManager.AppSettings["summary_adress"]+"/predict";
             client.BaseAddress = new Uri(url);
@@ -66,7 +70,7 @@ namespace BEXIS.ASM.Services
         private string prepare_for_classification(string datasetids)
         {
             StringBuilder str = new StringBuilder();
-            str.AppendLine("datasetID;Datasetversion_id;variable_id;unit;type;entity_id;entity;charachteristic_id;charachteristic;" +
+            str.AppendLine("datasetID;Datasetversion_id;variable_id;unit;type;entity_id;entityLabel;entity;charachteristic_id;charachteristicLabel;charachteristic;" +
                 "standard_id;standard;dataset_title;owner;project;variable_id_from_table;variable_value");
             write_out(str.ToString(),true);
             DataStructureManager dsm = new DataStructureManager();
@@ -139,11 +143,13 @@ namespace BEXIS.ASM.Services
                                 ch = ch + var?.Unit?.Name + ";";
                                 ch = ch + var?.DataAttribute?.DataType?.Name + ";";
                                 ch = ch + variable_annotation?.entity_id.Id + ";";
+                                ch = ch + variable_annotation?.entity_id.label + ";";
                                 ch = ch + variable_annotation?.entity_id.URI + ";";
                                 ch = ch + variable_annotation?.characteristic_id.Id + ";";
+                                ch = ch + variable_annotation?.characteristic_id.label + ";";
                                 ch = ch + variable_annotation?.characteristic_id.URI + ";";
                                 ch = ch + variable_annotation?.standard_id.Id + ";";
-                                ch = ch + variable_annotation?.standard_id.URI + ";";
+                                ch = ch + variable_annotation?.standard_id.label + ";";
                                 ch = ch + title?.Replace(';', ' ') + " ; " + owner?.Replace(';', ' ') + " ; " + project?.Replace(';', ' ') + " ; ";
                                 #endregion
 

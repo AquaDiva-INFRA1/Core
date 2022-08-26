@@ -7,10 +7,23 @@
     <script type="text/javascript" src='@Url.Content("~/Scripts/vis/vis.js")'></script>
 
     <link href='@Url.Content("~/Scripts/vis/vis-network.min.css")' rel="stylesheet" type="text/css" />
-
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 
 </head>
 
+<!--
+<div class="row">
+    <input type="checkbox" checked data-toggle="toggle" data-size="xs" id="semantic_flag" data-on="Semantic ON" data-off="Semantic OFF">
+</div>
+-->
+
+<div class="row" align="right">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="semantic_flag">
+        <label class="form-check-label" for="semantic_flag">Semantic Classification</label>
+    </div>
+</div>
 
 <div class="row" id="terminoloies" hidden="true">
 
@@ -42,6 +55,7 @@
 
 
 <script type="text/javascript">
+    start();
 
     var g = null
     //classify();
@@ -119,7 +133,8 @@
                 async: true,
                 dataType: 'json',
                 data: {
-                    'dataset': @Model.ToString()
+                    'dataset': @Model.ToString(),
+                    'semantic_flag': $('#semantic_flag').is(':checked')
                 },
                 success: function (result) {
                     resolve(result)
@@ -129,278 +144,283 @@
         });
     }
 
-    document.getElementById("spinner_loader").removeAttribute("hidden");
-    functABC().then(function (result) {
-        g = result
-        var domains = ["Sites", "BioGeoChemichals", "Cycles", "Matter Cycles", "Signals", "Phages", "Surface Inputs", "Gases", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways", " ", " ", " ", " "]
-        var global_results;
+    var global_results;
+    function start() {
+        document.getElementById('mynetwork').innerHTML="";
+        document.getElementById("spinner_loader").removeAttribute("hidden");
+        document.getElementById("datasets_list").setAttribute("hidden", true);
+        document.getElementById("matched_terms").setAttribute("hidden", true);
+        document.getElementById("terminoloies").setAttribute("hidden", true);
+        functABC().then(function (result) {
+            g = result
+            var domains = ["Sites", "Surface Inputs", "BioGeoChemichals", "Cycles", "Signals", "Matter Cycles", "Gases", "phages", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways", ""];
+            
 
-        var nodes = [];
-        var links = [];
-        var predictions = [];
-        var keywords = [];
-        if (result != "") {
+            var nodes = [];
+            var links = [];
+            var predictions = [];
+            var keywords = [];
+            if (result != "") {
 
-            global_results = result
-            terminologies = x = JSON.parse(result.terminologies);
-            x = JSON.parse(result.data);
+                global_results = result
+                terminologies = x = JSON.parse(result.terminologies);
+                x = JSON.parse(result.data);
 
-            let i = 0; // index of the nodes for Vis graph
-            for (var key of Object.keys(x)) {
+                let i = 0; // index of the nodes for Vis graph
+                for (var key of Object.keys(x)) {
 
-                //predicted_class //predictions
-                x[key]['predicted_class'].split(',').forEach(
-                    (element) => {
-                        if (!predictions.includes(element)) {
-                            for (let k in element.split(",")) {
-                                if (!predictions.includes(domains[k])) {
-                                    predictions.push(domains[k])
-                                }
-                            }
-
-                        }
-                    }
-                )
-
-                //terminologies // keywords
-                JSON.parse(global_results.terminologies).forEach(
-                    (Element) => {
-                        cells = Element.split(",");
-                        console.log("cells 1 : " + cells[1])
-                        predictions.forEach(
-                            (elem) => {
-                                console.log("predictions : " + elem)
-                                if (cells[1].toLowerCase().trim() == elem.toLowerCase().trim()) {
-                                    keywords_ = cells[2].replace("  ", " ").split('"')
-                                    keywords_.forEach((e) => {
-                                        if (e.trim() != "") {
-                                            console.log("keywords : " + key + e)
-                                            if (getsimilarity(key, e) > 0.5) {
-                                                keywords.push(elem)
+                    //predicted_class //predictions
+                    x[key]['predicted_class'].split(';').forEach(
+                        (element) => {
+                            element = element.trim()
+                            if (element.trim() != "") {
+                                if (!predictions.includes(domains[element])) {
+                                    predictions.push(domains[element])
+                                    //terminologies // keywords
+                                    JSON.parse(global_results.terminologies).forEach(
+                                        (lines) => {
+                                            cells = lines.split(",");
+                                            if (cells[1]?.toLowerCase().trim() == domains[element]?.toLowerCase().trim()) {
+                                                keywords_ = cells[2].replace("  ", " ").split(' ')
+                                                keywords_.forEach((e) => {
+                                                    if (e.trim() != "") {
+                                                        if (getsimilarity(key, e) > 0.3) {
+                                                            keywords.push(e)
+                                                        }
+                                                    }
+                                                })
                                             }
                                         }
-                                    })
-                                }
-                            }
-                        )
-                    }
-                )
-
-                //db_match //onto_match // nodes
-                props = ["db_match", "onto_match"]
-                props.forEach((key_) => {
-                    JSON.parse(x[key][key_]).forEach(
-                        (element) => {
-                            path_of_nodes = element.replace("[", "").replace("]", "").replace("'", "").replace('"', "").replace(" ", "").split(',');
-                            if (path_of_nodes.includes('nan')) {
-                                path_of_nodes.splice(path_of_nodes.indexOf('nan'), 1);
-                            }
-                            for (let index = 0; index < path_of_nodes.length - 1; index++) {
-
-                                //nodes
-                                sub_element = path_of_nodes[index]
-                                if (!elemExists_(sub_element, nodes)) {
-                                    elem_node = { id: i, label: sub_element }
-                                    nodes.push(elem_node)
-                                    i++;
-                                }
-
-                                next_element = path_of_nodes[index + 1].replace("'", "").trim()
-                                if (!elemExists_(next_element, nodes)) {
-                                    elem_node = { id: i, label: next_element }
-                                    nodes.push(elem_node)
-                                    i++;
-                                }
-
-                                //links
-                                var elem_link = { from: return_id_(sub_element, nodes).id, to: return_id_(next_element, nodes).id }
-                                if (!elemExists(elem_link, links)) {
-                                    links.push(elem_link)
+                                    )
                                 }
                             }
                         }
                     )
-                })
-            }
 
-            global_results.predictions = predictions;
-            global_results.keywords = keywords;
-            global_results.nodes = nodes;
-            global_results.links = links;
+                    //db_match //onto_match // nodes
+                    props = ["db_match", "onto_match"]
+                    props.forEach((key_) => {
+                            JSON.parse(x[key][key_]).forEach(
+                                (element) => {
+                                    path_of_nodes = element.replace("[", "").replace("]", "").replace("'", "").replace('"', "").replace(" ", "").split(',');
+                                    if (path_of_nodes.includes('nan')) {
+                                        path_of_nodes.splice(path_of_nodes.indexOf('nan'), 1);
+                                    }
+                                    for (let index = 0; index < path_of_nodes.length - 1; index++) {
 
-            document.getElementById("matched_terms").innerHTML = global_results.keywords;
-            document.getElementById("matched_terms").removeAttribute("hidden");
+                                        //nodes
+                                        sub_element = path_of_nodes[index]
+                                        if (!elemExists_(sub_element, nodes)) {
+                                            elem_node = { id: i, label: sub_element }
+                                            nodes.push(elem_node)
+                                            i++;
+                                        }
 
-            document.getElementById("terminoloies").innerHTML = global_results.predictions;
-            document.getElementById("terminoloies").removeAttribute("hidden");
+                                        next_element = path_of_nodes[index + 1].replace("'", "").trim()
+                                        if (!elemExists_(next_element, nodes)) {
+                                            elem_node = { id: i, label: next_element }
+                                            nodes.push(elem_node)
+                                            i++;
+                                        }
 
-            document.getElementById("spinner_loader").setAttribute("hidden", true);
-            //document.getElementById("mynetwork").removeAttribute("hidden");
-            var nodes = new vis.DataSet(global_results.nodes);
-            // create an array with edges
-            var edges = new vis.DataSet(global_results.links);
-            // create a network
-            var container = document.getElementById('mynetwork');
-
-            // provide the data in the vis format
-            var data = {
-                nodes: nodes,
-                edges: edges
-            };
-
-            var options = {
-                physics: {
-                    stabilization: {
-                        enabled: true
-                    }
-                }
-            };
-
-            var options_ = {
-                edges: {
-                    smooth: false
-                },
-                physics: {
-                    stabilization: {
-                        enabled: true
-                    },
-                    repulsion: {
-                        nodeDistance: 100000 // Put more distance between the nodes.
-                    }
-                },
-                interaction: {
-                    dragNodes: true,// do not allow dragging nodes
-                    dragView: true  // do not allow dragging
-                }
-            };
-
-            var options__ = {
-                physics: {
-                    enabled: true,
-                    barnesHut: {
-                        gravitationalConstant: -2000,
-                        centralGravity: 0.3,
-                        springLength: 95,
-                        springConstant: 0.04,
-                        damping: 0.09,
-                        avoidOverlap: 0
-                    },
-                    forceAtlas2Based: {
-                        gravitationalConstant: -50,
-                        centralGravity: 0.01,
-                        springConstant: 0.08,
-                        springLength: 100,
-                        damping: 0.4,
-                        avoidOverlap: 0
-                    },
-                    repulsion: {
-                        centralGravity: 0.2,
-                        springLength: 200,
-                        springConstant: 0.05,
-                        nodeDistance: 100,
-                        damping: 0.09
-                    },
-                    hierarchicalRepulsion: {
-                        centralGravity: 0.0,
-                        springLength: 100,
-                        springConstant: 0.01,
-                        nodeDistance: 120,
-                        damping: 0.09
-                    },
-                    maxVelocity: 50,
-                    minVelocity: 0.1,
-                    solver: 'barnesHut',
-                    stabilization: {
-                        enabled: true,
-                        iterations: 1000,
-                        updateInterval: 100,
-                        onlyDynamicEdges: true,
-                        fit: true
-                    },
-                    timestep: 0.5,
-                    adaptiveTimestep: true
-                }
-            }
-
-            var optionss = {
-                layout: {
-                    hierarchical: {
-                        enabled: true,
-                        levelSeparation: 1000,
-                        nodeSpacing: 1000,
-                        treeSpacing: 1000,
-                        blockShifting: true,
-                        edgeMinimization: true,
-                        parentCentralization: true
-                    },
-                    randomSeed: 191006,
-                    improvedLayout: true
-                },
-                edges: {
-                    smooth: {
-                        enabled: false,
-                        type: 'continuous'
-                    }
-                },
-                nodes: {
-                    borderWidth: 1,
-                    borderWidthSelected: 2,
-                    physics: true,
-                    shadow: {
-                        enabled: false,
-                        color: '#C11818',
-                        size: 10,
-                        x: 5,
-                        y: 5
-                    },
-                    mass: 1,
-                },
-                //physics: {
-                //    stabilization: false,
-                //},
-            };
-
-            var network = new vis.Network(container, data, options__);
-            network.stabilize();
-            $("#mynetwork").height(700);
-            $("#mynetwork").css('border', '3px solid black');
-
-            network.on('click', function (properties) {
-                document.getElementById("datasets_list").setAttribute("hidden", true);
-                var ids = properties.nodes;
-                var clickedNodes = nodes.get(ids);
-                console.log('clicked nodes:', clickedNodes[0].label);
-                $.ajax({
-                    url: '/ASM/SummaryAnalysis/get_datasets_from_annot',
-                    type: 'POST',
-                    data: {
-                        'annot': clickedNodes[0].label
-                    },
-                    error: function (xhr) {
-                        alert('Error occured, please contact your administrator');
-                    },
-                    success: function (result) {
-                        if (result.length > 0) {
-                            var jsonObject = JSON.parse(result);
-                            var res = "<center>";
-                            for (var key of Object.keys(jsonObject)) {
-                                res = res + " <h3>" + key + "</h3><br>";
-                                elem = JSON.parse(jsonObject[key])
-                                for (var key_ of Object.keys(elem)) {
-                                    res = res + "<a id=\"" + elem[key_] + "\" onclick=\"onclickDataset(this)\" class=\"mylink\" > <span class=\"badge badge-pill badge-warning\"> " + elem[key_] + "</span></a> ";
+                                        //links
+                                        var elem_link = { from: return_id_(sub_element, nodes).id, to: return_id_(next_element, nodes).id }
+                                        if (!elemExists(elem_link, links)) {
+                                            links.push(elem_link)
+                                        }
+                                    }
                                 }
-                            }
-                            $('#datasets_list').html(res + "</center>");
-                        }
+                            )
+                        })
+                }
 
-                    },
+                global_results.predictions = predictions;
+                global_results.keywords = keywords;
+                global_results.nodes = nodes;
+                global_results.links = links;
+
+                console.log(global_results)
+
+                document.getElementById("matched_terms").innerHTML = global_results.keywords;
+                document.getElementById("matched_terms").removeAttribute("hidden");
+
+                document.getElementById("terminoloies").innerHTML = global_results.predictions;
+                document.getElementById("terminoloies").removeAttribute("hidden");
+
+                document.getElementById("spinner_loader").setAttribute("hidden", true);
+                //document.getElementById("mynetwork").removeAttribute("hidden");
+                var nodes = new vis.DataSet(global_results.nodes);
+                // create an array with edges
+                var edges = new vis.DataSet(global_results.links);
+                // create a network
+                var container = document.getElementById('mynetwork');
+
+                // provide the data in the vis format
+                var data = {
+                    nodes: nodes,
+                    edges: edges
+                };
+
+                var options = {
+                        physics: {
+                            stabilization: {
+                                enabled: true
+                            }
+                        }
+                    };
+
+                var options_ = {
+                        edges: {
+                            smooth: false
+                        },
+                        physics: {
+                            stabilization: {
+                                enabled: true
+                            },
+                            repulsion: {
+                                nodeDistance: 100000 // Put more distance between the nodes.
+                            }
+                        },
+                        interaction: {
+                            dragNodes: true,// do not allow dragging nodes
+                            dragView: true  // do not allow dragging
+                        }
+                    };
+
+                var options__ = {
+                    //layout: { improvedLayout: false },
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -2000,
+                            centralGravity: 0.3,
+                            springLength: 95,
+                            springConstant: 0.04,
+                            damping: 0.09,
+                            avoidOverlap: 0
+                        },
+                        forceAtlas2Based: {
+                            gravitationalConstant: -50,
+                            centralGravity: 0.01,
+                            springConstant: 0.08,
+                            springLength: 100,
+                            damping: 0.4,
+                            avoidOverlap: 0
+                        },
+                        repulsion: {
+                            centralGravity: 0.2,
+                            springLength: 200,
+                            springConstant: 0.05,
+                            nodeDistance: 100,
+                            damping: 0.09
+                        },
+                        hierarchicalRepulsion: {
+                            centralGravity: 0.0,
+                            springLength: 100,
+                            springConstant: 0.01,
+                            nodeDistance: 120,
+                            damping: 0.09
+                        },
+                        maxVelocity: 50,
+                        minVelocity: 0.1,
+                        solver: 'barnesHut',
+                        stabilization: {
+                            enabled: true,
+                            iterations: 1000,
+                            updateInterval: 100,
+                            onlyDynamicEdges: true,
+                            fit: true
+                        },
+                        timestep: 0.5,
+                        adaptiveTimestep: true
+                    }
+                }
+
+                var optionss = {
+                        layout: {
+                            hierarchical: {
+                                enabled: true,
+                                levelSeparation: 1000,
+                                nodeSpacing: 1000,
+                                treeSpacing: 1000,
+                                blockShifting: true,
+                                edgeMinimization: true,
+                                parentCentralization: true
+                            },
+                            randomSeed: 191006,
+                            improvedLayout: true
+                        },
+                        edges: {
+                            smooth: {
+                                enabled: false,
+                                type: 'continuous'
+                            }
+                        },
+                        nodes: {
+                            borderWidth: 1,
+                            borderWidthSelected: 2,
+                            physics: true,
+                            shadow: {
+                                enabled: false,
+                                color: '#C11818',
+                                size: 10,
+                                x: 5,
+                                y: 5
+                            },
+                            mass: 1,
+                        },
+                        //physics: {
+                        //    stabilization: false,
+                        //},
+                    };
+
+                var network = new vis.Network(container, data, options__);
+                network.stabilize();
+                $("#mynetwork").height(700);
+                $("#mynetwork").css('border', '3px solid black');
+
+                
+                document.getElementById("datasets_list").setAttribute("hidden", true);
+
+                network.on('click', function (properties) {
+                    document.getElementById("datasets_list").setAttribute("hidden", true);
+                    var ids = properties.nodes;
+                    var clickedNodes = nodes.get(ids);
+                    console.log('clicked nodes:', clickedNodes[0].label);
+                    $.ajax({
+                        url: '/ASM/SummaryAnalysis/get_datasets_from_annot',
+                        type: 'POST',
+                        data: {
+                            'annot': clickedNodes[0].label
+                        },
+                        error: function (xhr) {
+                            alert('Error occured, please contact your administrator');
+                        },
+                        success: function (result) {
+                            if (result.length > 0) {
+                                var jsonObject = JSON.parse(result);
+                                var res = "<center>";
+                                for (var key of Object.keys(jsonObject)) {
+                                    res = res + " <h3>" + key + "</h3><br>";
+                                    elem = JSON.parse(jsonObject[key])
+                                    for (var key_ of Object.keys(elem)) {
+                                        res = res + "<a id=\"" + elem[key_] + "\" onclick=\"onclickDataset(this)\" class=\"mylink\" > <span class=\"badge badge-pill badge-warning\"> " + elem[key_] + "</span></a> ";
+                                    }
+                                }
+                                $('#datasets_list').html(res + "</center>");
+                            }
+
+                        },
+                    });
+                    document.getElementById("datasets_list").removeAttribute("hidden");
                 });
-                document.getElementById("datasets_list").removeAttribute("hidden");
-            });
-        }
-    })
-    .catch(function (err) {
-        console.log(err)
-    })
+            }
+        })
+        .catch(function (err) {
+            console.log(err)
+        })
+    }
+
+    document.getElementById("semantic_flag").addEventListener("click", start);
 
 </script>
