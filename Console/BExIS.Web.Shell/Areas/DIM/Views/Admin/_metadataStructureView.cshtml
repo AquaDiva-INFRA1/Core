@@ -126,7 +126,7 @@
         console.log(bt);
 
 
-        if ($("#" + id + " input:checkbox:checked").length > 0 && exportIsAvailable == "True") {
+        if ($("#" + id + " input:checkbox:checked").length > 0 && exportIsAvailable == "exportIAvailable") {
             console.log("some are checked");
 
 
@@ -200,7 +200,6 @@
         var selectedDatasetIds = "";
         var idString = obj.id.split('_')[1];
         var id = idString.split('-')[1];
-
         $("#" + idString + " input:checkbox:checked").each(function () {
 
             if (this.id.indexOf("all") == -1) {
