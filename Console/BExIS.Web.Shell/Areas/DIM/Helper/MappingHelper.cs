@@ -575,12 +575,15 @@ namespace BExIS.Modules.Dim.UI.Helper
 
                     type = LinkElementType.MetadataNestedAttributeUsage;
 
-                    tmp.Add(
-                            new LinkElementModel(
+                    LinkElementModel linkElementModel = new LinkElementModel(
                                 0,
                                 attr.Id,
-                                type, attr.Label, "", position, complexity, attr.Description)
-                            );
+                                type, attr.Label, "", position, complexity, attr.Description);
+                    LinkElementRootModel linkElementRootModel = new LinkElementRootModel(type, attr.Id, attr.Label, position);
+
+                    addUsageAsLinkElement(attr, "", linkElementRootModel, linkElementModel);
+                    linkElementModel.XPath = linkElementRootModel.LinkElements[0].XPath;
+                    tmp.Add(linkElementModel);
                 }
 
                 return tmp;
@@ -689,14 +692,15 @@ namespace BExIS.Modules.Dim.UI.Helper
                     //    ? LinkElementType.SimpleMetadataAttribute
                     //    : LinkElementType.ComplexMetadataAttribute;
 
-                    type = LinkElementType.MetadataAttributeUsage;
-
-                    tmp.Add(
-                            new LinkElementModel(
+                    LinkElementModel linkElementModel = new LinkElementModel(
                                 0,
                                 attr.Id,
-                                type, attr.Label, "", pos, complexity, attr.Description)
-                            );
+                                type, attr.Label, "", pos, complexity, attr.Description);
+                    LinkElementRootModel linkElementRootModel = new LinkElementRootModel(type, attr.Id, attr.Label, pos);
+
+                    addUsageAsLinkElement(attr, "",linkElementRootModel, linkElementModel);
+                    linkElementModel.XPath = linkElementRootModel.LinkElements[0].XPath;
+                    tmp.Add(linkElementModel);
                 }
 
                 return tmp;
