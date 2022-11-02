@@ -1007,7 +1007,7 @@
       <Name>BExIS.Modules.Rpm.UI</Name>
     </ProjectReference>
     <ProjectReference Include="BEXIS.ASM.Services\BEXIS.ASM.Services.csproj">
-      <Project>{18AACAD7-16BA-4604-917A-90202EFD8F45}</Project>
+      <Project>{18aacad7-16ba-4604-917a-90202efd8f45}</Project>
       <Name>BEXIS.ASM.Services</Name>
     </ProjectReference>
   </ItemGroup>
