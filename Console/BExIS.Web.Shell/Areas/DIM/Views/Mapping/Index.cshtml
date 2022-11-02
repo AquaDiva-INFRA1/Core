@@ -189,9 +189,8 @@
     }
 
     function reloadmetadata(senddata) {
-
-        window.location.href = window.location.origin + window.location.pathname + "/mapping" +
-        "?sourceId=" + senddata.sourceId +
+        window.location.href = window.location.origin + "/DIM/Mapping/mapping" +
+            "?sourceId=" + senddata.sourceId +
             "&targetId=" + senddata.targetId +
             "&sourceType=" + senddata.sourceType +
             "&targetType=" + senddata.targetType;
