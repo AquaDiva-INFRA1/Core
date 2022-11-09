@@ -405,8 +405,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
                         {
                             long datasetId = long.Parse(dataset_id);
 
-                            if (dm.GetDataset(datasetId) == null)
-                                datasetId = dm.GetDatasetVersion(datasetId).Dataset.Id;
+                            datasetId = dm.GetDatasetVersion(datasetId).Dataset.Id;
 
                             dm.CheckOutDataset(datasetId, GetUsernameOrDefault());
                             XmlDocument metadataDoc = dm.GetDatasetLatestMetadataVersion(datasetId);
