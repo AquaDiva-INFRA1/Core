@@ -317,10 +317,10 @@ namespace BExIS.OAC.Services
                 foreach (string elem in header.Split(','))
                 {
                     DataAttribute CurrentDataAttribute = dam.CreateDataAttribute(elem, elem, elem, false, false, "", MeasurementScale.Categorial,
-                        DataContainerType.ReferenceType, "", dataTypeRepo.Get().ToList<Dlm.Entities.DataStructure.DataType>().FirstOrDefault(x => x.Name == "String"),
-                        unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"), null, null, null, null, null, null);
+                        DataContainerType.ReferenceType, "", dataTypeRepo.Get().ToList<Dlm.Entities.DataStructure.DataType>().FirstOrDefault(x => x.Name.ToLower() == "String"),
+                        unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name.ToLower() == "none"), null, null, null, null, null, null);
                     Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, elem, "", "", "",
-                        unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"));
+                        unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name.ToLower() == "None"));
                     VariableIdentifier vi = new VariableIdentifier
                     {
                         name = newVariable.Label,
