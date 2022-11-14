@@ -173,13 +173,13 @@ namespace BExIS.Modules.Rpm.UI.Models
         public AttributePreviewStruct fill(DataAttribute dataAttribute, bool getConstraints)
         {
             this.Id = dataAttribute.Id;
-            this.Name = dataAttribute.Name;
-            this.Description = dataAttribute.Description;
-            this.Unit.Id = dataAttribute.Unit?.Id ?? 0 ;
-            this.Unit.Name = dataAttribute.Unit?.Name ?? "No unit related";
+            this.Name = dataAttribute?.Name ?? "No Name related";
+            this.Description = dataAttribute?.Description ?? "No Descrition related";
+            this.Unit.Id = dataAttribute?.Unit?.Id ?? 0 ;
+            this.Unit.Name = dataAttribute?.Unit?.Name ?? "No unit related";
             this.Unit.Description = dataAttribute.Unit?.Abbreviation ?? "No unit related";
-            this.DataType = dataAttribute.DataType.Name;
-            this.Dimension = dataAttribute.Unit.Dimension.Name;
+            this.DataType = dataAttribute?.DataType?.Name ?? "No Name related";
+            this.Dimension = dataAttribute?.Unit?.Dimension?.Name ?? "No Dimension related"; 
 
             DataTypeDisplayPattern displayPattern = DataTypeDisplayPattern.Materialize(dataAttribute.DataType.Extra);
             if (displayPattern != null)
