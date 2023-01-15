@@ -1,3 +1,5 @@
 bin
 obj
 /Console/BExIS.Web.Shell/Properties/PublishProfiles
+/packages
+/Console/Workspace_
