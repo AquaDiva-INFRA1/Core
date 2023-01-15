@@ -70,14 +70,17 @@ namespace BExIS.Aam.Services
                 using (IUnitOfWork uow = this.GetUnitOfWork())
                 {
                     IRepository<Aam_Uri> repo = uow.GetRepository<Aam_Uri>();
+                    Aam_Uri uri = repo.Get().Where(x => x.URI == an.URI).FirstOrDefault();
+                    uri.label = an.label;
+                    uri.type_uri = an.type_uri;
                     repo.Merge(an);
-                    var merged = repo.Get(an.Id);
-                    repo.Put(merged);
-                    uow.Commit();
-                    return (merged);
+                    //var merged = repo.Get(an.Id);
+                    //repo.Put(merged);
+                    //uow.Commit();
+                    return (uri);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return an;
             }
@@ -202,8 +205,10 @@ namespace BExIS.Aam.Services
                     {
                         label = label.Split('@')[0];
                     }
-                    if (uri_ma.get_all_Aam_Uri().Where(x=>x.URI == uri).Count() == 0)
+                    if (uri_ma.get_all_Aam_Uri().Where(x => x.URI == uri).Count() == 0)
                         uri_ma.creeate_Aam_Uri(new Aam_Uri(uri, label, "Charachteristic"));
+                    else
+                        uri_ma.edit_Aam_Uri(new Aam_Uri(uri, label, "Charachteristic"));
                 }
                 #endregion
 
@@ -234,6 +239,8 @@ namespace BExIS.Aam.Services
                     }
                     if (uri_ma.get_all_Aam_Uri().Where(x => x.URI == uri).Count() == 0)
                         uri_ma.creeate_Aam_Uri(new Aam_Uri(uri, label, "Entity"));
+                    else
+                        uri_ma.edit_Aam_Uri(new Aam_Uri(uri, label, "Entity"));
                 }
                 #endregion
 
@@ -264,6 +271,8 @@ namespace BExIS.Aam.Services
                     }
                     if (uri_ma.AnnotationRepo.Get(x => x.URI == uri).Count == 0)
                         uri_ma.creeate_Aam_Uri(new Aam_Uri(uri, label, "Standard"));
+                    else
+                        uri_ma.edit_Aam_Uri(new Aam_Uri(uri, label, "Standard"));
                 }
                 #endregion
                 return true;
