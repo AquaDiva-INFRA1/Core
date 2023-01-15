@@ -772,8 +772,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                     break;
                                 }
                             }
-                            if (!b)
-                                clean_ids.Add(res);
+                            if (!b) clean_ids.Add(res);
                         }
                         #endregion
 
@@ -813,15 +812,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                     Console.WriteLine(exc.Message);
                                 }
                             }
-                            try
-                            {
-                                m.Rows.Add(row);
-                            }
-                            catch (Exception exec)
-                            {
-                                Console.WriteLine(exec.Message);
-                            }
-
+                            m.Rows.Add(row);
                         }
                     }
                     #endregion
@@ -1465,19 +1456,5 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         #endregion
 
 
-        #region retrieve semantics from description
-        public async Task<string> getEntitiesRelation(string id)
-        {
-            string output = "";
-            using (var client = new HttpClient())
-            {
-                XmlDatasetHelper helper = new XmlDatasetHelper();
-                string description = helper.GetInformation(Int64.Parse(id), NameAttributeValues.description);
-                var response = await client.GetAsync(semanticExtractionURL + "?key=" + description).ConfigureAwait(true);
-                output = await response.Content.ReadAsStringAsync();
-            }
-            return output;
-        }
-        #endregion
     }
 }
