@@ -1,4 +1,5 @@
-﻿using BExIS.Ddm.Model;
+﻿using BExIS.Utils.Models;
+using System.Collections.Generic;
 
 /// <summary>
 ///
@@ -41,7 +42,7 @@ namespace BExIS.Ddm.Api
         /// <param name="numberOfResults"></param>
         /// <returns></returns>
         SearchModel GetTextBoxSearchValues(string value, string filter, string searchType, int numberOfResults);
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -54,7 +55,7 @@ namespace BExIS.Ddm.Api
         /// <param name="searchCriteria"></param>
         /// <returns></returns>
         SearchModel GetTextBoxSearchValues(string value, string filter, string searchType, int numberOfResults, SearchCriteria searchCriteria);
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -63,7 +64,16 @@ namespace BExIS.Ddm.Api
         /// <param name="searchCriteria"></param>
         /// <returns></returns>
         SearchModel UpdateFacets(SearchCriteria searchCriteria);
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="searchCriteria"></param>
+        /// <returns></returns>
+        SearchModel UpdateProperties(SearchCriteria searchCriteria);
+
         /// <summary>
         /// 
         /// </summary>
@@ -74,7 +84,7 @@ namespace BExIS.Ddm.Api
         /// <param name="currentPage"></param>
         /// <returns></returns>
         SearchModel Get(SearchCriteria searchCriteria, int pageSize = 10, int currentPage = 1);
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -85,7 +95,7 @@ namespace BExIS.Ddm.Api
         /// <param name="currentPage"></param>
         /// <returns></returns>
         SearchModel SearchAndUpdate(SearchCriteria searchCriteria, int pageSize = 10, int currentPage = 1);
-       
+
         /// <summary>
         /// 
         /// </summary>
@@ -94,6 +104,18 @@ namespace BExIS.Ddm.Api
         /// <param name="searchCriteria"></param>
         void SearchAndUpdate(SearchCriteria searchCriteria);
 
+        /// <summary>
+        /// Update a list of datasets to the index
+        /// </summary>
+        /// <param name="datasetsToIndex"></param>
+        void UpdateIndex(Dictionary<long, IndexingAction> datasetsToIndex);
+
+        /// <summary>
+        /// Update single Dataset to to the index
+        /// </summary>
+        /// <param name="datasetId"></param>
+        /// <param name="indAction"></param>
+        void UpdateSingleDatasetIndex(long datasetId, IndexingAction indAction);
 
 
         void Reload();

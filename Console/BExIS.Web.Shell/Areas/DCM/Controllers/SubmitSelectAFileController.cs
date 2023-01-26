@@ -1,23 +1,25 @@
-﻿using System;
+﻿using BExIS.Dcm.UploadWizard;
+using BExIS.Dcm.Wizard;
+using BExIS.IO;
+using BExIS.IO.Transform.Input;
+using BExIS.IO.Transform.Validation.Exceptions;
+using BExIS.Modules.Dcm.UI.Models;
+using BExIS.Utils.Data.Upload;
+using BExIS.Utils.Upload;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
-using BExIS.IO.Transform.Input;
-using BExIS.IO.Transform.Validation.Exceptions;
-using BExIS.Dcm.UploadWizard;
-using BExIS.Dcm.Wizard;
-using BExIS.Web.Shell.Areas.DCM.Models;
 using Vaiona.Utils.Cfg;
-using BExIS.IO;
+using Vaiona.Web.Extensions;
 
-namespace BExIS.Web.Shell.Areas.DCM.Controllers
+namespace BExIS.Modules.Dcm.UI.Controllers
 {
     public class SubmitSelectAFileController : Controller
     {
-
         private TaskManager TaskManager;
         private FileStream Stream;
 
@@ -34,15 +36,16 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 TaskManager.SetCurrent(index);
 
             //Get Bus infomations
-            SelectFileViewModel model = new SelectFileViewModel();
+            var model = new SelectFileViewModel();
             if (TaskManager.Bus.ContainsKey(TaskManager.FILENAME))
             {
                 model.SelectedFileName = TaskManager.Bus[TaskManager.FILENAME].ToString();
             }
 
+
             //get datastuctureType
             model.DataStructureType = GetDataStructureType();
-            model.SupportedFileExtentions = UploadWizardHelper.GetExtentionList(model.DataStructureType);
+            model.SupportedFileExtentions = UploadHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
 
             //Get StepInfo
             model.StepInfo = TaskManager.Current();
@@ -57,8 +60,9 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         [HttpPost]
         public ActionResult SelectAFile(object[] data)
         {
+            IOUtility iOUtility = new IOUtility();
 
-            SelectFileViewModel model = new SelectFileViewModel();
+            var model = new SelectFileViewModel();
 
             TaskManager = (TaskManager)Session["TaskManager"];
 
@@ -80,58 +84,68 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                             if (GetDataStructureType().Equals(DataStructureType.Structured))
                             {
                                 #region structured datastructure
-                                    //try save FileStream
-                                    string filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
-                                    //if extention like a makro excel FileStream
-                                    if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsm"))
+                                //try save FileStream
+                                var filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
+                                //if extention like a makro excel FileStream
+                                if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsm"))
+                                {
+                                    // open FileStream
+                                    var reader = new ExcelReader(null, null);
+                                    Stream = reader.Open(filePath);
+                                    //Session["Stream"] = Stream;
+
+                                    //check is it template
+
+                                    if (reader.IsTemplate(Stream))
                                     {
-                                        // open FileStream
-                                        ExcelReader reader = new ExcelReader();
-                                        Stream = reader.Open(filePath);
-                                        //Session["Stream"] = Stream;
-
-                                        //check is it template
-
-                                        if (reader.IsTemplate(Stream))
+                                        TaskManager.Current().SetValid(true);
+                                        TaskManager.AddToBus(TaskManager.IS_TEMPLATE, "true");
+                                        TaskManager.AddToBus(TaskManager.FILE_READER_INFO, new ExcelFileReaderInfo()
                                         {
-                                            TaskManager.Current().SetValid(true);
-                                            TaskManager.AddToBus(TaskManager.IS_TEMPLATE, "true");
-                                        }
-                                        else
-                                        {
-                                            model.ErrorList.Add(new Error(ErrorType.Other, "File is not a Template"));
-                                            TaskManager.AddToBus(TaskManager.IS_TEMPLATE, "false");
-                                        }
-
-                                        Stream.Close();
+                                            Offset = 1,
+                                            Variables = 1,
+                                            Data = 13,
+                                            Decimal = DecimalCharacter.point
+                                        });
                                     }
                                     else
                                     {
+                                        model.ErrorList.Add(new Error(ErrorType.Other, "File is not a Template"));
                                         TaskManager.AddToBus(TaskManager.IS_TEMPLATE, "false");
-                                        // excel FileStream
-                                        if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xls"))
-                                        {
-
-                                            // open FileStream
-                                            ExcelReader reader = new ExcelReader();
-                                            Stream = reader.Open(filePath);
-                                            //Session["Stream"] = Stream;
-                                            TaskManager.Current().SetValid(true);
-
-                                            Stream.Close();
-                                        }
-                                        // text ór csv FileStream
-                                        else if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".csv") || TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".txt"))
-                                        {
-                                            // open FileStream
-                                            AsciiReader reader = new AsciiReader();
-                                            Stream = reader.Open(filePath);
-                                            //Session["Stream"] = Stream;
-                                            TaskManager.Current().SetValid(true);
-
-                                            Stream.Close();
-                                        }
                                     }
+
+                                    if (!ExcelReader.SUPPORTED_APPLICATIONS.Contains(reader.Application))
+                                    {
+                                        model.ErrorList.Add(new Error(ErrorType.Other, "The document was created in an application " + reader.Application + " that will currently not support"));
+                                    }
+
+                                    Stream.Close();
+                                }
+                                else
+                                {
+                                    TaskManager.AddToBus(TaskManager.IS_TEMPLATE, "false");
+                                    // excel FileStream
+                                    if (iOUtility.IsSupportedExcelFile(TaskManager.Bus[TaskManager.EXTENTION].ToString()))
+                                    {
+
+                                        // open FileStream
+                                        var reader = new ExcelReader(null, null);
+                                        Stream = reader.Open(filePath);
+                                        TaskManager.Current().SetValid(true);
+                                        Stream.Close();
+                                    }
+                                    // text ór csv FileStream
+                                    else if (iOUtility.IsSupportedAsciiFile(TaskManager.Bus[TaskManager.EXTENTION].ToString()))
+                                    {
+                                        // open FileStream
+                                        var reader = new AsciiReader(null, null, new IOUtility());
+                                        Stream = reader.Open(filePath);
+                                        //Session["Stream"] = Stream;
+                                        TaskManager.Current().SetValid(true);
+
+                                        Stream.Close();
+                                    }
+                                }
                                 #endregion
                             }
 
@@ -139,26 +153,9 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                             {
                                 #region unstructured datastructure
                                 //try save FileStream
-                                string filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
-                              
-                                if(FileHelper.FileExist( filePath ))
-                                {
-                                    TaskManager.Current().SetValid(true);
-                                }
+                                var filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
 
-                                
-                                #endregion
-                            }
-
-                            if (GetDataStructureType().Equals(DataStructureType.NewStructured))
-                            {
-                                #region newstructured datastructure
-                                //try save FileStream
-                                string filePath = TaskManager.Bus[TaskManager.FILEPATH].ToString();
-
-                                TaskManager.AddToBus(TaskManager.IS_TEMPLATE, "false");
-
-                                if (TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xls") || TaskManager.Bus[TaskManager.EXTENTION].ToString().Equals(".xlsx"))
+                                if (FileHelper.FileExist(filePath))
                                 {
                                     TaskManager.Current().SetValid(true);
                                 }
@@ -168,10 +165,15 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                             }
 
                         }
-                        catch
+                        catch (NotSupportedException ex) 
+                        {
+                            model.ErrorList.Add(new Error(ErrorType.Other, ex.Message));
+                        }
+                        catch (Exception ex)
                         {
                             model.ErrorList.Add(new Error(ErrorType.Other, "Cannot access FileStream on server."));
                         }
+
                     }
                     else
                     {
@@ -198,7 +200,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             model.serverFileList = GetServerFileList();
             //get datastuctureType
             model.DataStructureType = GetDataStructureType();
-            model.SupportedFileExtentions = UploadWizardHelper.GetExtentionList(model.DataStructureType);
+            model.SupportedFileExtentions = UploadHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
 
             return PartialView(model);
         }
@@ -212,12 +214,12 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         /// <returns></returns>
         public ActionResult SelectFileProcess(HttpPostedFileBase SelectFileUploader)
         {
-            TaskManager TaskManager = (TaskManager)Session["TaskManager"];
+            var TaskManager = (TaskManager)Session["TaskManager"];
             if (SelectFileUploader != null)
             {
                 //data/datasets/1/1/
-                string dataPath = AppConfiguration.DataPath; //Path.Combine(AppConfiguration.WorkspaceRootPath, "Data");
-                string storepath = Path.Combine(dataPath, "Temp", GetUserNameOrDefault());
+                var dataPath = AppConfiguration.DataPath; //Path.Combine(AppConfiguration.WorkspaceRootPath, "Data");
+                var storepath = Path.Combine(dataPath, "Temp", GetUsernameOrDefault());
 
                 // if folder not exist
                 if (!Directory.Exists(storepath))
@@ -225,7 +227,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                     Directory.CreateDirectory(storepath);
                 }
 
-                string path = Path.Combine(storepath, SelectFileUploader.FileName);
+                var path = Path.Combine(storepath, SelectFileUploader.FileName);
 
                 SelectFileUploader.SaveAs(path);
                 TaskManager.AddToBus(TaskManager.FILEPATH, path);
@@ -246,14 +248,14 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         /// <returns></returns>
         public ActionResult SelectFileFromServerProcess(string fileName)
         {
-            TaskManager TaskManager = (TaskManager)Session["TaskManager"];
+            var TaskManager = (TaskManager)Session["TaskManager"];
             if (fileName != null)
             {
                 //string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "ServerFiles",fileName);
 
                 //data/datasets/1/1/
-                string dataPath = AppConfiguration.DataPath; //Path.Combine(AppConfiguration.WorkspaceRootPath, "Data");
-                string path = Path.Combine(dataPath, "Temp", GetUserNameOrDefault(), fileName);
+                var dataPath = AppConfiguration.DataPath; //Path.Combine(AppConfiguration.WorkspaceRootPath, "Data");
+                var path = Path.Combine(dataPath, "Temp", GetUsernameOrDefault(), fileName);
 
                 TaskManager.AddToBus(TaskManager.FILEPATH, path);
 
@@ -274,7 +276,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         private List<String> GetServerFileList()
         {
 
-            string userDataPath = Path.Combine(AppConfiguration.DataPath, "Temp", GetUserNameOrDefault());
+            var userDataPath = Path.Combine(AppConfiguration.DataPath, "Temp", GetUsernameOrDefault());
 
             // if folder not exist
             if (!Directory.Exists(userDataPath))
@@ -283,23 +285,23 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             }
 
 
-            DirectoryInfo dirInfo = new DirectoryInfo(userDataPath);
+            var dirInfo = new DirectoryInfo(userDataPath);
             return dirInfo.GetFiles().Select(i => i.Name).ToList();
 
         }
 
         // chekc if user exist
         // if true return usernamem otherwise "DEFAULT"
-        public string GetUserNameOrDefault()
+        public string GetUsernameOrDefault()
         {
-            string userName = string.Empty;
+            var username = string.Empty;
             try
             {
-                userName = HttpContext.User.Identity.Name;
+                username = HttpContext.User.Identity.Name;
             }
             catch { }
 
-            return !string.IsNullOrWhiteSpace(userName) ? userName : "DEFAULT";
+            return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
         }
 
         /// <summary>
@@ -311,10 +313,10 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         {
             if (taskManager.Bus.ContainsKey(TaskManager.EXTENTION))
             {
-                string ext = taskManager.Bus[TaskManager.EXTENTION].ToString();
-                DataStructureType type = (DataStructureType)taskManager.Bus[TaskManager.DATASTRUCTURE_TYPE];
+                var ext = taskManager.Bus[TaskManager.EXTENTION].ToString();
+                var type = (DataStructureType)taskManager.Bus[TaskManager.DATASTRUCTURE_TYPE];
 
-                if (UploadWizardHelper.GetExtentionList(type).Contains(ext.ToLower())) return true;
+                if (UploadHelper.GetExtentionList(type, this.Session.GetTenant()).Contains(ext.ToLower())) return true;
 
             }
 

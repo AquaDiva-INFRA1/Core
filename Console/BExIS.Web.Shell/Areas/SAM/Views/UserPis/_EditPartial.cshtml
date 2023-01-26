@@ -1,46 +1,39 @@
-﻿@using BExIS.Web.Shell.Areas.SAM.Models
+﻿@model UserPiEditModel
+@using BExIS.Modules.Sam.UI.Models
 @using Telerik.Web.Mvc.UI
-@model UserPiEditModel
 @using (Ajax.BeginForm("Edit", "UserPis",new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "contentEdit", OnSuccess = "userPiEdit_onSuccess" }))
 {
    @* @Html.ValidationSummary(true) *@
 
-    <div id="tabs">
+    <div id="contentDetails">
+        @Html.HiddenFor(m => m.Id)
+        <table>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(m => m.UserName)
+                    @Html.HiddenFor(m => m.UserId)
+                    @Html.HiddenFor(m => m.UserName)
+                </td>
+            </tr>
 
-        <ul>
-            <li><a href="#contentDetails">Details</a></li>
-        </ul>
-
-        <div id="contentDetails">
-            @Html.HiddenFor(m => m.Id)
-           <table>
-                <tr>
-                    <td>
-                        @Html.LabelFor(m => m.UserName)
-                    </td>
-                    <td>
-                       @Html.DisplayFor(m => m.UserName)
-                       @Html.HiddenFor(m => m.UserId)
-                       @Html.HiddenFor(m => m.UserName)
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        @Html.LabelFor(m => m.PiId)
-                    </td>
-                    <td>
-                        @Html.DropDownListFor(m => m.SelectedPiName, new SelectList(Model.UserList.ToList().Select(p=>p.Name), Model.SelectedPiName))
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                    @Html.LabelFor(m => m.PiId)
+                </td>
+                <td>
+                    @Html.DropDownListFor(m => m.SelectedPiName, new SelectList(Model.UserList.ToList().Select(p=>p.Name), Model.SelectedPiName))
+                </td>
+            </tr>
 
                
-            </table>
-        </div>
+        </table>
+    </div>
 
-        <div id="contentMembership">
+    <div id="contentMembership">
            
-        </div>
     </div>
 
     <p>
@@ -53,19 +46,12 @@
 }
 
 <script type="text/javascript">
-    $("#tabs").tabs();
-
     $(document).ready(function () {
-
-        console.log($("#SelectedPiName").val());
-
-        //$("#SelectedPiName").val($("#CurrentPi_Name").val());
-
-        var checkboxes = Array.prototype.slice.call(document.querySelectorAll('.js-switch'));
+        /*var checkboxes = Array.prototype.slice.call(document.querySelectorAll('.js-switch'));
 
         checkboxes.forEach(function (html) {
             var switchery = new Switchery(html, { size: 'small' });
-        });
+        });*/
 
         $.validator.unobtrusive.parse("#contentEdit");
     });

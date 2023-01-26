@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Xml;
 using System.Xml.Schema;
 
 namespace BExIS.Xml.Helpers
@@ -45,7 +41,24 @@ namespace BExIS.Xml.Helpers
             return simpleTypes;
         }
 
-    
+        /// <summary>
+        /// Get all simple types from the schema.
+        /// </summary>
+        /// <param name="schema"></param>
+        /// <returns></returns>
+        public static List<XmlSchemaAttribute> GetAllAttributes(XmlSchema schema)
+        {
+            List<XmlSchemaAttribute> attributes = new List<XmlSchemaAttribute>();
+
+            foreach (XmlSchemaObject item in schema.Items)
+            {
+                if (item is XmlSchemaAttribute) attributes.Add((XmlSchemaAttribute)item);
+            }
+
+            return attributes;
+        }
+
+
         /// <summary>
         /// Get all elements from the schema.
         /// </summary>
@@ -85,18 +98,20 @@ namespace BExIS.Xml.Helpers
 
         public static List<XmlSchemaElement> GetAllElements(XmlSchemaObject obj, bool recursive, List<XmlSchemaElement> allElements)
         {
-            List<XmlSchemaElement> elements  = new List<XmlSchemaElement>(); 
+            List<XmlSchemaElement> elements = new List<XmlSchemaElement>();
 
             // Element
             if (obj.GetType().Equals(typeof(XmlSchemaElement)))
             {
-                XmlSchemaElement element  = (XmlSchemaElement)obj;
+                XmlSchemaElement element = (XmlSchemaElement)obj;
 
                 XmlSchemaComplexType complexType = element.ElementSchemaType as XmlSchemaComplexType;
 
+                if(complexType==null) complexType = element.SchemaType as XmlSchemaComplexType;
+
                 if (complexType != null)
                 {
-                    #region sequence
+                    #region sequence  as XmlSchemaSequence
                     /// Get the sequence particle of the complex type.
                     XmlSchemaSequence sequence = complexType.ContentTypeParticle as XmlSchemaSequence;
                     if (sequence != null)
@@ -109,6 +124,34 @@ namespace BExIS.Xml.Helpers
                     }
 
                     #endregion
+
+                    #region sequence as XmlSchemaAll
+                    /// Get the sequence particle of the complex type.
+                    XmlSchemaAll all = complexType.ContentTypeParticle as XmlSchemaAll;
+                    if (all != null)
+                    {
+                        // Iterate over each XmlSchemaElement in the Items collection.
+                        foreach (XmlSchemaObject childElement in all.Items)
+                        {
+                            elements = GetElements(childElement, elements, recursive, allElements);
+                        }
+                    }
+
+                    #endregion
+
+                    //#region sequence as XmlSchemaAll
+                    ///// Get the sequence particle of the complex type.
+                    //XmlSchemaAll all = complexType.ContentTypeParticle as Content;
+                    //if (all != null)
+                    //{
+                    //    // Iterate over each XmlSchemaElement in the Items collection.
+                    //    foreach (XmlSchemaObject childElement in all.Items)
+                    //    {
+                    //        elements = GetElements(childElement, elements, recursive, allElements);
+                    //    }
+                    //}
+
+                    //#endregion
 
                     #region choice
                     // check if it is e choice
@@ -164,19 +207,19 @@ namespace BExIS.Xml.Helpers
             {
                 XmlSchemaGroup group = obj as XmlSchemaGroup;
 
-              #region sequence
-                    /// Get the sequence particle of the complex type.
-                    XmlSchemaSequence sequence = group.Particle as XmlSchemaSequence;
-                    if (sequence != null)
+                #region sequence
+                /// Get the sequence particle of the complex type.
+                XmlSchemaSequence sequence = group.Particle as XmlSchemaSequence;
+                if (sequence != null)
+                {
+                    // Iterate over each XmlSchemaElement in the Items collection.
+                    foreach (XmlSchemaObject childElement in sequence.Items)
                     {
-                        // Iterate over each XmlSchemaElement in the Items collection.
-                        foreach (XmlSchemaObject childElement in sequence.Items)
-                        {
-                            elements = GetElements(childElement, elements, recursive, allElements);
-                        }
+                        elements = GetElements(childElement, elements, recursive, allElements);
                     }
+                }
 
-              #endregion
+                #endregion
 
                 #region choice
                 // check if it is e choice
@@ -211,7 +254,7 @@ namespace BExIS.Xml.Helpers
             //    }
             //}
 
-        
+
             return elements;
 
         }
@@ -229,7 +272,7 @@ namespace BExIS.Xml.Helpers
                     {
                         //if (!child.SchemaTypeName.Name.Equals(parentTypeName))
                         //{
-                        
+
                         list.Add(child);
 
                         if (recursive)
@@ -241,6 +284,7 @@ namespace BExIS.Xml.Helpers
                             if (complexType != null)
                             {
                                 #region sequence
+
                                 /// Get the sequence particle of the complex type.
                                 XmlSchemaSequence sequence = complexType.ContentTypeParticle as XmlSchemaSequence;
                                 if (sequence != null)
@@ -255,6 +299,7 @@ namespace BExIS.Xml.Helpers
                                 #endregion
 
                                 #region choice
+
                                 // check if it is e choice
                                 XmlSchemaChoice choice = complexType.ContentTypeParticle as XmlSchemaChoice;
                                 if (choice != null)
@@ -265,6 +310,7 @@ namespace BExIS.Xml.Helpers
                                         list = GetElements(childElement, list, recursive, allElements);
                                     }
                                 }
+
                                 #endregion
                             }
                         }
@@ -279,6 +325,10 @@ namespace BExIS.Xml.Helpers
                         XmlSchemaElement refElement = allElements.Where(e => e.QualifiedName.Equals(child.RefName)).FirstOrDefault();
                         if (refElement != null)
                         {
+                            //set parameters from the child to the refernce
+                            refElement.MinOccurs = child.MinOccurs;
+                            refElement.MaxOccurs = child.MaxOccurs;
+
                             list.Add(refElement);
 
                             if (recursive)
@@ -332,11 +382,11 @@ namespace BExIS.Xml.Helpers
                     list = GetElements(childElement, list, recursive, allElements);
                 }
             }
-            else 
+            else
                 if (element.GetType().Equals(typeof(XmlSchemaSequence)))
             {
                 XmlSchemaSequence sequence = (XmlSchemaSequence)element;
-                    
+
                 // Iterate over each XmlSchemaElement in the Items collection.
                 foreach (XmlSchemaObject childElement in sequence.Items)
                 {
@@ -385,6 +435,56 @@ namespace BExIS.Xml.Helpers
                 XmlSchemaComplexType complexType = (XmlSchemaComplexType)element.ElementSchemaType;
                 if (complexType.ContentModel is XmlSchemaSimpleContent)
                     return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// return true if a Element is a Choice
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        public static bool IsChoiceType(XmlSchemaElement element)
+        {
+            if (element.ElementSchemaType is XmlSchemaComplexType)
+            {
+                XmlSchemaComplexType ct = element.ElementSchemaType as XmlSchemaComplexType;
+
+                if (ct != null)
+                {
+                    #region choice
+                    // check if it is e choice
+                    XmlSchemaChoice choice = ct.ContentTypeParticle as XmlSchemaChoice;
+                    if (choice != null)
+                    {
+                        return true;
+                    }
+                    #endregion
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// return true if a Element is a Choice
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        public static bool IsChoiceType(XmlSchemaComplexType complexType)
+        {
+
+            if (complexType != null)
+            {
+                #region choice
+                // check if it is e choice
+                XmlSchemaChoice choice = complexType.ContentTypeParticle as XmlSchemaChoice;
+                if (choice != null)
+                {
+                    return true;
+                }
+                #endregion
             }
 
             return false;

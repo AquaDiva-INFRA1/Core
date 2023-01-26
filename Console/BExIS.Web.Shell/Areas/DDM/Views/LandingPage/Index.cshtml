@@ -1,0 +1,270 @@
+﻿
+<html>
+@using System.Web.UI.WebControls
+@using Vaiona.Web.Mvc;
+@using BExIS.Utils.WebHelpers
+@using Vaiona.Web.Mvc.Modularity;
+
+
+@{
+    Layout = null;
+}
+
+@{
+    string semantic_Coverage = String.Format("{0:0.00}", (double)(ViewData["semantic_Coverage"]) * 100);
+    string datasetCount = (string)ViewData["datasetCount"];
+    string Datapoints = (string)ViewData["Datapoints"];
+}
+
+
+<head>
+    <style>
+        .carousel-item h1 {
+            display: table-cell;
+            //align-content: center;
+            text-align: justify;
+            vertical-align: middle;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 25px;
+            margin: 35px;
+            margin-right: 50rem;
+            //background-color: rgba(0, 0, 0, 0.2);
+            color: #FFFFFF;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-wrap: wrap;
+            flex-wrap: wrap;
+            -webkit-align-content: center;
+        }
+    </style>
+
+    <link rel="stylesheet" type="text/css" href='@Url.Content("~/HomePage/Content/modern-business.css")' />
+
+    <link rel="stylesheet" type="text/css" href='@Url.Content("~/HomePage/Content/bootstrap.min.css")' />
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+</head>
+
+
+<body>
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">
+    </nav>
+    <!-- Navigation -->
+
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="../../ddm/dashboard/ShowMyDatasetsInFullPage/">AquaDiva data portal</a>
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <header>
+        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+            <ol class="carousel-indicators">
+                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"  style="color: #000000;background-color: #000000;"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="1" style="color: #000000;background-color: #000000;"></li>
+            </ol>
+            <div class="carousel-inner" role="listbox">
+                <!-- Slide One - Set the background image for this slide in the line below -->
+                <div class="carousel-item active" style="background-image: url(@Url.Content("~/HomePage/Content/Images/Lehmann-Hainich004.jpg"))">
+                    <div class="d-flex h-100 align-items-center justify-content-center">
+                        <h1 class="myclass">
+                            Understanding the links between surface and subsurface biogeosphere.
+                            The CRC AquaDiva focuses on the important roles of water (Aqua) and biodiversity (Diva) for shaping the structure, properties, and functions of the subsurface,
+                            the part of the Earth's Critical Zone (CZ) that begins below the highest density of plant roots and extends down into the first aquifers.
+                        </h1>
+                    </div>
+                    <div class="carousel-caption d-none d-md-block">
+                        <h3>Scientific Data Management</h3>
+                        <p></p>
+                    </div>
+                </div>
+                <!-- Slide Two - Set the background image for this slide in the line below -->
+                <div class="carousel-item" style="background-image:  url(@Url.Content("~/HomePage/Content/Images/D01_2.png"))">
+                    <div class="d-flex h-100 align-items-center justify-content-center">
+                        <h1 style="color: #5C4921; margin: 20 px; margin-left: 50rem;margin-right: 7rem; font : 35px;">
+                            SemDaTe explores semantic technologies to enable a seamless, ontology-based integration of structured experimental data
+                            (from databases or spreadsheets) and originally unstructured textual data (from publications) in a common information management system.
+                            This platform, based on the BExIS2 software, will not only provide a safe home for all of AquaDiva's data,
+                            but also enable AquaDiva scientists to semantically retrieve, model, and aggregate data (e.g., for the purposes of hypothesis
+                            testing or summarization), including information about their trustworthiness, consistency, and completeness.
+                            Such an environment will be of use not only within AquaDiva, but also advance the state of the art in data science, in general.
+                        </h1>
+                    </div>
+                    <div class="carousel-caption d-none d-md-block">
+                        <h3 style="color: #FFFFFF; " <!--style="color: #000000; background-color: rgba(255,255, 255, 0.6);"-->Semantic search and structred data summary</h3>
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <!--<h1 class="my-4">Welcome to AquaDiva Data Portal </h1>-->
+        <!-- Marketing Icons Section -->
+        <hr class="my-12">
+        <div class="row">
+            <div class="col-lg-12 mb-12">
+                <div class="card h-100">
+                    <h4 class="card-header">Datasets</h4>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6 mb-6">
+                                <div class="jumbotron" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.3) 100%), url('@Url.Content("~/HomePage/Content/Images/squares.png")'); background-size: cover;">
+                                    <h1 class="display-4">More than</h1>
+                                    <h2><span class="Single">@datasetCount</span></h2>
+                                    <p class="lead">Datasets.</p>
+                                    <hr class="my-4">
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-6">
+                                <div class="jumbotron" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.3) 100%), url('@Url.Content("~/HomePage/Content/Images/binary-code.png")'); background-size: cover;">
+                                    <h1 class="display-4">More than</h1>
+                                    <h2><span class="Single">@Datapoints</span> </h2>
+                                    <p class="lead">Data points.</p>
+                                    <hr class="my-4">
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 mb-12">
+                                <div class="jumbotron" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.3) 100%), url('@Url.Content("~/HomePage/Content/Images/graphics.png")'); background-size: cover;">
+                                    <h1 class="display-4">Based on AquaDiva ontology, semantically covering more than</h1>
+                                    <h2><span class="Single">80 </span>% </h2>
+                                    <p class="lead">of Datasets.</p>
+                                    <hr class="my-4">
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- /.row -->
+        <!-- Portfolio Section -->
+
+        <hr class="my-12">
+        <h3> Services</h3>
+        <div class="row">
+            <div class="col-lg-4 col-sm-6 portfolio-item">
+                <div class="card h-100">
+                    <a href="#"><img class="card-img-top" src="@Url.Content("~/HomePage/Content/Images/Annotation 2019-11-06 171336.png")" alt="" height="220px"></a>
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <a href="../../dcm/EasyUpload/UploadWizard">Upload data - Easy upload</a>
+                        </h4>
+                        <p class="card-text">Easy upload is a feature within AquaDiva data portal enabling you to upload your data in a simple way and manage its content.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6 portfolio-item">
+                <div class="card h-100">
+                    <a href="#"><img class="card-img-top" src="@Url.Content("~/HomePage/Content/images/Annotation 2019-11-06 171445.png")" alt="" height="220px"></a>
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <a href="../../ddm/home/index">Search datasets</a>
+                        </h4>
+                        <p class="card-text">Search public and private datasets and have access on the metadata which is public for all of our datasets.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6 portfolio-item">
+                <div class="card h-100">
+                    <a href="#"><img class="card-img-top" src="@Url.Content("~/HomePage/Content/images/Annotation 2019-11-06 171548.png")" alt="" height="220px"></a>
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <a href="../../sam/help/index">Help</a>
+                        </h4>
+                        <p class="card-text">In case you need to get to know more about the AquaDiva functionalities and help provided.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-12">
+        <div class="row">
+            <div class="col-lg-12 col-sm-12 portfolio-item">
+                <div class="card h-100">
+                    <a href="#"><img class="card-img-top" src="~/HomePage/Content/images/Annotation 2019-11-06 171037.png" alt=""></a>
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <a href="../../ddm/Data/ShowData/361">Sampling campaing data in <strong>Hainich</strong> national park and <strong>Sandsteinplatte</strong></a>
+                        </h4>
+                        <p class="card-text">This service is used to visually explore different samples collected within the project and its different locations (Hainich HZE and Sandsteinplatte CZE)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <hr>
+
+        <!-- Call to Action Section -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <p></p>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-lg btn-secondary btn-block" href="../../ddm/dashboard/ShowMyDatasetsInFullPage">Access Data Portal</a>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.container -->
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">Copyright &copy; AquaDiva 2019</p>
+        </div>
+        <!-- /.container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+
+
+    <script src='@Url.Content("~/HomePage/Scripts/jquery.min.js")'></script>
+    <script src='@Url.Content("~/HomePage/Scripts/bootstrap.bundle.min.js")'></script>
+
+
+    <script type="text/JavaScript">
+        $('.Single').each(function () {
+            $(this).prop('Counter', 0).animate({
+                Counter: $(this).text()
+            }, {
+                duration: 4000,
+                easing: 'swing',
+                step: function (now) {
+                    $(this).text(Math.ceil(now));
+                }
+            });
+        });
+
+    </script>
+</body>
+
+
+</html>

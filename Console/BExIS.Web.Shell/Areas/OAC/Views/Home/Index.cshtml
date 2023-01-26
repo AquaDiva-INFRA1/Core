@@ -1,0 +1,269 @@
+@model BExIS.Modules.OAC.UI.Models.ViewFormModel
+
+@using System.Configuration
+@using System.Xml;
+
+    
+<div id="SetupContainer">
+
+    @section Information
+    {
+        This module imports metadata from BioGPS, NCBI and EBI. To import metadata from a dataset, enter the accession (sample ID) in the accession field.
+        <br />To import the data, you also need to specify the target metadata model, so BExIS knows which fields mean what, and a data model, in case you want to add your own data, later.
+        <br />BExIS itself isn't meant as genome string storage, because it's not build for such large amounts of data, and has no appropriate search / analysis tools for it (yet).
+    }
+    @Html.ValidationSummary(true)
+
+    <h1>Import External Sample Metadata</h1>
+    @if (Model.Error != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.Error;
+        </div>
+
+    }
+
+
+    <div class="row">
+        <div class="col col-lg-6">
+            @using (Html.BeginForm("FetchDataFromPortalAsync", "Home", FormMethod.Post))
+            {
+                <table>
+                    <tr>
+                        <td style="width: 300px;">
+                            @Html.LabelFor(m => m.Identifier) <span class="bx bx-required" title="Required"></span>
+                        </td>
+                        <td style="width: 400px;">
+                            @Html.TextBoxFor(m => m.Identifier, new { @class = "form-control" })
+                        </td>
+                        <td>
+                            @Html.ValidationMessageFor(m => m.Identifier)
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td style="width: 300px;">
+                            @Html.LabelFor(m => m.SelectedDataSourceId) <span class="bx bx-required" title="Required"></span>
+                        </td>
+                        <td id="selectPortal">
+                            @(Html.Telerik().DropDownList()
+                              .Name("SelectedDataSourceId")
+                              .ClientEvents(events => events.OnChange("onChangeSource"))
+                              .Placeholder("Select")
+                              .SelectedIndex(0)
+                              .HtmlAttributes(new
+                              {
+                                  title = "Select the " + Html.DisplayNameFor(m => m.SelectedDataSourceId),
+                                  @class = "bx-dropdown"
+                              })
+                              .BindTo(new SelectList(Model.DataSourceViewList, "Id", "Title", Model.SelectedDataSourceId))
+                        )
+                        </td>
+                        <td>
+                            @Html.ValidationMessageFor(m => m.SelectedDataSourceId)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 300px;">
+                            @Html.LabelFor(m => m.SelectedMetadataStructureId) <span class="bx bx-required" title="Required"></span>
+                        </td>
+                        <td id="smsid_parent">
+                            @(Html.Telerik().DropDownList()
+                                  .Name("SelectedMetadataStructureId")
+                                  .ClientEvents(events => events.OnOpen("onOpen"))
+                                  .Placeholder("Select")
+                                  .HtmlAttributes(new
+                                  {
+                                      title = "Select the " + Html.DisplayNameFor(m => m.SelectedMetadataStructureId),
+                                      @class = "bx-dropdown"
+                                  })
+                                  .SelectedIndex(0)
+                                  .BindTo(new SelectList(Model.MetadataStructureViewList, "Id", "Title", Model.SelectedMetadataStructureId))
+                        )
+                        </td>
+                        <td>
+                            @Html.ValidationMessageFor(m => m.SelectedMetadataStructureId)
+                        </td>
+
+                    </tr>
+                </table>
+
+                <div class="bx-footer right">
+                    <button type="submit" class="bx-button action" style="border:0px;">Fetch "Accession / Study number" data</button>
+                </div>
+
+            }
+        </div>
+        <div class="col col-lg-6">
+        </div>
+    </div>
+
+    @if (Model.Accessions.Count > 0)
+    {
+        <div class="row">
+            <div class="col col-lg-2">
+                <div class="row">
+                    <button value="Import to the Portal" name="Import" id="Import" class="bx-button action" onclick="selectAll()">Check/uncheck all</button>
+                </div>
+                <div class="row">
+                    <button value="Import to the Portal" name="Import" id="Import" class="bx-button action" onclick="Import_Batch()">
+                        <i id="spinner2" class="fa fa-spinner fa-spin" style="display:none"></i>
+                        Import to the Portal
+                    </button>
+                </div>
+                <div class="row">
+                    <div class="overflow-auto">
+                        <div class="form-check" style="overflow-y: scroll; height:600px; width: auto;">
+                            @foreach (KeyValuePair<string, string> acc in Model.Accessions)
+                            {
+                                <input name="accession_number" class="form-check-input" type="checkbox" value="@acc.Key.Split('	')[0]" id="@acc.Key.Split('	')[0]"
+                                       onclick="loadView( '@Html.Raw(@acc.Key.Split('	')[0].Split(' ')[1])' , '@Model.SelectedMetadataStructureId' ,'@Model.SelectedDataSourceId','@Model.SelectedDataStructureId', '@Html.Raw(@acc.Key.Split('	')[1])' )">
+                                <label class="form-check-label" for="@acc.Key.Split('	')[0]">
+                                    @acc.Key.Split('	')[0].Split(' ')[1]
+                                </label>
+                                <br />
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col col-lg-8" id="View">
+
+            </div>
+        </div>
+    }
+
+
+
+</div>
+
+
+
+
+<style type="text/css">
+    #SetupContainer .bx-dropdown {
+        width: 100%;
+    }
+</style>
+
+<script>
+
+
+
+            var lastData = 0;
+
+            function onOpen() {
+                if (lastData) {
+                    setTimeout(function () {
+                        var items = document.getElementsByClassName('t-item');
+                        lastData.forEach(entry => {
+                            var dat = entry.Data;
+                            var id = dat.id;
+                            var hasFile = dat.hasFile;
+                            for (var i = 0; i < items.length; i++) {
+                                var item = items[i];
+                                if (item.innerText.trim() == dat.title) {
+                                    item.disabled = !hasFile;
+                                    item.style = hasFile ? "" : "background: #777"
+
+                                }
+                            }
+                        })
+                    }, 10)
+                }
+                return true
+            }
+
+            function onChangeSource(e) {
+                /*
+                // get the selected source
+                var selectedSource = e.value || -1
+                
+                // grap the mapping possibilities for it
+                $.post("QueryAvailableMappings", { SelectedDataSourceId: selectedSource }, function (data) {
+
+                    var items = document.getElementsByClassName('t-item');
+                    // display them
+                    lastData = JSON.parse(data);
+                    lastData.forEach(entry => {
+                        var dat = entry.Data;
+                        var id = dat.id;
+                        var hasFile = dat.hasFile;
+                        for (var i = 0; i < items.length; i++) {
+                            var item = items[i];
+                            if (item.innerText.trim() == dat.title) {
+                                item.disabled = !hasFile;
+                                item.style = hasFile ? "" : "background: #777"
+
+                            }
+                        }
+                    })
+                });
+                */
+
+            }
+
+        </script>
+
+<script type="text/javascript">
+
+    function loadView(sample,SelectedMetadataStructureId,SelectedDataSourceId,SelectedDataStructureId,project) {
+        var params_ = "?sample=" + sample +"&project="+project+ "&MetadataStructureId=" + SelectedMetadataStructureId + "&DataSourceId=" + SelectedDataSourceId + "&DataStructureId=" + SelectedDataStructureId;
+        console.debug(params_)
+        $.ajax({
+            url: '/OAC/Home/LoadSamplesViewMetadataAsync'+params_,
+            error: function (xhr) {
+                alert('OoOoOoOppps ... error happened, come back later ...');
+            },
+            success: function (result) {
+                $("#View").html("");
+                $("#View").html(result);
+            }
+        })
+
+    }
+
+    function Import_Batch() {
+
+        var accession_number = [];
+        $.each($("input[name='accession_number']:checked"), function () {
+            accession_number.push($(this).val());
+        });
+        if (accession_number.length < 1) {
+            alert("please select an accession number to be attached to the dataset");
+            return;
+        };
+        $('#spinner2').show();
+        console.log(accession_number.toString());
+        $.ajax({
+            url: '/OAC/Home/SubmitAsync',
+            type: 'POST',
+            data: {
+                'acc': accession_number.toString()
+            },
+            //contentType: 'text/plain',
+            error: function (xhr) {
+                 console.log(xhr.responseText);
+                alert('OoOoOoOppps ... error happened, come back later ...');
+            },
+            success: function (result) {
+                console.log("results : " + result);
+                window.location.href = "/ddm/Data/ShowData/" + result;
+            },
+            complete: function () {
+                $('#spinner2').hide();
+            }
+        });
+    }
+
+    function selectAll() {
+        child_checked_length = $("input[name='accession_number']:checked").length
+        if (child_checked_length > 0) {
+            $("input[name='accession_number']").removeAttr('checked');
+        } else {
+            $("input[name='accession_number']").attr("checked", "checked");
+        }
+    }
+
+</script>

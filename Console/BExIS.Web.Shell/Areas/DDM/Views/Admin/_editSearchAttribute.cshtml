@@ -1,7 +1,7 @@
 ﻿@model SearchAttributeViewModel
 
-@using BExIS.Ddm.Model;
-@using BExIS.Web.Shell.Areas.DDM.Models;
+@using BExIS.Utils.Models;
+@using BExIS.Modules.Ddm.UI.Models;
 
 @{
     
@@ -91,7 +91,7 @@
                         @Html.ValidationMessageFor(m => m.displayName)
                     </td>
                 </tr>
-                <tr>
+                @*<tr>
                     <td>
                          @(Html.LabelFor(m => m.sourceName))<span class="bx bx-required" title="Required">
                     </td>
@@ -100,7 +100,7 @@
 
                          @Html.ValidationMessageFor(m => m.sourceName)
                     </td>
-                </tr>
+                </tr>*@
                 <tr>
                     <td style="vertical-align:top;">
                         @(Html.LabelFor(m => m.metadataNames))<span class="bx bx-required" title="Required">
@@ -113,6 +113,20 @@
                                 {
                                     foreach (var xpath in Model.metadataNames)
                                     {
+                                        if (xpath.Contains(";"))
+                                        {
+                                            string[] list_composed_xpath = xpath.Split(';');
+                                            foreach (var s in list_composed_xpath)
+                                            {
+                                                Html.RenderPartial("_metadataNode", s);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Html.RenderPartial("_metadataNode", xpath);
+                                            //@Html.ActionLink(" ", "AddMetadataNode", null, new { id = "addNode", @class = "bx-add bx-function", title="Corresponding metadata node to be used for the Lucene index." })
+
+                                        }
                                         Html.RenderPartial("_metadataNode", xpath);
                                     }
                                 }
@@ -152,7 +166,7 @@
                         @(Html.LabelFor(m => m.searchType))<span class="bx bx-required" title="Required">
                     </td>
                     <td>
-                         @Html.DropDownListFor(m => m.searchType, new SelectList(SearchComponentBaseType, Model.searchType), "Select, please")
+                         @Html.DropDownListFor(m => m.searchType, new SelectList(SearchComponentBaseType, Model.searchType), "Please select")
                          <label title="Search pattern to be used for this item.">?</label>
                     </td>
                 </tr>
@@ -161,7 +175,7 @@
                        @(Html.LabelFor(m => m.dataType))<span class="bx bx-required" title="Required">
                     </td>
                     <td>
-                         @Html.DropDownListFor(m => m.dataType, new SelectList(DataType, Model.dataType), "Select, please", new { title="Data type to be indexed." })
+                         @Html.DropDownListFor(m => m.dataType, new SelectList(DataType, Model.dataType), "Please select", new { title="Data type to be indexed." })
                     </td>
                 </tr>
         <tr>
@@ -250,12 +264,14 @@
             </table>
     }
     </div>
+
+
     <div class="bx-footer right">
-       <button value="c" name="cancel"  class="bx-button action" >Cancel</button>
-       <button type="submit" value="Save" name="submit"  class="bx-button action" >Save</button>
+        <button type="submit" value="Save" name="submit" class="bx-button action">Save</button>
+        <button value="c" name="cancel" class="bx-button action" onclick="OnCancel()">Cancel</button>
     </div>
-   
 }
+
 
 
 <script type="text/javascript">
@@ -279,8 +295,7 @@
         return false;
     });
 
-    function OnCancel()
-    {
+    function OnCancel() {
         var window = $('#EditSearchAttribute').data('tWindow');
         window.close();
     }
@@ -290,7 +305,7 @@
         var window = $('#EditSearchAttribute').data('tWindow');
         window.close();
 
-        @*$.post('@Url.Action("SearchDesigner", "Admin", new RouteValueDictionary { { "area", "DDM" } })', function (response) {
+        @*$.post('@Url.Action("SearchDesigner", "Admin", new RouteValueDictionary { { "area", "ddm" } })', function (response) {
             $("body").html(response);
         })*@
     }

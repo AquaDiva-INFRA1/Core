@@ -38,7 +38,7 @@ namespace BExIS.Dcm.Wizard
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>        
-        public Dictionary<String,object> Parameters { get; set; }
+        public Dictionary<String, object> Parameters { get; set; }
 
         /// <summary>
         ///
@@ -53,5 +53,24 @@ namespace BExIS.Dcm.Wizard
             ActionName = "";
             Parameters = new Dictionary<String, object>();
         }
+
+        /// <summary>
+        /// Get true back if all needed parameter are set
+        /// </summary>
+        /// <returns></returns>
+        public bool IsComplete()
+        {
+            //if (String.IsNullOrEmpty(AreaName))
+            //    return false;
+
+            if (String.IsNullOrEmpty(ControllerName))
+                return false;
+
+            if (String.IsNullOrEmpty(ActionName))
+                return false;
+
+            return true;
+        }
+
     }
 }

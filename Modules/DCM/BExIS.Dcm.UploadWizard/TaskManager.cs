@@ -1,8 +1,7 @@
-﻿using System;
+﻿using BExIS.Dcm.Wizard;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using BExIS.Dcm.Wizard;
 
 /// <summary>
 ///
@@ -44,22 +43,19 @@ namespace BExIS.Dcm.UploadWizard
         public static string OWNER = "Owner";
         public static string PROJECTNAME = "ProjectName";
         public static string INSTITUTE = "Institute";
-        public static string SCHEMA = "Schema";
 
-        // sheet structure
+        //Easy Upload Sheet Structure
         public static string SHEET_FORMAT = "SheetFormat";
 
-        // sheet area selection
+        //Easy Upload Sheet Area Selection
         public static string SHEET_HEADER_AREA = "SheetHeaderArea";
         public static string SHEET_DATA_AREA = "SheetDataArea";
         public static string SHEET_JSON_DATA = "SheetJsonData";
+        public static string ACTIVE_WOKSHEET_URI = "ActiveWorksheetUri";
 
-        // data validation
-        public static string VERIFICATION_AVAILABLEUNITS = "VerificationAvailableUnits";
-        public static string VERIFICATION_HEADERFIELDS = "VerificationHeaderFields";
-        public static string VERIFICATION_MAPPEDHEADERUNITS = "VerificationMappedHeaderUnits";
-
+        public static string UPLOAD_METHOD = "UPLOAD_METHOD";
         public static string NUMBERSOFROWS = "NUMBERSOFROWS";
+        public static string NUMBERSOFVARIABLES = "NUMBERSOFVARIABLES";
         public static string CURRENTPACKAGE = "CURRENTPACKAGE";
         public static string CURRENTPACKAGESIZE = "CURRENTPACKAGE";
 
@@ -77,7 +73,7 @@ namespace BExIS.Dcm.UploadWizard
 
             TaskManager tm = new TaskManager();
             tm.StepInfos = new List<StepInfo>();
-   
+
             foreach (XmlNode xmlStepInfo in xmlStepInfos)
             {
 
@@ -108,14 +104,19 @@ namespace BExIS.Dcm.UploadWizard
 
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public enum DataStructureType
-    { 
-        Structured,
-        Unstructured,
-        NewStructured
-    }
+    ///// <summary>
+    ///// 
+    ///// </summary>
+    //public enum DataStructureType
+    //{
+    //    Structured,
+    //    Unstructured
+    //}
+
+    //public enum UploadMethod
+    //{
+    //    Append,
+    //    Update
+    //}
 
 }

@@ -1,27 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using BExIS.Ddm.Api;
-using BExIS.Ddm.Model;
-using BExIS.Ddm.Providers.LuceneProvider.Helpers;
+﻿using BExIS.Ddm.Api;
 using BExIS.Ddm.Providers.LuceneProvider.Config;
+using BExIS.Ddm.Providers.LuceneProvider.Helpers;
 using BExIS.Ddm.Providers.LuceneProvider.Indexer;
 using BExIS.Ddm.Providers.LuceneProvider.Searcher;
+using BExIS.Utils.Models;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using SearchCriteria = BExIS.Utils.Models.SearchCriteria;
+using SearchCriterion = BExIS.Utils.Models.SearchCriterion;
+using SearchModel = BExIS.Utils.Models.SearchModel;
 
 /// <summary>
 ///
-/// </summary>        
+/// </summary>
 namespace BExIS.Ddm.Providers.LuceneProvider
 {
     /// <summary>
     ///
     /// </summary>
-    /// <remarks></remarks>        
+    /// <remarks></remarks>
     public class SearchProvider : ISearchProvider
     {
         public static Dictionary<object, WeakReference> Providers = new Dictionary<object, WeakReference>();
@@ -30,14 +33,14 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         ///
         /// </summary>
         /// <remarks></remarks>
-        /// <seealso cref=""/>        
+        /// <seealso cref=""/>
         public SearchModel DefaultSearchModel { get; private set; }
 
         /// <summary>
         ///
         /// </summary>
         /// <remarks></remarks>
-        /// <seealso cref=""/>        
+        /// <seealso cref=""/>
         public SearchModel WorkingSearchModel { get; private set; }
 
         private Query bexisSearching;
@@ -46,18 +49,18 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         ///
         /// </summary>
         /// <remarks></remarks>
-        /// <seealso cref=""/>        
+        /// <seealso cref=""/>
         public SearchProvider()
         {
             load();
-            Providers.Add(this.GetHashCode() , new WeakReference(this));
+            Providers.Add(this.GetHashCode(), new WeakReference(this));
         }
 
         /// <summary>
         ///
         /// </summary>
         /// <remarks></remarks>
-        /// <seealso cref=""/>        
+        /// <seealso cref=""/>
         ~SearchProvider()
         {
             Providers.Remove(this.GetHashCode());
@@ -67,20 +70,20 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         ///
         /// </summary>
         /// <remarks></remarks>
-        /// <seealso cref=""/>        
+        /// <seealso cref=""/>
         public void Reload()
         {
             load(true);
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
         /// <param name="forceReset"></param>
         /// <return></return>
-        private void load(bool forceReset=false)
+        private void load(bool forceReset = false)
         {
             if (forceReset == true)
                 SearchConfig.Reset();
@@ -92,7 +95,6 @@ namespace BExIS.Ddm.Providers.LuceneProvider
             this.WorkingSearchModel = Get(this.WorkingSearchModel.CriteriaComponent);
         }
 
-
         #region ISearchDataModel Member
 
         /// <summary>
@@ -100,7 +102,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
-        /// <param>NA</param>   
+        /// <param>NA</param>
         /// <returns></returns>
         private SearchModel initDefault()
         {
@@ -117,6 +119,16 @@ namespace BExIS.Ddm.Providers.LuceneProvider
             //Textvalues
             model.SearchComponent.TextBoxSearchValues = new List<TextValue>();
 
+            /// Add the general searchable properties, these are usually not visible through the UI.
+            /// Here, there is one built-in field that is used to filter public datasets
+            ///
+            model.SearchComponent.Generals = new List<General>()
+                        { new General()
+                                { Name="gen_isPublic", DefaultValue = "FALSE", DisplayName = "Is dataset public", Value = "FALSE", IsVisible = false},
+                          new General()
+                                { Name="gen_entity_name", DefaultValue = "", DisplayName = "Type", Value = "", IsVisible = true}
+                        };
+
             return model;
             //throw new NotImplementedException();
         }
@@ -126,7 +138,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
-        /// <param>NA</param>   
+        /// <param>NA</param>
         /// <returns></returns>
         private SearchModel initWorking()
         {
@@ -140,16 +152,22 @@ namespace BExIS.Ddm.Providers.LuceneProvider
             //categories
             model.SearchComponent.Categories = new List<Category>(SearchConfig.getCategoriesCopy());
 
-
             //Textvalues
             model.SearchComponent.TextBoxSearchValues = new List<TextValue>();
+
+            model.SearchComponent.Generals = new List<General>()
+                        { new General()
+                                { Name="gen_isPublic", DefaultValue = "FALSE", DisplayName = "Is dataset public", Value = "FALSE", IsVisible = false},
+                         new General()
+                                { Name="gen_entity_name", DefaultValue = "", DisplayName = "Type", Value = "", IsVisible = true}
+                        };
 
             return model;
             //throw new NotImplementedException();
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
@@ -171,7 +189,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
@@ -197,8 +215,19 @@ namespace BExIS.Ddm.Providers.LuceneProvider
             return this.WorkingSearchModel;
         }
 
+        public SearchModel UpdateProperties(SearchCriteria searchCriteria = null)
+        {
+            if (searchCriteria == null)
+                searchCriteria = new SearchCriteria();
+            getQueryFromCriteria(searchCriteria);
+
+            this.WorkingSearchModel.SearchComponent.Properties = BexisIndexSearcher.propertySearch(this.bexisSearching, this.WorkingSearchModel.SearchComponent.Properties);
+
+            return this.WorkingSearchModel;
+        }
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
@@ -208,16 +237,14 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         /// <returns></returns>
         public SearchModel Get(SearchCriteria searchCriteria, int pageSize = 10, int currentPage = 1)
         {
-
             getQueryFromCriteria(searchCriteria);
             this.WorkingSearchModel.ResultComponent = BexisIndexSearcher.search(bexisSearching, SearchConfig.headerItemXmlNodeList);
+
             return this.WorkingSearchModel;
-            //return ResultObjectBuilder.ConvertListOfMetadataToSearchResultObject(MetadataReader.ListOfMetadata, pageSize, currentPage);
-            //return null;
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
@@ -227,10 +254,11 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         {
             this.WorkingSearchModel = Get(searchCriteria);
             this.WorkingSearchModel = UpdateFacets(searchCriteria);
+            this.WorkingSearchModel = UpdateProperties(searchCriteria);
         }
-    
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
@@ -242,12 +270,29 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         {
             this.WorkingSearchModel = Get(searchCriteria, pageSize, currentPage);
             this.WorkingSearchModel = UpdateFacets(searchCriteria);
+            this.WorkingSearchModel = UpdateProperties(searchCriteria);
 
             return this.WorkingSearchModel;
         }
-       
+
+        public void UpdateIndex(Dictionary<long, IndexingAction> datasetsToIndex)
+        {
+            BexisIndexer bexisIndexer = new BexisIndexer();
+            bexisIndexer.updateIndex(datasetsToIndex);
+
+            Reload();
+        }
+
+        public void UpdateSingleDatasetIndex(long datasetId, IndexingAction indAction)
+        {
+            BexisIndexer bexisIndexer = new BexisIndexer();
+            bexisIndexer.updateSingleDatasetIndex(datasetId, indAction);
+
+            Reload();
+        }
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
@@ -257,21 +302,30 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         {
             if (searchCriteria.SearchCriteriaList.Count() > 0)
             {
-
                 bexisSearching = new BooleanQuery();
                 foreach (SearchCriterion sco in searchCriteria.SearchCriteriaList)
                 {
                     if (sco.Values.Count > 0)
                     {
-
-                        if (sco.SearchComponent.Type.Equals(SearchComponentBaseType.Category))
+                        if (sco.SearchComponent.Type.Equals(SearchComponentBaseType.General))
+                        {
+                            String fieldName = sco.SearchComponent.Name;
+                            BooleanQuery bexisSearchingGeneral = new BooleanQuery();
+                            foreach (String value in sco.Values)
+                            {
+                                String encodedValue = value;
+                                Query query = new TermQuery(new Term(fieldName, encodedValue));
+                                bexisSearchingGeneral.Add(query, Occur.SHOULD);
+                            }
+                            ((BooleanQuery)bexisSearching).Add(bexisSearchingGeneral, Occur.MUST);
+                        }
+                        else if (sco.SearchComponent.Type.Equals(SearchComponentBaseType.Category))
                         {
                             BooleanQuery bexisSearchingCategory = new BooleanQuery();
                             String fieldName = "category_" + sco.SearchComponent.Name;
                             QueryParser parser;
                             if (fieldName.ToLower().Equals("category_all"))
                             {
-                                
                                 List<string> temp2 = BexisIndexSearcher.getCategoryFields().ToList();
                                 temp2.AddRange(BexisIndexSearcher.getStoredFields().ToList());
                                 temp2.Add("ng_all");
@@ -285,7 +339,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider
                             {
                                 String encodedValue = EncoderHelper.Encode(value);
                                 String newString = null;
-                              //string value = val.Replace(")", "").Replace("(", "");
+                                //string value = val.Replace(")", "").Replace("(", "");
                                 char[] delimiter = new char[] { ';', ' ', ',', '!', '.' };
                                 string[] parts = encodedValue.ToLower().Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
                                 for (int i = 0; i < parts.Length; i++)
@@ -310,7 +364,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider
                             BooleanQuery bexisSearchingFacet = new BooleanQuery();
                             foreach (String value in sco.Values)
                             {
-                                String encodedValue = EncoderHelper.Encode(value);
+                                String encodedValue = value;
                                 Query query = new TermQuery(new Term(fieldName, encodedValue));
                                 bexisSearchingFacet.Add(query, Occur.SHOULD);
                             }
@@ -326,12 +380,12 @@ namespace BExIS.Ddm.Providers.LuceneProvider
                                 DateTime dd = new DateTime(Int32.Parse(sco.Values[0]), 1, 1, 1, 1, 1);
                                 if (pp.Direction == Direction.increase)
                                 {
-                                    NumericRangeQuery<long> dateRangeQuery = NumericRangeQuery.NewLongRange(fieldName , dd.Ticks, long.MaxValue, true, true);
+                                    NumericRangeQuery<long> dateRangeQuery = NumericRangeQuery.NewLongRange(fieldName, dd.Ticks, long.MaxValue, true, true);
                                     ((BooleanQuery)bexisSearching).Add(dateRangeQuery, Occur.MUST);
                                 }
                                 else
                                 {
-                                    NumericRangeQuery<long> dateRangeQuery = NumericRangeQuery.NewLongRange(fieldName , long.MinValue, dd.Ticks, true, true);
+                                    NumericRangeQuery<long> dateRangeQuery = NumericRangeQuery.NewLongRange(fieldName, long.MinValue, dd.Ticks, true, true);
                                     ((BooleanQuery)bexisSearching).Add(dateRangeQuery, Occur.MUST);
                                 }
                             }
@@ -340,7 +394,6 @@ namespace BExIS.Ddm.Providers.LuceneProvider
                                 BooleanQuery bexisSearchingProperty = new BooleanQuery();
                                 foreach (String value in sco.Values)
                                 {
-
                                     if (value.ToLower().Equals("all"))
                                     {
                                         Query query = new MatchAllDocsQuery();
@@ -348,13 +401,10 @@ namespace BExIS.Ddm.Providers.LuceneProvider
                                     }
                                     else
                                     {
-                                        String encodedValue = EncoderHelper.Encode(value);
+                                        String encodedValue = value;
                                         if (SearchConfig.getNumericProperties().Contains(sco.SearchComponent.Name.ToLower()))
                                         {
-
-
                                         }
-
                                         else
                                         {
                                             Query query = new TermQuery(new Term(fieldName, encodedValue));
@@ -363,8 +413,6 @@ namespace BExIS.Ddm.Providers.LuceneProvider
                                     }
                                 }
                                 ((BooleanQuery)bexisSearching).Add(bexisSearchingProperty, Occur.MUST);
-
-
                             }
                         }
                     }
@@ -376,11 +424,14 @@ namespace BExIS.Ddm.Providers.LuceneProvider
             }
             else
             {
-                QueryParser parser = new QueryParser(Lucene.Net.Util.Version.LUCENE_30, "id", new SimpleAnalyzer());
-                bexisSearching = parser.Parse("*:*");
+                using (var sa = new SimpleAnalyzer())
+                {
+                    QueryParser parser = new QueryParser(Lucene.Net.Util.Version.LUCENE_30, "id", sa);
+                    bexisSearching = parser.Parse("*:*");
+                }
             }
         }
 
-        #endregion
+        #endregion ISearchDataModel Member
     }
 }

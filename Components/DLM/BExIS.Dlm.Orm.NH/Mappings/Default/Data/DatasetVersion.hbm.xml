@@ -7,7 +7,7 @@
   <class xmlns="urn:nhibernate-mapping-2.2" name="DatasetVersion" table="DatasetVersions">
     <!-- Mapping BaseEntity properties -->
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_DatasetVersions_id"/>
       <generator class="native" />
     </id>
 
@@ -67,16 +67,24 @@
     
     <!-- Mapping Dataset properties -->
 
-    <property name="ChangeDescription" type="string">
-      <column name="ChangeDescription" />
+    <property name="Title" type="string">
+      <column name="Title"  />
     </property>
 
-    <property name="Timestamp" type="DateTime">
-      <column name="Timestamp" />
+    <property name="Description" type="string">
+      <column name="Description" sql-type="varchar"/>
+    </property>
+    
+    <property name="ChangeDescription" type="StringClob">
+      <column name="ChangeDescription"  sql-type="text" />
+    </property>
+
+    <property name="Timestamp" type="Timestamp">
+      <column name="Timestamp"  index="idx_DatasetVersions_timestamp"/>
     </property>
 
     <property name="Status" type="BExIS.Dlm.Entities.Data.DatasetVersionStatus, BExIS.Dlm.Entities">
-      <column name="Status" />
+      <column name="Status" index="idx_DatasetVersions_status" />
     </property>
 
     <property name="Metadata" type="System.Xml.XmlDocument, System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
@@ -88,7 +96,7 @@
     </property>
 
     <!-- Mapping entity associations -->
-    <many-to-one name="Dataset" class="BExIS.Dlm.Entities.Data.Dataset" not-null="true" column="DatasetRef"/>
+    <many-to-one name="Dataset" class="BExIS.Dlm.Entities.Data.Dataset" not-null="true" column="DatasetRef" index="idx_DatasetVersions_DatasetRef"/>
     
     <set cascade="all-delete-orphan" name="PriliminaryTuples" inverse="true" lazy="true" order-by="OrderNo">
       <key>

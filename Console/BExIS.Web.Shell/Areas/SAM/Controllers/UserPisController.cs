@@ -1,15 +1,15 @@
-﻿using BExIS.Security.Entities.Subjects;
-using BExIS.Security.Services.Subjects;
-using BExIS.Web.Shell.Areas.SAM.Models;
+﻿using BExIS.Security.Services.Subjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Telerik.Web.Mvc;
-using DataAnnotationsExtensions;
+using BExIS.Security.Entities.Subjects;
+using BExIS.Modules.Sam.UI.Models;
+using Vaiona.Persistence.Api;
 
-namespace BExIS.Web.Shell.Areas.SAM.Controllers
+namespace BExIS.Modules.Sam.UI.Controllers
 {
     public class UserPisController : Controller
     {
@@ -26,6 +26,11 @@ namespace BExIS.Web.Shell.Areas.SAM.Controllers
             return View();
         }
 
+        public ActionResult openCreatePiMappingWindow()
+        {
+            return View("UserPis");
+        }
+
         [GridAction]
         public ActionResult UserPis_Select()
         {
@@ -36,7 +41,8 @@ namespace BExIS.Web.Shell.Areas.SAM.Controllers
 
             if (collection != null)
             {
-                users = userPiManager.GetAllUserPis().Select(upis => UserPisGridRowModel.Convert(upis)).ToList();
+                UserPisGridRowModel converter = new UserPisGridRowModel();
+                users = userPiManager.GetAllUserPis().Select(upis => converter.Convert(upis)).ToList();
             }
 
             return View(new GridModel<UserPisGridRowModel> { Data = users });
@@ -57,18 +63,17 @@ namespace BExIS.Web.Shell.Areas.SAM.Controllers
         [HttpPost]
         public ActionResult Edit(UserPiEditModel userPiEditModel)
         {
-
-
-            //User currentPi = userPiEditModel.CurrentPi;
             string newPiName = userPiEditModel.SelectedPiName;
-            User newPi = new SubjectManager().GetUserByName(newPiName);
-            long user = userPiEditModel.UserId;
+
+            var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+            long newPiId = repo.Query(u => u.Name.Equals(newPiName))
+                        .Select( u => u.Id )
+                        .FirstOrDefault();
+            
             long entryId = userPiEditModel.Id;
 
-            UserPi editedUserPi = new UserPi(entryId, user, newPi.Id);
-
             UserPiManager uPM = new UserPiManager();
-            UserPi savedUserPi = uPM.EditUserPi(editedUserPi);
+            UserPi savedUserPi = uPM.EditUserPi(entryId, newPiId);
 
             if (savedUserPi != null)
             {
@@ -76,7 +81,7 @@ namespace BExIS.Web.Shell.Areas.SAM.Controllers
             }
             else
             {
-                userPiEditModel.CurrentPi = newPi;
+                //userPiEditModel.CurrentPi = newPi;
                 return PartialView("_EditPartial", userPiEditModel);
             }
 
@@ -95,15 +100,20 @@ namespace BExIS.Web.Shell.Areas.SAM.Controllers
             {
                 string userName = model.SelectedUserName;
                 string piName = model.SelectedPiName;
+                using (SubjectManager subjectManager = new SubjectManager())
+                {
+                    //SubjectManager subjectManager = new SubjectManager();
+                    //User user = subjectManager.GetUserByName(userName);
+                    //User pi = subjectManager.GetUserByName(piName);
+                    var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+                    User user = repo.Query(u => u.Name.Equals(userName)).FirstOrDefault();
+                    User pi = repo.Query(u => u.Name.Equals(piName)).FirstOrDefault();
 
-                SubjectManager subjectManager = new SubjectManager();
-                User user = subjectManager.GetUserByName(userName);
-                User pi = subjectManager.GetUserByName(piName);
+                    UserPiManager userPiManager = new UserPiManager();
+                    userPiManager.AddUserPi(user.Id, pi.Id);
 
-                UserPiManager userPiManager = new UserPiManager();
-                userPiManager.AddUserPi(user.Id, pi.Id);
-
-                return Json(new { success = true });
+                    return Json(new { success = true });
+                }
             }
             return Json(new { success = false });
         }
@@ -127,18 +137,24 @@ namespace BExIS.Web.Shell.Areas.SAM.Controllers
 
             if (userName != null && piName != null && userName.Length > 0 && piName.Length > 0)
             {
-                SubjectManager sum = new SubjectManager();
-                User User = sum.GetUserByName(userName);
-                User Pi = sum.GetUserByName(piName);
-
-                if (User != null && Pi != null)
+                using (SubjectManager subjectManager = new SubjectManager())
                 {
-                    UserPiManager upm = new UserPiManager();
-                    UserPi upi = upm.GetUserPi(User.Id, Pi.Id);
+                    //SubjectManager sum = new  SubjectManager();
+                    //User User = sum.GetUserByName(userName);
+                    //User Pi = sum.GetUserByName(piName);
+                    var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+                    User User = repo.Query(u => u.Name.Equals(userName)).FirstOrDefault();
+                    User Pi = repo.Query(u => u.Name.Equals(piName)).FirstOrDefault();
 
-                    if (upi == null)
+                    if (User != null && Pi != null)
                     {
-                        return true;
+                        UserPiManager upm = new UserPiManager();
+                        UserPi upi = upm.GetUserPi(User.Id, Pi.Id);
+
+                        if (upi == null)
+                        {
+                            return true;
+                        }
                     }
                 }
             }

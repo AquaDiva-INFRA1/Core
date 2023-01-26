@@ -1,0 +1,125 @@
+﻿
+@model BExIS.Modules.Dcm.UI.Models.SelectVerificationModel
+@using Telerik.Web.Mvc.UI;
+@using Telerik.Web.Mvc.Resources;
+@using BExIS.Modules.Dcm.UI.Models;
+@using BExIS.Dlm.Entities.DataStructure;
+@using BExIS.Modules.Dcm.UI.Helpers;
+
+
+@{
+    int i = Convert.ToInt16(ViewData["dataheaderid"]);
+}
+
+
+<td>
+    <i class="fa" aria-hidden="true" title=""></i>
+
+    <!--Dropdown-Menu to choose a suggested Attribute from - unit and datatype stored in html-Attributes for usage in javascript-->
+    <select style="width: 80%" id="suggestionSelect" name="Suggestions" headerfieldId="@(i)" onchange="suggestionSelected(this, @i)">
+
+        <!--The default option is the name of the column in the submitted table-->
+        <option data-unit="@ViewData["defaultUnitID"]" data-datatype="@ViewData["defaultDatatypeID"]" value="@Html.Name(Model.HeaderFields[i])">@Html.Name(Model.HeaderFields[i])</option>
+
+        <!--Create an option for each variable in the respective suggestions
+            make sure that the one that is registered as selected is actually shown as selected in the list-->
+        @foreach (EasyUploadSuggestion sug in Model.Suggestions[i])
+        {
+            if (@sug.show)
+            {
+                string selected = "";
+                if (Model.HeaderVariableInformation.Count > 0)
+                {
+                    EasyUploadVariableInformation tuple = Model.HeaderVariableInformation.Where(t => (t.headerId == i) &&
+                                                                                        (t.variableName == sug.attributeName) &&
+                                                                                        (t.unitInfo.UnitId == sug.unitID) &&
+                                                                                        (t.unitInfo.SelectedDataTypeId == sug.dataTypeID)).FirstOrDefault();
+                    if (tuple != null)
+                    {
+                        selected = "selected";
+                    }
+                }
+
+                string display = sug.attributeName + " - " + sug.unitName + " - " + sug.datatypeName;
+
+                <option @Html.Raw(selected) data-unit="@sug.unitID" data-datatype="@sug.dataTypeID" value="@sug.attributeName">@display</option>
+            }
+        }
+    </select>
+</td>
+
+<td>
+    <!--Unit Selector-->
+    <select id=@("unitID_"+i) style="width: 80%" name="Unit" headerfieldId="@(i)" onfocus="deselect(this)" onblur="reselect(this)">
+        @foreach (UnitInfo unit in Model.AvailableUnits)
+        {
+            string selected = "";
+
+            if (Model.HeaderVariableInformation.Count > 0)
+            {
+                EasyUploadVariableInformation tuple = Model.HeaderVariableInformation.Where(t => t.unitInfo.UnitId == unit.UnitId && t.headerId == i).FirstOrDefault();
+
+                if (tuple != null)
+                {
+                    selected = "selected";
+                }
+
+            }
+            <option @Html.Raw(selected) value="@Html.Name(Convert.ToString(unit.UnitId))" title="@Html.Name(unit.Description)">@Html.Name(unit.Name) (@Html.Name(unit.Abbreviation))</option>
+        }
+    </select>
+</td>
+<td>
+    <!--Datatype Selector-->
+    <select id=@("Datatype_"+i) style="width: 80%" name="Datatype" headerfieldId="@(i)" onfocus="deselect(this)" onblur="reselect(this)">
+        @{
+
+            EasyUploadVariableInformation tupleBla = Model.HeaderVariableInformation.Where(t => t.headerId == i).FirstOrDefault();
+            string datatypeDescription = "";
+
+            if (tupleBla != null && tupleBla.unitInfo.UnitId >= 0)
+            {
+                foreach (DataTypeInfo dataTypeInfo in ((UnitInfo)tupleBla.unitInfo).DataTypeInfos)
+                {
+                    string selected = "";
+
+                    if (tupleBla.unitInfo.SelectedDataTypeId == dataTypeInfo.DataTypeId)
+                    {
+                        selected = "selected";
+                        datatypeDescription = dataTypeInfo.Description;
+                    }
+
+                    <option @Html.Raw(selected) value="@Html.Name(Convert.ToString(dataTypeInfo.DataTypeId))" title="@Html.Name(dataTypeInfo.Description)">@Html.Name(dataTypeInfo.Name)</option>
+                }
+            }
+            else
+            {
+                <option value="none" title="Please select a unit">Please select a unit</option>
+            }
+        }
+    </select>
+</td>
+<td id="@("datatypeinfo_"+i)" class="datatypeinfo">
+    @Html.Raw(datatypeDescription)
+</td>
+<td id="@("ontologyMapping_"+i)" class="ontologyMapping"></td>
+
+<script type="text/javascript">
+    $(this).ready(function () {
+        var headerItemIndex = $(this).data("index");
+
+        //Dirty workaround to get the value of the javascript variable into the generated URL
+        var url = '@Url.Action("GetMappingSuggestionDropdown", "EasyUploadVerification", new RouteValueDictionary { { "area", "DCM" }, { "headerIndex", "-1" } })';
+        //url = url.replace("-1", headerItemIndex);
+        if (ref != undefined)
+            url = url.replace("-1", ref);
+        else
+            url = url.replace("-1", headerItemIndex);
+        console.log("url : " + url);
+        //Show preloader
+        $(this).find(".ontologyMapping").preloader(12, "Loading mapping suggestions")
+        //Load and show mapping suggestion select-boxes
+        $(this).find(".ontologyMapping").load(url);
+        console.log("row table - javascript running")
+    }
+</script>

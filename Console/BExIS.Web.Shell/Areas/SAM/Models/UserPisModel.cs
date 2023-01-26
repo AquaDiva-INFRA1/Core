@@ -7,8 +7,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Vaiona.Persistence.Api;
 
-namespace BExIS.Web.Shell.Areas.SAM.Models
+namespace BExIS.Modules.Sam.UI.Models
 {
     public class UserPisGridRowModel
     {
@@ -23,11 +24,14 @@ namespace BExIS.Web.Shell.Areas.SAM.Models
         public string PiName { get; set; }
 
 
-        public static UserPisGridRowModel Convert(UserPi userPi)
+        public UserPisGridRowModel Convert(UserPi userPi)
         {
-            SubjectManager sum = new SubjectManager();
+            /*SubjectManager sum = new SubjectManager();
             User MappingPi = sum.GetUserById(userPi.PiId);
-            User MappingUser = sum.GetUserById(userPi.UserId);
+            User MappingUser = sum.GetUserById(userPi.UserId);*/
+            var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+            User MappingPi = repo.Query( u => u.Id.Equals(userPi.PiId) ).FirstOrDefault();
+            User MappingUser = repo.Query(u => u.Id.Equals(userPi.UserId)).FirstOrDefault();
 
             return new UserPisGridRowModel()
             {
@@ -68,9 +72,12 @@ namespace BExIS.Web.Shell.Areas.SAM.Models
             UserPiManager userPiManager = new UserPiManager();
             UserPi userPi = userPiManager.GetUserPiById(userPiId);
 
-            SubjectManager sum = new SubjectManager();
+            /*SubjectManager sum = new SubjectManager();
             User MappingPi = sum.GetUserById(userPi.PiId);
-            User MappingUser = sum.GetUserById(userPi.UserId);
+            User MappingUser = sum.GetUserById(userPi.UserId);*/
+            var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+            User MappingPi = repo.Query(u => u.Id.Equals(userPi.PiId)).FirstOrDefault();
+            User MappingUser = repo.Query(u => u.Id.Equals(userPi.UserId)).FirstOrDefault();
 
             Id = userPi.Id;
             UserId = userPi.UserId;
@@ -80,12 +87,13 @@ namespace BExIS.Web.Shell.Areas.SAM.Models
             SelectedPiName = MappingPi.Name;
             CurrentPi = MappingPi;
 
-            UserList = new SubjectManager().GetAllUsers().ToList().OrderBy(u => u.Name).ToList();
+            UserList = repo.Get().ToList().OrderBy(u => u.Name).ToList();
         }
 
         public UserPiEditModel()
         {
-            UserList = new SubjectManager().GetAllUsers().ToList().OrderBy(u => u.Name).ToList();
+            var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+            UserList = repo.Get().ToList().OrderBy(u => u.Name).ToList();
         }
 
         private List<UserPi> Convert(List<User> UserList)
@@ -130,13 +138,16 @@ namespace BExIS.Web.Shell.Areas.SAM.Models
 
 
 
-        public static UserPiEditModel Convert(UserPi userPi)
+        public UserPiEditModel Convert(UserPi userPi)
         {
 
 
-            SubjectManager sum = new SubjectManager();
+            /*SubjectManager sum = new SubjectManager();
             User MappingPi = sum.GetUserById(userPi.PiId);
-            User MappingUser = sum.GetUserById(userPi.UserId);
+            User MappingUser = sum.GetUserById(userPi.UserId);*/
+            var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+            User MappingPi = repo.Query(u => u.Id.Equals(userPi.PiId)).FirstOrDefault();
+            User MappingUser = repo.Query(u => u.Id.Equals(userPi.UserId)).FirstOrDefault();
 
             return new UserPiEditModel()
             {
@@ -176,9 +187,9 @@ namespace BExIS.Web.Shell.Areas.SAM.Models
 
         public UserPiCreateModel()
         {
-            SubjectManager Sum = new SubjectManager();
-            this.UserList = Sum.GetAllUsers().OrderBy(u => u.Name).ToList();
-            this.PiUserList = Sum.GetAllUsers().OrderBy(u => u.Name).ToList();
+            var repo = this.GetUnitOfWork().GetReadOnlyRepository<User>();
+            this.UserList = repo.Get().OrderBy(u => u.Name).ToList();
+            this.PiUserList = repo.Get().OrderBy(u => u.Name).ToList();
         }
     }
 }

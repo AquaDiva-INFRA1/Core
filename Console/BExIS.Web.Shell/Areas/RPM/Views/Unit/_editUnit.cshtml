@@ -2,11 +2,23 @@
 @using System
 @using BExIS.Dlm.Entities.DataStructure
 @using BExIS.Dlm.Services.DataStructure
-@model BExIS.Web.Shell.Areas.RPM.Models.EditUnitModel
+@model BExIS.Modules.Rpm.UI.Models.EditUnitModel
 
 @{
+    string DimDesc = "";
     string temp = "";
     HtmlString dimensionArray = new HtmlString(temp);
+
+    int dimensionIndex = 0;
+
+    if (Model.Unit.Dimension != null && Model.Unit.Dimension.Id > 0 && Model.DimensionList.Any())
+    {
+        Dimension dim = Model.DimensionList.Where(d => d.Id.Equals(Model.Unit.Dimension.Id)).FirstOrDefault();
+        if (dim != null)
+        {
+            dimensionIndex = Model.DimensionList.IndexOf(dim);
+        }
+    }
 }
 
 @if(Model.Unit != null)
@@ -49,9 +61,10 @@
                 <td id="nameBox">
                     Name <span class="bx bx-required" title="Required"></span>
                 </td>
-                <td>
+                <td id = "Unit_input">
                     @(Html.TextBoxFor(m => Model.Unit.Name, new { @class = "t-input bx-input" , @autofocus = "autofocus", @tabindex = "1"}))
                 </td>
+                <td class="dimDesc"></td>
                 <td class="bx-errorMsg">@Session["nameMsg"]</td>
             </tr>
             <tr>
@@ -61,6 +74,7 @@
                 <td>
                     @(Html.TextBoxFor(m => Model.Unit.Abbreviation, new { @class = "t-input bx-input", @tabindex = "2"}))
                 </td>
+                <td class="dimDesc"></td>
                 <td class="bx-errorMsg">@Session["abbrMsg"]</td>
             </tr>
             <tr>
@@ -70,12 +84,17 @@
                 <td>
                     @(Html.TextBoxFor(m => Model.Unit.Description, new { @class = "t-input bx-input", @tabindex = "3"}))
                 </td>
+                <td class="dimDesc"></td>
+                <td class="bx-errorMsg"></td>
             </tr>
             <tr>
                 <td>
                     Dimension Name <span class="bx bx-required" title="Required"></span>
                 </td>
                 <td>
+
+                    
+
                     @(Html.Telerik().ComboBox()
                         .Name("Unit_Dimension_Name_ComboBox")
                         .Placeholder("Select or Enter")
@@ -89,6 +108,10 @@
                                 {
                                     //item.Add().Text(d.Name.ToString() + " (" + d.Specification + ")").Value(d.Id.ToString()).Selected(true);
                                     item.Add().Text(d.Name.ToString()).Value(d.Id.ToString()).Selected(true);
+                                    if (d.Description != null)
+                                    {
+                                        DimDesc = d.Description;
+                                    }
                                 }
                                 else
                                 {
@@ -96,22 +119,32 @@
                                     item.Add().Text(d.Name.ToString()).Value(d.Id.ToString());
 
                                 }
+
                                 if (temp == "" || temp == null)
                                 {
-                                    temp = "[" + d.Id + ",'" + d.Specification + "']";
+                                    temp = "[" + d.Id + ",'" + d.Specification +"','" + d.Description + "']";
                                 }
                                 else
                                 {
-                                    temp = temp + ",[" + d.Id + ",'" + d.Specification + "']";
+                                    temp = temp + ",[" + d.Id + ",'" + d.Specification + "','" + d.Description + "']";
                                 }
                             }
+
+                            if (Model.Unit.Dimension != null && !string.IsNullOrEmpty(Model.Unit.Dimension.Name))
+                            {
+                                item.Add().Text(Model.Unit.Dimension.Name.ToString()).Value(Model.Unit.Dimension.Id.ToString()).Selected(true);
+                            }
+
                             dimensionArray = new HtmlString(temp);
                         })
                         .SelectedIndex(0)
-                        .ClientEvents(e => e.OnChange("dimensionChange")))
+                        .ClientEvents(e => e.OnChange("dimensionChange"))
+                        )
+
                         @(Html.HiddenFor(m => Model.Unit.Dimension.Id, new { @class = "hidden" }))
                         @(Html.HiddenFor(m => Model.Unit.Dimension.Name, new { @class = "hidden" }))
                 </td>
+                <td id="Unit_Dimension_Description" class="dimDesc">@DimDesc</td>
                 <td class="bx-errorMsg">@Session["dimensionMsg"]</td>
             </tr>
             <tr>
@@ -119,8 +152,10 @@
                     Dimension Specification
                 </td>
                 <td>
-                    @(Html.TextBoxFor(m => Model.Unit.Dimension.Specification, new { @class = "bx-input", @tabindex = "3", @placeholder = "L(0,0)M(0,0)T(0,0)I(0,0)Θ(0,0)N(0,0)J(0,0)"}))
+                    @(Html.TextBoxFor(m => Model.Unit.Dimension.Specification, new { @class = "bx-input", @tabindex = "3", @placeholder = "L(0,0)M(0,0)T(0,0)I(0,0)?(0,0)N(0,0)J(0,0)"}))
                 </td>
+                <td></td>
+                <td class="bx-errorMsg">@Session["dimensionSpecificationMsg"]</td>
             </tr>
             <tr>
                 <td>
@@ -134,41 +169,40 @@
                         .BindTo(new SelectList(MeasurementSystemList))
                     )
                 </td>
+                <td class="dimDesc"></td>
+                <td class="bx-errorMsg"></td>
             </tr>
         </table>
-        @(Html.Telerik().Grid(Model.DataTypeList)
+            @(Html.Telerik().Grid(Model.DataTypeList)
             .Name("bx-rpm-selectDataTypeGrid")
-            .Scrollable(t => t.Height(250))
-            .Sortable()
+            .Scrollable()
+            //.Sortable()
             .Filterable()
             //.DataBinding(binding => binding.Ajax().OperationMode(GridOperationMode.Client))
             .Columns(columns =>
-                {
-                    columns.Template(
-                    @<text>
-                        <input class="checkBox" name="checkedRecords" type="checkbox" value="@item.Id " title="checkedRecords" tabindex = "5" 
-                            @if (dataTypeIds.Contains(item.Id) || checkedIds.Contains(item.Id))
-                            {
-                                <text>checked="checked"</text>
-                            }
-                        />
-                    </text>)
+            {
+            columns.Template(
+                @<text>
+                    <input class="checkBox" name="checkedRecords" type="checkbox" value="@item.Id " title="checkedRecords" tabindex="5"
+                           @if (dataTypeIds.Contains(item.Id) || checkedIds.Contains(item.Id)) { <text> checked="checked" </text>  } />
+                </text>)
                     .Title("").Width(36).HtmlAttributes(new { style = "text-align:center" });
-                    columns.Bound(c => c.Name);
-                    columns.Bound(c => c.Id);
-                    columns.Bound(c => c.SystemType);
-                    columns.Bound(c => c.Description);
-                })
-                .ClientEvents(events=>events.OnDataBound("onDataBound"))
+                columns.Bound(c => c.Id)
+                .Width(100);
+                columns.Bound(c => c.Name);
+                columns.Bound(c => c.SystemType);
+                columns.Bound(c => c.Description);
+            })
+                .ClientEvents(events => events.OnDataBound("onDataBound"))
             )
-        <div class="bx-errorMsg bx-rpm-functions">
-                @Session["dataTypeMsg"]
-        </div>
-        <div class="bx-rpm-submit bx-rpm-buttons">
-            <button name="create" value="create" type="submit" class="t-button action"  id="saveButton" title="Save The Unit" tabindex = "6">Save</button>
-            @Html.ActionLink("Cancel", "UnitManager", "Unit", new { area = "RPM", @class = "t-button action", @title = "Cancel", @tabindex = "7" })
-        </div>       
-    }
+                    <div class="bx-errorMsg bx-rpm-functions">
+                        @Session["dataTypeMsg"]
+                    </div>
+                    <div class="bx-rpm-submit bx-rpm-buttons">
+                        <button name="create" value="create" type="submit" class="bx-button action" id="saveButton" title="Save The Unit" tabindex="6">Save</button>
+                        @Html.ActionLink("Cancel", "UnitManager", "Unit", new { area = "RPM", @class = "bx-button action", @title = "Cancel", @tabindex = "7" })
+                    </div>
+                    }
 
 </div>
 }
@@ -186,12 +220,14 @@ else
     }
 
     $(document).ready(function () {
+        console.log("document ready")
         dimensionChange();
     })
 
-
     function dimensionChange()
     {
+        console.log("on change")
+
         var temp = $("#Unit_Dimension_Name_ComboBox").val();
         if (isNaN(parseInt(temp)))
         {
@@ -201,19 +237,35 @@ else
         $('#Unit_Dimension_Id').val(temp);
         $('#Unit_Dimension_Name').val($("#Unit_Dimension_Name_ComboBox-input").val());
 
-        var dimensionArray = [@dimensionArray];
-        $('#Unit_Dimension_Specification').prop('disabled', false);
-        
-        for (var i = 0; i < dimensionArray.length; i++)
-        {
-            if (dimensionArray[i][0] == temp)
-            {
-                $('#Unit_Dimension_Specification').val(dimensionArray[i][1]);
-                $('#Unit_Dimension_Specification').prop('disabled', true);
+        if (temp != 0) {
+
+            var dimensionArray = [@dimensionArray];
+
+            for (var i = 0; i < dimensionArray.length; i++) {
+                if (dimensionArray[i][0] == temp) {
+                    $('#Unit_Dimension_Specification').val(dimensionArray[i][1]);
+                    $('#Unit_Dimension_Specification').prop('disabled', true);
+                    if (dimensionArray[i][2] != "" && dimensionArray[i][2] != null) {
+                        $('#Unit_Dimension_Description').text(dimensionArray[i][2]);
+                    }
+                    else
+                    {
+                        $('#Unit_Dimension_Description').text('');
+                    }
+                }
             }
         }
+        else {
+
+            console.log($('#Unit_Dimension_Name').val());
+            console.log($('#Unit_Dimension_Name_ComboBox-input').val());
+
+            $('#Unit_Dimension_Specification').val('@Model.Unit.Dimension.Specification');
+            $('#Unit_Dimension_Specification').prop('disabled', false);
+            $('#Unit_Dimension_Description').text('');
+        }
     }
-   
+
     $('.checkBox').change(function () {
         if ($(this).attr('checked'))
             $(this).attr('checked', true);
@@ -250,11 +302,3 @@ else
         });
     });
 </script>
-<style type="text/css">
-
-    .unitInput
-    {
-        /*width:300px;*/
-    }
-
-</style>

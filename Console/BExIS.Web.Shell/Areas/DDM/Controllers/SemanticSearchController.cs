@@ -52,7 +52,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static HeaderItem idHeader;
 
         static Dictionary<String, List<OntologyMapping>> mappingDic;
-        
+
         static String mappingDictionaryFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "mappings.txt");
         static String autocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "autocompletion.txt");
         static String extendedautocompletionFilePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Semantic Search", "extendedAutocompletion.txt");
@@ -97,7 +97,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             //debugging file
             using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
             {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") +" : Search Terms passed : " + searchTerm);
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : Search Terms passed : " + searchTerm);
             }
 
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Semantic Search", this.Session.GetTenant());
@@ -123,7 +123,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 //Merge the results from the semantic search with the results from the normal bexis-search
                 //Alternative: Skip the merging: 
-                model.semanticComponent = semanticSearchAsync(searchTerm, Seamntic_depth,  Error_distance).Result;
+                model.semanticComponent = semanticSearchAsync(searchTerm, Seamntic_depth, Error_distance).Result;
                 //model.semanticComponent = searchAndMerge(semanticSearch(searchTerm), searchTerm);
             }
 
@@ -142,7 +142,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             int currentSubsetSize = model.resultListComponent.subsetsize;
             int currentSubsetStart = model.resultListComponent.subsetstart;
             string searchTermString = model.resultListComponent.searchTermString;
-            
+
             int newSubsetStart = currentSubsetStart + currentSubsetSize;
             int newSubsetSize = currentSubsetSize;
 
@@ -175,7 +175,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             int currentSubsetSize = model.resultListComponent.subsetsize;
             int currentSubsetStart = model.resultListComponent.subsetstart;
             string searchTermString = model.resultListComponent.searchTermString;
-            
+
             int newSubsetStart = currentSubsetStart - currentSubsetSize;
             int newSubsetSize = currentSubsetSize;
 
@@ -364,7 +364,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             mappingDic = new Dictionary<string, List<OntologyMapping>>();
             List<OntologyNamePair> ontologies = new List<OntologyNamePair>();
 
-            
+
             ontologies.Add(new OntologyNamePair(ADOntologyPath, "ADOntology"));
 
             //Just for testing purposes
@@ -720,7 +720,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 dict_data.Add("errorDistance", Error_distance);
 
                 var json_ = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);
-                using (var stringContent = new StringContent("["+json_+"]" , Encoding.UTF8, "application/json"))
+                using (var stringContent = new StringContent("[" + json_ + "]", Encoding.UTF8, "application/json"))
                 {
                     string output = "";
                     try
@@ -761,7 +761,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     {
                         #region cleaning ids of datasets so they can be put in the table as id should be unique
                         List<JObject> clean_ids = new List<JObject>();
-                        foreach (JObject res in (JArray) obj)
+                        foreach (JObject res in (JArray)obj)
                         {
                             Boolean b = false;
                             foreach (JObject r in clean_ids)
@@ -772,8 +772,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                     break;
                                 }
                             }
-                            if (!b) 
-                                clean_ids.Add(res);
+                            if (!b) clean_ids.Add(res);
                         }
                         #endregion
 
@@ -796,7 +795,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                 dataset = datasetRepo.Get(datasetID);
                             }
 
-                            
+
                             if (dataset != null)
                             {
                                 try
@@ -813,19 +812,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                     Console.WriteLine(exc.Message);
                                 }
                             }
-                            try
-                            {
-                                m.Rows.Add(row);
-                            }
-                            catch (Exception exec)
-                            {
-                                Console.WriteLine(exec.Message);
-                            }
-                                
+                            m.Rows.Add(row);
                         }
                     }
                     #endregion
-                    if (m.Rows.Count > 0) 
+                    if (m.Rows.Count > 0)
                         return m;
                     return searchAndMerge(m, searchTerm);
                 }
@@ -1032,9 +1023,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             return request_string.Substring(0, request_string.Length - 1);
         }
 
-        public String get_dataset_related_papers_by_ID(String id,String flag)
+        public String get_dataset_related_papers_by_ID(String id, String flag)
         {
-            String Semedico_Result ="";
+            String Semedico_Result = "";
             string Semedico_Result_AD = "";
             Semedico_Result = "";
             String Query_4_API;
@@ -1058,7 +1049,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 model.resultListComponent.searchTermString = Query_4_API;
                 if (flag == null) model.resultListComponent.subsetstart = 0;
             }
-            else {
+            else
+            {
                 if (flag == "nextpage")
                 {
                     model.resultListComponent.subsetstart = model.resultListComponent.subsetstart + 10;
@@ -1282,7 +1274,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             // debugging file
             using (StreamWriter sw = System.IO.File.AppendText(DebugFilePath))
             {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_entity_URI_for_insert called : "+uri+" ==> " + uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", ""));
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssTZD") + " : clean_entity_URI_for_insert called : " + uri + " ==> " + uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", ""));
             }
             return uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", "");
         }
@@ -1310,14 +1302,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             }
             if (label.Contains("#"))
             {
-                return label.Substring(label.IndexOf("@"), label.Length -1);
+                return label.Substring(label.IndexOf("@"), label.Length - 1);
             }
             else
             {
                 return label;
             }
 
-                
+
         }
         #endregion
 
@@ -1464,19 +1456,5 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         #endregion
 
 
-        #region retrieve semantics from description
-        public async Task<string> getEntitiesRelation(string id)
-        {
-            string output = "";
-            using (var client = new HttpClient())
-            {
-                XmlDatasetHelper helper = new XmlDatasetHelper();
-                string description =  helper.GetInformation(Int64.Parse(id), NameAttributeValues.description);
-                var response = await client.GetAsync(semanticExtractionURL + "?key=" + description).ConfigureAwait(true);
-                output = await response.Content.ReadAsStringAsync();
-            }
-            return output;
-        }
-        #endregion
     }
 }

@@ -1,0 +1,39 @@
+﻿@model List<BExIS.Modules.Bam.UI.Models.partyGridModel>
+@(Html.Telerik().Grid(Model)
+            .Name("partiesGrid").DataBinding(dataBinding => dataBinding
+        .Ajax().OperationMode(GridOperationMode.Client))
+            .Pageable(paging => paging.Enabled(true).PageSize(10).Position(GridPagerPosition.Both).PageTo(1))
+            .Sortable()
+            .Filterable().ClientEvents(events =>
+            {
+                events.OnDataBound("onDataBound");
+            })
+            .Columns(columns =>
+            {
+               // columns.Bound(c => c.Id);
+                columns.Bound(c => c.Name);
+                columns.Bound(c => c.PartyTypeTitle).Title("Type");
+                columns.Bound(c => c.StartDate).Format("{0:yyyy-MM-dd}").Title("Start date");
+                columns.Bound(c => c.EndDate).Format("{0:yyyy-MM-dd}").Title("End date");
+                columns.Template(
+                    @<text>
+                        <div>
+                            @Html.ActionLink(" ", "View", "Party", new { id = item.Id }, new { @class = "bx bx-grid-function bx-show whiteText", title = "View Party \"" + item.Name + "\"" })
+                            @Html.ActionLink(" ", "CreateEdit", "Party", new { id = item.Id }, new { @class = "bx bx-grid-function bx-edit whiteText", title = "Edit Party \"" + item.Name + "\"" })
+                            @Html.ActionLink(" ", "DeleteConfirm", "Party", new { id = item.Id}, new { @class = "bx bx-grid-function bx-trash whiteText", title = "Delete Party \"" + item.Name + "\"" })
+                        </div>
+                    </text>
+                        ).ClientTemplate("<div><a title=\"View Party\" href=\"/BAM/Party/View/<#= Id #>\" class=\"bx bx-grid-function bx-show whiteText\"> </a><a title=\"Edit Party\" href=\"/BAM/Party/CreateEdit/<#= Id #>\" class=\"bx bx-grid-function bx-edit whiteText\"> </a><a title=\"Delete Party\" href=\"/BAM/Party/DeleteConfirm/<#= Id #>\" class=\"bx bx-grid-function bx-trash  whiteText\"> </a></div>");
+                columns.Template(
+                    @<text>
+                        @(item.IsTemp ? Html.Raw("<img src='/Content/Images/Bad.png' data-toggle='tooltip' title='Some relationships are required! ' />") : Html.Raw(""))
+                    </text>).ClientTemplate("<img src='/Content/Images/Bad.png' data-toggle='tooltip' title='Some relationships are required! ' <#= IsTemp==false ? \"style='display:none;'\" :\"''\" #>  />")
+                     .Title("Actions required!");
+            }).Filterable()
+      .Pageable(pageable =>
+      {
+          pageable.PageSize(100, new[] { 10, 20, 50, 100, 200, 500, 1000, 2000 });
+          pageable.Style(GridPagerStyles.NextPreviousAndNumeric | GridPagerStyles.PageSizeDropDown);
+          pageable.Position(GridPagerPosition.Bottom);
+      })
+)

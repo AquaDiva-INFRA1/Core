@@ -1,5 +1,7 @@
 ﻿using System;
 using BExIS.Dlm.Entities.DataStructure;
+using System.Xml.Serialization;
+using Newtonsoft.Json;
 
 /// <summary>
 ///
@@ -18,7 +20,9 @@ namespace BExIS.Dlm.Entities.Data
         ///
         /// </summary>
         /// <remarks></remarks>
-        /// <seealso cref=""/>        
+        /// <seealso cref=""/>   
+        [JsonProperty("v")]
+        
         public object Value { get; set; }
 
         /// <summary>
@@ -26,6 +30,9 @@ namespace BExIS.Dlm.Entities.Data
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>        
+        [XmlIgnoreAttribute]
+        [JsonIgnore]
+
         public DateTime SamplingTime { get; set; }
 
         /// <summary>
@@ -33,6 +40,9 @@ namespace BExIS.Dlm.Entities.Data
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>        
+        [XmlIgnoreAttribute]
+        [JsonIgnore]
+
         public DateTime ResultTime { get; set; }
 
         /// <summary>
@@ -40,6 +50,9 @@ namespace BExIS.Dlm.Entities.Data
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>        
+        [XmlIgnoreAttribute]
+        [JsonIgnore]
+
         public ObtainingMethod ObtainingMethod { get; set; }
 
         /// <summary>
@@ -47,6 +60,9 @@ namespace BExIS.Dlm.Entities.Data
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>        
+        [XmlIgnoreAttribute]
+        [JsonIgnore]
+
         public string Note { get; set; }
 
         #endregion

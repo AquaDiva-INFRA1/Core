@@ -1,11 +1,8 @@
-﻿using System;
+﻿using BExIS.IO;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using BExIS.IO;
-using BExIS.IO.Transform.Input;
 
-namespace BExIS.Web.Shell.Areas.DCM.Models
+namespace BExIS.Modules.Dcm.UI.Models
 {
     public class FileInfoModel
     {
@@ -39,6 +36,12 @@ namespace BExIS.Web.Shell.Areas.DCM.Models
 
         public TextMarker TextMarker { get; set; }
 
+        //select area for excel
+        public List<string> DataArea { get; set; }
+        public string HeaderArea { get; set; }
+        public Dictionary<Uri, String> SheetUriDictionary { get; set; }
+        public string activeSheetUri { get; set; }
+
         public FileInfoModel()
         {
             Extention = "";
@@ -49,6 +52,10 @@ namespace BExIS.Web.Shell.Areas.DCM.Models
             Data = 2;
             Dateformat = "";
             TextMarker = TextMarker.quotes;
+            DataArea = new List<string>();
+            HeaderArea = "";
+            SheetUriDictionary = new Dictionary<Uri, string>();
+            activeSheetUri = "";
         }
   
     }

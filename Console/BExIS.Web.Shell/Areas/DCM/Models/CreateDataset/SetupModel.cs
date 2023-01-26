@@ -1,41 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
-namespace BExIS.Web.Shell.Areas.DCM.Models.CreateDataset
+namespace BExIS.Modules.Dcm.UI.Models.CreateDataset
 {
+    public enum DataStructureOptions
+    {
+        [Display(Name = "Tabular data (new)")]
+        CreateNewStructure,
+
+        [Display(Name = "File (new)")]
+        CreateNewFile,
+
+        [Display(Name = "Existing tabular data structure")]
+        Existing_structured,
+
+        [Display(Name = "Existing file data structure")]
+        Existing_unstructured
+
+    }
+
     public class SetupModel
     {
+        [Display(Name = "Dataset")]
+        [Required]
+        public long SelectedDatasetId { get; set; }
+
         [Display(Name = "Metadata Structure")]
         [Required(ErrorMessage = "Please select a metadata structure.")]
         public long SelectedMetadataStructureId { get; set; }
 
         [Display(Name = "Data Structure")]
-        [Required(ErrorMessage = "Please select a data structure.")]
+        //[Required(ErrorMessage = "Please select a data structure.")]
         public long SelectedDataStructureId { get; set; }
-
-        [Display(Name = "UserPi")]
-        [Required(ErrorMessage = "Please select a Pi Mapping.")]
-        public long SelectedUserPiId { get; set; }
+        public long SelectedDataStructureId_ { get; set; }
 
         public List<ListViewItem> MetadataStructureViewList { get; set; }
 
-        public List<ListViewItem> DataStructureViewList { get; set; }
+        public List<ListViewItemWithType> DataStructureViewList_unstructured { get; set; }
 
-        public List<long> Pis { get; set; }
+        public List<ListViewItem> DatasetViewList { get; set; }
+
+        public bool BlockDatasetId { get; set; }
+        public bool BlockDatastructureId { get; set; }
+        public bool BlockMetadataStructureId { get; set; }
+
+        public DataStructureOptions DataStructureOptions { get; set; }
+        public List<ListViewItemWithType> DataStructureViewList_structured { get; internal set; }
 
         public SetupModel()
         {
-            SelectedMetadataStructureId = 0;
+            SelectedMetadataStructureId = -1;
             MetadataStructureViewList = new List<ListViewItem>();
+            BlockMetadataStructureId = false;
 
-            SelectedDataStructureId = 0;
-            DataStructureViewList = new List<ListViewItem>();
+            SelectedDataStructureId = -1;
+            SelectedDataStructureId_ = -1;
+            DataStructureViewList_unstructured = new List<ListViewItemWithType>();
+            BlockDatastructureId = false;
 
-            SelectedUserPiId = 0;
-            Pis = new List<long>(); 
+            SelectedDatasetId = -1;
+            DatasetViewList = new List<ListViewItem>();
+            BlockDatasetId = false;
+
+            DataStructureOptions = DataStructureOptions.CreateNewStructure;
         }
     }
 }

@@ -3,7 +3,7 @@
     <!-- Mapping BaseEntity properties -->
     
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_DataStructures_id"/>
       <generator class="native" />
     </id>
 
@@ -65,7 +65,7 @@
     <!-- Mapping Entity properties -->
 
     <property name="Name" type="string">
-      <column name="Name" />
+      <column name="Name" index="idx_DataStructures_name" />
     </property>
 
     <property name="Description" type="string">
@@ -91,7 +91,7 @@
 
     <set name="Views" table="DataStructures_Views" lazy="true">
       <key column="DataStructureRef"/>
-      <many-to-many column="ViewRef" class="DataView"/>
+      <many-to-many column="DatasetViewRef" class="DatasetView"/>
     </set>
 
     <set name="ResearchPlans" inverse="true" table="ResearchPlans_DataStructures" lazy="true" cascade="all-delete-orphan">

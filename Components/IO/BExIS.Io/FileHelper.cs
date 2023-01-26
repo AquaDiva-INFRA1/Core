@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace BExIS.IO
 {
@@ -18,18 +15,58 @@ namespace BExIS.IO
 
         public static bool MoveFile(string tempFile, string destinationPath)
         {
-            if (File.Exists(tempFile))
+            try
             {
-                File.Move(tempFile, destinationPath);
 
-                if (File.Exists(destinationPath))
+                if (File.Exists(tempFile))
                 {
-                    return true;
+                    // check if directoy exist otherwhise create
+                    string directory = Path.GetDirectoryName(destinationPath);
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    File.Move(tempFile, destinationPath);
+
+                    if (File.Exists(destinationPath))
+                    {
+                        return true;
+                    }
+                    else return false;
                 }
                 else return false;
             }
-            else return false;
+            catch
+            {
+                return false;
+            }
+        }
 
+        public static FileStream Create(string filepath)
+        {
+            string path = Path.GetDirectoryName(filepath);
+            // if folder not exist
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            if (!File.Exists(filepath))
+            {
+                return File.Create(filepath);
+            }
+
+            return null;
+        }
+
+        public static void CreateDicrectoriesIfNotExist(string directoryPath)
+        {
+            // if folder not exist
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
         }
 
         public static bool Delete(string file)
@@ -39,7 +76,6 @@ namespace BExIS.IO
                 File.Delete(file);
 
                 if (!File.Exists(file)) return true;
-
             }
 
             return false;
@@ -47,8 +83,6 @@ namespace BExIS.IO
 
         public static bool WaitForFile(string fullPath)
         {
-           
-
             int numTries = 0;
             while (true)
             {
@@ -57,7 +91,7 @@ namespace BExIS.IO
                 {
                     // Attempt to open the file exclusively.
                     using (FileStream fs = new FileStream(fullPath,
-                        FileMode.Open, FileAccess.ReadWrite, 
+                        FileMode.Open, FileAccess.ReadWrite,
                         FileShare.None, 100))
                     {
                         fs.ReadByte();
@@ -75,11 +109,51 @@ namespace BExIS.IO
 
                     // Wait for the lock to be released
                     System.Threading.Thread.Sleep(300);
-                    Console.WriteLine("Waiting : "+ex.Message);
+                    Console.WriteLine("Waiting : " + ex.Message);
                 }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// remove all files and folders from the given folder
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
+        public static bool ClearFolder(string fullPath)
+        {
+            // https://stackoverflow.com/a/1288747/1169798
+
+            // get file/folder listing
+            System.IO.DirectoryInfo di = new DirectoryInfo(fullPath);
+
+            // delete all files
+            foreach (FileInfo file in di.GetFiles())
+            {
+                file.Delete();
+            }
+
+            // delete all folders (including their content)
+            foreach (DirectoryInfo dir in di.GetDirectories())
+            {
+                Directory.Delete(dir.FullName, true);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Copies the contents of input to output. Doesn't close either stream.
+        /// </summary>
+        public static void CopyStream(Stream input, Stream output)
+        {
+            byte[] buffer = new byte[8 * 1024];
+            int len;
+            while ((len = input.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                output.Write(buffer, 0, len);
+            }
         }
     }
 }

@@ -1,58 +1,108 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Routing;
-using System.Xml;
-using BExIS.IO.Transform.Input;
-using BExIS.IO.Transform.Validation.Exceptions;
+﻿using BExIS.Dcm.UploadWizard;
 using BExIS.Dlm.Entities.Administration;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Administration;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
-using BExIS.Web.Shell.Areas.DCM.Models;
-using BExIS.Dcm.UploadWizard;
-using Vaiona.Utils.Cfg;
-using System.Diagnostics;
-using BExIS.IO.Transform.Output;
-using BExIS.Dlm.Entities.MetadataStructure;
 using BExIS.Dlm.Services.MetadataStructure;
-using BExIS.Dcm.Wizard;
-using BExIS.Security.Entities.Objects;
+using BExIS.Modules.Dcm.UI.Models;
+using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Services.Authorization;
-using BExIS.Security.Services.Subjects;
-using System.Xml.Linq;
+using BExIS.Security.Services.Objects;
+using BExIS.UI.Helpers;
+using BExIS.Utils.Data.Upload;
 using BExIS.Xml.Helpers;
-using BExIS.Xml.Services;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Web.Mvc;
+using System.Web.Routing;
+using System.Xml;
+using Vaiona.Persistence.Api;
+using Vaiona.Utils.Cfg;
+using Vaiona.Web.Extensions;
+using Vaiona.Web.Mvc;
 using Vaiona.Web.Mvc.Models;
 
-namespace BExIS.Web.Shell.Areas.DCM.Controllers
+namespace BExIS.Modules.Dcm.UI.Controllers
 {
-    public class SubmitController : Controller
+    public class SubmitController : BaseController
     {
         //
         // GET: /Collect/Home/
 
-        
-        List<string> ids = new List<string>();
-        private TaskManager TaskManager;
+        private List<string> ids = new List<string>();
         private FileStream Stream;
+        private TaskManager TaskManager;
+
+        private XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+
 
         public ActionResult Index()
         {
-            ViewBag.Title = PresentationModel.GetViewTitle("Upload Data");
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Upload Data", Session.GetTenant());
             return View();
         }
 
         #region Upload Wizard
 
-        public ActionResult UploadWizard(DataStructureType type)
+        public ActionResult UploadWizard(DataStructureType type, long datasetid = 0)
         {
-            ViewBag.Title = PresentationModel.GetViewTitle("Upload Data");
+            // if dataset id is set it possible to check the entity
+            //get the researchobject (cuurently called dataset) to get the id of a metadata structure
+            Dataset researcobject = this.GetUnitOfWork().GetReadOnlyRepository<Dataset>().Get(datasetid);
+            string defaultAction = "Upload";
+            long entityId = datasetid;
+            if (researcobject != null)
+            {
+                long metadataStrutcureId = researcobject.MetadataStructure.Id;
+
+                using (MetadataStructureManager metadataStructureManager = new MetadataStructureManager())
+                {
+                    string entityName = xmlDatasetHelper.GetEntityNameFromMetadatStructure(metadataStrutcureId, metadataStructureManager);
+                    string entityType = xmlDatasetHelper.GetEntityTypeFromMetadatStructure(metadataStrutcureId, metadataStructureManager);
+
+                    //ToDo in the entity table there must be the information
+                    using (EntityManager entityManager = new EntityManager())
+                    {
+                        var entity = entityManager.Entities.Where(e => e.Name.Equals(entityName)).FirstOrDefault();
+
+                        string moduleId = "";
+                        Tuple<string, string, string> action = null;
+
+                        if (entity != null && entity.Extra != null)
+                        {
+                            var node = entity.Extra.SelectSingleNode("extra/modules/module");
+
+                            if (node != null) moduleId = node.Attributes["value"].Value;
+
+                            string modus = "upload";
+
+                            action = EntityViewerHelper.GetEntityViewAction(entityName, moduleId, modus);
+                        }
+                        if (action == null) RedirectToAction(defaultAction, new { type, entityId });
+
+                        try
+                        {
+
+                            return RedirectToAction(action.Item3, action.Item2, new { area = action.Item1, type, entityId });
+                        }
+                        catch
+                        {
+                            return RedirectToAction(defaultAction, new { type, entityId });
+                        }
+                    }
+                }
+            }
+
+            return RedirectToAction(defaultAction, new { type, entityId });
+        }
+
+        public ActionResult Upload(DataStructureType type, long entityId = 0)
+        {
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Upload Data", Session.GetTenant());
 
             Session["TaskManager"] = null;
 
@@ -62,7 +112,6 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             {
                 try
                 {
-
                     string path = "";
 
                     if (type == DataStructureType.Unstructured)
@@ -70,9 +119,6 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
                     if (type == DataStructureType.Structured)
                         path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "SubmitTaskInfo.xml");
-
-                    if (type == DataStructureType.NewStructured)
-                        path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "SubmitNewStructuredDataTaskInfo.xml");
 
                     XmlDocument xmlTaskInfo = new XmlDocument();
                     xmlTaskInfo.Load(path);
@@ -82,8 +128,9 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                     TaskManager = (TaskManager)Session["TaskManager"];
                     TaskManager.AddToBus(TaskManager.DATASTRUCTURE_TYPE, type);
 
-                    Session["TaskManager"] = TaskManager;
+                    if(entityId > 0) TaskManager.AddToBus(TaskManager.DATASET_ID, entityId);
 
+                    Session["TaskManager"] = TaskManager;
                 }
                 catch (Exception e)
                 {
@@ -98,14 +145,14 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                 Session["DatasetVersionViewList"] = LoadDatasetVersionViewList(type);
                 Session["DataStructureViewList"] = LoadDataStructureViewList(type);
                 Session["ResearchPlanViewList"] = LoadResearchPlanViewList();
-                
+
+                // setparameters
+                SetParametersToTaskmanager(entityId);
             }
 
-
-            return View((TaskManager)Session["TaskManager"]);
+            return View("UploadWizard",(TaskManager)Session["TaskManager"]);
         }
 
-     
         #region UploadNavigation
 
         [HttpPost]
@@ -124,7 +171,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             return PartialView("_taskListView", TaskManager.GetStatusOfStepInfos());
         }
 
-        #endregion
+        #endregion UploadNavigation
 
         #region Finish
 
@@ -132,37 +179,16 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         public ActionResult FinishUpload()
         {
             TaskManager = (TaskManager)Session["TaskManager"];
-            //TaskManager.SetCurrent(null);
 
-            
-            FinishUploadModel finishModel = new FinishUploadModel();
-            if (TaskManager != null)
-            {
-                finishModel.DatasetTitle = TaskManager.Bus[TaskManager.DATASET_TITLE].ToString();
-                finishModel.Filename = TaskManager.Bus[TaskManager.FILENAME].ToString();
-            }
-
+            long datasetId = (long)TaskManager.Bus[TaskManager.DATASET_ID];
             Session["TaskManager"] = null;
-            try
-            {
-                string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "SubmitTaskInfo.xml");
-                XmlDocument xmlTaskInfo = new XmlDocument();
-                xmlTaskInfo.Load(path);
 
+            return ShowData(datasetId);
 
-                Session["TaskManager"] = TaskManager.Bind(xmlTaskInfo);
-            }
-            catch (Exception e)
-            {
-                ModelState.AddModelError(String.Empty, e.Message);
-            }
-
-
-            return ShowData((long)TaskManager.Bus[TaskManager.DATASET_ID]);
         }
 
-        #endregion
-        
+        #endregion Finish
+
         #region Navigation options
 
         public ActionResult CancelUpload()
@@ -187,102 +213,80 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             return RedirectToAction("ShowData", "Data", new RouteValueDictionary { { "area", "DDM" }, { "id", id } });
         }
 
-        #endregion
+        public ActionResult ShowDashboard()
+        {
+            return RedirectToAction("Index", "Dashboard", new RouteValueDictionary { { "area", "DDM" }});
+        }
+
+        #endregion Navigation options
 
         #region Helper functions
 
-            // chekc if user exist
-            // if true return usernamem otherwise "DEFAULT"
-            public string GetUserNameOrDefault()
+        // chekc if user exist
+        // if true return usernamem otherwise "DEFAULT"
+        public string GetUsernameOrDefault()
+        {
+            string username = string.Empty;
+            try
             {
-                string userName = string.Empty;
-                try
-                {
-                    userName = HttpContext.User.Identity.Name;
-                }
-                catch { }
-
-                return !string.IsNullOrWhiteSpace(userName) ? userName : "DEFAULT";
+                username = HttpContext.User.Identity.Name;
             }
+            catch { }
 
-            public List<ListViewItem> LoadDatasetVersionViewList( DataStructureType dataStructureType)
+            return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
+        }
+
+        public List<ListViewItem> LoadDatasetVersionViewList(DataStructureType dataStructureType)
+        {
+            EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+            DataStructureManager dataStructureManager = new DataStructureManager();
+            DatasetManager dm = new DatasetManager();
+
+            try
             {
-                PermissionManager permissionManager = new PermissionManager();
-                SubjectManager subjectManager = new SubjectManager();
+                List<long> datasetIds = entityPermissionManager.GetKeys(GetUsernameOrDefault(), "Dataset", typeof(Dataset), RightType.Write).ToList();
 
-                // add security
-                ICollection<long> datasetIDs = permissionManager.GetAllDataIds(subjectManager.GetUserByName(GetUserNameOrDefault()).Id, 1, RightType.Update).ToList();
+                List<ListViewItem> tempStructured = new List<ListViewItem>();
+                List<ListViewItem> tempUnStructured = new List<ListViewItem>();
 
-                DataStructureManager dataStructureManager = new DataStructureManager();
-                DatasetManager dm = new DatasetManager();
+                var DatasetVersions = dm.GetDatasetLatestVersions(datasetIds, false);
 
-                Dictionary<long, XmlDocument> dmtemp = new Dictionary<long, XmlDocument>();
-                dmtemp = dm.GetDatasetLatestMetadataVersions();
-
-                List<ListViewItem> temp = new List<ListViewItem>();
+                foreach (var dsv in DatasetVersions)
+                {
+                    if (dsv.Dataset.DataStructure.Self.GetType().Equals(typeof(StructuredDataStructure)))
+                    {
+                        tempStructured.Add(new ListViewItem(dsv.Dataset.Id, dsv.Title));
+                    }
+                    else
+                    {
+                        tempUnStructured.Add(new ListViewItem(dsv.Dataset.Id, dsv.Title));
+                    }
+                }
 
                 if (dataStructureType.Equals(DataStructureType.Structured))
                 {
-                    List<StructuredDataStructure> list = dataStructureManager.StructuredDataStructureRepo.Get().ToList();
-
-                    foreach (StructuredDataStructure sds in list)
-                    {
-                        sds.Materialize();
-
-                        foreach (Dataset d in sds.Datasets)
-                        {
-                            if (datasetIDs.Contains(d.Id))
-                            {
-                                temp.Add(new ListViewItem(d.Id, XmlDatasetHelper.GetInformation(dm.GetDatasetLatestVersion(d), AttributeNames.title)));
-                            }
-                        }
-                    }
-
-                }
-                else if (dataStructureType.Equals(DataStructureType.Unstructured))
-                {
-                    List<UnStructuredDataStructure> list = dataStructureManager.UnStructuredDataStructureRepo.Get().ToList();
-                                       
-                    foreach (UnStructuredDataStructure sds in list)
-                    {
-                        foreach (Dataset d in sds.Datasets)
-                        {
-                            if (datasetIDs.Contains(d.Id))
-                            {
-                                DatasetVersion datasetVersion = dm.GetDatasetLatestVersion(d);
-                                temp.Add(new ListViewItem(d.Id, XmlDatasetHelper.GetInformation(datasetVersion, AttributeNames.title)));
-                            }
-                        }
-                    }
-                }
-                else if(dataStructureType.Equals(DataStructureType.NewStructured))
-                {
-                    List<StructuredDataStructure> list = dataStructureManager.StructuredDataStructureRepo.Get().ToList();
-
-                    foreach (StructuredDataStructure sds in list)
-                    {
-                        sds.Materialize();
-
-                        foreach (Dataset d in sds.Datasets)
-                        {
-                            if (datasetIDs.Contains(d.Id))
-                            {
-                                temp.Add(new ListViewItem(d.Id, XmlDatasetHelper.GetInformation(dm.GetDatasetLatestVersion(d), AttributeNames.title)));
-                            }
-                        }
-                    }
+                    return tempStructured.OrderBy(p => p.Title).ToList();
                 }
                 else
                 {
-
+                    return tempUnStructured.OrderBy(p => p.Title).ToList();
                 }
-
-               return temp.OrderBy(p => p.Title).ToList();
+  
             }
-
-            public List<ListViewItem> LoadDataStructureViewList( DataStructureType dataStructureType )
+            finally
             {
-                DataStructureManager dsm = new DataStructureManager();
+                entityPermissionManager.Dispose();
+                dataStructureManager.Dispose();
+                dm.Dispose();
+            }
+        }
+
+        public List<ListViewItem> LoadDataStructureViewList(DataStructureType dataStructureType)
+        {
+            DataStructureManager dsm = new DataStructureManager();
+
+            try
+            {
                 List<ListViewItem> temp = new List<ListViewItem>();
 
                 foreach (DataStructure datasStructure in dsm.StructuredDataStructureRepo.Get())
@@ -292,14 +296,18 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                     temp.Add(new ListViewItem(datasStructure.Id, title));
                 }
 
-
-
                 return temp.OrderBy(p => p.Title).ToList();
             }
-
-            public List<ListViewItem> LoadResearchPlanViewList()
+            finally
             {
-                ResearchPlanManager rpm = new ResearchPlanManager();
+                dsm.Dispose();
+            }
+        }
+
+        public List<ListViewItem> LoadResearchPlanViewList()
+        {
+            using (ResearchPlanManager rpm = new ResearchPlanManager())
+            {
                 List<ListViewItem> temp = new List<ListViewItem>();
 
                 foreach (ResearchPlan researchPlan in rpm.Repo.Get())
@@ -311,24 +319,55 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
                 return temp.OrderBy(p => p.Title).ToList();
             }
+        }
 
-            
-        #endregion
+        private void SetParametersToTaskmanager(long datasetId)
+        {
+            if (TaskManager == null)
+            {
+                TaskManager = (TaskManager)Session["TaskManager"];
+            }
 
-        #endregion
+            #region set dataset id & dataset title
 
+            if (datasetId > 0)
+            {
+                try
+                {
+                    long datasetid = Convert.ToInt64(datasetId);
+                    TaskManager.AddToBus(TaskManager.DATASET_ID, datasetid);
 
-        #region helper
+                    // get title
+                    using (DatasetManager dm = new DatasetManager())
+                    {
+                        string title = "";
+                        // is checkedIn?
+                        if (dm.IsDatasetCheckedIn(datasetid))
+                        {
+                            var dsv = dm.GetDatasetLatestVersion(datasetid);
+                            title = dsv.Title;
+                        }
 
-        #endregion
+                        TaskManager.AddToBus(TaskManager.DATASET_TITLE, title);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
 
+            #endregion set dataset id & dataset title
+        }
 
+        #endregion Helper functions
+
+        #endregion Upload Wizard
     }
 
     public class UpdateNameModel
     {
         public string Name { get; set; }
         public IEnumerable<int> Numbers { get; set; }
-    } 
-
+    }
 }
