@@ -109,7 +109,7 @@ namespace BExIS.Security.Services.Subjects
             }
             else
             {
-                throw new ArgumentException("The UserPi with UserId [" + UserId + "] and PiId [" + PiId + "] already exist");
+                throw new ArgumentException("The UserPi with UserId [" + UserId + "] and PiId [" + PiId + "] already exists");
             }
         }
 
@@ -159,16 +159,24 @@ namespace BExIS.Security.Services.Subjects
             }
         }
 
-        public UserPi EditUserPi(UserPi userPi)
+        public UserPi EditUserPi(long entryId, long newPiId)
         {
+            long userId;
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<UserPi> userPiRepo = uow.GetRepository<UserPi>();
-                userPiRepo.Put(userPi);
+                UserPi existing = userPiRepo.Get(entryId);
+                userId = existing.UserId;
+                if (existing != null)
+                    existing.PiId = newPiId;
+                else
+                {
+                    throw new NullReferenceException("UserPi cannot be found");
+                }
                 uow.Commit();
             }
 
-            return (userPi);
+            return (new UserPi(entryId, userId, newPiId));
         }
 
         public void DeleteUserPi(long id)
@@ -191,13 +199,14 @@ namespace BExIS.Security.Services.Subjects
             }
         }
 
-        public ICollection<UserPi> GetAllPiMember(long piId)
+        public ICollection<User> GetAllPiMembers(long piId)
         {
-            ICollection<UserPi> userPis = UserPisRepo.Query(u => u.PiId == piId).ToArray();
+            ICollection<long> userIds = UserPisRepo.Query(u => u.PiId == piId).Select(u => u.UserId).ToArray();
+            ICollection<User> users = UsersRepo.Query(u => userIds.Contains(u.Id)).ToArray();
 
-            if (userPis.Count() > 0)
+            if (users.Count() > 0)
             {
-                return userPis;
+                return users;
             }
             else
             {

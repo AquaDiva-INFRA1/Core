@@ -1,12 +1,13 @@
-﻿using System;
+﻿using BExIS.Dcm.UploadWizard;
+using BExIS.Dcm.Wizard;
+using BExIS.IO.Transform.Validation.Exceptions;
+using BExIS.Utils.Data.Upload;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Web;
-using BExIS.IO.Transform.Validation.Exceptions;
-using BExIS.Dcm.Wizard;
-using BExIS.Dcm.UploadWizard;
 
-namespace BExIS.Web.Shell.Areas.DCM.Models
+namespace BExIS.Modules.Dcm.UI.Models
 {
     public class SelectFileViewModel
     {
@@ -18,9 +19,11 @@ namespace BExIS.Web.Shell.Areas.DCM.Models
         public Stream fileStream;
         public DataStructureType DataStructureType;
 
+        public String csvDelimiter = "";
+
         public List<string> SupportedFileExtentions = new List<string>();
 
-        
+
         public StepInfo StepInfo { get; set; }
     }
 }

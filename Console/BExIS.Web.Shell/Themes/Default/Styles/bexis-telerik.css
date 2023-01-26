@@ -20,7 +20,7 @@ Green 05  #eff7f6 brigth
 */
 
 /*GENERAL*/
-.t-link {text-decoration: none}
+.t-link {text-decoration: none; cursor: pointer;}
 .t-animation-container{background :transparent none repeat scroll 0 0; overflow:hidden}
 .t-animation-container, .t-animation-container .t-popup
 {
@@ -48,15 +48,28 @@ Green 05  #eff7f6 brigth
 
 .t-grid th a:hover
 {
-    color: #ff9700;
+    color: var(--t-grid-a-hover);
 }
 
-/*.t-grid td {padding-left: 30px;}
+.t-icon {
+    font-size: 0;
+    line-height: 14px;
+}
 
-.t-grid-without-filter th
-{
-    padding-left:30px;
-}*/
+.t-icon:before {
+    font-size: 15px;
+}
+
+.t-grid th {
+    overflow-x: hidden;
+    padding-right: 30px;
+}
+
+.t-grid th .t-grid-filter{
+    margin-left: 100%;
+    margin-right: -28px;
+    margin-top: -26px
+}
 
 /* GRID TOOLBAR*/
 .t-grid-bottom,
@@ -94,6 +107,7 @@ Green 05  #eff7f6 brigth
 .t-group-indicator .t-link {
 	margin:0 2px 0 2px; 
 	/*font-family: Arial*/
+    cursor: pointer;
 }
 
 .t-group-indicator .t-link, .t-group-delete
@@ -148,6 +162,7 @@ Green 05  #eff7f6 brigth
 {
     width:100%;
     text-align:left;
+    cursor: pointer;
 }
 .t-pager .t-page-size .t-dropdown
 {
@@ -398,13 +413,13 @@ div.t-window-content{padding:.4em .5em;overflow:auto;position:relative;}
 .t-window table {background-color:#ffffff}
 
 /* Window Custom*/
-.t-window-titlebar{background-color:black; color:#ff9700; text-align:left; font-size:16px; font-weight:bold; }
+.t-window-titlebar{background-color:black; color:var(--t-windows-titlebar-color); text-align:left; font-size:16px; font-weight:bold; }
 .t-window-titlebar .t-close,.t-window-titlebar .t-state-hover .t-close{color:white;}
 .t-window-titlebar .t-window-actions {font-size: 18px;position: absolute;top:1px;right: 0.5em; white-space: nowrap;}
 
 
 /* Dropdown Custom */
-.t-dropdown {width: auto; height:30px; border: 2px solid black; padding: 0 7px}
+.t-dropdown {width: auto; height:30px; border: var(--border-width-field) solid var(--border-color-field); padding: 0 7px}
 .t-dropdown-wrap,
 .t-dropdown-wrap t-input,
 .t-dropdown-wrap t-select
@@ -425,7 +440,7 @@ div.t-window-content{padding:.4em .5em;overflow:auto;position:relative;}
 .t-animation-container .t-popup .t-reset .t-state-selected
 {
     color:white;
-    background-color:#ff9700;
+    background-color:var(--t-animation-container-hover-selected);
 }
 
 .t-dropdown-wrap .t-select
@@ -592,6 +607,17 @@ div.t-numerictextbox{display:inline-block;*display:inline;zoom:1;position:relati
 .t-datepicker .t-picker-wrap .t-input
 {
     width:100%;
+}
+
+.t-datepicker-calendar {
+    overflow-x: hidden;
+}
+
+.t-datepicker-calendar th,
+.t-datepicker-calendar td
+{
+    border-right: none 0;
+    padding: 10px;
 }
 
 

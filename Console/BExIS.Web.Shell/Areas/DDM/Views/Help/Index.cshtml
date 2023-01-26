@@ -1,20 +1,14 @@
-﻿@model BExIS.Web.Shell.Areas.DDM.Models.ShowHelpModel
-@using BExIS.Web.Shell.Areas.DDM.Models;
+@model string
+<style type="text/css">
+    .help img {
+        width:100%;
+        height:auto;
+    }
+</style>
 
-@{
-    HtmlString index = new HtmlString(Model.Title);
-    HtmlString content = new HtmlString(Model.Description);
-}
-
-@section Information
-{
-    This guide will walk you through the basics of using search UI including how to manage search component.
-}
-
-@content
-
-@section LeftPane 
-{             
-    @index
-}
+<div class="row help">
+    <div class="col-xs-6 col-xs-offset-3">
+        @Html.Raw(Model)
+    </div>
+</div>
 

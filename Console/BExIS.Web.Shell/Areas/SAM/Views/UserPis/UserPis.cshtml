@@ -1,25 +1,27 @@
-﻿@using System.Web.UI.WebControls
-@using BExIS.Web.Shell.Areas.SAM.Models
+﻿@model  GridModel<UserPisGridRowModel>
+@using System.Web.UI.WebControls
+@using BExIS.Modules.Sam.UI.Models
+@using Telerik.Web.Mvc
 @using Telerik.Web.Mvc.UI
 @using Telerik.Web.Mvc.UI.Fluent
 
 @{
     ViewBag.Title = "UserPis";
+    GridPagerStyles pagerStyles = GridPagerStyles.NextPreviousAndNumeric;
+    //pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
+    //pagerStyles |= GridPagerStyles.Numeric;
 }
 
-<h2>User Pi Mapping</h2>
+<h2 style="display: inline-block">User Pi Mapping</h2>
+<button type="button" onclick="openCreatePiMappingWindow()" class="t.button action" style="float: right; margin-bottom: 10px; margin-top: 20px">Create</button>
 
 @(Html.Telerik().Grid<UserPisGridRowModel>()
       .Name("gridUsers")
-      .ToolBar(command =>
-      {
-          command.Custom().Name("Create").Text("Create").Ajax(true).Action("Create", "UserPis").ButtonType(GridButtonType.ImageAndText).ImageHtmlAttributes(new { @class = "t-icon t-add" });
-      })
       .Columns(columns =>
       {
           columns.Command(command =>
           {
-              command.Custom("Edit").Text("Edit").Ajax(true).ButtonType(GridButtonType.Text);
+              command.Custom("Edit").Text("Edit").Ajax(true).ButtonType(GridButtonType.Text).HtmlAttributes( new { @class = "t-button action"} );
           }).Title("Actions").Width(90).HtmlAttributes(new { style = "text-align:left" });
           columns.Bound(u => u.Id);
           //columns.Bound(u => u.UserId);
@@ -36,13 +38,19 @@
           .Select("UserPis_Select", "UserPis")
       )
       .Filterable()
-      .Pageable(pageable =>
-      {
-          pageable.PageSize(100, new[] {10, 20, 50, 100});
-          pageable.Style(GridPagerStyles.NextPreviousAndNumeric | GridPagerStyles.PageSizeDropDown);
-      })
+
+      .Pageable(paging =>
+                paging
+                        .Style(pagerStyles)
+                    .Position(GridPagerPosition.Bottom)
+                    )
       .Sortable(sorting => sorting.OrderBy(sortOrder => sortOrder.Add(o => o.Id))))
 
+@{
+    //Needed to load the telerik window library
+    Html.Telerik().Window()
+        .Name("PiMappingWindow");
+}
 
 <script type="text/javascript">
 
@@ -53,39 +61,6 @@
     function gridUsers_onCommand(e) {
 
         switch (e.name) {
-            case "Create":
-                $.ajax({
-                    type: 'GET',
-                    url: '@Url.Action("Create", "UserPis")',
-                    dataType: 'html',
-                    success: function (htmlData) {
-                        var windowElement = $.telerik.window.create({
-                            title: "Create User",
-                            html: "<div id='contentCreate'>" + htmlData + "</div>",
-                            contentUrl: "",
-                            actions: ["Close"],
-                            modal: true,
-                            width: 500,
-                            height: 500,
-                            resizable: false,
-                            draggable: true,
-                            scrollable: false,
-                            onClose: function () {
-                                $("#windowCreate").data('tWindow').destroy();
-                                $("#gridUsers .t-refresh").trigger('click');
-                            }
-                        });
-
-                        
-                        windowElement.attr('id', 'windowCreate');
-                        var window = $(windowElement).data('tWindow');
-                        window.center().open();
-                        
-                    }
-                })
-
-                break;
-
             case "Edit":
                 $.ajax({
                     type: 'GET',
@@ -97,7 +72,7 @@
                             title: "Edit UserPi (Id: " + e.dataItem.Id + ")",
                             html: "<div id='contentEdit'>" + htmlData + "</div>",
                             contentUrl: "",
-                            actions: ["Close"],
+                            actions: [],
                             modal: true,
                             width: 500,
                             height: 500,
@@ -126,7 +101,37 @@
     // --------------------------------------------------
     // CREATE
     // --------------------------------------------------
+    function openCreatePiMappingWindow() {
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("Create", "UserPis")',
+            dataType: 'html',
+            success: function (htmlData) {
+                var windowElement = $.telerik.window.create({
+                    title: "Create User",
+                    html: "<div id='contentCreate'>" + htmlData + "</div>",
+                    contentUrl: "",
+                    actions: [],
+                    modal: true,
+                    width: 500,
+                    height: 500,
+                    resizable: false,
+                    draggable: true,
+                    scrollable: false,
+                    onClose: function () {
+                        $("#windowCreate").data('tWindow').destroy();
+                        $("#gridUsers .t-refresh").trigger('click');
+                    }
+                });
 
+
+                windowElement.attr('id', 'windowCreate');
+                var window = $(windowElement).data('tWindow');
+                window.center().open();
+
+            }
+        })
+    }
     function windowCreate_onCancel() {
         $('#windowCreate').data('tWindow').close();
     }
@@ -160,5 +165,4 @@
             });
         }
     }
-
     </script>

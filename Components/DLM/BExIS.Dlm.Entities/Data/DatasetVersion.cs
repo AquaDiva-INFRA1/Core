@@ -29,10 +29,10 @@ namespace BExIS.Dlm.Entities.Data
     {
         #region Attributes
 
-        /// Mapping metadata and extended properties as component, makes them fields of Dataset table! this is good for performance (no need for joins) and 
-        /// also helps to reduce the complexity of content versioning, as there are less associations.
-        //public virtual string Title { get; set; }
-        //public virtual string Description { get; set; } // Description of the dataset not the changes made in this version.
+        // Mapping metadata and extended properties as component, makes them fields of Dataset table! this is good for performance (no need for joins) and 
+        // also helps to reduce the complexity of content versioning, as there are less associations.
+        public virtual string Title { get; set; }
+        public virtual string Description { get; set; } // Description of the dataset not the changes made in this version.
 
         /// <summary>
         ///
@@ -120,7 +120,7 @@ namespace BExIS.Dlm.Entities.Data
         #region Methods
 
         ///it is here for the automatic object creation by the persistence layer. Programmers SHOULD use the other constructor that takes a Dataset as a parameter
-        
+
         /// <summary>
         ///
         /// </summary>
@@ -132,6 +132,7 @@ namespace BExIS.Dlm.Entities.Data
             ExtendedPropertyValues = new List<ExtendedPropertyValue>();
             ContentDescriptors = new List<ContentDescriptor>();
             PriliminaryTuples = new List<DataTuple>();
+            Timestamp = DateTime.UtcNow;
             //XmlExtendedPropertyValues = new XmlDocument();
         }
 
@@ -141,7 +142,7 @@ namespace BExIS.Dlm.Entities.Data
         /// <remarks></remarks>
         /// <seealso cref=""/>
         /// <param name="dataset"></param>
-        public DatasetVersion(Dataset   dataset): this()
+        public DatasetVersion(Dataset dataset) : this()
         {
             this.Dataset = dataset;
             //if (this.Dataset.DataStructure is UnStructuredDataStructure)
@@ -160,11 +161,14 @@ namespace BExIS.Dlm.Entities.Data
         /// <remarks></remarks>
         /// <seealso cref=""/>
         /// <param></param>       
-        public override void Materialize()
+        public override void Materialize(bool includeChildren = true)
         {
             base.Materialize();
-            if(this.PriliminaryTuples != null)
-                this.PriliminaryTuples.ToList().ForEach(p => p.Materialize());
+            if (includeChildren)
+            {
+                if (this.PriliminaryTuples != null)
+                    this.PriliminaryTuples.ToList().ForEach(p => p.Materialize());
+            }
         }
 
         /// <summary>
@@ -173,15 +177,18 @@ namespace BExIS.Dlm.Entities.Data
         /// <remarks></remarks>
         /// <seealso cref=""/>
         /// <param></param>      
-        public override void Dematerialize()
+        public override void Dematerialize(bool includeChildren = true)
         {
             base.Dematerialize();
-            if (this.PriliminaryTuples != null)
-                this.PriliminaryTuples.ToList().ForEach(p => p.Dematerialize());            
+            if (includeChildren)
+            {
+                if (this.PriliminaryTuples != null)
+                    this.PriliminaryTuples.ToList().ForEach(p => p.Dematerialize());
+            }
         }
 
         #endregion
     }
 
-   
+
 }

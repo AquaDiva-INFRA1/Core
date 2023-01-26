@@ -1,0 +1,201 @@
+﻿@model BEXIS.OAC.Entities.AccessionMetadataV2
+@using BEXIS.OAC.Entities;
+
+<div>
+    <h4>AccessionMetadataV2</h4>
+    <hr />
+	<dl class="dl-horizontal">
+		<dt>
+			@Html.DisplayNameFor(model => model.Accession)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Accession)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.Alias)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.Alias)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.CenterName)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.CenterName)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.TITLE)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.TITLE)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.DESCRIPTION)
+		</dt>
+
+		<dd>
+			@Html.DisplayFor(model => model.DESCRIPTION)
+		</dd>
+
+        <!--  IDENTIFIERS    -->
+
+		<dt>
+			@Html.DisplayNameFor(model => model.IDENTIFIERS.EXTERNALID.Namespace)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.IDENTIFIERS.EXTERNALID.Namespace)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.IDENTIFIERS.EXTERNALID.Text)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.IDENTIFIERS.EXTERNALID.Text)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.IDENTIFIERS.PRIMARYID)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.IDENTIFIERS.PRIMARYID)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.IDENTIFIERS.SUBMITTERID.Namespace)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.IDENTIFIERS.SUBMITTERID.Namespace)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.IDENTIFIERS.SUBMITTERID.Text)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.IDENTIFIERS.SUBMITTERID.Text)
+		</dd>
+
+        <!-- SAMPLENAME -->
+
+		<dt>
+			@Html.DisplayNameFor(model => model.SAMPLENAME.TAXONID)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.SAMPLENAME.TAXONID)
+		</dd>
+
+		<dt>
+			@Html.DisplayNameFor(model => model.SAMPLENAME.SCIENTIFICNAME)
+		</dt>
+		<dd>
+			@Html.DisplayFor(model => model.SAMPLENAME.SCIENTIFICNAME)
+		</dd>
+
+        <!-- SAMPLELINKS -->
+
+		@{
+			List<SAMPLELINK> sls = (List<SAMPLELINK>)Model.SAMPLELINKS.SAMPLELINK;
+			foreach (SAMPLELINK sl in sls)
+			{
+				<dt>
+					@Html.DisplayNameFor(model => sl.XREFLINK.DB)
+				</dt>
+				<dd>
+					@Html.DisplayFor(model => sl.XREFLINK.DB);
+				</dd>
+				<dt>
+					@Html.DisplayNameFor(model => sl.XREFLINK.ID)
+				</dt>
+				<dd>
+					@Html.DisplayFor(model => sl.XREFLINK.ID);
+				</dd>
+
+			}
+
+		}
+
+		@{
+			List<SAMPLEATTRIBUTE> sas = (List<SAMPLEATTRIBUTE>)Model.SAMPLEATTRIBUTES.SAMPLEATTRIBUTE;
+			foreach (SAMPLEATTRIBUTE sa in sas)
+			{
+				<dt>
+					@Html.DisplayNameFor(model => sa.TAG)
+				</dt>
+				<dd>
+					@Html.DisplayFor(model => sa.TAG);
+				</dd>
+				<dt>
+					@Html.DisplayNameFor(model => sa.VALUE)
+				</dt>
+				<dd>
+					@Html.DisplayFor(model => sa.VALUE);
+				</dd>
+				<dt>
+					@Html.DisplayNameFor(model => sa.UNITS)
+				</dt>
+				<dd>
+					@Html.DisplayFor(model => sa.UNITS);
+				</dd>
+
+			}
+
+		}
+
+	</dl>
+</div>
+
+<script type="text/javascript">
+
+        function Import(element) {
+
+            $.ajax({
+                url: '/OAC/Home/Submit?acc='+element.value,
+                type: 'POST',
+                error: function (xhr) {
+                    alert('Error: ' + xhr.statusText);
+
+                },
+                success: function (result) {
+                    if (result) {
+                        window.top.location = "/DDM/Data/ShowData/" + result;
+
+                    } else {
+                        alert("Dataset can not be uploaded ... please contact the portal administration");
+                        window.top.location = "/";
+                    }
+                }
+            });
+        }
+
+        function ImportAll() {
+
+            $.ajax({
+                url: '/OAC/SequenceDataUpload/importMetadataFromSample',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                error: function (xhr) {
+                    alert('Error: ' + xhr.statusText);
+
+                },
+                success: function (result) {
+                    if (result) {
+                        window.top.location = "/DDM/Data/ShowData/" + result;
+
+                    } else {
+                        alert("Dataset can not be uploaded ... please contact the portal administration");
+                        window.top.location = "/";
+                    }
+                }
+            });
+        }
+
+</script>
+

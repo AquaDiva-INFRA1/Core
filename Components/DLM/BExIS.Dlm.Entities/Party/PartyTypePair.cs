@@ -2,19 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Vaiona.Entities.Common;
 
 namespace BExIS.Dlm.Entities.Party
 {
-    public class PartyTypePair
+    public class PartyTypePair : BaseEntity
     {
+
         #region Attributes
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public virtual string Title { get; set; }
+        public virtual string Description { get; set; }
+        public virtual string ConditionSource { get; set; }
+        public virtual string ConditionTarget { get; set; }
+        public virtual int PermissionTemplate { get; set; }
+        public virtual Boolean PartyRelationShipTypeDefault { get; set; }
         #endregion
 
         #region Associations
-        public virtual PartyType AlowedSource { get; set; }
-        public virtual PartyType AlowedTarget { get; set; }
+        public virtual PartyType SourcePartyType { get; set; }
+        public virtual PartyType TargetPartyType { get; set; }
         public virtual PartyRelationshipType PartyRelationshipType { get; set; }
         #endregion
 

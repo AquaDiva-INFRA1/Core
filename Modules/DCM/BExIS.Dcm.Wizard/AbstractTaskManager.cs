@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 /// <summary>
@@ -16,12 +14,14 @@ namespace BExIS.Dcm.Wizard
     /// <remarks></remarks>        
     public class AbstractTaskManager
     {
+
         public List<StepInfo> StepInfos;
         public List<StepInfo> TaskInfos;
         protected StepInfo currentStepInfo;
         protected StepInfo prevStepInfo;
 
         public Dictionary<string, object> Bus = new Dictionary<string, object>();
+        public Dictionary<string, ActionInfo> Actions = new Dictionary<string, ActionInfo>();
 
         /// <summary>
         /// 
@@ -315,6 +315,25 @@ namespace BExIS.Dcm.Wizard
         /// <param name="key"></param>
         /// <param name="value"></param>
         public void AddToBus(string key, object value)
+        {
+            if (!this.Bus.ContainsKey(key))
+            {
+                this.Bus.Add(key, value);
+            }
+            else
+            {
+                this.Bus[key] = value;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        public void UpdateBus(string key, object value)
         {
             if (!this.Bus.ContainsKey(key))
             {

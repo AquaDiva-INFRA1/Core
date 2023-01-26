@@ -1,33 +1,32 @@
-﻿using System;
+﻿using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.DataStructure;
+using BExIS.IO.Transform.Validation.DSValidation;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Xml;
-using System.Xml.Linq;
-using BExIS.Dlm.Entities.Data;
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Dlm.Services.Data;
-using BExIS.IO.Transform.Validation.DSValidation;
-using BExIS.IO.Transform.Validation.Exceptions;
-using BExIS.Xml.Helpers;
+using Vaiona.Utils.Cfg;
 
 /// <summary>
 ///
-/// </summary>        
+/// </summary>
 namespace BExIS.IO.Transform.Output
 {
     /// <summary>
     ///
     /// </summary>
-    /// <remarks></remarks>        
-    public class AsciiWriter:DataWriter
+    /// <remarks></remarks>
+    public class AsciiWriter : DataWriter
     {
+        #region constructor
+
         /// <summary>
         ///
         /// </summary>
         /// <remarks></remarks>
-        /// <seealso cref=""/>        
+        /// <seealso cref=""/>
         public TextSeperator Delimeter { get; set; }
 
         /// <summary>
@@ -35,7 +34,7 @@ namespace BExIS.IO.Transform.Output
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
-        /// <param>NA</param>       
+        /// <param>NA</param>
         public AsciiWriter()
         {
             Delimeter = TextSeperator.comma;
@@ -47,13 +46,385 @@ namespace BExIS.IO.Transform.Output
         /// <remarks></remarks>
         /// <seealso cref=""/>
         /// <param name="delimeter"></param>
-        public AsciiWriter(TextSeperator delimeter)
+        public AsciiWriter(TextSeperator delimeter) : base()
         {
             Delimeter = delimeter;
         }
 
+        #endregion constructor
+
+        #region constants
+
+        //private static char[] specialChars = new char[] { '"', ',' };
+
+        #endregion constants
+
+        #region instance variables
+
+        // filepath to the output file
+        private string filepath;
+
+        // file content
+        private StringBuilder data;
+
+        // separator
+        private string separator;
+
+        #endregion instance variables
+
+        #region setup / close actions
+
+        protected override void Init(string file, long dataStructureId)
+        {
+            // store pointer to dataStructure
+            //dataStructure = GetDataStructure(dataStructureId);
+
+            // create the file
+            CreateFile(file);
+
+            // save the path
+            this.filepath = file;
+
+            // reset instance variables
+            this.data = new StringBuilder();
+            this.separator = Char.ToString(AsciiHelper.GetSeperator(Delimeter));
+        }
+
+        protected override void Close()
+        {
+            // write content to file
+            File.WriteAllText(this.filepath, data.ToString());
+
+            // reset
+            this.filepath = "";
+            this.data = null;
+            this.separator = null;
+        }
+
+        #endregion setup / close actions
+
+        #region addHeader
+
+        protected override bool AddHeader(StructuredDataStructure ds)
+        {
+            if (ds.Variables != null && ds.Variables.Any())
+            {
+                List<Variable> variables = ds.Variables.ToList();
+
+                if (VisibleColumns != null)
+                {
+                    variables = GetSubsetOfVariables(ds.Variables.ToList(), VisibleColumns);
+                }
+
+                variables = variables.OrderBy(v => v.OrderNo).ToList();
+
+                // copy header titles to array
+                string[] line = new string[variables.Count];
+
+                //foreach (Variable v in variables)
+                for (int i = 0; i < variables.Count; i++)
+                {
+                    // get value
+                    string value = variables[i].Label.ToString();
+
+                    // add value
+                    line[i] = escapeValue(value);
+
+                    // add to variable identifiers
+                    this.VariableIdentifiers.Add
+                        (
+                            new VariableIdentifier
+                            {
+                                id = variables[i].Id,
+                                name = variables[i].Label,
+                                systemType = variables[i].DataAttribute.DataType.SystemType
+                            }
+                        );
+                }
+
+                // add to data collection
+                data.AppendLine(String.Join(this.separator, line));
+
+                return true;
+            }
+
+            return false;
+        }
+
+        protected override bool AddHeader(DataColumnCollection columns)
+        {
+            // number of columns
+            int colCount = columns.Count;
+            // content of one line
+            string[] line = new string[colCount];
+
+            // append header
+            for (int i = 0; i < colCount; i++)
+            {
+                line[i] = escapeValue(columns[i].Caption);
+            }
+            data.AppendLine(String.Join(this.separator, line));
+
+            return true;
+        }
+
+        protected override bool AddHeader(string[] header)
+        {
+            // Add header to data
+            data.AppendLine(String.Join(this.separator, header.ToArray()));
+
+            return true;
+        }
+
+        #endregion addHeader
+
+        #region add units
+
+        protected override bool AddUnits(StructuredDataStructure ds)
+        {
+            if (ds.Variables != null && ds.Variables.Any())
+            {
+                List<Variable> variables = ds.Variables.ToList();
+
+                if (VisibleColumns != null)
+                {
+                    variables = GetSubsetOfVariables(ds.Variables.ToList(), VisibleColumns);
+                }
+
+                variables = variables.OrderBy(v => v.OrderNo).ToList();
+
+                // copy header titles to array
+                string[] line = new string[variables.Count];
+
+                //foreach (Variable v in variables)
+                for (int i = 0; i < variables.Count; i++)
+                {
+                    // get unit
+                    string unit = variables[i].Unit != null ? variables[i].Unit.Name : "";
+
+                    // add unit
+                    line[i] = escapeValue(unit);
+                }
+
+                // add to data collection
+                data.AppendLine(String.Join(this.separator, line));
+
+                return true;
+            }
+
+            return false;
+        }
+
+        protected override bool AddUnits(string[] units)
+        {
+            // Add header to data
+            data.AppendLine(String.Join(this.separator, units.ToArray()));
+
+            return true;
+        }
+
+        #endregion add units
+
+        #region addRow
+
+        protected override bool AddRow(AbstractTuple tuple, long rowIndex)
+        {
+            // number of columns
+            int colCount = this.VariableIdentifiers.Count;
+            // content of one line
+            string[] line = new string[colCount];
+
+            string value;
+            for (int i = 0; i < this.VariableIdentifiers.Count; i++)
+            {
+                // shortcut
+                var vi = this.VariableIdentifiers[i];
+
+                Variable variable = dataStructure.Variables.Where(p => p.Id == vi.id).SingleOrDefault();
+
+                if (variable != null)
+                {
+                    Dlm.Entities.DataStructure.DataType dataType = variable.DataAttribute.DataType;
+
+                    VariableValue vv = tuple.VariableValues.Where(v => v.VariableId.Equals(vi.id)).FirstOrDefault();
+
+                    if (vv != null && vv.Value != null)
+                    {
+                        // checking for display pattern
+                        string format = GetStringFormat(dataType);
+                        if (!string.IsNullOrEmpty(format))
+                        {
+                            value = GetFormatedValue(vv.Value, dataType, format);
+                        }
+                        else value = vv.Value.ToString();
+
+                        // check if the value is a missing value and should be replaced
+                        if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
+                        {
+                            value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
+                        }
+
+                        // Add value to row
+                        line[i] = escapeValue(value);
+                    }
+                }
+            }
+
+            // add line to result
+            data.AppendLine(String.Join(this.separator, line));
+
+            return true;
+        }
+
+        protected override bool AddRow(DataRow row, long rowIndex)
+        {
+            // number of columns
+            int colCount = row.Table.Columns.Count;
+            // content of one line
+            string[] line = new string[colCount];
+
+            // append contents
+            for (int i = 0; i < colCount; i++)
+            {
+                // get value as string
+                string value = row[i].ToString();
+
+                // check if the value is a missing value and should be replaced
+                Variable variable = dataStructure.Variables.ElementAt(i);
+
+                if (variable != null)
+                {
+                    //checking for display pattern
+                    Dlm.Entities.DataStructure.DataType dataType = variable.DataAttribute.DataType;
+                    string format = GetStringFormat(dataType);
+                    if (!string.IsNullOrEmpty(format))
+                    {
+                        value = GetFormatedValue(value, dataType, format);
+                    }
+                    else value = value.ToString();
+
+                    // checking for missing values
+                    if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
+                    {
+
+                        value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
+                    }
+                }
+                // add value to row
+                line[i] = escapeValue(value);
+            }
+
+            // Add to result
+            data.AppendLine(String.Join(this.separator, line));
+
+            return true;
+        }
+
+        protected override bool AddRow(string[] row, long rowIndex)
+        {
+            List<string> newRow = new List<string>();
+
+            // set vor missing values
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                var value = row[i];
+                // check if the value is a missing value and should be replaced
+                var variable = dataStructure.Variables.ElementAt(i);
+
+                if (variable != null)
+                {
+                    //checking for display pattern
+                    Dlm.Entities.DataStructure.DataType dataType = variable.DataAttribute.DataType;
+                    string format = GetStringFormat(dataType);
+                    if (!string.IsNullOrEmpty(format))
+                    {
+                        value = GetFormatedValue(value, dataType, format);
+                    }
+                    else value = value.ToString();
+
+                    if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
+                    {
+                        value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
+                    }
+                }
+                newRow.Add(value);
+            }
+
+            // Add to result
+            data.AppendLine(String.Join(this.separator, newRow.ToArray()));
+
+            return true;
+        }
+
+        #endregion addRow
+
+        #region generic
+
+        public static bool AllTextToFile(string filepath, string text)
+        {
+            try
+            {
+                File.WriteAllText(filepath, text);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion generic
+
+        #region helper
+
+        private string escapeValue(string value)
+        {
+            // modify if special characters are present
+
+            if (value.IndexOfAny(AsciiHelper.GetAllSeperator().ToArray()) != -1)
+            {
+                value = "\"" + value.Replace("\"", "\"\"") + "\"";
+            }
+            return value;
+        }
+
+        #endregion helper
+
+        #region bexis internal usage
+
         /// <summary>
-        ///
+        /// create a new empty file at the given path
+        /// </summary>
+        /// <param name="filepath"></param>
+        /// <returns></returns>
+        public static new string CreateFile(string filepath)
+        {
+            // method is needed as C# does not support static method inheritance
+
+            string dataPath = Path.Combine(AppConfiguration.DataPath, filepath);
+
+            try
+            {
+                if (!File.Exists(dataPath))
+                {
+                    string directory = Path.GetDirectoryName(dataPath);
+                    FileHelper.CreateDicrectoriesIfNotExist(directory);
+
+                    File.Create(dataPath).Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message.ToString();
+            }
+
+            return dataPath;
+        }
+
+        /// <summary>
+        /// return the filepath
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
@@ -70,9 +441,11 @@ namespace BExIS.IO.Transform.Output
             {
                 if (!File.Exists(dataPath))
                 {
+                    string directory = Path.GetDirectoryName(dataPath);
+                    FileHelper.CreateDicrectoriesIfNotExist(directory);
+
                     File.Create(dataPath).Close();
                 }
-
             }
             catch (Exception ex)
             {
@@ -83,254 +456,34 @@ namespace BExIS.IO.Transform.Output
         }
 
         /// <summary>
-        /// Add Datatuples and Datastructure to a Ascii file
+        /// create a new file in the given namespace and return the full path
         /// </summary>
-        /// <remarks></remarks>
-        /// <seealso cref=""/>
-        /// <param name="dataTuples"> Datatuples to add</param>
-        /// <param name="filePath">Path of the excel template file</param>
-        /// <param name="dataStructureId">Id of datastructure</param>
-        /// <returns>List of Errors or null</returns>
-        public List<Error> AddDataTuples(List<long> dataTuplesIds, string filePath, long dataStructureId)
+        /// <param name="ns"></param>
+        /// <param name="v"></param>
+        /// <param name="ext"></param>
+        /// <returns></returns>
+        internal string CreateFile(string ns, string title, string extension)
         {
-            if (File.Exists(filePath))
+            string dataPath = GetFullStorePath(ns, title, extension);
+
+            try
             {
-                StringBuilder data = new StringBuilder();
-
-                data.AppendLine(dataStructureToRow(dataStructureId));
-
-                foreach (long id in dataTuplesIds)
+                if (!File.Exists(dataPath))
                 {
-                    data.AppendLine(datatupleToRow(id));
+                    string directory = Path.GetDirectoryName(dataPath);
+                    FileHelper.CreateDicrectoriesIfNotExist(directory);
+
+                    File.Create(dataPath).Close();
                 }
-
-
-                File.WriteAllText(filePath, data.ToString());
             }
-
-            return ErrorMessages;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <remarks></remarks>
-        /// <seealso cref=""/>
-        /// <param name="dataTuples"></param>
-        /// <param name="filePath"></param>
-        /// <param name="dataStructureId"></param>
-        /// <returns></returns>
-        public List<Error> AddDataTuples(List<AbstractTuple> dataTuples, string filePath, long dataStructureId)
-        {
-            if (File.Exists(filePath))
+            catch (Exception ex)
             {
-                StringBuilder data = new StringBuilder();
-
-                data.AppendLine(dataStructureToRow(dataStructureId));
-
-                foreach (AbstractTuple dataTuple in dataTuples)
-                {
-                    data.AppendLine(datatupleToRow(dataTuple));
-                }
-
-
-                File.WriteAllText(filePath, data.ToString());
+                string message = ex.Message.ToString();
             }
 
-            return ErrorMessages;
+            return dataPath;
         }
 
-        /// <summary>
-        /// Convert Datatuple to  String line
-        /// </summary>
-        /// <remarks></remarks>
-        /// <seealso cref=""/>
-        /// <param name="id">Id of the Datatuple</param>
-        /// <returns></returns>
-        private string datatupleToRow(long id)
-        {
-            //DatatupleManager
-            DatasetManager datasetManager = new DatasetManager();
-            
-            // I do not know where this function is called, but there is a chance that the id is referring to a tuple in a previous version, in that case, the tuple is not in the data tuples anymore. Javad
-            DataTuple dataTuple = datasetManager.DataTupleRepo.Get(id);
-            dataTuple.Materialize();
-
-            //StringBuilder builder = new StringBuilder();
-            //bool first = true;
-            //string value = "";
-
-            //foreach (VariableIdentifier vi in this.VariableIdentifiers)
-            //{
-            //    VariableValue vv = dataTuple.VariableValues.Where(v => v.Variable.Id.Equals(vi.id)).FirstOrDefault();
-            //    if (vv.Value != null)
-            //        value = vv.Value.ToString();
-            //    // Add separator if this isn't the first value
-            //    if (!first)
-            //        builder.Append(AsciiHelper.GetSeperator(Delimeter));
-            //    // Implement special handling for values that contain comma or quote
-            //    // Enclose in quotes and double up any double quotes
-            //    if (value.IndexOfAny(new char[] { '"', ',' }) != -1)
-            //        builder.AppendFormat("\"{0}\"", value.Replace("\"", "\"\""));
-            //    else
-            //        builder.Append(value);
-            //    first = false;
-            //}
-
-
-            //foreach (VariableValue vv in dataTuple.VariableValues)
-            //{
-            //    string value ="";
-            //    if(vv.Value!=null)
-            //        value =  vv.Value.ToString();
-            //    // Add separator if this isn't the first value
-            //    if (!first)
-            //        builder.Append(AsciiHelper.GetSeperator(Delimeter));
-            //    // Implement special handling for values that contain comma or quote
-            //    // Enclose in quotes and double up any double quotes
-            //    if (value.IndexOfAny(new char[] { '"', ',' }) != -1)
-            //        builder.AppendFormat("\"{0}\"", value.Replace("\"", "\"\""));
-            //    else
-            //        builder.Append(value);
-            //    first = false;
-            //}
-
-            return datatupleToRow(dataTuple);
-        }
-
-        /// <summary>
-        /// Convert Datatuple to  String line
-        /// </summary>
-        /// <remarks></remarks>
-        /// <seealso cref=""/>
-        /// <param name="dataTuple"></param>
-        /// <returns></returns>
-        private string datatupleToRow(AbstractTuple dataTuple)
-        {
-            StringBuilder builder = new StringBuilder();
-            bool first = true;
-            string value = "";
-
-            foreach (VariableIdentifier vi in this.VariableIdentifiers)
-            {
-                VariableValue vv = dataTuple.VariableValues.Where(v => v.Variable.Id.Equals(vi.id)).FirstOrDefault();
-                if (vv.Value != null)
-                    value = vv.Value.ToString();
-                // Add separator if this isn't the first value
-                if (!first)
-                    builder.Append(AsciiHelper.GetSeperator(Delimeter));
-                // Implement special handling for values that contain comma or quote
-                // Enclose in quotes and double up any double quotes
-                if (value.IndexOfAny(new char[] { '"', ',' }) != -1)
-                    builder.AppendFormat("\"{0}\"", value.Replace("\"", "\"\""));
-                else
-                    builder.Append(value);
-                first = false;
-            }
-
-            //StringBuilder builder = new StringBuilder();
-            //bool first = true;
-
-            //List<VariableValue> variableValues = dataTuple.VariableValues.ToList();
-
-            //if (visibleColumns != null)
-            //{
-            //    variableValues = GetSubsetOfVariableValues(variableValues, visibleColumns);
-            //}
-
-            //foreach (VariableValue vv in variableValues)
-            //{
-            //    string value = "";
-            //    if (vv.Value != null)
-            //        value = vv.Value.ToString();
-            //    // Add separator if this isn't the first value
-            //    if (!first)
-            //        builder.Append(AsciiHelper.GetSeperator(Delimeter));
-            //    // Implement special handling for values that contain comma or quote
-            //    // Enclose in quotes and double up any double quotes
-            //    if (value.IndexOfAny(new char[] { '"', ',' }) != -1)
-            //        builder.AppendFormat("\"{0}\"", value.Replace("\"", "\"\""));
-            //    else
-            //        builder.Append(value);
-            //    first = false;
-            //}
-
-            return builder.ToString();
-        }
-        
-        /// <summary>
-        /// Convert Datastructure to a String line
-        /// </summary>
-        /// <remarks></remarks>
-        /// <seealso cref=""/>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        private string dataStructureToRow(long id)
-        {
-            StructuredDataStructure ds = GetDataStructure(id);
-            StringBuilder builder = new StringBuilder();
-            bool first = true;
-
-            List<Variable> variables = ds.Variables.ToList();
-
-            if (VisibleColumns != null)
-            {
-                variables = GetSubsetOfVariables(ds.Variables.ToList(), VisibleColumns);
-            }
-
-            variables = SortVariablesOnDatastructure(variables, ds);
-
-            foreach (Variable v in variables)
-            {
-                string value = v.Label.ToString();
-                // Add separator if this isn't the first value
-                if (!first)
-                    builder.Append(AsciiHelper.GetSeperator(Delimeter));
-                // Implement special handling for values that contain comma or quote
-                // Enclose in quotes and double up any double quotes
-                if (value.IndexOfAny(new char[] { '"', ',' }) != -1)
-                    builder.AppendFormat("\"{0}\"", value.Replace("\"", "\"\""));
-                else
-                    builder.Append(value);
-                first = false;
-
-                // add to variable identifiers
-                this.VariableIdentifiers.Add
-                (
-                    new VariableIdentifier
-                    {
-                        id = v.Id,
-                        name = v.Label,
-                        systemType = v.DataAttribute.DataType.SystemType
-                    }
-                );
-            }
-
-            return builder.ToString();
-        }
-
-        private List<Variable> SortVariablesOnDatastructure(List<Variable> variables, DataStructure datastructure)
-        {
-            List<Variable> sortedVariables = new List<Variable>();
-
-            XmlDocument extra = new XmlDocument();
-            extra.LoadXml(datastructure.Extra.OuterXml);
-            IEnumerable<XElement> elements = XmlUtility.GetXElementByNodeName("variable", XmlUtility.ToXDocument(extra));
-
-            foreach (XElement element in elements)
-            {
-                long id = Convert.ToInt64(element.Value);
-                Variable var =variables.Where(v => v.Id.Equals(id)).FirstOrDefault();
-                if(var !=null)
-                    sortedVariables.Add(var);
-            }
-
-
-            return sortedVariables;
-        }
-
-        
+        #endregion bexis internal usage
     }
-
-
 }

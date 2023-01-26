@@ -1,0 +1,360 @@
+﻿@using Telerik.Web.Mvc.UI
+
+@section Information
+{
+    This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.<br />
+    It reflects the distribution of the categoral attributes and its values within the dataset.
+
+}
+
+@{
+    //List<string> header = (List<string>)ViewData["header"];
+    //List<List<string>> data_lines = (List<List<string>>)ViewData["data_lines"];
+
+    List<List<string>> values = (List<List<string>>)ViewData["values"];
+    List<List<string>> labels = (List<List<string>>)ViewData["labels"];
+
+    List<List<string>> table = (List<List<string>>)ViewData["table"];
+    List<List<string>> headers = (List<List<string>>)ViewData["headers"];
+
+    string error = (string)ViewData["error"];
+    if (error.Length > 1)
+    {
+        <script type="text/javascript">
+            alert(@error);
+        </script>
+    }
+
+    int number_of_graphs = labels.Count();
+    int number_of_rows = (int)Math.Round((float)(1 / 2) + (float)number_of_graphs / (float)5);
+    Int32 index = 0;
+}
+
+
+@{
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.0"></script>
+    -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
+
+
+}
+
+
+<div>
+    <h1 class="display-4">Dataset Summary</h1>
+    <h3>
+        This summary presnts the results of the analysis over the categoral attributes extracted from the data structure.<br />
+        <small class="text-muted">It reflects the distribution of the categoral attributes and its values within the dataset.</small>
+    </h3>
+</div>
+
+<div class="jumbotron">
+    @{
+        if (table.Count > 0)
+        {
+            <table class="table">
+                <thead>
+                    @foreach (List<string> s in headers)
+                    {
+                        <tr>
+                            @foreach (string ss in s)
+                            {
+                                <th scope="col">@ss</th>
+                            }
+                        </tr>
+                    }
+                </thead>
+                <tbody>
+
+                    @foreach (List<string> s in table)
+                    {
+
+                        <tr>
+                            @foreach (string ss in s)
+                            {
+                                <td>@ss</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+</div>
+
+<!--
+<br /><br />
+<div id="spinner">
+    <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+<br /><br />
+-->
+
+@if (number_of_graphs < 1)
+{
+    <div class="alert alert-warning" role="alert">
+        No Categoral Analysis / Summary was extracted from this dataset.
+    </div>
+}
+else
+{
+    <button onclick="myFunction()">Hide / View Graphs</button>
+    <!-- Create a div where the graph will take place style="display:none" -->
+    <div id="table">
+        <table>
+            @while (index <= number_of_graphs)
+            {
+                <tr>
+                    @for (int k = 0; k < 3; k++)
+                    {
+                        <td>
+
+                            <canvas id="myChart_@index" width="500" height="350"></canvas>
+
+                        </td>
+                        index = index + 1;
+                    }
+                </tr>
+                <br>
+            }
+
+
+        </table>
+    </div>
+}
+
+
+
+
+<script type="text/javascript">
+
+    start();
+
+    $(window).resize(function () {
+        //start();
+    });
+    //  spinner show / hide
+    //var spinner = document.getElementById("spinner");
+    //if (spinner.style.display === "none") {
+    //    spinner.style.display = "block";
+    //}
+    //  end of spinner show / hide
+
+    //  numerical distribution show / hide
+    function myFunction() {
+        var x = document.getElementById("table");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        }
+        else {
+            x.style.display = "none";
+        }
+    };
+    //  end of numerical distribution show / hide
+
+    function start() {
+        $.ajax({
+            url: '/asm/DataSetSummary/getGraphData',
+            type: 'POST',
+            success: function (resp) {
+                //spinner = document.getElementById("spinner");
+                //spinner.style.display = "none";
+                var myJSON = JSON.parse(resp);
+
+                Object.keys(myJSON).forEach(function (entry) {
+
+                    var element = myJSON[entry];
+
+                    var xdata = element[0];
+                    var xlabel = xdata[0];
+                    var xvalues = xdata[1].replace('[', '').replace(']', '').split(",");
+
+                    var ydata = element[1];
+                    var ylabel = ydata[0];
+                    var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
+
+                    //if (xlabel != ylabel){
+                    var data_ = [];
+                    for (var z = 0; z < yvalues.length; z++) {
+                        data_.push({ x: xvalues[z], y: yvalues[z] });
+                    }
+                    var id = "myChart_" + entry;
+
+                    var colors = [];
+                    for (var i = 0; i < xvalues.length; i++) {
+                        colors.push(getRandomColor());
+                    }
+
+                    var scatterChartData = {
+                        datasets:
+                            [{
+                                data: data_
+                            }]
+                    };
+                    //check which type of data chart to use :
+                    var ctxSc = document.getElementById(id).getContext('2d');
+                    var myChart = new Chart(ctxSc, {
+                        type: 'bar',
+                        data: {
+                            labels: xvalues, // ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], // x data here
+                            datasets: [{
+                                data: yvalues, // [12, 19, 3, 5, 2, 3] // Y data here
+                                backgroundColor: colors
+                            }]
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: "",
+                                fontColor: 'black',
+                            },
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                    stacked: true,
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'Count',
+                                        fontColor: 'black'
+                                    }
+                                }],
+                                xAxes: [{
+                                    //maxBarThickness: 25,
+                                    gridLines: {
+                                        offsetGridLines: true
+                                    },
+                                    stacked: true,
+                                    fontColor: 'black',
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: xlabel,
+                                        fontColor: 'black'
+                                    }
+                                }]
+                            },
+                            legend: {
+                                display: false
+                            }
+                        }
+                    });
+
+                    //}
+                });
+            },
+            error: function (e) {
+                alert('Error: ' + e);
+            }
+        });
+    }
+
+
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+
+    function Show_numerical_distribution() {
+        $.ajax({
+            url: '/asm/PortalStatistics/getGraphData',
+            type: 'POST',
+            success: function (resp) {
+                //spinner = document.getElementById("spinner");
+                //spinner.style.display = "none";
+                var myJSON = JSON.parse(resp);
+
+                Object.keys(myJSON).forEach(function (entry) {
+
+                    var element = myJSON[entry];
+
+                    var xdata = element[0];
+                    var xlabel = xdata[0];
+                    var xvalues = xdata[1].replace('[', '').replace(']', '').split(",");
+
+                    var ydata = element[1];
+                    var ylabel = ydata[0];
+                    var yvalues = ydata[1].replace('[', '').replace(']', '').split(",");
+
+                    //if (xlabel != ylabel){
+                    var data_ = [];
+                    for (var z = 0; z < yvalues.length; z++) {
+                        data_.push({ x: xvalues[z], y: yvalues[z] });
+                    }
+                    var id = "myChart_" + entry;
+
+                    var scatterChartData = {
+                        datasets:
+                            [{
+                                data: data_
+                            }]
+                    };
+
+                    var ctxSc = document.getElementById(id).getContext('2d');
+                    var config1 = new Chart.Scatter(ctxSc, {
+                        type: 'Line',
+                        data: scatterChartData,
+                        options: {
+                            title: {
+                                display: true,
+                                text: ylabel + " || " + xlabel,
+                            },
+                            scales: {
+                                xAxes: [{
+                                    position: 'bottom',
+                                    title: xlabel
+                                }],
+                                yAxes: [{
+                                    stacked: true,
+                                    title: ylabel
+                                }]
+                            },
+                            legend: {
+                                display: false
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                                speed: 0.5
+                            },
+                            zoom: {
+                                enabled: true,
+                                mode: 'xy',
+                                speed: 0.5
+                            }
+                        }
+                    });
+
+                    //}
+                });
+            },
+            error: function (e) {
+                alert('Error: ' + e);
+            }
+        });
+    }
+</script>
+
+
+
+
+
