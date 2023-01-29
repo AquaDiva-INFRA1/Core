@@ -791,12 +791,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_GlobalResources\UploadLocalization.zh-CN.resx">
-      <Generator>GlobalResourceProxyGenerator</Generator>
-      <LastGenOutput>UploadLocalization.zh-CN.designer.cs</LastGenOutput>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
@@ -872,6 +866,15 @@
       <Project>{b423a986-eb03-4696-aade-a5e8ea11fc73}</Project>
       <Name>BExIS.OAC.Services</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\Sample\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.zh-CN.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.zh-CN.designer.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_GlobalResources\UploadLocalization.ru-RU.resx">
@@ -1088,9 +1091,6 @@
       <Generator>GlobalResourceProxyGenerator</Generator>
       <LastGenOutput>EditorLocalization.bg-BG.designer.cs</LastGenOutput>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Views\Sample\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
