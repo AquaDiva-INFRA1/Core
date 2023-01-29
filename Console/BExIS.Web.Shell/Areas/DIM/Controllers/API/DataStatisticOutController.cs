@@ -24,6 +24,7 @@ using System.Linq;
 //using System.Linq.Dynamic;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http.Description;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http;
@@ -35,7 +36,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
     public class DataStatisticOutController : ApiController
     {
 
-        // GET: api/data
+        // GET api/DataStatistic
         /// <summary>
         /// Get a list of all dataset ids
         /// </summary>
@@ -66,10 +67,15 @@ namespace BExIS.Modules.Dim.UI.Controllers
             }
         }
 
+
+        // GET api/DataStatistic/{id}
+        /// <summary>
+        /// Get unique values, max and min values, and max and min length for all variables
+        /// </summary>
         /// <param name="id">Dataset Id</param>
         [BExISApiAuthorize]
-        //[Route("api/Data")]
         [GetRoute("api/DataStatistic/{id}")]
+        [ResponseType(typeof(ApiDataStatisticModel))]
         [HttpGet]
         public HttpResponseMessage Get(int id)
         {
@@ -78,12 +84,17 @@ namespace BExIS.Modules.Dim.UI.Controllers
             return getData(id, -1, token);
         }
 
+
+        // GET api/DataStatistic/{id}/{variableId}
+        /// <summary>
+        /// Get unique values, max and min values, and max and min length for one variable
+        /// </summary>
         /// <param name="id">Dataset Id</param>
         /// <param name="variableId">Variable id</param>
         /// <returns></returns>
         [BExISApiAuthorize]
-        //[Route("api/Data")]
         [GetRoute("api/DataStatistic/{id}/{variableId}")]
+        [ResponseType(typeof(ApiDataStatisticModel))]
         [HttpGet]
         public HttpResponseMessage Get(long id, int variableId)
         {
@@ -145,9 +156,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
                             object stats = new object();
 
                             DataTable dt = new DataTable("Varibales");
-                            DataTable dtMissingValues = new DataTable("MissingValues");
-                            dtMissingValues.Columns.Add("placeholder", typeof(String));
-                            dtMissingValues.Columns.Add("displayName", typeof(String));
+                            
 
                             List<ApiDataStatisticModel> dataStatisticModels = new List<ApiDataStatisticModel>();
                             StructuredDataStructure structuredDataStructure = dataStructureManager.StructuredDataStructureRepo.Get(datasetVersion.Dataset.DataStructure.Id);
@@ -175,7 +184,11 @@ namespace BExIS.Modules.Dim.UI.Controllers
                                     dataStatisticModel.minLength = dt.Compute("Min(length)", string.Empty).ToString();
                                     dataStatisticModel.maxLength = dt.Compute("Max(length)", string.Empty).ToString();
                                     dataStatisticModel.count = dt.Compute("Sum(count)", string.Empty).ToString();
-                                    dtMissingValues.Clear();
+                                    
+                                    DataTable dtMissingValues = new DataTable("MissingValues");
+                                    dtMissingValues.Columns.Add("placeholder", typeof(String));
+                                    dtMissingValues.Columns.Add("displayName", typeof(String));
+                                    
                                     foreach (var missingValue in vs.MissingValues)
                                     {
                                         DataRow workRow = dtMissingValues.NewRow();
@@ -210,6 +223,11 @@ namespace BExIS.Modules.Dim.UI.Controllers
                                 dataStatisticModel.minLength = dt.Compute("Min(length)", string.Empty).ToString();
                                 dataStatisticModel.maxLength = dt.Compute("Max(length)", string.Empty).ToString();
                                 dataStatisticModel.count = dt.Compute("Sum(count)", string.Empty).ToString();
+
+                                DataTable dtMissingValues = new DataTable("MissingValues");
+                                dtMissingValues.Columns.Add("placeholder", typeof(String));
+                                dtMissingValues.Columns.Add("displayName", typeof(String));
+
                                 foreach (var missingValue in variable.MissingValues)
                                 {
                                     DataRow workRow = dtMissingValues.NewRow();

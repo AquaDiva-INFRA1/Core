@@ -179,13 +179,32 @@ namespace BExIS.Security.Services.Authorization
             }
         }
 
+        // Get public status and date of publication
+        public Tuple<bool, DateTime> GetPublicAndDate(long entityId, long key)
+        {
+            using (var uow = this.GetUnitOfWork())
+            {
+                var entityPermissionRepository = uow.GetRepository<EntityPermission>();
+                var permission = entityPermissionRepository.Get(p => p.Subject == null && p.Entity.Id == entityId && p.Key == key);
+
+                bool isPublic = false;
+                DateTime publicationDate = DateTime.MinValue;
+
+                if (permission.Count == 1)
+                {
+                    isPublic = true;
+                    publicationDate = permission.FirstOrDefault().CreationDate;
+                }
+
+                return Tuple.Create(isPublic, publicationDate);
+            }
+        }
+
         public bool Exists(long? subjectId, long entityId, long key)
         {
             using (var uow = this.GetUnitOfWork())
             {
                 var entityPermissionRepository = uow.GetRepository<EntityPermission>();
-                if (subjectId == null)
-                    return false;
                 return subjectId == null ? entityPermissionRepository.Get(p => p.Subject == null && p.Entity.Id == entityId && p.Key == key).Count == 1 : entityPermissionRepository.Get(p => p.Subject.Id == subjectId && p.Entity.Id == entityId && p.Key == key).Count == 1;
             }
         }
@@ -221,9 +240,10 @@ namespace BExIS.Security.Services.Authorization
         {
             using (var uow = this.GetUnitOfWork())
             {
-                return (GetEffectiveRights(subjectId, new List<long>(){entityId}, key));
+                return (GetEffectiveRights(subjectId, new List<long>() { entityId }, key));
             }
         }
+
         /// <summary>
         /// get effective rights of subjects(incoming as ids) on a entity,
         /// return a dictionary with subjectid , right
@@ -247,7 +267,6 @@ namespace BExIS.Security.Services.Authorization
 
                 var entity = entityRepository.Get(entityId);
 
-
                 foreach (var subjectId in subjectIds)
                 {
                     var subject = subjectRepository.Get(subjectId);
@@ -256,11 +275,9 @@ namespace BExIS.Security.Services.Authorization
 
                     tmp.Add(subjectId, effectiveRights);
                 }
-
             }
 
             return tmp;
-
         }
 
         /// <summary>
@@ -292,11 +309,9 @@ namespace BExIS.Security.Services.Authorization
 
                     tmp.Add(subject.Id, effectiveRights);
                 }
-
             }
 
             return tmp;
-
         }
 
         public int GetEffectiveRights(long? subjectId, List<long> entityIds, long key)
@@ -365,8 +380,8 @@ namespace BExIS.Security.Services.Authorization
         }
         */
 
-                private int getEffectiveRights(Subject subject, List<Entity> entities, long key,
-            IReadOnlyRepository<EntityPermission> entityPermissionRepository, 
+        private int getEffectiveRights(Subject subject, List<Entity> entities, long key,
+            IReadOnlyRepository<EntityPermission> entityPermissionRepository,
             IReadOnlyRepository<PartyUser> partyUserRepository,
             IReadOnlyRepository<Party> partyRepository,
             IReadOnlyRepository<PartyRelationship> partyRelationshipRepository)
@@ -398,7 +413,6 @@ namespace BExIS.Security.Services.Authorization
 
                     if (userParty != null && entityParty != null)
                     {
-                       
                         var partyRelationships = partyRelationshipRepository.Query(m => m.SourceParty.Id == userParty.Id && m.TargetParty.Id == entityParty.Id);
 
                         rights.AddRange(partyRelationships.Select(m => m.Permission));
@@ -525,7 +539,7 @@ namespace BExIS.Security.Services.Authorization
             }
         }
 
-        public Dictionary<long,int> GetRights(IEnumerable<long> subjectIds, long entityId, long key)
+        public Dictionary<long, int> GetRights(IEnumerable<long> subjectIds, long entityId, long key)
         {
             Dictionary<long, int> tmp = new Dictionary<long, int>();
 
@@ -539,7 +553,7 @@ namespace BExIS.Security.Services.Authorization
                 foreach (var subjectId in subjectIds)
                 {
                     var subject = subjectId == null ? null : subjectRepository.Query(s => s.Id == subjectId).FirstOrDefault();
-                    
+
                     int rights = getRights(subject, entity, key, entityPermissionRepository);
 
                     tmp.Add(subjectId, rights);
@@ -614,7 +628,7 @@ namespace BExIS.Security.Services.Authorization
         public string[] GetRights(short rights)
         {
             return Enum.GetNames(typeof(RightType)).Select(n => n)
-                .Where(n => (rights & (int) Enum.Parse(typeof(RightType), n)) > 0).ToArray();
+                .Where(n => (rights & (int)Enum.Parse(typeof(RightType), n)) > 0).ToArray();
         }
 
         public short GetRights(string[] rights)
