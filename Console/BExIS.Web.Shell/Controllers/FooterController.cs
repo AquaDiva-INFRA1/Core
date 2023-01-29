@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
 
@@ -26,6 +22,12 @@ namespace BExIS.Web.Shell.Controllers
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Imprint", this.Session.GetTenant());
             return View("Content", null, Session.GetTenant().ImprintFileNamePath);
+        }
+
+        public ActionResult TermsAndConditions()
+        {
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("TermsAndConditions", this.Session.GetTenant());
+            return View("Content", null, this.Session.GetTenant().TermsAndConditionsFileNamePath);
         }
 
         public ActionResult Policy()

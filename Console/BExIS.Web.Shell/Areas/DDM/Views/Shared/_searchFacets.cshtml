@@ -15,7 +15,7 @@
 @(Html.Telerik().TreeView()
        .Name("TreeView")
        .ShowCheckBox(true)
-       .ExpandAll(true)
+       .ExpandAll(false)
 
        .ClientEvents(events => events
                            .OnSelect("onSelect")
@@ -32,7 +32,7 @@
                            item.Enabled = true;
                            item.Checkable = false;
                            item.Checked = false;
-                           item.Expanded = true;
+                           item.Expanded = false;
                            item.LinkHtmlAttributes["class"] = "searchFacet t-headeritem bx-trunc-child";
                            item.LinkHtmlAttributes["title"] = facet.Text + " (" + facet.Count + ")";
 
@@ -57,6 +57,7 @@
                                    //subitem.Text = t.Text;
 
                                    //subitem.Parent = item;
+                                   subitem.Expanded = false;
                                    subitem.Value = t.Name;
                                    subitem.Enabled = true;//t.Enabled;
                                    subitem.Checked = IsSelected;
@@ -151,7 +152,7 @@
             var detailWindow = $("#MoreWindow").data("tWindow");
 
 
-            $.post('@Url.Action("ShowMoreWindow", "Home")',
+            $.post('@Url.Action("ShowMoreWindow", @controller)',
                 { parent: parent },
                 function(response) {
                     $("#search_more").html(response);
