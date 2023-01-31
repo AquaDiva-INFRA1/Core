@@ -15,13 +15,13 @@ using VDS.RDF;
 using VDS.RDF.Query;
 using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
-using Npgsql;
 using System.Xml;
 using System.Configuration;
 using BExIS.Modules.Ddm.UI.Helpers;
 using BExIS.Aam.Services;
 using BExIS.Aam.Entities.Mapping;
 using System.Web.Configuration;
+using Npgsql;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -234,14 +234,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     {
                         try
                         {
-                            if ((item.Lat.ToSafeString().IndexOf(lon.Substring(0, lon.Length - 1)) > -1) && (item.Lon.ToSafeString().IndexOf(lat.Substring(0, lat.Length - 1)) > -1))
+                            if ((item.Lat.ToString().IndexOf(lon.Substring(0, lon.Length - 1)) > -1) && (item.Lon.ToString().IndexOf(lat.Substring(0, lat.Length - 1)) > -1))
                             {
                                 return item.Well_name;
                             }
                         }
                         catch (NullReferenceException e)
                         {
-                            Debug.WriteLine(e.ToSafeString());
+                            Debug.WriteLine(e.ToString());
                         }
 
                     }
@@ -413,8 +413,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                 {
                                     if (dr["datasets_id"] != System.DBNull.Value)
                                     {
-                                        var datasets_id = dr["datasets_id"].ToSafeString();
-                                        var variable_id = dr["variable_id"].ToSafeString();
+                                        var datasets_id = dr["datasets_id"].ToString();
+                                        var variable_id = dr["variable_id"].ToString();
                                         results_ = results_ + datasets_id + " -->" + variable_id + "\n";
                                         Debug.WriteLine(datasets_id + " --->");
 
