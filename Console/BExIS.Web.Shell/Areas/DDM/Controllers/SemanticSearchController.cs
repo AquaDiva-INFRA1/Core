@@ -602,7 +602,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                             outputBuilder.Append(map.getMappedConceptUri());
                             outputBuilder.Append(informationSeparator);
                             outputBuilder.Append(map.getMappedConceptGroup());
-                            writer.WriteLine(outputBuilder.ToSafeString());
+                            writer.WriteLine(outputBuilder.ToString());
                         }
                     }
                 }

@@ -163,12 +163,20 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 Enum.TryParse<SheetFormat>(sheetFormatString, true, out sheetFormat);
                 if (TaskManager.Bus[EasyUploadTaskManager.EXTENTION].ToString() != ".csv")
                 {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                     using (ExcelPackage ep = new ExcelPackage(fis))
                     {
-                        fis.Close();
-                        ExcelWorkbook excelWorkbook = ep.Workbook;
-                        ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
-                        headers = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson);
+                        try
+                        {
+                            fis.Close();
+                            ExcelWorkbook excelWorkbook = ep.Workbook;
+                            ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
+                            headers = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
                     }
                 }
                 else

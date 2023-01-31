@@ -4,7 +4,6 @@ using System.Web.Mvc;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
-using Npgsql;
 using System.Configuration;
 using System.Linq;
 using BExIS.Modules.Rpm.UI.Models;
