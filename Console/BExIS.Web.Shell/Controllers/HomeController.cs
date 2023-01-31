@@ -1,43 +1,26 @@
-﻿using System.Web.Mvc;
-using Vaiona.Web.Mvc.Data;
-using Vaiona.Web.Mvc.Modularity;
-using Vaiona.Web.Extensions;
-using Vaiona.Web.Mvc.Models;
-using BExIS.Web.Shell.Helpers;
-using Vaiona.IoC;
-using BExIS.App.Bootstrap;
-using System;
-using System.Configuration;
-using System.IO;
-using System.Xml.Linq;
-using BExIS.Security.Services.Versions;
-using BExIS.Web.Shell.Models;
-using BExIS.Xml.Helpers;
-using Vaiona.Utils.Cfg;
-using BExIS.Dlm.Entities.Data;
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Dlm.Services.Data;
-using Npgsql;
-using System.Collections.Generic;
-using System.Linq;
-using BExIS.Modules.Rpm.UI.Models;
-using System.Configuration;
-using System.IO;
-using System.Xml.Linq;
-using BExIS.Security.Services.Versions;
-using BExIS.Web.Shell.Models;
-using BExIS.Xml.Helpers;
-using Vaiona.Utils.Cfg;
+﻿using BExIS.App.Bootstrap;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Subjects;
+using BExIS.Security.Services.Versions;
+using BExIS.Web.Shell.Models;
+using BExIS.Xml.Helpers;
+using System;
+using System.Configuration;
+using System.IO;
+using System.Web.Mvc;
+using System.Xml.Linq;
+using Vaiona.IoC;
+using Vaiona.Utils.Cfg;
+using Vaiona.Web.Extensions;
+using Vaiona.Web.Mvc.Data;
+using Vaiona.Web.Mvc.Models;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Web.Shell.Controllers
 {
     public class HomeController : Controller
     {
-        static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
-
         [DoesNotNeedDataAccess]
         public ActionResult Index()
         {
@@ -62,7 +45,6 @@ namespace BExIS.Web.Shell.Controllers
                         landingPageForUsers.Split(',')[1].Trim(), //controller
                         landingPageForUsers.Split(',')[2].Trim());//action
                 }
-
 
                 //if the landingPage not null and the action is accessable
                 if (landingPage == null || !this.IsAccessible(landingPage.Item1, landingPage.Item2, landingPage.Item3) || !checkPermission(landingPage))
@@ -103,17 +85,16 @@ namespace BExIS.Web.Shell.Controllers
             //return View();
 
             // return result of defined landing page
-            var result = this.Render(landingPage.Item1, landingPage.Item2, landingPage.Item3);  
+            var result = this.Render(landingPage.Item1, landingPage.Item2, landingPage.Item3);
             return Content(result.ToHtmlString(), "text/html");
             //return RedirectToAction(landingPage.Item3, landingPage.Item2, new { area = landingPage.Item1 });
         }
-        
-        [DoesNotNeedDataAccess]
-        public ActionResult Nopermission() {
 
+        [DoesNotNeedDataAccess]
+        public ActionResult Nopermission()
+        {
             return View("NoPermission");
         }
-
 
         [DoesNotNeedDataAccess]
         public ActionResult SessionTimeout()
@@ -139,7 +120,6 @@ namespace BExIS.Web.Shell.Controllers
                 XDocument settings = XDocument.Load(filePath);
                 XElement entry = XmlUtility.GetXElementByAttribute("entry", "key", "version", settings);
                 var workspace = entry.Attribute("value")?.Value;
-
 
                 var model = new VersionModel()
                 {
@@ -175,7 +155,6 @@ namespace BExIS.Web.Shell.Controllers
 
             try
             {
-
                 var areaName = LandingPage.Item1;
                 if (areaName == "")
                 {
@@ -186,19 +165,19 @@ namespace BExIS.Web.Shell.Controllers
 
                 var userName = HttpContext.User?.Identity?.Name;
                 var operation = operationManager.Find(areaName, controllerName, "*");
-                
+
                 var feature = operation.Feature;
                 if (feature == null) return true;
 
                 var result = userManager.FindByNameAsync(userName);
 
-
                 if (featurePermissionManager.HasAccess(result.Result?.Id, feature.Id))
                 {
                     return true;
                 }
-                else { 
-                    return false; 
+                else
+                {
+                    return false;
                 }
             }
             finally
@@ -208,6 +187,5 @@ namespace BExIS.Web.Shell.Controllers
                 userManager.Dispose();
             }
         }
-
     }
 }

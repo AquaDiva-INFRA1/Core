@@ -1444,9 +1444,9 @@ var Microsoft;
                         for (var i = 0; i <= frames.length; i++) {
                             var frame = frames[i];
                             if (_StackFrame.regex.test(frame)) {
-                                var parsOACrame = new _StackFrame(frames[i], level++);
-                                totalSizeInBytes += parsOACrame.sizeInBytes;
-                                parsedStack.push(parsOACrame);
+                                var parsedFrame = new _StackFrame(frames[i], level++);
+                                totalSizeInBytes += parsedFrame.sizeInBytes;
+                                parsedStack.push(parsedFrame);
                             }
                         }
                         var exceptionParsedStackThreshold = 32 * 1024;
