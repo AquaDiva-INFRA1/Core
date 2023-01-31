@@ -123,9 +123,11 @@ namespace BExIS.Modules.Sam.UI.Helpers
             using (ZipFile zip = new ZipFile())
             {
                 zip.AddDirectory(directoryPath);
-                MemoryStream output = new MemoryStream();
-                zip.Save(output);
-                return output.ToArray();
+                using (MemoryStream output = new MemoryStream())
+                {
+                    zip.Save(output);
+                    return output.ToArray();
+                }
             }
         }
 
