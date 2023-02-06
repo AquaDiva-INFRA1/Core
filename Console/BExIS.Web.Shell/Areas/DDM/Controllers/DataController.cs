@@ -1434,9 +1434,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         dsm.StructuredDataStructureRepo.LoadIfNot(sds.Variables);
                         //StructuredDataStructure sds = (StructuredDataStructure)(ds.Dataset.DataStructure.Self);
                         SearchUIHelper suh = new SearchUIHelper();
-                        DataTable table = suh.ConvertStructuredDataStructureToDataTable(sds);
-
-                        return View(new GridModel(table));
+                        using (DataTable table = suh.ConvertStructuredDataStructureToDataTable(sds))
+                        {
+                            return View(new GridModel(table));
+                        }
                     }
                 }
                 else
@@ -1449,8 +1450,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 dm.Dispose();
                 dsm.Dispose();
             }
-
-            return View(new GridModel(new DataTable()));
+            using (DataTable tb = new DataTable())
+            {
+                return View(new GridModel(tb));
+            }
         }
 
         public ActionResult ShowPreviewDataStructure(long datasetID, string entityType = "Dataset")

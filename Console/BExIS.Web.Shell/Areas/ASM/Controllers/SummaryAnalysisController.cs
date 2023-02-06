@@ -391,17 +391,19 @@ namespace BExIS.Modules.Asm.UI.Controllers
                     }
                     else
                     {
-                        Dictionary<string, string> dict_PNKs = new Dictionary<string, string>();
+                        Dictionary<string, List<string>> dict_PNKs = new Dictionary<string, List<string>>();
                         foreach (var element in keys.key2)
                         {
-                            //var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
-                            JObject obj = element.Value;
-                            foreach (JToken kvp in obj.Children())
+                            var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(element));
+                            //JObject obj = element.Value;
+                            foreach (KeyValuePair<string, string> kvp in dict)
                             {
-                                if (!dict_PNKs.ContainsKey(kvp.ToString()))
-                                {
-                                    dict_PNKs.Add(((Newtonsoft.Json.Linq.JProperty)kvp).Name, ((Newtonsoft.Json.Linq.JProperty)kvp).Value.ToString());
-                                }
+                                if (!dict_PNKs.ContainsKey(kvp.Key))
+                                    dict_PNKs.Add(kvp.Key.Replace(',', ' '), new List<string>());
+                                List<string> value = new List<string>();
+                                dict_PNKs.TryGetValue(kvp.Key, out value);
+                                value.Add(kvp.Value);
+                                dict_PNKs[kvp.Key] = value;
                             }
                         }
                         //dict_PNKs = dict_PNKs.OrderByDescending(x => x.Key.Length).ToDictionary(x => x.Key, x => x.Value);

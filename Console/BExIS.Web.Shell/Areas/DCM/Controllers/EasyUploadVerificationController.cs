@@ -170,7 +170,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         {
                             fis.Close();
                             ExcelWorkbook excelWorkbook = ep.Workbook;
-                            ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[1];
+                            ExcelWorksheet firstWorksheet = excelWorkbook.Worksheets[0];
                             headers = GetExcelHeaderFields(firstWorksheet, sheetFormat, selectedHeaderAreaJson);
                         }
                         catch (Exception ex)

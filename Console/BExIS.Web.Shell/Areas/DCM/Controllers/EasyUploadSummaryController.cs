@@ -688,7 +688,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             catch (Exception ex)
             {
                 temp.Add(new Error(ErrorType.Other, "An error occured during the upload. " +
-                    "Please try again later. If this problem keeps occuring, please contact your administrator."));
+                    "Please try again later. If this problem keeps occuring, please contact your administrator." + System.Environment.NewLine + ex.Message));
                 return temp;
             }
             finally

@@ -75,12 +75,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BExIS.RPM.Entities\BExIS.Rpm.Entities.csproj">
-      <Project>{09eb9e97-c30e-4c4d-8666-58a5f87ee69e}</Project>
-      <Name>BExIS.Rpm.Entities</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

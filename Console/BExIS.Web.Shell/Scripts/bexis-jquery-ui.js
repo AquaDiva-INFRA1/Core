@@ -15,5 +15,7 @@ function bx_openDialog(id, type)
 				$(this).dialog("close");
 			}
 		}
+
 	});
+
 }
