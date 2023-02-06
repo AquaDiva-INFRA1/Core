@@ -177,6 +177,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Ddm.Model", "Modules\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Ddm.Providers.LuceneProvider", "Modules\DDM\BExIS.Ddm.Providers.LuceneProvider\BExIS.Ddm.Providers.LuceneProvider.csproj", "{FBE3101A-791A-4EAB-9B8F-F6E071F8DBDC}"
 EndProject
+<<<<<<<< HEAD:aquadiva.sln
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JSON", "JSON", "{7849E471-E703-4B88-8F4F-140BB41735F7}"
 	ProjectSection(SolutionItems) = preProject
 		Components\JSON\BExIS.JSON.Helpers.Tests\BExIS.JSON.Helpers.Tests.csproj = Components\JSON\BExIS.JSON.Helpers.Tests\BExIS.JSON.Helpers.Tests.csproj
@@ -184,6 +185,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JSON", "JSON", "{7849E471-E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BEXIS.JSON.Helpers", "Components\JSON\BEXIS.JSON.Helpers\BEXIS.JSON.Helpers.csproj", "{C4D68AC5-84FA-4A97-9E64-9F11623DADC9}"
 EndProject
+========
+>>>>>>>> originAD/BPP211_migration_08_2018:Aquadiva.sln
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -858,7 +861,10 @@ Global
 		{5F913230-E704-4143-8B4B-B214590AEA3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5F913230-E704-4143-8B4B-B214590AEA3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F913230-E704-4143-8B4B-B214590AEA3C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+<<<<<<<< HEAD:aquadiva.sln
 		{5F913230-E704-4143-8B4B-B214590AEA3C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+========
+>>>>>>>> originAD/BPP211_migration_08_2018:Aquadiva.sln
 		{5F913230-E704-4143-8B4B-B214590AEA3C}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{5F913230-E704-4143-8B4B-B214590AEA3C}.Debug|x86.Build.0 = Debug|Any CPU
 		{5F913230-E704-4143-8B4B-B214590AEA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -1287,6 +1293,7 @@ Global
 		{FBE3101A-791A-4EAB-9B8F-F6E071F8DBDC}.TestServerRelease|Mixed Platforms.Build.0 = TestServerRelease|Any CPU
 		{FBE3101A-791A-4EAB-9B8F-F6E071F8DBDC}.TestServerRelease|x86.ActiveCfg = TestServerRelease|Any CPU
 		{FBE3101A-791A-4EAB-9B8F-F6E071F8DBDC}.TestServerRelease|x86.Build.0 = TestServerRelease|Any CPU
+<<<<<<<< HEAD:aquadiva.sln
 		{C4D68AC5-84FA-4A97-9E64-9F11623DADC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C4D68AC5-84FA-4A97-9E64-9F11623DADC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4D68AC5-84FA-4A97-9E64-9F11623DADC9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -1305,6 +1312,26 @@ Global
 		{C4D68AC5-84FA-4A97-9E64-9F11623DADC9}.TestServerRelease|Mixed Platforms.Build.0 = Release|Any CPU
 		{C4D68AC5-84FA-4A97-9E64-9F11623DADC9}.TestServerRelease|x86.ActiveCfg = Release|Any CPU
 		{C4D68AC5-84FA-4A97-9E64-9F11623DADC9}.TestServerRelease|x86.Build.0 = Release|Any CPU
+========
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Debug|x86.Build.0 = Debug|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Release|x86.ActiveCfg = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.Release|x86.Build.0 = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.TestServerRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.TestServerRelease|Any CPU.Build.0 = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.TestServerRelease|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.TestServerRelease|Mixed Platforms.Build.0 = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.TestServerRelease|x86.ActiveCfg = Release|Any CPU
+		{EAD4CD9A-AF19-4951-8F9A-B8852CDD2123}.TestServerRelease|x86.Build.0 = Release|Any CPU
+>>>>>>>> originAD/BPP211_migration_08_2018:Aquadiva.sln
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1391,8 +1418,11 @@ Global
 		{8519EAC6-FBF8-48B3-813F-E0B9D3CC4A52} = {A98E4405-1702-4F38-9EBD-AEA67D4185A6}
 		{AB46BEB8-C36D-412F-9B1A-646C86299A87} = {A98E4405-1702-4F38-9EBD-AEA67D4185A6}
 		{FBE3101A-791A-4EAB-9B8F-F6E071F8DBDC} = {A98E4405-1702-4F38-9EBD-AEA67D4185A6}
+<<<<<<<< HEAD:aquadiva.sln
 		{7849E471-E703-4B88-8F4F-140BB41735F7} = {A753DD30-104E-48DB-A9D8-73C0DDE973E6}
 		{C4D68AC5-84FA-4A97-9E64-9F11623DADC9} = {7849E471-E703-4B88-8F4F-140BB41735F7}
+========
+>>>>>>>> originAD/BPP211_migration_08_2018:Aquadiva.sln
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E189371C-381B-4FE5-A432-53E3EF8E0581}
