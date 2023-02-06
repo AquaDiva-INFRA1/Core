@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-
+﻿using BExIS.Ddm.Model;
+using System.Collections.Generic;
 /// <summary>
 ///
 /// </summary>        

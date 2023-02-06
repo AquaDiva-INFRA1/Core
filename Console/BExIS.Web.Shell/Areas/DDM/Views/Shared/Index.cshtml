@@ -51,7 +51,7 @@
 }
 
 <div>
-    @Html.Partial("_searchHeader", Model.WorkingSearchModel)
+    @Html.Partial("_searchHeader", (BExIS.Utils.Models.SearchModel)Model.WorkingSearchModel)
 
     <div class="searchBreadcrumbNavigation">
         @Html.Partial("_searchBreadcrumb", Model.WorkingSearchModel)
