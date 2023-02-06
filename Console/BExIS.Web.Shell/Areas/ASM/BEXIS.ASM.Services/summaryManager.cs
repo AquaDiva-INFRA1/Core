@@ -132,8 +132,8 @@ namespace BEXIS.ASM.Services
                             foreach (Variable var in ds.Variables)
                             {
                             #region entity and characteristics extraction
-                            Aam_Dataset_column_annotation variable_annotation = aam.get_dataset_column_annotation_by_variable(var).Where(x => x.Dataset.Id == id).FirstOrDefault();
-                            //Aam_Dataset_column_annotation variable_annotation = all_annot.Where(x => (x.variable_id.Id == var.Id) && (x.Dataset.Id == id)).FirstOrDefault();
+                            //Aam_Dataset_column_annotation variable_annotation = aam.get_dataset_column_annotation_by_variable(var).Where(x => x.Dataset.Id == id).FirstOrDefault();
+                            Aam_Dataset_column_annotation variable_annotation = all_annot.Where(x => (x.variable_id.Id == var.Id) && (x.Dataset.Id == id)).FirstOrDefault();
                                 #endregion
 
                                 #region create file content

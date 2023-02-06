@@ -6,23 +6,39 @@
 
     bool onlyPublic = ((string)Session["Controller"]) == "PublicSearch";
 
- }
+}
 
-<div class="searchHeader">           
-@using (Html.BeginForm(Session["SubmissionAction"].ToString(), @controller))
-{
+<div class="searchHeader">
 
-   <div id="search_Components"> 
-       <table>
-           <tr>
-                <td></td>
-                <td>
+    <div class="alert alert-info " role="alert" id="notifNLP" hidden="true">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <div>
+            <strong>Entities : </strong>
+            <div id="semanticEntitesContent"></div>
+        </div>
+        <div>
+            <br />
+            <strong>Relations : </strong>
+            <div id="semanticRelationsContent"></div>
+        </div>
 
-                </td>
-           </tr>
-           <tr>
-                <td>
-                    @(Html.Telerik().DropDownList()
+    </div>
+
+    @using (Html.BeginForm(Session["SubmissionAction"].ToString(), @controller))
+    {
+
+        <div id="search_Components">
+            <table>
+                <tr>
+                    <td></td>
+                    <td>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.Telerik().DropDownList()
                          .Name("FilterList")
                          .SelectedIndex((int)Session["SelectedIndexFilterAC"])
                          .DropDownHtmlAttributes(new { style = "height: 200px;" })
@@ -32,8 +48,8 @@
                         .BindTo(new SelectList(Model.SearchComponent.Categories, "Value", "DisplayName"))
 
                     )
-                </td>
-                <td>
+                    </td>
+                    <td>
                         @(Html.Telerik().AutoComplete()
                                 .Name("autoComplete")
                                 .Encode(false)
@@ -48,40 +64,40 @@
                                     filtering.FilterMode(AutoCompleteFilterMode.Contains);
                                     filtering.MinimumChars(3);
 
-                                })                                
+                                })
                        )
-                </td>
-               <td>
+                    </td>
+                    <td>
 
-                   <button type="submit" class="bx-button small function">Search</button>
-  
-               </td>
-  
-           </tr>
+                        <button type="submit" class="bx-button small function">Search</button>
 
-           @if (HttpContext.Current.User != null &&
-               HttpContext.Current.User.Identity != null &&
-               !string.IsNullOrEmpty(HttpContext.Current.User.Identity.Name))
-           {
-           <tr>
-               <td>
-                   @Html.CheckBox("OnlyPublic", @onlyPublic, new { onclick = "onShowOnlyPublicChanged(this)" }) <b style="vertical-align:top">public only</b>
-               </td>
-           </tr>
-           }
-       </table>
-  </div>      
-     
-   <div class="search_Summery">
+                    </td>
 
-        @*<b>@Model.ResultComponent.NumberOfHits results for search "" in
-        Category   </b> *@
+                </tr>
 
-   </div>
-}
+                @if (HttpContext.Current.User != null &&
+                    HttpContext.Current.User.Identity != null &&
+                    !string.IsNullOrEmpty(HttpContext.Current.User.Identity.Name))
+                {
+                    <tr>
+                        <td>
+                            @Html.CheckBox("OnlyPublic", @onlyPublic, new { onclick = "onShowOnlyPublicChanged(this)" }) <b style="vertical-align:top">public only</b>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+
+        <div class="search_Summery">
+
+            @*<b>@Model.ResultComponent.NumberOfHits results for search "" in
+                Category   </b> *@
+
+        </div>
+    }
 </div>
 
- <script type="text/javascript">
+<script type="text/javascript">
      function onChangeFilterList(e) {
          //alert(e.value);
          var data = e.value;
@@ -108,10 +124,10 @@
          console.log(value);
 
          if (value === true) {
-             //redirect to public search 
+             //redirect to public search
              //console.log("public");
              window.location.href = '@Url.Action("Index", "PublicSearch", new RouteValueDictionary { { "area", "ddm" } })';
-             
+
          }
          else {
              //redirect to search
@@ -125,11 +141,233 @@
 </script>
 <style type="text/css">
 
-    
-    #search_Components table
-    {
-        width:auto;
+
+    #search_Components table {
+        width: auto;
+    }
+</style>
+
+@*
+    <script type="text/javascript">
+
+        document.addEventListener("click", function () {
+            if (counterset('') == '0')
+                document.getElementsByClassName('removeSeachHeader')[document.getElementsByClassName('removeSeachHeader').length - 1].hidden = true
+            else
+                document.getElementsByClassName('removeSeachHeader')[document.getElementsByClassName('removeSeachHeader').length - 1].hidden = false
+        })
+
+        $('#searchOperation').on('hidden.bs.modal', function (e) {
+            add_search_term();
+        })
+
+        function add_search_term() {
+            xx = document.createElement('span')
+            xx.setAttribute("class", "badge badge-secondary");
+            xx.setAttribute("align", "center");
+            //console.log($('input[name=includeOperation]:checked', '#searchOperation').val() )
+            xx.innerHTML = $('input[name=includeOperation]:checked', '#searchOperation').val()
+
+            new_search_input = document.getElementsByClassName('t-widget t-autocomplete t-input')[document.getElementsByClassName('t-widget t-autocomplete t-input').length - 1].cloneNode(true);
+            new_search_input.value = '';
+
+            document.getElementsByClassName('t-widget t-autocomplete t-input')[document.getElementsByClassName('t-widget t-autocomplete t-input').length - 1].after(new_search_input);
+            new_search_input.before(document.createElement('br'));
+            new_search_input.before(xx);
+            new_search_input.before(document.createElement('br'));
+            counterset('increment');
+        }
+
+        function delete_search_term() {
+            document.getElementsByClassName('t-widget t-autocomplete t-input')[document.getElementsByClassName('t-widget t-autocomplete t-input').length - 1].previousElementSibling.remove();
+            document.getElementsByClassName('t-widget t-autocomplete t-input')[document.getElementsByClassName('t-widget t-autocomplete t-input').length - 1].previousElementSibling.remove();
+            document.getElementsByClassName('t-widget t-autocomplete t-input')[document.getElementsByClassName('t-widget t-autocomplete t-input').length - 1].previousElementSibling.remove();
+            document.getElementsByClassName('t-widget t-autocomplete t-input')[document.getElementsByClassName('t-widget t-autocomplete t-input').length - 1].remove();
+            counterset('remove');
+        }
+
+        function counterset(action) {
+            switch (action) {
+                case 'increment':
+                    $('#counter').val(parseInt($('#counter').val()) + 1);
+                    break;
+                case 'remove':
+                    $('#counter').val(parseInt($('#counter').val()) - 1);
+                    break;
+                default:
+                    return $('#counter').val();
+            }
+            $('#counter').click()
+            //console.log("counter  search  inputs : ", $('#counter').val())
+        }
+
+        //document.getElementsByClassName().addEventListener('mousemove', (event) => { });
+
+        function getid(e) {
+            alert(e.getAttribute("id"))
+        }
+
+
+    </script>
+*@
+
+<script type="text/javascript">
+
+    /*
+    let entities_ = [];
+    let relations_ = [];
+
+    function getEntitiesRelation() {
+        document.getElementById('semanticEntitesContent').innerHTML = document.getElementById('semanticEntitesContent').innerHTML = "";
+        resultContent = document.getElementById('resultContent');
+        tbody = resultContent.getElementsByTagName('tbody');
+        Trs = tbody[0].getElementsByTagName('tr');
+        for (let item of Trs) {
+            try {
+                obj = getEntitiesRelationByID(item)
+                console.log(obj)
+                obj['entities'].forEach(element => function () {
+                    this.entities_.push(element)
+                })
+                obj['relations'].forEach(element => function () {
+                    this.relations_.push(element)
+                })
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+
+    }
+        */
+
+    async function getEntitiesRelationByID__(item) {
+
+        return new Promise(function (resolve, reject) {
+            try {
+                x = item.getElementsByTagName('td')[0];
+                var data = {
+                    id: x.innerText
+                }
+                $.ajax({
+                    url: '/ddm/SemanticSearch/getEntitiesRelation',
+                    type: 'POST',
+                    data: data,
+                    //dataType: 'json',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    error: function (xhr) {
+                        alert('Error: ' + xhr.statusText);
+
+                    },
+                    success: function (result) {
+                        entities = [];
+                        relations = [];
+                        result = JSON.parse(result)
+                        result['entities'].forEach(elem => {
+                            xx = document.createElement('span');
+                            xx.setAttribute("class", "badge badge-secondary");
+                            xx.setAttribute("style", "background-color: red;");
+                            xx.innerHTML = elem;
+                            entities.push(xx);
+                        })
+                        result['relations'].forEach(elem => {
+                            xx = document.createElement('span');
+                            xx.setAttribute("class", "badge badge-secondary");
+                            xx.innerHTML = elem;
+                            relations.push(xx);
+                        })
+                        return resolve({ 'entities': entities, 'relations': relations });
+                    }
+                });
+            } catch (error) {
+                console.log(error);
+            }
+            resolve({ 'entities': [], 'relations': [] });
+        });
+    }
+
+    function fill_semantic_block(object) {
+
+        document.getElementById('semanticEntitesContent').innerHTML = "";
+        document.getElementById('semanticRelationsContent').innerHTML = "";
+
+        object.entities.forEach(elem_ => {
+            document.getElementById('semanticEntitesContent').appendChild(elem_);
+
+        })
+        object.relations.forEach(elem_ => {
+            document.getElementById('semanticRelationsContent').appendChild(elem_);
+        })
     }
 
 
-</style>
+    async function getEntitiesRelationByID(item) {
+
+        try {
+            x = item.getElementsByTagName('td')[0];
+            var data = {
+                id: x.innerText
+            }
+            entities = []
+            relations = []
+
+            $.ajax({
+                url: '/ddm/SemanticSearch/getEntitiesRelation',
+                type: 'POST',
+                data: data,
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                async: true,
+                error: function (xhr) {
+                    alert('Error: ' + xhr.statusText);
+
+                },
+                success: function (result) {
+                    result = JSON.parse(result)
+                    result['entities'].forEach(elem => {
+                        xx = document.createElement('span');
+                        xx.setAttribute("class", "badge badge-secondary");
+                        xx.setAttribute("style", "background-color: red;");
+                        xx.innerHTML = elem;
+                        entities.push(xx);
+                    })
+                    result['relations'].forEach(elem => {
+                        xx = document.createElement('span');
+                        xx.setAttribute("class", "badge badge-secondary");
+                        xx.innerHTML = elem;
+                        relations.push(xx);
+                    })
+                },
+                complete: function (result) {
+                    document.getElementById("notifNLP").removeAttribute("hidden");
+                    document.getElementById('semanticEntitesContent').innerHTML = "";
+                    document.getElementById('semanticRelationsContent').innerHTML = "";
+
+                    entities.forEach(elem_ => {
+                        document.getElementById('semanticEntitesContent').appendChild(elem_);
+
+                    })
+                    relations.forEach(elem_ => {
+                        document.getElementById('semanticRelationsContent').appendChild(elem_);
+                    })
+                }
+            })
+
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
+
+    function init_table_actions() {
+
+        resultContent = document.getElementById('resultContent');
+        tbody = resultContent.getElementsByTagName('tbody');
+        Trs = tbody[0].getElementsByTagName('tr');
+        for (let item of Trs) {
+            item.addEventListener("click", function () {
+                getEntitiesRelationByID(item)
+            })
+        }
+    }
+
+</script>

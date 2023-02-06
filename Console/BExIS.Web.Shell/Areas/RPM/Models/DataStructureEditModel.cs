@@ -179,7 +179,7 @@ namespace BExIS.Modules.Rpm.UI.Models
             this.Unit.Name = dataAttribute.Unit?.Name ?? "No unit related";
             this.Unit.Description = dataAttribute.Unit?.Abbreviation ?? "No unit related";
             this.DataType = dataAttribute.DataType.Name;
-            this.Dimension = dataAttribute.Unit.Dimension.Name;
+            this.Dimension = dataAttribute.Unit?.Dimension?.Name ?? "No unit related";
 
             DataTypeDisplayPattern displayPattern = DataTypeDisplayPattern.Materialize(dataAttribute.DataType.Extra);
             if (displayPattern != null)
