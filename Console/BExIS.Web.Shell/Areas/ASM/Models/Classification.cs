@@ -100,11 +100,11 @@ namespace BExIS.Modules.Asm.UI.Models
             class_score = new Predict_classScore(jTok["class_score"]);
             predition_bestMatches = (string)jTok["predicted_class"];
             onto_match = JsonConvert.DeserializeObject<List<string>>(jTok["onto_match"].ToString());
-            onto_noPath = JsonConvert.DeserializeObject<List<string>>(jTok["onto_no_path"].ToString());
-            onto_noNode = JsonConvert.DeserializeObject<List<string>>(jTok["onto_no_node"].ToString());
+            //onto_noPath = JsonConvert.DeserializeObject<List<string>>(jTok["onto_no_path"].ToString());
+            //onto_noNode = JsonConvert.DeserializeObject<List<string>>(jTok["onto_no_node"].ToString());
             db_match = JsonConvert.DeserializeObject<List<string>>(jTok["db_match"].ToString());
-            db_noPath = JsonConvert.DeserializeObject<List<string>>(jTok["db_no_path"].ToString());
-            db_noNode = JsonConvert.DeserializeObject<List<string>>(jTok["db_no_node"].ToString());
+            //db_noPath = JsonConvert.DeserializeObject<List<string>>(jTok["db_no_path"].ToString());
+            //db_noNode = JsonConvert.DeserializeObject<List<string>>(jTok["db_no_node"].ToString());
             onto_targetFile = JsonConvert.DeserializeObject<List<string>>(jTok["onto_target_file"].ToString());
         }
 

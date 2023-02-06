@@ -13,6 +13,7 @@ using System.Web.Mvc;
 using BExIS.Dlm.Entities.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Vaiona.Logging;
 
 namespace BExIS.Modules.ASM.UI.Controllers
 {
@@ -53,7 +54,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         {
             using (var client = new HttpClient())
             {
-                string url = this.ControllerContext.HttpContext.Request.Url.Scheme + "://" + this.ControllerContext.HttpContext.Request.Url.Authority + "/api/Statistics/reset";
+                string url = BaseAdress + "/api/Statistics/reset";
                 client.BaseAddress = new Uri(url);
                 var responseTask = client.GetAsync("");
                 responseTask.Wait();
@@ -85,9 +86,11 @@ namespace BExIS.Modules.ASM.UI.Controllers
                 long noRows = ds.DataStructure.Self is StructuredDataStructure ? dm.GetDatasetLatestVersionEffectiveTupleCount(ds) : 0; // It would save time to calc the row count for all the datasets at once!
                 if (ds.Status == DatasetStatus.CheckedIn)
                 {
+                    LoggerFactory.GetFileLogger().LogCustom(ds.Id + " --> " + noColumns + " --> " + noRows + " --> " + noRows* noColumns);
                     somme = somme + (noRows * noColumns);
                 }
             }
+            LoggerFactory.GetFileLogger().LogCustom("Sum total : " + somme );
             dm.Dispose();
             string json = "{\"dataset_count\" : " + datasets.Count + " , \"datapoints\" : " + somme + " }";
             using (StreamWriter sw = System.IO.File.CreateText(temp_file))
