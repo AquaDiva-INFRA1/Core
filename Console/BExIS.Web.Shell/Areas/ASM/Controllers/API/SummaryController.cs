@@ -32,7 +32,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         }
 
         [BExISApiAuthorize]
-        [HttpPost]
+        [HttpPost,HttpGet]
         [PostRoute("api/Summary/getSummary")]
         [GetRoute("api/Summary/getSummary")]
         public async Task<string> getSummary()
@@ -44,8 +44,10 @@ namespace BExIS.Modules.ASM.UI.Controllers
             dict.TryGetValue("data", out dataset);
             string username;
             dict.TryGetValue("username", out username);
+            string semantic_flag;
+            dict.TryGetValue("semantic_flag", out semantic_flag);
 
-            string result = await _summary.get_analysisAsync(dataset, username);
+            string result = await _summary.get_analysisAsync(dataset, username, Convert.ToBoolean(semantic_flag));
             return result;
         }
 
