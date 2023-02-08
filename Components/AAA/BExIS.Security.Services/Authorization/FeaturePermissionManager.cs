@@ -274,7 +274,7 @@ namespace BExIS.Security.Services.Authorization
                 return false;
             }
         }
-        public Dictionary<long,bool> HasAccess(IEnumerable<Subject> subjects, long featureId)
+        public Dictionary<long, bool> HasAccess(IEnumerable<Subject> subjects, long featureId)
         {
             Dictionary<long, bool> tmp = new Dictionary<long, bool>();
 
@@ -287,7 +287,7 @@ namespace BExIS.Security.Services.Authorization
 
                 foreach (var subject in subjects)
                 {
-  
+
                     bool hasAccess = false;
 
                     // Anonymous
@@ -296,7 +296,7 @@ namespace BExIS.Security.Services.Authorization
                         while (feature != null)
                         {
                             if (Exists(null, feature.Id, PermissionType.Grant))
-                                hasAccess =  true;
+                                hasAccess = true;
 
                             feature = feature.Parent;
                         }
@@ -315,7 +315,7 @@ namespace BExIS.Security.Services.Authorization
                         else
                         if (Exists(subject.Id, feature.Id, PermissionType.Grant))
                             hasAccess = true;
-                        
+
 
                         if (subject is User)
                         {
