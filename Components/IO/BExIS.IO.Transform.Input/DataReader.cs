@@ -242,7 +242,7 @@ namespace BExIS.IO.Transform.Input
 
                             if (Info.Decimal.Equals(DecimalCharacter.point))
                             {
-                                if (value.Contains(",")) value = value.Replace(",", ".");
+                                if (value.Contains(",")) value = value.Remove(',');
                             }
 
                             switch (datatype)
