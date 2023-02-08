@@ -242,6 +242,9 @@ namespace BExIS.IO.Transform.Input
 
                             if (Info.Decimal.Equals(DecimalCharacter.point))
                             {
+                                // The removal is the only way of getting a number with ONLY ONE decimal character.
+                                // Previously, it might created several "." which should not work at all.
+                                //if (value.Contains(",")) value = value.Replace(",", ".");
                                 if (value.Contains(",")) value = value.Remove(',');
                             }
 
