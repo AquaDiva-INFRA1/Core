@@ -2744,7 +2744,7 @@ namespace BExIS.Dlm.Services.Data
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<Dataset> repo = uow.GetRepository<Dataset>();
-                var q = repo.Query(p => p.Id == datasetId && p.Status == DatasetStatus.CheckedIn && (p.CheckOutUser.Equals(string.Empty) || p.CheckOutUser == username));
+                var q = repo.Query(p => p.Id == datasetId && p.Status == DatasetStatus.CheckedIn && p.CheckOutUser.Equals(string.Empty));
                 Dataset ds = q.FirstOrDefault();
                 if (ds != null)
                 {
