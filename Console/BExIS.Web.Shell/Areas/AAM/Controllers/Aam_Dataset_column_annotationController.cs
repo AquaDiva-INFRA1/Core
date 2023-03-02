@@ -342,36 +342,126 @@ namespace BExIS.Modules.Aam.UI.Controllers
                             }
                         }
 
-                        Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager();
-                        Aam_Uri uri_M = new Aam_Uri();
-                        if (variable != null)
+                        using (Aam_Dataset_column_annotationManager aam = new Aam_Dataset_column_annotationManager())
                         {
-                            Aam_Uri uri = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.URI == entity_uri).FirstOrDefault<Aam_Uri>();
-                            Aam_Uri charac = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.URI == charac_uri).FirstOrDefault<Aam_Uri>();
-                            Aam_Uri std = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.type_uri.ToLower() == "standard").FirstOrDefault<Aam_Uri>();
-                            if (uri == null)
+                            Aam_Uri uri_M = new Aam_Uri();
+                            if ((variable != null)&& (variable.Id != 0))
                             {
-                                uri = new Aam_Uri(entity_uri, entity_label, "Entity");
-                                uri = new Aam_UriManager().creeate_Aam_Uri(uri);
+                                Aam_Uri uri = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.URI == entity_uri).FirstOrDefault<Aam_Uri>();
+                                Aam_Uri charac = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.URI == charac_uri).FirstOrDefault<Aam_Uri>();
+                                Aam_Uri std = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.type_uri.ToLower() == "standard").FirstOrDefault<Aam_Uri>();
+                                if (uri == null)
+                                {
+                                    uri = new Aam_Uri(entity_uri, entity_label, "Entity");
+                                    uri = new Aam_UriManager().creeate_Aam_Uri(uri);
+                                }
+                                if (charac == null)
+                                {
+                                    charac = new Aam_Uri(charac_uri, charac_label, "Charachteristic");
+                                    charac = new Aam_UriManager().creeate_Aam_Uri(charac);
+                                }
+                                if (std == null)
+                                {
+                                    std = new Aam_Uri("http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "Standard", "Standard");
+                                    std = new Aam_UriManager().creeate_Aam_Uri(std);
+                                }
+                                Aam_Dataset_column_annotation an = new Aam_Dataset_column_annotation(
+                                    new DatasetManager().GetDataset(Int64.Parse(ds_id[0])), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(ds_id[0])),
+                                    variable, uri, charac, std
+                                    );
+                                if (aam.get_all_dataset_column_annotation().Where<Aam_Dataset_column_annotation>(x => x.variable_id == an.variable_id &&
+                               x.Dataset == an.Dataset && x.characteristic_id == an.characteristic_id && x.entity_id == an.entity_id).Count() == 0)
+                                    aam.creeate_dataset_column_annotation(an);
                             }
-                            if (charac == null)
-                            {
-                                charac = new Aam_Uri(charac_uri, charac_label, "Charachteristic");
-                                charac = new Aam_UriManager().creeate_Aam_Uri(charac);
-                            }
-                            if (std == null)
-                            {
-                                std = new Aam_Uri("http://ecoinformatics.org/oboe/oboe.1.2/oboe-core.owl#Standard", "Standard", "Standard");
-                                std = new Aam_UriManager().creeate_Aam_Uri(std);
-                            }
-                            Aam_Dataset_column_annotation an = new Aam_Dataset_column_annotation(
-                                new DatasetManager().GetDataset(Int64.Parse(ds_id[0])), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(ds_id[0])),
-                                variable, uri, charac, std
-                                );
-                            if (aam.get_all_dataset_column_annotation().Where<Aam_Dataset_column_annotation>(x => x.variable_id == an.variable_id &&
-                           x.Dataset == an.Dataset && x.characteristic_id == an.characteristic_id && x.entity_id == an.entity_id).Count() == 0)
-                                aam.creeate_dataset_column_annotation(an);
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+
+        public void upload_observations_from_Excel_file(String filePath)
+        {
+            //FileStream for the users file
+            FileStream fis = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            //Grab the sheet format from the bus
+            string sheetFormatString = Convert.ToString("TopDown");
+            SheetFormat CurrentSheetFormat = 0;
+            Enum.TryParse<SheetFormat>(sheetFormatString, true, out CurrentSheetFormat);
+
+            //Transforms the content of the file into a 2d-json-array
+            JsonTableGenerator EUEReader = new JsonTableGenerator(fis);
+            //If the active worksheet was never changed, we default to the first one
+            string activeWorksheet = EUEReader.GetFirstWorksheetUri().ToString();
+            //Generate the table for the active worksheet
+            string jsonTable = EUEReader.GenerateJsonTable(CurrentSheetFormat, activeWorksheet);
+            JArray textArray = JArray.Parse(jsonTable);
+            int index = 0;
+
+            string[] ds_id = new string[2];
+            for (int k = 1; k < textArray.Count; k++)
+            {
+                if (textArray[k].ToString().Length > 1)
+                {
+                    try
+                    {
+                        var excelline = textArray[k];
+                        JArray excellineJson = JArray.Parse(excelline.ToString());
+
+                        if (excellineJson[0].ToString().Length > 1)
+                        {
+                            ds_id = excellineJson[0].ToString().Split('.');
+                        }
+
+                        string var_id = excellineJson[2].ToString();
+                        string Contextualized_entity = clean_entity_URI_for_insert(excellineJson[6].ToString());
+                        string Contextualized_entity_label = clean_entity_URI_for_insert(excellineJson[4].ToString());
+                        string characContextualizing_entity = clean_entity_URI_for_insert(excellineJson[7].ToString());
+                        string characContextualizing_entity_label = clean_entity_URI_for_insert(excellineJson[5].ToString());
+
+                        Variable variable = new Variable();
+                        DataStructureManager dataStructureManager = new DataStructureManager();
+                        var structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
+                        StructuredDataStructure dataStructure = structureRepo.Get(new DatasetManager().GetDataset(Int64.Parse(ds_id[0])).DataStructure.Id);
+
+                        if (var_id != "")
+                        {
+                            foreach (Variable var in dataStructure.Variables)
+                            {
+                                if (var.Id == Int64.Parse(var_id)) variable = var;
+                            }
+                        }
+
+                        using (Aam_Observation_ContextManager aam = new Aam_Observation_ContextManager())
+                        {
+                            Aam_Uri uri_M = new Aam_Uri();
+                            if ((variable != null) && (variable.Id != 0))
+                            {
+                                Aam_Uri Contextualized_entity_uri = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.URI == Contextualized_entity).FirstOrDefault<Aam_Uri>();
+                                Aam_Uri characContextualizing_entity_uri = uri_M.GetBulkUnitOfWork().GetReadOnlyRepository<Aam_Uri>().Get(x => x.URI == characContextualizing_entity).FirstOrDefault<Aam_Uri>();
+                                if (Contextualized_entity_uri == null)
+                                {
+                                    Contextualized_entity_uri = new Aam_Uri(Contextualized_entity, Contextualized_entity_label, "Entity");
+                                    Contextualized_entity_uri = new Aam_UriManager().creeate_Aam_Uri(Contextualized_entity_uri);
+                                }
+                                if (characContextualizing_entity_uri == null)
+                                {
+                                    characContextualizing_entity_uri = new Aam_Uri(characContextualizing_entity, characContextualizing_entity_label, "Entity");
+                                    characContextualizing_entity_uri = new Aam_UriManager().creeate_Aam_Uri(characContextualizing_entity_uri);
+                                }
+                                Aam_Observation_Context an = new Aam_Observation_Context(
+                                    new DatasetManager().GetDataset(Int64.Parse(ds_id[0])), new DatasetManager().GetDatasetLatestVersion(Int64.Parse(ds_id[0])),
+                                    Contextualized_entity_uri, characContextualizing_entity_uri
+                                    );
+                                if (aam.get_all_Aam_Observation_Context().Where<Aam_Observation_Context>(x => x.Contextualized_entity == an.Contextualized_entity &&
+                               x.Dataset == an.Dataset && x.Contextualizing_entity == an.Contextualizing_entity).Count() == 0)
+                                    aam.creeate_Aam_Observation_Context(an);
+                            }
+                        }
+                        
                     }
                     catch (Exception ex)
                     {

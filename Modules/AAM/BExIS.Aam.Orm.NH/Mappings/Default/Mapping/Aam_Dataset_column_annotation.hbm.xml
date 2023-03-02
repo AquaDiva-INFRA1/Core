@@ -13,17 +13,17 @@
       <column name="VersionNo" />
     </version>
 
-    <many-to-one name="Dataset" column="datasets_id" class="BExIS.Dlm.Entities.Data.Dataset"></many-to-one>
+    <many-to-one name="Dataset" column="datasets_id" class="BExIS.Dlm.Entities.Data.Dataset" ></many-to-one>
     
-    <many-to-one name="DatasetVersion" column="version_id" class="BExIS.Dlm.Entities.Data.DatasetVersion"></many-to-one>
+    <many-to-one name="DatasetVersion" column="version_id" class="BExIS.Dlm.Entities.Data.DatasetVersion" ></many-to-one>
 
-    <many-to-one name="standard_id" column="standard_id" class="BExIS.Aam.Entities.Mapping.Aam_Uri"></many-to-one>
+    <many-to-one name="standard_id" column="standard_id" class="BExIS.Aam.Entities.Mapping.Aam_Uri" ></many-to-one>
 
-    <many-to-one name="entity_id" column="entity_id" class="BExIS.Aam.Entities.Mapping.Aam_Uri"></many-to-one>
+    <many-to-one name="entity_id" column="entity_id" class="BExIS.Aam.Entities.Mapping.Aam_Uri" ></many-to-one>
 
-    <many-to-one name="characteristic_id" column="characteristic_id" class="BExIS.Aam.Entities.Mapping.Aam_Uri"></many-to-one>
+    <many-to-one name="characteristic_id" column="characteristic_id" class="BExIS.Aam.Entities.Mapping.Aam_Uri" ></many-to-one>
 
-    <many-to-one name="variable_id" column="variable_id" class="BExIS.Dlm.Entities.DataStructure.Variable"></many-to-one>
+    <many-to-one name="variable_id" column="variable_id" class="BExIS.Dlm.Entities.DataStructure.Variable" ></many-to-one>
 
   </class>
 </hibernate-mapping>
