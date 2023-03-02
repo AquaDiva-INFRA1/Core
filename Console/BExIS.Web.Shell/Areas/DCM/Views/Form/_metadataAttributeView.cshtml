@@ -333,7 +333,15 @@
                                             string value = Model.Value.ToString();
                                             string[] email_parts = value.Split('@');
                                             value = String.Join("<span>werwe</span>", email_parts);
-                                            @email_parts[0]<span>&#x40;</span><!--<span>werwe</span>-->@email_parts[1] }
+                                            try
+                                            {
+                                                 @email_parts[0]<span>&#x40;</span><!--<span>werwe</span>-->@email_parts[1] 
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Console.WriteLine(ex.Message);
+                                            }
+                                        }
                                         else
                                         {
                                             @Html.DisplayWithLinksFor(m => m.Value)
