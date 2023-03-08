@@ -475,9 +475,23 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
                                             for (int k = 0; k < parent_node_mapping_xml_source.SelectNodes(child_node_mapping_sub_xpath_source).Count; k++)
                                             {
-
                                                 XmlNode child_node_child_source = parent_node_mapping_xml_source.SelectNodes(child_node_mapping_sub_xpath_source)[k];
                                                 XmlNode child_node_child_target = parent_node_mapping_xml_target.SelectNodes(child_node_mapping_sub_xpath_target)[k];
+
+                                                if (child_node_child_target is null)
+                                                {
+                                                    XmlNode new_node = parent_node_mapping_xml_target.SelectSingleNode(child_node_mapping_sub_xpath_target).Clone();
+                                                    var child_nodes = new List<XmlNode>(new_node.ChildNodes.Cast<XmlNode>());
+                                                    for (int index = 0; index < child_nodes.Count(); index++)
+                                                    {
+                                                        if (child_nodes[index].ChildNodes.Count > 0)
+                                                            child_nodes.AddRange(child_nodes[index].Cast<XmlNode>());
+                                                    }
+                                                    child_nodes.Where(x => x.ChildNodes.Count == 0).ToList<XmlNode>().ForEach(x => x.InnerText = "");
+                                                    parent_node_mapping_xml_target.SelectNodes(child_node_mapping_sub_xpath_target)[k-1].ParentNode.AppendChild(new_node);
+                                                    parent_node_mapping_xml_target.SelectSingleNode(child_node_mapping_sub_xpath_target).ParentNode.AppendChild(new_node);
+                                                    child_node_child_target = parent_node_mapping_xml_target.SelectNodes(child_node_mapping_sub_xpath_target)[k];
+                                                }
 
                                                 string source_value = child_node_child_source.InnerText;
 
@@ -487,9 +501,10 @@ namespace BExIS.Modules.Dim.UI.Controllers
                                                     string index = mappings__[i].TransformationRule.Mask.Trim().Split('[', ']').Where(x => string.IsNullOrEmpty(x) == false).ToList<string>()[1];
                                                     source_value = rg.Matches(child_node_child_source.InnerText)[Int32.Parse(index)].Value;
                                                 }
-                                                if (!string.IsNullOrEmpty(child_node_child_target.InnerText))
+                                                
+                                                if (!string.IsNullOrEmpty(child_node_child_target?.InnerText))
                                                     child_node_child_target.InnerText += " " + source_value;
-                                                else
+                                                else 
                                                     child_node_child_target.InnerText = source_value;
 
                                             }
@@ -507,8 +522,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
                                 catch (NullReferenceException ex)
                                 {
                                     //Reference of the title node is missing
-                                    dm.CheckInDataset(datasetId, "Metadata Imported", GetUsernameOrDefault());
-                                    throw new NullReferenceException("The extra-field of this metadata-structure is missing the title-node-reference!");
+                                    throw new NullReferenceException(ex.Message);
 
                                 }
                             }
