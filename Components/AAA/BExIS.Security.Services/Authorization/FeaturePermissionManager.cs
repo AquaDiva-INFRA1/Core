@@ -274,6 +274,8 @@ namespace BExIS.Security.Services.Authorization
                 return false;
             }
         }
+
+        /*
         public Dictionary<long,bool> HasAccess(IEnumerable<Subject> subjects, long featureId)
         {
             Dictionary<long, bool> tmp = new Dictionary<long, bool>();
@@ -342,19 +344,20 @@ namespace BExIS.Security.Services.Authorization
                 return tmp;
             }
         }
+        */
 
-        //public Dictionary<long, bool> HasAccess(IEnumerable<Subject> subjects, long featureId)
-        //{
-        //    Dictionary<long, bool> accessDictionary = new Dictionary<long, bool>();
-        //
-        //    foreach (var subject in subjects)
-        //    {
-        //        if (subject != null)
-        //            accessDictionary.Add(subject.Id, HasAccess(subject.Id, featureId));
-        //    }
-        //
-        //    return accessDictionary;
-        //}
+        public Dictionary<long, bool> HasAccess(IEnumerable<Subject> subjects, long featureId)
+        {
+            Dictionary<long, bool> accessDictionary = new Dictionary<long, bool>();
+        
+            foreach (var subject in subjects)
+            {
+                if (subject != null)
+                    accessDictionary.Add(subject.Id, HasAccess(subject.Id, featureId));
+            }
+        
+            return accessDictionary;
+        }
 
         public bool HasAccess<T>(string subjectName, string module, string controller, string action) where T : Subject
         {
