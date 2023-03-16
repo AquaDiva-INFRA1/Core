@@ -1,6 +1,5 @@
 ﻿@model BExIS.Ddm.Api.ISearchProvider
-
-@using Microsoft.Web.Helpers;
+@using Telerik.Web.Mvc.UI;
 
 <header>
     <link href="@Url.Content(Themes.GetResourcePath("Styles", "search.css"))" rel="stylesheet" type="text/css" />
@@ -51,7 +50,7 @@
 }
 
 <div>
-    @Html.Partial("_searchHeader", (BExIS.Utils.Models.SearchModel)Model.WorkingSearchModel)
+    @Html.Partial("_searchHeader", Model.WorkingSearchModel)
 
     <div class="searchBreadcrumbNavigation">
         @Html.Partial("_searchBreadcrumb", Model.WorkingSearchModel)

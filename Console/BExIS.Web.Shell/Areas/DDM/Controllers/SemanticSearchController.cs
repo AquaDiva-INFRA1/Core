@@ -806,13 +806,21 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                                     row["Datasetdescription"] = helper.GetInformation(datasetID, NameAttributeValues.description).Trim();
                                     row["Title"] = helper.GetInformation(datasetID, NameAttributeValues.title).Trim();
                                     row["Owner"] = helper.GetInformation(datasetID, NameAttributeValues.owner).Trim();
+                                    
+                                }
+                                catch (Exception exc)
+                                {
+                                    Console.WriteLine(exc.Message);
+                                }
+                                try
+                                {
+                                    m.Rows.Add(row);
                                 }
                                 catch (Exception exc)
                                 {
                                     Console.WriteLine(exc.Message);
                                 }
                             }
-                            m.Rows.Add(row);
                         }
                     }
                     #endregion

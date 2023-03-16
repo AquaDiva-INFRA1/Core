@@ -17,14 +17,14 @@ namespace BExIS.Modules.Asm.UI.Models
                     key1 = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(xx.Value.ToString());
                 else if (xx.Name == "key2")
                     if (xx.Value.ToString() == "")
-                        key2 = new Dictionary<JToken, JObject>();
+                        key2 = new List<Dictionary<string, string>>();
                     else
-                        key2 = JsonConvert.DeserializeObject<Dictionary<JToken, JObject>>(xx.Value.ToString());
+                        key2 = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(xx.Value.ToString());
+
             }
         }
         public List<Dictionary<string, string>> key1 { get; set; }
-        public Dictionary<JToken, JObject> key2 { get; set; }
+        public List<Dictionary<string, string>> key2 { get; set; }
     }
-
 
 }

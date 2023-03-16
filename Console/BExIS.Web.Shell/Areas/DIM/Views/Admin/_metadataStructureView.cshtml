@@ -245,9 +245,8 @@
                     }
                 },
                 error: function (data) {
-                    alert("error !! "+
-                        "possible solutions : Mapping file not existing ...please create one and proceed to migrtion of dataset metadata."+
-                        "Contact portal administrator in case of further issues")
+                    alert("error !! " + data)
+                    console.log(data)
                 }
             });
             
