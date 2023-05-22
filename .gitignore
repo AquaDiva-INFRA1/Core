@@ -248,6 +248,7 @@ paket-files/
 /Console/BExIS.Web.Shell/Areas/SAM/Content/Images/Help
 /Console/*.zip
 /Console/Workspace_
+/Console/Workspace
 /Console/WorkspaceOld
 /CodeMaid.config
 /Console/BExIS.Web.Shell/Areas/Template
@@ -262,3 +263,4 @@ paket-files/
 /Console/BExIS.Web.Shell/samples/Credentials.config.sample
 /Console/BExIS.Web.Shell/web.config
 /packages/
+/Console/Workspace
