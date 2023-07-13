@@ -158,8 +158,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         public ActionResult CheckedTreeViewItem(string SelectedItem, string Parent)
         {
             ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>();
-            provider.WorkingSearchModel.UpdateSearchCriteria(Parent, SelectedItem, SearchComponentBaseType.Facet, true);
-            provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent);
+            provider.WorkingSearchModel.UpdateSearchCriteria(Parent, SelectedItem, SearchComponentBaseType.Facet, true); // search criteria.cs update
+            provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent); // searchprovider.cs 
 
             return PartialView("_searchFacets", Tuple.Create(provider.WorkingSearchModel, provider.DefaultSearchModel.SearchComponent.Facets));
         }

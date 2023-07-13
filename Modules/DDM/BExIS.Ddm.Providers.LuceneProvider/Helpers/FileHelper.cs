@@ -51,6 +51,10 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Helpers
         {
             get { return (Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Lucene", "Config", "LuceneConfig.xml")); }
         }
+        public static string ConfigFilePath_ProjectFolder
+        {
+            get { return (Path.Combine(AppConfiguration.GetModuleWorkspacePath("DDM"), "Lucene", "Projects")); }
+        }
 
         /// <summary>
         ///

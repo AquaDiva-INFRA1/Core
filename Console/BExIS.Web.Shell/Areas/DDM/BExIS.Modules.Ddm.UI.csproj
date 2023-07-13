@@ -622,6 +622,8 @@
     <Content Include="Views\LandingPage\Index.cshtml" />
     <Content Include="Views\Admin\_metadataNode_partial.cshtml" />
     <Content Include="Views\Admin\__editSearchAttribute.cshtml" />
+    <Content Include="Views\Admin\_variableNode.cshtml" />
+    <Content Include="Views\Admin\_GroupNode.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

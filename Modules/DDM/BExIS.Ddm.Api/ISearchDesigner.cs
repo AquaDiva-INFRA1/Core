@@ -1,6 +1,7 @@
 ﻿using BExIS.Utils.Models;
 using System.Collections.Generic;
-
+using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Security.Entities.Subjects;
 
 namespace BExIS.Ddm.Api
 {
@@ -20,9 +21,10 @@ namespace BExIS.Ddm.Api
         void Dispose();
 
         List<SearchMetadataNode> GetMetadataNodes();
+        List<Variable> GetVariablesNodes();
 
         bool IsPrimaryDataIncluded();
-
+        List<Group> GetProjectsNodes();
     }
 
     public enum IndexingAction { CREATE, UPDATE, DELETE }
