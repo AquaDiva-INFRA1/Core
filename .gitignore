@@ -262,3 +262,6 @@ paket-files/
 /Console/BExIS.Web.Shell/samples/Credentials.config.sample
 /Console/BExIS.Web.Shell/web.config
 /packages/
+*.Tests.csproj
+/Console/Workspace/
+/.vs/
