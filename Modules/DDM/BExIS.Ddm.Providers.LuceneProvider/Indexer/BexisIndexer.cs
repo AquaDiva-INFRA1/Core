@@ -475,7 +475,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 String multivalued = facet.Attributes.GetNamedItem("multivalued").Value;
 
                 string[] variable_names = facet.Attributes.GetNamedItem("variable_name")?.Value.Split(',').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-                if (variable_names != null)
+                if (variable_names.Length != 0)
                     using (DataStructureManager dsm = new DataStructureManager())
                     {
                         List<string> vars = variable_names.Where(va => (dsm.VariableRepo.Get(Int32.Parse(va)) != null))
