@@ -473,22 +473,98 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             foreach (XmlNode facet in facetNodes)
             {
                 String multivalued = facet.Attributes.GetNamedItem("multivalued").Value;
-                string[] metadataElementNames = facet.Attributes.GetNamedItem("metadata_name").Value.Split(',');
-                String lucene_name = facet.Attributes.GetNamedItem("lucene_name").Value;
-                foreach (string metadataElementName in metadataElementNames)
-                {
-                    string concatenated_values = "";                
-                    foreach (string res in Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc))
+
+                string[] variable_names = facet.Attributes.GetNamedItem("variable_name")?.Value.Split(',').Where(x => !string.IsNullOrEmpty(x)).ToArray();
+                if (variable_names.Length != 0)
+                    using (DataStructureManager dsm = new DataStructureManager())
                     {
-                        dataset.Add(new Field("facet_" + lucene_name, res,
-                                Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
-                        dataset.Add(new Field("ng_all", res,
-                            Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
-                        writeAutoCompleteIndex(docId, lucene_name, res);
-                        writeAutoCompleteIndex(docId, "ng_all", res);
+                        List<string> vars_ = variable_names.Where(va => (dsm.VariableRepo.Get(Int32.Parse(va)) != null)).ToList(); 
+                        List<string> vars = vars_.Where(va => dsm.VariableRepo.Get(Int32.Parse(va)).DataStructure.Datasets.Where(d => d.Id == id).Count() > 0).ToList();
+                        foreach (string variableName in vars)
+                        {
+                            Variable variableObj = dsm.VariableRepo.Get(Int32.Parse(variableName));
+                            using (DatasetManager dm = new DatasetManager())
+                            {
+                                DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
+                                var Xmin = table.Compute("min([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
+                                var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
+                                try
+                                {
+                                    if (((variableObj.DataAttribute.DataType.Name.ToLower().Contains("date")) && (!variableObj.DataAttribute.DataType.Name.ToLower().Contains("time")))
+                                        ||(variableObj.DataAttribute.DataType.Name.ToLower().Contains("date")) )
+                                    {
+
+                                        DateTime dateValue = DateTime.Now;
+                                        DateTime dateValue_ = dateValue;
+                                        string[] formats = {"M/d/yyyy h:mm:ss tt", "M/d/yyyy h:mm tt",
+                                                   "MM/dd/yyyy hh:mm:ss", "M/d/yyyy h:mm:ss",
+                                                   "M/d/yyyy hh:mm tt", "M/d/yyyy hh tt",
+                                                   "M/d/yyyy h:mm", "M/d/yyyy h:mm",
+                                                   "MM/dd/yyyy hh:mm", "M/dd/yyyy hh:mm"};
+                                        DateTime.TryParseExact(Xmin.ToString(),
+                                            formats,
+                                            new CultureInfo("en-US"),
+                                            DateTimeStyles.None,
+                                            out dateValue);
+                                        if ((dateValue != dateValue_)&&(!string.IsNullOrEmpty(Xmin.ToString())))
+                                        {
+                                            Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.SECOND), Field.Store.YES, Field.Index.NOT_ANALYZED);
+                                            dataset.Add(newField_);
+                                        }
+                                        dateValue = DateTime.Now;
+                                        dateValue_ = dateValue;
+                                        DateTime.TryParseExact(Xmax.ToString(),
+                                                formats,
+                                                new CultureInfo("en-US"),
+                                                DateTimeStyles.None,
+                                                out dateValue);
+                                        if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmax.ToString())))
+                                        {
+                                            Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.SECOND), Field.Store.YES, Field.Index.NOT_ANALYZED);
+                                            dataset.Add(newField_);
+                                        }
+                                    }
+                                    else if ((variableObj.DataAttribute.DataType.Name.ToLower().Contains("int")) || 
+                                        (variableObj.DataAttribute.DataType.Name.ToLower().Contains("double")) ||
+                                        (variableObj.DataAttribute.DataType.Name.ToLower().Contains("decimal")) ||
+                                        (variableObj.DataAttribute.DataType.Name.ToLower().Contains("number")))
+                                    {
+                                        NumericField newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmin.ToString()));
+                                        if (!string.IsNullOrEmpty(Xmin.ToString())) 
+                                            dataset.Add(newField_);
+                                        newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmax.ToString()));
+                                        if (!string.IsNullOrEmpty(Xmax.ToString()))
+                                            dataset.Add(newField_);
+
+                                    }
+                                }
+                                catch (Exception exc)
+                                {
+                                    LoggerFactory.GetFileLogger().LogCustom(exc.Message);
+                                    LoggerFactory.GetFileLogger().LogCustom(exc.InnerException.Message);
+                                }
+                            }
+                        }
                     }
-                } 
+                string[] metadataElementNames = facet.Attributes.GetNamedItem("metadata_name")?.Value.Split(',');
+                String lucene_name = facet.Attributes.GetNamedItem("lucene_name").Value;
+                if (metadataElementNames != null) 
+                    foreach (string metadataElementName in metadataElementNames)
+                    {
+                        string concatenated_values = "";                
+                        foreach (string res in Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc))
+                        {
+                            dataset.Add(new Field("facet_" + lucene_name, res,
+                                    Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                            dataset.Add(new Field("ng_all", res,
+                                Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
+                            writeAutoCompleteIndex(docId, lucene_name, res);
+                            writeAutoCompleteIndex(docId, "ng_all", res);
+                        }
+                    }
             }
+
+
             List<XmlNode> propertyNodes = propertyXmlNodeList;
             foreach (XmlNode property in propertyNodes)
             {

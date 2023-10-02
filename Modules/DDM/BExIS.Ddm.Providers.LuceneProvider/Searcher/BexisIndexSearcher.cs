@@ -373,22 +373,38 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
                 c.Text = f.Text;
                 c.Value = f.Value;
                 c.DisplayName = f.DisplayName;
+                c.Project = f.Project;
                 c.Childrens = new List<Facet>();
                 using (SimpleFacetedSearch sfs = new SimpleFacetedSearch(_Reader, new string[] { "facet_" + f.Name }))
                 {
                     SimpleFacetedSearch.Hits hits = sfs.Search(query);
+                    //sfs.Search(new QueryParser(Lucene.Net.Util.Version.LUCENE_30, "id", new SimpleAnalyzer()).Parse("*:*"));
                     int cCount = 0;
                     foreach (SimpleFacetedSearch.HitsPerFacet hpg in hits.HitsPerFacet)
                     {
                         if (!hpg.Name.ToString().Equals(""))
                         {
+
                             Facet cc = new Facet();
                             cc.Name = hpg.Name.ToString();
                             cc.Text = hpg.Name.ToString();
                             cc.Value = hpg.Name.ToString();
                             cc.Count = (int)hpg.HitCount;
-                            if (cc.Count > 0) cCount++;
-                            c.Childrens.Add(cc);
+                            if (cc.Count > 0)
+                            {
+                                cCount++;
+                                foreach (var doc in hpg.Documents)
+                                {
+                                    IList<IFieldable> numericFields = doc.GetFields("facet_" + f.Name);
+                                    foreach (var field in numericFields)
+                                    {
+                                        cc.Name = field.StringValue;
+                                        cc.Text = field.StringValue;
+                                        cc.Value = field.StringValue;
+                                        if (!c.Childrens.Exists(x => x.Name == cc.Name)) c.Childrens.Add(cc);
+                                    }
+                                }
+                            }
                         }
                     }
                     c.Count = cCount;

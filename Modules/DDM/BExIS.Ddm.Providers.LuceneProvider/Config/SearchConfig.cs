@@ -2,6 +2,7 @@
 using BExIS.Ddm.Providers.LuceneProvider.Searcher;
 using BExIS.Utils.Models;
 using Lucene.Net.Analysis.Standard;
+using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
@@ -86,7 +87,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Config
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>        
-        private static void Load()
+        private static void Load(string project = null)
         {
             
 
@@ -129,6 +130,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Config
                         cDefault.Text = fieldName;
                         cDefault.Value = fieldName;
                         cDefault.DisplayName = fieldProperty.Attributes.GetNamedItem("display_name").Value;
+                        cDefault.Project = fieldProperty.Attributes.GetNamedItem("projects")?.Value;
 
                         cDefault.Childrens = new List<Facet>();
                         List<Facet> lcDefault = new List<Facet>();
@@ -138,7 +140,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Config
                             Query query = new QueryParser(Lucene.Net.Util.Version.LUCENE_30, "id", new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30)).Parse("*:*");
                             using (SimpleFacetedSearch sfs = new SimpleFacetedSearch(_Reader, new string[] { "facet_" + fieldName }))
                             {
-                                SimpleFacetedSearch.Hits hits = sfs.Search(query);
+                                SimpleFacetedSearch.Hits hits = sfs.Search(query); //topdoc
 
                                 int cCount = 0;
                                 foreach (SimpleFacetedSearch.HitsPerFacet hpg in hits.HitsPerFacet)
@@ -151,7 +153,18 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Config
                                         ccDefault.Value = hpg.Name.ToString();
                                         ccDefault.Count = (int)hpg.HitCount;
                                         if (ccDefault.Count > 0) cCount++;
-                                        cDefault.Childrens.Add(ccDefault);
+
+                                        foreach (var doc in hpg.Documents)
+                                        {
+                                            IList<IFieldable> numericFields = doc.GetFields("facet_" + fieldName);
+                                            foreach (var field in numericFields)
+                                            {
+                                                ccDefault.Name = field.StringValue;
+                                                ccDefault.Text = field.StringValue;
+                                                ccDefault.Value = field.StringValue;
+                                                if (!cDefault.Childrens.Exists(x => x.Name == ccDefault.Name)) cDefault.Childrens.Add(ccDefault);
+                                            }
+                                        }
                                     }
                                 }
                                 cDefault.Count = cCount;
@@ -159,9 +172,9 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Config
                             }
 
                         }
-                        catch
+                        catch (Exception exc)
                         {
-                            throw;
+                            Console.WriteLine(exc.Message);
                         }
                     }
 
@@ -174,7 +187,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Config
                         cDefault.DisplayName = fieldProperty.Attributes.GetNamedItem("display_name").Value;
                         cDefault.DisplayTitle = fieldProperty.Attributes.GetNamedItem("display_name").Value;
                         cDefault.DataSourceKey = fieldProperty.Attributes.GetNamedItem("metadata_name").Value;
-                        cDefault.UIComponent = fieldProperty.Attributes.GetNamedItem("uiComponent").Value; ;
+                        cDefault.UIComponent = fieldProperty.Attributes.GetNamedItem("uiComponent").Value;
                         cDefault.AggregationType = fieldProperty.Attributes.GetNamedItem("aggregationType").Value;
                         cDefault.DefaultValue = "All";
                         cDefault.DataType = fieldProperty.Attributes.GetNamedItem("primitive_type").Value;

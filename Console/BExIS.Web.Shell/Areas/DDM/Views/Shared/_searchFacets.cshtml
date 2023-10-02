@@ -3,16 +3,38 @@
 @using SearchModel = BExIS.Utils.Models.SearchModel
 
 
-@model Tuple<SearchModel,IEnumerable<Facet>>
-           
-@{ 
+@model Tuple<SearchModel, IEnumerable<Facet>>
+
+@{
 
     string controller = Session["Controller"].ToString();
+    List<string> groups = new List<string>();
+    using (BExIS.Security.Services.Subjects.UserManager userManager = new BExIS.Security.Services.Subjects.UserManager())
+    {
+        groups = userManager.FindByNameAsync(this.User.Identity.Name).Result.Groups.ToList().Select(x=> x.Id.ToString()).ToList();
+    }
 
+    List<Facet> Facets = Model.Item1.SearchComponent.Facets.Where(x => !string.IsNullOrEmpty(x.Project)).ToList();
+
+    for (int i = Facets.Count - 1; i >= 0; i--)
+    {
+        Facet facet = Facets[i];
+        List<string> projects = facet.Project.Split(',').ToList();
+        foreach (string proj in projects)
+        {
+            if (!groups.Contains(proj))
+            {
+                Facets.RemoveAt(i);
+                break;
+            }
+        }
+    }
 }
 
+
 <div id="searchTreeView" class="bx-trunc-parent">
-@(Html.Telerik().TreeView()
+
+    @(Html.Telerik().TreeView()
        .Name("TreeView")
        .ShowCheckBox(true)
        .ExpandAll(false)
@@ -24,9 +46,8 @@
                            .OnLoad("onLoad")
                            )
 
-                       .BindTo<Facet>(Model.Item1.SearchComponent.Facets, (item, facet) =>
+                       .BindTo<Facet>(Facets, (item, facet) =>
                        {
-
                            item.Text = facet.DisplayName + " (" + facet.Count + ")";
                            item.Value = facet.Name;
                            item.Enabled = true;
@@ -40,68 +61,148 @@
                                    orderby f.Count descending, f.Name
                                    select f;
 
+                           bool date_fields = false;
+                           bool numeric_fields = false;
 
-                           foreach (Facet t in l)// @facet.Childrens)
+                           try
                            {
-                               t.Parent = facet;
-                               bool IsSelected = Model.Item1.CriteriaComponent.ContainsFacet(t);
-
-
-                               if (item.Items.Count() < 5 && t.Count > 0 || IsSelected)
+                               var xx = facet.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Lucene.Net.Documents.DateTools.StringToDate(s.Value.Trim()));
+                               date_fields = xx.Count() > 0;
+                           }
+                           catch (Exception ex)
+                           {
+                               try
                                {
+                                   var xx = facet.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Double.Parse((s.Value.Trim())));
+                                   numeric_fields = xx.Count() > 0;
+                               }
+                               catch (Exception ex_)
+                               {
+                                   //throw;
+                               }
+                           }
 
-                                   TreeViewItem subitem = new TreeViewItem();
-                                   item.Items.Add(subitem);
-
-                                   subitem.Text = t.Text + " (" + t.Count + ")";
-                                   //subitem.Text = t.Text;
-
-                                   //subitem.Parent = item;
-                                   subitem.Expanded = false;
-                                   subitem.Value = t.Name;
-                                   subitem.Enabled = true;//t.Enabled;
-                                   subitem.Checked = IsSelected;
-                                   subitem.Selected = IsSelected;
-                                   if (IsSelected)
+                           if (!numeric_fields)
+                           {
+                               foreach (Facet t in l)// @facet.Childrens)
+                               {
+                                   t.Parent = facet;
+                                   bool IsSelected = Model.Item1.CriteriaComponent.ContainsFacet(t);
+                                   if (item.Items.Count() < 5 && t.Count > 0 || IsSelected)
                                    {
-                                       subitem.HtmlAttributes["class"] = "selected";
+                                       TreeViewItem subitem = new TreeViewItem();
+                                       item.Items.Add(subitem);
+
+                                       subitem.Text = t.Text + " (" + t.Count + ")";
+                                       //subitem.Text = t.Text;
+
+                                       //subitem.Parent = item;
+                                       subitem.Expanded = false;
+                                       subitem.Value = t.Name;
+                                       subitem.Enabled = true;//t.Enabled;
+                                       subitem.Checked = IsSelected;
+                                       subitem.Selected = IsSelected;
+                                       if (IsSelected)
+                                       {
+                                           subitem.HtmlAttributes["class"] = "selected";
+                                       }
+                                       subitem.LinkHtmlAttributes["class"] = "searchFacet t-item-child bx-trunc-child";
+                                       subitem.ActionName = "OnSelectTreeViewItem";
+                                       subitem.ControllerName = @controller;
+                                       subitem.LinkHtmlAttributes["title"] = t.Text + " (" + t.Count + ")";
+                                       subitem.Action("OnSelectTreeViewItem", @controller, new RouteValueDictionary { { "area", "ddm" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
                                    }
-                                   subitem.LinkHtmlAttributes["class"] = "searchFacet t-item-child bx-trunc-child";
-                                   subitem.ActionName = "OnSelectTreeViewItem";
-                                   subitem.ControllerName = @controller;
-                                   subitem.LinkHtmlAttributes["title"] = t.Text + " (" + t.Count + ")";
-                                   subitem.Action("OnSelectTreeViewItem", @controller, new RouteValueDictionary { { "area", "ddm" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
+
+                               }
+                               //Get Count from Facets
+                               Facet tmp = Model.Item1.SearchComponent.Facets.Where(p => p.Name.Equals(facet.Name)).FirstOrDefault();
+                               int count = tmp.Childrens.Where(c => c.Count > 0).Count();
+
+                               if (item.Items.Count < count && count > 0)
+                               {
+                                   TreeViewItem moreBt = new TreeViewItem();
+
+                                   moreBt.Text = "more";
+                                   moreBt.Value = "more";
+                                   moreBt.Enabled = true;
+                                   moreBt.Selected = false;
+                                   moreBt.Checkable = false;
+                                   moreBt.LinkHtmlAttributes["title"] = "more";
+                                   moreBt.LinkHtmlAttributes["class"] = "t-item-more bx-more bx-selection";
+                                   moreBt.LinkHtmlAttributes["parentDisplayName"] = facet.DisplayName;
+
+                                   if (!item.Items.Contains(moreBt))
+                                       item.Items
+                                           .Add(moreBt);
+
+                               }
+                           }
+                           if (numeric_fields)
+                           {
+                               item.Expanded = true;
+                               Facet xx = Model.Item2.FirstOrDefault(x => x.Name == facet.Name);
+                               
+                               if (xx != null)
+                               {
+                                   double min = facet.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Double.Parse(s.Value.Trim())).ToArray().Min();
+                                   double max = facet.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Double.Parse(s.Value.Trim())).ToArray().Max();
+                                   double min_ = xx.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Double.Parse(s.Value.Trim())).ToArray().Min();
+                                   double max_ = xx.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Double.Parse(s.Value.Trim())).ToArray().Max();
+                                   var fa = Model.Item1.CriteriaComponent.SearchCriteriaList.Where(sc => sc.SearchComponent.Name == facet.Name);
+                                   if (fa.Count() > 1)
+                                   {
+                                       string[] last_crit = fa.Last().Values.Last().Split(new string[] { " - " }, StringSplitOptions.None);
+                                       Model.Item1.CriteriaComponent.SearchCriteriaList.Where(sc => sc.SearchComponent.Name == facet.Name).ToList().Last().Values.Clear();
+                                       //Model.Item1.CriteriaComponent.SearchCriteriaList.Where(sc => sc.SearchComponent.Name == facet.Name).ToList().Last().Values.Add(string.Join(" - ", last_crit));
+                                       min = Double.Parse(last_crit[0]);
+                                       max = Double.Parse(last_crit[1]);
+                                   }
+                                   item.Html = "<div class=\"range-wrap\">";
+                                   item.Html = item.Html + "<input type=\"range\" min=\"" + (min_ - 1) + "\" max=\" " + max_ + 1 + "\" value=\"" + min + "\" id=\"rangeInput1\">";
+                                   item.Html = item.Html + "<input type=\"range\" min=\"" + (min_ - 1) + "\" max=\" " + max_ + 1 + "\" value=\"" + max + "\" id=\"rangeInput2\">";
+                                   item.Html = item.Html + "<output class=\"bubble\" id=\"bubble\">" + (int)min + " - " + (int)max + "</output>";
+                                   item.Html = item.Html + "</div>";
+                               }
+
+                           }
+                           if (date_fields)
+                           {
+                               item.Expanded = true;
+                               Facet xx = Model.Item2.FirstOrDefault(x => x.Name == facet.Name);
+                               if (xx != null)
+                               {
+                                   DateTime min = facet.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Lucene.Net.Documents.DateTools.StringToDate(s.Value.Trim()).Date).ToArray().Min();
+                                   DateTime max = facet.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Lucene.Net.Documents.DateTools.StringToDate(s.Value.Trim()).Date).ToArray().Max();
+                                   DateTime min_ = xx.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Lucene.Net.Documents.DateTools.StringToDate(s.Value.Trim()).Date).ToArray().Min();
+                                   DateTime max_ = xx.Childrens.ToList().Where(s => !string.IsNullOrEmpty(s.Value.Trim())).Select(s => Lucene.Net.Documents.DateTools.StringToDate(s.Value.Trim()).Date).ToArray().Max();
+                                   //var fa = Model.Item1.CriteriaComponent.SearchCriteriaList.Where(sc => sc.SearchComponent.Name == facet.Name);
+                                   //if (fa.Count() > 0)
+                                   //{
+                                   //    string[] last_crit = fa.Last().Values.Last().Split(new string[] { " - " }, StringSplitOptions.None);
+                                   //    Model.Item1.CriteriaComponent.SearchCriteriaList.Where(sc => sc.SearchComponent.Name == facet.Name).ToList().Last().Values.Clear();
+                                   //    //Model.Item1.CriteriaComponent.SearchCriteriaList.Where(sc => sc.SearchComponent.Name == facet.Name).ToList().Last().Values.Add(string.Join(" - ", last_crit));
+                                   //    min = DateTime.ParseExact(last_crit[0], "yyyy/mm/dd", null);
+                                   //    max = DateTime.ParseExact(last_crit[1], "yyyy/mm/dd", null);
+                                   //
+                                   //}
+                                   item.Html = "<div class=\"range-wrap\">";
+                                   //item.Html = item.Html + "<input type=\"range\" min=\"" + min_ + "\" max=\" " + max_ + "\" value=\"" + min + "\" step=\"1\" id=\"daterangeInput1\">";
+                                   item.Html = item.Html + "<input type=\"date\" value=\"" + min.ToString("yyyy-MM-dd") + "\"  id=\"daterangeInput1\" min=\"" + min_.ToString("yyyy-MM-dd") + "\" max=\"" + max_.ToString("yyyy-MM-dd") + "\">";
+                                   //item.Html = item.Html + "<input type=\"range\" min=\"" + min_ + "\" max=\" " + max_ + "\" value=\"" + max + "\" step=\"1\" id=\"daterangeInput2\">";
+                                   item.Html = item.Html + "<input type=\"date\"  value=\"" + max.ToString("yyyy-MM-dd") + "\" id=\"daterangeInput2\" min=\"" + min_.ToString("yyyy-MM-dd") + "\" max=\"" + max_.ToString("yyyy-MM-dd") + "\">";
+                                   //item.Html = item.Html + "<output class=\"bubble\" id=\"datebubble\">" + min.ToShortDateString() + " - " + max.ToShortDateString() + "</output>";
+                                   item.Html = item.Html + "</div>";
                                }
 
                            }
 
-                           //Get Count from Facets
-                           Facet tmp = Model.Item1.SearchComponent.Facets.Where(p => p.Name.Equals(facet.Name)).FirstOrDefault();
-                           int count = tmp.Childrens.Where(c => c.Count > 0).Count();
+                       })
+    )
 
-                           if (item.Items.Count < count && count > 0)
-                           {
-                               TreeViewItem moreBt = new TreeViewItem();
 
-                               moreBt.Text = "more";
-                               moreBt.Value = "more";
-                               moreBt.Enabled = true;
-                               moreBt.Selected = false;
-                               moreBt.Checkable = false;
-                               moreBt.LinkHtmlAttributes["title"] = "more";
-                               moreBt.LinkHtmlAttributes["class"] = "t-item-more bx-more bx-selection";
-                               moreBt.LinkHtmlAttributes["parentDisplayName"] = facet.DisplayName;
-
-                               if (!item.Items.Contains(moreBt))
-                                   item.Items
-                                       .Add(moreBt);
-
-                           }
-                       }
-          ))
 </div>
 
-   @(Html.Telerik().Window()
+@(Html.Telerik().Window()
 
     .Name("MoreWindow")
     .Visible(false)
@@ -122,9 +223,147 @@
 )
 
 
-
-
 <script type="text/javascript">
+
+    document.getElementById('rangeInput1')?.addEventListener('change', function () {
+        const rangeInput1 = document.getElementById('rangeInput1');
+        const rangeInput2 = document.getElementById('rangeInput2');
+            value1 = parseInt(rangeInput1.value);
+            value2 = parseInt(rangeInput2.value);
+
+            if (value1 >= value2) {
+                rangeInput2.value = value1 + 1;
+                value2 = rangeInput2.value;
+                document.getElementById('bubble').innerHTML = value1 + " - " + value2;
+                return;
+            }
+            document.getElementById('bubble').innerHTML = value1 + " - " + value2;
+            var x = new Object();
+            x.item = rangeInput1;
+
+            var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
+            $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+                { SelectedItem: document.getElementById('bubble').innerHTML, Parent: parent },
+                function (response) {
+                    $("#searchTreeView").html(response);
+                    facets_disable();
+
+                    $.post('@Url.Action("GetDataForBreadCrumbView", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+                        {},
+                        function (response) {
+                            $("#breadCrumb").replaceWith(response);
+                            refreshGrid();
+                        });
+
+                    facets_enable();
+                })
+          refreshGrid();
+
+        });
+    document.getElementById('rangeInput2')?.addEventListener('change', function () {
+        const rangeInput1 = document.getElementById('rangeInput1');
+        const rangeInput2 = document.getElementById('rangeInput2');
+            value1 = parseInt(rangeInput1.value);
+            value2 = parseInt(rangeInput2.value);
+
+            if (value2 <= value1) {
+                rangeInput1.value = value2 - 1;
+                value1 = rangeInput1.value;
+                document.getElementById('bubble').innerHTML = value1 + " - " + value2;
+                return;
+            }
+
+            document.getElementById('bubble').innerHTML = value1 + " - " + value2;
+            var x = new Object();
+            x.item = rangeInput2;
+
+            var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
+            $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+                { SelectedItem: document.getElementById('bubble').innerHTML, Parent: parent },
+                function(response) {
+                    $("#searchTreeView").html(response);
+                    facets_disable();
+
+                    $.post('@Url.Action("GetDataForBreadCrumbView", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+                        {},
+                        function(response) {
+                            $("#breadCrumb").replaceWith(response);
+                            refreshGrid();
+                        });
+
+                    facets_enable();
+                })
+
+            refreshGrid();
+        });
+
+    document.getElementById('daterangeInput1')?.addEventListener('focusout', function () {
+        const daterangeInput1 = document.getElementById('daterangeInput1');
+        const daterangeInput2 = document.getElementById('daterangeInput2');
+            const value1 = daterangeInput1.value;
+            const value2 = daterangeInput2.value;
+
+            if (value1 >= value2) {
+                daterangeInput2.value = value1;
+                return;
+            }
+            var x = new Object();
+            x.item = daterangeInput1;
+
+            var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
+            $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+                { SelectedItem: value1 + " - " + value2, Parent: parent },
+                function (response) {
+                    $("#searchTreeView").html(response);
+                    facets_disable();
+
+                    $.post('@Url.Action("GetDataForBreadCrumbView", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+                        {},
+                        function (response) {
+                            $("#breadCrumb").replaceWith(response);
+                            refreshGrid();
+                        });
+
+                    facets_enable();
+                })
+
+            refreshGrid();
+        });
+    document.getElementById('daterangeInput2')?.addEventListener('focusout', function () {
+        const daterangeInput1 = document.getElementById('daterangeInput1');
+        const daterangeInput2 = document.getElementById('daterangeInput2');
+        const value1 = daterangeInput1.value;
+        const value2 = daterangeInput2.value;
+
+            if (value2 <= value1) {
+                daterangeInput1.value = value2;
+                return;
+            }
+
+            var x = new Object();
+        x.item = daterangeInput2
+        console.log(value1.replaceAll('-', '/') + " - " + value2.replaceAll('-', '/'))
+            var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
+        $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+            { SelectedItem: value1.replaceAll('-', '/') + " - " + value2.replaceAll('-', '/'), Parent: parent },
+                function (response) {
+                    $("#searchTreeView").html(response);
+                    facets_disable();
+
+                    $.post('@Url.Action("GetDataForBreadCrumbView", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+                        {},
+                        function (response) {
+                            $("#breadCrumb").replaceWith(response);
+                            refreshGrid();
+                        });
+
+                    facets_enable();
+                })
+
+            refreshGrid();
+        });
+
+
 
     function treeView() {
         return $('#TreeView').data('tTreeView');
@@ -177,8 +416,6 @@
 
 
     function onChecked(e) {
-
-
         var selectedItem = treeView().getItemText(e.item)
         var selectedItemValue = treeView().getItemValue(e.item)
         var parent = $(e.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
@@ -226,7 +463,7 @@
 
     function onLoad(e) {
 
-        refreshTree()
+        refreshTree();
     }
 
     function refreshTree() {
@@ -242,57 +479,90 @@
         $('.t-state-selected[title*="more"]').removeClass('t-state-selected');
     }
 
+
 </script>
 <style type="text/css">
-    
-     #TreeView .t-item {
-         padding-right: 0;
-         padding-bottom: 0;
-         overflow-x: hidden;
-     }
 
-     #TreeView .t-item li:hover,
-     #TreeView .t-item li.selected
-     {
-         background-color: #d2e8e3;
-     }
+    .range-wrap {
+        position: relative;
+        margin: 0 auto 3rem;
+        width: 100%;
+        height: 100%;
+    }
 
-     /*#TreeView .t-item-child.t-state-selected
+    .range {
+        width: 100%;
+    }
+
+    .bubble {
+        background: red;
+        color: white;
+        padding: 4px 12px;
+        position: absolute;
+        border-radius: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size : smaller;
+    }
+
+        .bubble::after {
+            content: "";
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: red;
+            top: -1px;
+            left: 50%;
+        }
+
+
+
+    #TreeView .t-item {
+        padding-right: 0;
+        padding-bottom: 0;
+        overflow-x: hidden;
+    }
+
+        #TreeView .t-item li:hover,
+        #TreeView .t-item li.selected {
+            background-color: #d2e8e3;
+        }
+
+        /*#TreeView .t-item-child.t-state-selected
      {
          background-color: #d2e8e3;
      }*/
 
-    #TreeView .t-item li {
-        padding-left: 5px;
-        padding-right: 0;
-        overflow-x: hidden;
-    }
+        #TreeView .t-item li {
+            padding-left: 5px;
+            padding-right: 0;
+            overflow-x: hidden;
+        }
 
     #TreeView .t-item-child {
         width: 100% !important;
         padding-left: 0;
         padding-right: 0;
         color: #black;
+    }
 
-    }
-    #TreeView .t-item-child:hover {
-        font-weight: normal;
-        width: 100% !important;
-        padding-left: 0;
-        padding-right: 0;
-        color: black;
+        #TreeView .t-item-child:hover {
+            font-weight: normal;
+            width: 100% !important;
+            padding-left: 0;
+            padding-right: 0;
+            color: black;
+        }
 
-    }
-    #TreeView .t-item-child.t-state-selected {
-        font-weight: normal;
-        width: 100% !important;
-        padding-left: 0;
-        padding-right: 0;
-        color: black !important;
-    }
+        #TreeView .t-item-child.t-state-selected {
+            font-weight: normal;
+            width: 100% !important;
+            padding-left: 0;
+            padding-right: 0;
+            color: black !important;
+        }
 
     #TreeView .t-item.t-last {
         padding-bottom: 5px;
     }
 </style>
-         

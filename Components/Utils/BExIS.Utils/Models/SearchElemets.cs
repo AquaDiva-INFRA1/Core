@@ -117,6 +117,13 @@ namespace BExIS.Utils.Models
         /// <remarks></remarks>
         /// <seealso cref=""/>
         public string Value { get; set; }
+
+        /// <summary>
+        /// to work with.
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        public string Project { get; set; }
     }
 
     /// <summary>

@@ -1,0 +1,62 @@
+﻿@*edited on Bexis*@
+
+@model String
+@using BExIS.Modules.Ddm.UI.Helpers;
+@using BExIS.Utils.Models;
+@using BExIS.Dlm.Entities.DataStructure;
+
+@{
+    List<BExIS.Security.Entities.Subjects.Group> groups = new List<BExIS.Security.Entities.Subjects.Group>();
+    if (Session["Projects"] != null)
+    {
+        groups = (List<BExIS.Security.Entities.Subjects.Group>)Session["Projects"];
+    }
+    var _groups = groups.ToList<BExIS.Security.Entities.Subjects.Group>().OrderBy(x => x.DisplayName).Select(c => new { id = c.Id, label = c.Id + " - " + c.DisplayName });
+
+    int group_count = int.Parse(Model);
+
+    <div id="project_node_container_@group_count" class="project_node_container_@group_count">
+        <div>
+            @Html.DropDownListFor(m => _groups,
+                            new SelectList(
+                                _groups,
+                                "id",
+                                "label"),
+                            "Select, please"
+            )
+        </div>
+        <div class="col-lg-1 text-left vcenter">
+            <a class="removeProjectNode " onclick="delete_node('project_node_container_@group_count')">
+                <span class="glyphicon glyphicon-remove-circle"></span>
+            </a>
+        </div><br />
+    </div>
+
+
+}
+@*
+    <div class="metadataNode row">
+        @using (Html.BeginCollectionItem("metadataNames"))
+        {
+            <div class="col-lg-10 vcenter">
+                @Html.DropDownListFor(m => m, new SelectList(metadataNodes.OrderBy(s => s.DisplayNameLong), "XPath", "DisplayNameLong", Model), "Please select", new { title = "Corresponding metadata node to be used for the Lucene index." })
+            </div>
+            <div class="col-lg-1 text-left vcenter">
+                <a href="#" class="removeMetadataNode bx-trash bx-function"></a>
+            </div>
+            //@Html.TextBoxFor(m => m);
+
+            }
+            </div>
+*@
+<style type="text/css">
+
+    .metadataNode select {
+        width: 100%;
+    }
+
+    .metadataNode {
+        width: 95%;
+        margin: 0;
+    }
+</style>
