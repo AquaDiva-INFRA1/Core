@@ -508,7 +508,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                             out dateValue);
                                         if ((dateValue != dateValue_)&&(!string.IsNullOrEmpty(Xmin.ToString())))
                                         {
-                                            Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.SECOND), Field.Store.YES, Field.Index.NOT_ANALYZED);
+                                            Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
                                             dataset.Add(newField_);
                                         }
                                         dateValue = DateTime.Now;
@@ -520,7 +520,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                                 out dateValue);
                                         if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmax.ToString())))
                                         {
-                                            Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.SECOND), Field.Store.YES, Field.Index.NOT_ANALYZED);
+                                            Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
                                             dataset.Add(newField_);
                                         }
                                     }

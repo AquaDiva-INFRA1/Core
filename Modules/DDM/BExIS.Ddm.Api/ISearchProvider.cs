@@ -103,6 +103,7 @@ namespace BExIS.Ddm.Api
         /// <seealso cref=""/>
         /// <param name="searchCriteria"></param>
         void SearchAndUpdate(SearchCriteria searchCriteria);
+        void SearchAndUpdate(SearchCriteria searchCriteria, Lucene.Net.Search.Occur ocuur = Lucene.Net.Search.Occur.MUST);
 
         /// <summary>
         /// Update a list of datasets to the index
