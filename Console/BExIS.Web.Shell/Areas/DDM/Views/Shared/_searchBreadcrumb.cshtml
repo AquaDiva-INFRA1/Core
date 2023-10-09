@@ -6,13 +6,14 @@
 @{ 
 
     string controller = Session["Controller"].ToString();
-
+    List<string> ops = new List<string>() { "AND","OR" };
+    string selected_operator_for_facets = (string)Session["occur"];
+    Boolean is_search_criteria_seperator = Session["is_search_criteria_seperator"] != null ? (Boolean)Session["is_search_criteria_seperator"] : false;
 }           
 
 <div id="breadCrumb">
     @if (@Model.CriteriaComponent != null)
     {
-
         SearchCriteria sc = Model.CriteriaComponent;
 
         if (sc.SearchCriteriaList.Count > 0)
@@ -67,8 +68,12 @@
                             @foreach (string s in @item.Values)
                             {
                                 @Html.ActionLink(@s.ToString(), "OnClickBreadCrumbItem", new { value = s, parent = @item.SearchComponent.Name.ToString() })
+
                                 if (s != @item.Values.Last())
-                                { <b> or </b>}
+                                {
+                                    @Html.DropDownListFor(m => ops, new SelectList(ops, item.ValueSearchOperation), new { onchange = "updateValueSearchOperation(this)" })
+                                    //<b>Or</b>
+                                }
                             }
 
                             )
@@ -102,8 +107,12 @@
                                 @foreach (string s in @item.Values)
                                 {
                                     @Html.ActionLink(@s.ToString(), "OnClickBreadCrumbItem", new { value = s, parent = @item.SearchComponent.Name.ToString() })
+
                                     if (s != @item.Values.Last())
-                                    { <b> or </b>}
+                                    {
+                                        @Html.DropDownListFor(m => ops, new SelectList(ops, item.ValueSearchOperation), new { onchange = "updateValueSearchOperation(this)" })
+                                        //<b>Or</b>
+                                    }
                                 }
 
                                 )
@@ -111,8 +120,18 @@
                         }
 
                     }
-
                 </text>
+            }
+            if ((sc.SearchCriteriaList.Count > 1) )
+            {
+                            
+                <br />
+                <input type="radio" id="global_Search_facet_operator" name="global_Search_facet_operator" value="AND" checked onchange = "updateValueSearchOperation(this, 'global')">
+                <label for="global_Search_facet_operator">AND</label>
+                <input type="radio" id="global_Search_facet_operator" name="global_Search_facet_operator" value="OR" onchange = "updateValueSearchOperation(this, 'global')">
+                <label for="global_Search_facet_operator">OR</label><br>
+                            
+                //@Html.DropDownListFor(m => ops, new SelectList(ops, selected_operator_for_facets), new { onchange = "updateValueSearchOperation(this, '" + item.SearchComponent.Name.ToString() + "')" });
             }
         }
         else
@@ -131,7 +150,7 @@
 
 
         var selectedItem = e.id
-    
+
         var dw = $("#MoreWindow").data("tWindow");
 
         if (dw != null) {
@@ -143,6 +162,32 @@
 
             dw.center().open();
         }
+    }
+
+    function updateValueSearchOperation(e, parent) {
+        console.log(e)
+        xxx = e;
+        is_search_criteria_seperator = false;
+        ValueSearchOperation = xxx.value;
+        if (typeof parent == 'undefined') {
+            parent = xxx.parentElement.id;
+        }
+        else {
+            is_search_criteria_seperator = true;
+            parent = null
+        }
+        $.post('@Url.Action("OnClickBreadCrumbItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+            { value: "", parent: parent, occur: ValueSearchOperation, is_search_criteria_seperator: is_search_criteria_seperator },
+            function (response) {
+                /*$('select')
+                    .filter(function () {
+                        if (this.id.match(/ops/)) {
+                            this.value = xxx.value
+                        }
+                    });*/
+                refreshGrid();
+
+            });
     }
 
 
