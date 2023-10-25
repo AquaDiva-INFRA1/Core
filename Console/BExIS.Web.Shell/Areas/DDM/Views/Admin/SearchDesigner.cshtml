@@ -113,9 +113,9 @@
                                 }
                                 using (DataStructureManager dsm = new DataStructureManager())
                                 {
-                                    foreach (string dt in item.Variables.Where(x=> !x.IsEmpty()))
+                                    foreach (string dt in item.Variables.Where(x => !x.IsEmpty()).Where(x=> dsm.VariableRepo.Get(Int32.Parse(x)) != null ))
                                     {
-                                        <span><b>@dsm.VariableRepo.Get(Int32.Parse(@dt)).Label </b><br/> </span>
+                                        <span><b>@Html.Raw( dsm.VariableRepo.Get(Int32.Parse(dt)).Label) </b><br/> </span>
                                     }
                                 }
                                 using (GroupManager grpManager = new GroupManager())

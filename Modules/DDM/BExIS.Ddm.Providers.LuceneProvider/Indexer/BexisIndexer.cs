@@ -479,22 +479,24 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     using (DataStructureManager dsm = new DataStructureManager())
                     {
                         List<string> vars_ = variable_names.Where(va => (dsm.VariableRepo.Get(Int32.Parse(va)) != null)).ToList(); 
-                        List<string> vars = vars_.Where(va => dsm.VariableRepo.Get(Int32.Parse(va)).DataStructure.Datasets.Where(d => d.Id == id).Count() > 0).ToList();
-                        foreach (string variableName in vars)
+                        //List<string> vars = vars_.Where(va => dsm.VariableRepo.Get(Int32.Parse(va)).DataStructure.Datasets.Where(d => d.Id == id).Count() > 0).ToList();
+                        foreach (string variableName in vars_)
                         {
-                            Variable variableObj = dsm.VariableRepo.Get(Int32.Parse(variableName));
                             using (DatasetManager dm = new DatasetManager())
                             {
-                                DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
-                                var Xmin = table.Compute("min([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
-                                var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
                                 try
                                 {
-                                    if (((variableObj.DataAttribute.DataType.Name.ToLower().Contains("date")) && (!variableObj.DataAttribute.DataType.Name.ToLower().Contains("time")))
-                                        ||(variableObj.DataAttribute.DataType.Name.ToLower().Contains("date")) )
+                                    Variable variableObj = dsm.VariableRepo.Get(Int32.Parse(variableName));
+                                    if (!variableObj.DataStructure.Datasets.Any(x => x.Id == id))
+                                        break;
+                                    DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
+                                    var Xmin = table.Compute("min([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
+                                    var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
+
+                                    if (facet.Attributes.GetNamedItem("primitive_type")?.Value == "date")
                                     {
 
-                                        DateTime dateValue = DateTime.Now;
+                                        DateTime dateValue = DateTime.MinValue;
                                         DateTime dateValue_ = dateValue;
                                         string[] formats = {"M/d/yyyy h:mm:ss tt", "M/d/yyyy h:mm tt",
                                                    "MM/dd/yyyy hh:mm:ss", "M/d/yyyy h:mm:ss",
@@ -506,12 +508,12 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                             new CultureInfo("en-US"),
                                             DateTimeStyles.None,
                                             out dateValue);
-                                        if ((dateValue != dateValue_)&&(!string.IsNullOrEmpty(Xmin.ToString())))
+                                        if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmin.ToString())))
                                         {
                                             Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
                                             dataset.Add(newField_);
                                         }
-                                        dateValue = DateTime.Now;
+                                        dateValue = DateTime.MinValue;
                                         dateValue_ = dateValue;
                                         DateTime.TryParseExact(Xmax.ToString(),
                                                 formats,
@@ -524,19 +526,29 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                             dataset.Add(newField_);
                                         }
                                     }
-                                    else if ((variableObj.DataAttribute.DataType.Name.ToLower().Contains("int")) || 
-                                        (variableObj.DataAttribute.DataType.Name.ToLower().Contains("double")) ||
-                                        (variableObj.DataAttribute.DataType.Name.ToLower().Contains("decimal")) ||
-                                        (variableObj.DataAttribute.DataType.Name.ToLower().Contains("number")))
+                                    else if ((facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("int")) ||
+                                        (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("double")) ||
+                                        (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("decimal")) ||
+                                        (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("number")))
                                     {
                                         NumericField newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmin.ToString()));
-                                        if (!string.IsNullOrEmpty(Xmin.ToString())) 
+                                        if (!string.IsNullOrEmpty(Xmin.ToString()))
                                             dataset.Add(newField_);
                                         newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmax.ToString()));
                                         if (!string.IsNullOrEmpty(Xmax.ToString()))
                                             dataset.Add(newField_);
 
                                     }
+                                    //else if ((variableObj.DataAttribute.DataType.Name.ToLower().Contains("string")))
+                                    //{
+                                    //    Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(), Field.Store.YES, Field.Index.ANALYZED);
+                                    //    if (!string.IsNullOrEmpty(Xmin.ToString()))
+                                    //        dataset.Add(newField_);
+                                    //    newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(), Field.Store.YES, Field.Index.ANALYZED);
+                                    //    if (!string.IsNullOrEmpty(Xmax.ToString()))
+                                    //        dataset.Add(newField_);
+                                    //
+                                    //}
                                 }
                                 catch (Exception exc)
                                 {
