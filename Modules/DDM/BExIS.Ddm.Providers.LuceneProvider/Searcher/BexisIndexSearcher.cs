@@ -393,17 +393,24 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
                             if (cc.Count > 0)
                             {
                                 cCount++;
-                                foreach (var doc in hpg.Documents)
+                                foreach (XmlElement item in configXML.GetElementsByTagName("field"))
                                 {
-                                    IList<IFieldable> numericFields = doc.GetFields("facet_" + f.Name);
-                                    foreach (var field in numericFields)
+                                    if ((!item.Attributes["primitive_type"].InnerText.ToLower().Contains("date")) && (!item.Attributes["primitive_type"].InnerText.ToLower().Contains("string")) && (item.Attributes["display_name"].InnerText.ToLower().Contains(c.Name.ToLower())))
                                     {
-                                        cc.Name = field.StringValue;
-                                        cc.Text = field.StringValue;
-                                        cc.Value = field.StringValue;
-                                        if (!c.Childrens.Exists(x => x.Name == cc.Name)) c.Childrens.Add(cc);
+                                        foreach (var doc in hpg.Documents)
+                                        {
+                                            IList<IFieldable> numericFields = doc.GetFields("facet_" + f.Name);
+                                            foreach (var field in numericFields)
+                                            {
+                                                cc.Name = field.StringValue;
+                                                cc.Text = field.StringValue;
+                                                cc.Value = field.StringValue;
+                                                if (!c.Childrens.Exists(x => x.Name == cc.Name)) c.Childrens.Add(cc);
+                                            }
+                                        }
                                     }
                                 }
+                                c.Childrens.Add(cc);
                             }
                         }
                     }

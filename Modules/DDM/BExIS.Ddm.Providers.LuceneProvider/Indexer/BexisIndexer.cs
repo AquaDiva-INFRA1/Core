@@ -22,6 +22,7 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Xml;
 using Vaiona.Logging;
 using Vaiona.Persistence.Api;
@@ -492,63 +493,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                     DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
                                     var Xmin = table.Compute("min([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
                                     var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
-
-                                    if (facet.Attributes.GetNamedItem("primitive_type")?.Value == "date")
-                                    {
-
-                                        DateTime dateValue = DateTime.MinValue;
-                                        DateTime dateValue_ = dateValue;
-                                        string[] formats = {"M/d/yyyy h:mm:ss tt", "M/d/yyyy h:mm tt",
-                                                   "MM/dd/yyyy hh:mm:ss", "M/d/yyyy h:mm:ss",
-                                                   "M/d/yyyy hh:mm tt", "M/d/yyyy hh tt",
-                                                   "M/d/yyyy h:mm", "M/d/yyyy h:mm",
-                                                   "MM/dd/yyyy hh:mm", "M/dd/yyyy hh:mm"};
-                                        DateTime.TryParseExact(Xmin.ToString(),
-                                            formats,
-                                            new CultureInfo("en-US"),
-                                            DateTimeStyles.None,
-                                            out dateValue);
-                                        if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmin.ToString())))
-                                        {
-                                            Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
-                                            dataset.Add(newField_);
-                                        }
-                                        dateValue = DateTime.MinValue;
-                                        dateValue_ = dateValue;
-                                        DateTime.TryParseExact(Xmax.ToString(),
-                                                formats,
-                                                new CultureInfo("en-US"),
-                                                DateTimeStyles.None,
-                                                out dateValue);
-                                        if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmax.ToString())))
-                                        {
-                                            Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
-                                            dataset.Add(newField_);
-                                        }
-                                    }
-                                    else if ((facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("int")) ||
-                                        (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("double")) ||
-                                        (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("decimal")) ||
-                                        (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("number")))
-                                    {
-                                        NumericField newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmin.ToString()));
-                                        if (!string.IsNullOrEmpty(Xmin.ToString()))
-                                            dataset.Add(newField_);
-                                        newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmax.ToString()));
-                                        if (!string.IsNullOrEmpty(Xmax.ToString()))
-                                            dataset.Add(newField_);
-
-                                    }
-                                    //else if ((variableObj.DataAttribute.DataType.Name.ToLower().Contains("string")))
-                                    //{
-                                    //    Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(), Field.Store.YES, Field.Index.ANALYZED);
-                                    //    if (!string.IsNullOrEmpty(Xmin.ToString()))
-                                    //        dataset.Add(newField_);
-                                    //    newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(), Field.Store.YES, Field.Index.ANALYZED);
-                                    //    if (!string.IsNullOrEmpty(Xmax.ToString()))
-                                    //        dataset.Add(newField_);
-                                    //
-                                    //}
+                                    dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId);
                                 }
                                 catch (Exception exc)
                                 {
@@ -566,12 +511,15 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         string concatenated_values = "";                
                         foreach (string res in Extract_nodes(ref concatenated_values, metadataElementName, metadataDoc))
                         {
-                            dataset.Add(new Field("facet_" + lucene_name, res,
-                                    Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
-                            dataset.Add(new Field("ng_all", res,
-                                Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
-                            writeAutoCompleteIndex(docId, lucene_name, res);
-                            writeAutoCompleteIndex(docId, "ng_all", res);
+                            try
+                            {
+                                dataset = write_primary_data_facet(facet, res, null, dataset, docId);
+                            }
+                            catch (Exception ex)
+                            {
+                                LoggerFactory.GetFileLogger().LogCustom(ex.Message);
+                                LoggerFactory.GetFileLogger().LogCustom(ex.InnerException.Message);
+                            }
                         }
                     }
             }
@@ -774,6 +722,69 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             }
 
             indexWriter.AddDocument(dataset);
+        }
+
+       private Document write_primary_data_facet(XmlNode facet, object Xmin, object Xmax, Document dataset, string docId)
+        {
+            if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "string")
+            {
+                dataset.Add(new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(),
+                    Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                dataset.Add(new Field("ng_all", Xmin.ToString(),
+                    Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
+                writeAutoCompleteIndex(docId, facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString());
+                writeAutoCompleteIndex(docId, "ng_all", Xmin.ToString());
+            }
+            else
+            {
+                if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "date")
+                {
+
+                    DateTime dateValue = DateTime.MinValue;
+                    DateTime dateValue_ = dateValue;
+                    string[] formats = {"M/d/yyyy h:mm:ss tt", "M/d/yyyy h:mm tt",
+                                                       "MM/dd/yyyy hh:mm:ss", "M/d/yyyy h:mm:ss",
+                                                       "M/d/yyyy hh:mm tt", "M/d/yyyy hh tt",
+                                                       "M/d/yyyy h:mm", "M/d/yyyy h:mm",
+                                                       "MM/dd/yyyy hh:mm", "M/dd/yyyy hh:mm"};
+                    DateTime.TryParseExact(Xmin.ToString(),
+                        formats,
+                        new CultureInfo("en-US"),
+                        DateTimeStyles.None,
+                        out dateValue);
+                    if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmin.ToString())))
+                    {
+                        Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
+                        dataset.Add(newField_);
+                    }
+                    dateValue = DateTime.MinValue;
+                    dateValue_ = dateValue;
+                    DateTime.TryParseExact(Xmax.ToString(),
+                            formats,
+                            new CultureInfo("en-US"),
+                            DateTimeStyles.None,
+                            out dateValue);
+                    if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmax.ToString())))
+                    {
+                        Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
+                        dataset.Add(newField_);
+                    }
+                }
+                else if ((facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("int")) ||
+                    (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("double")) ||
+                    (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("decimal")) ||
+                    (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("number")))
+                {
+                    NumericField newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmin.ToString()));
+                    if (!string.IsNullOrEmpty(Xmin.ToString()))
+                        dataset.Add(newField_);
+                    newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmax.ToString()));
+                    if (!string.IsNullOrEmpty(Xmax.ToString()))
+                        dataset.Add(newField_);
+
+                }
+            }
+            return dataset;
         }
 
         private void indexPrimaryData(long id, List<XmlNode> categoryNodes, ref Document dataset, string docId, XmlDocument metadataDoc)
