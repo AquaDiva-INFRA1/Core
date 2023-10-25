@@ -158,8 +158,8 @@
                                        max = Double.Parse(last_crit[1]);
                                    }
                                    item.Html = "<div class=\"range-wrap\">";
-                                   item.Html = item.Html + "<input type=\"range\" min=\"" + (min_ - 1) + "\" max=\" " + max_ + 1 + "\" value=\"" + min + "\" id=\"rangeInput1\">";
-                                   item.Html = item.Html + "<input type=\"range\" min=\"" + (min_ - 1) + "\" max=\" " + max_ + 1 + "\" value=\"" + max + "\" id=\"rangeInput2\">";
+                                   item.Html = item.Html + "<input type=\"range\" min=\"" + (min_ - 1) + "\" max=\" " + max_ + 1 + "\" value=\"" + min + "\" id=\"rangeInput1\" onchange=\"myFunction(this)\">";
+                                   item.Html = item.Html + "<input type=\"range\" min=\"" + (min_ - 1) + "\" max=\" " + max_ + 1 + "\" value=\"" + max + "\" id=\"rangeInput2\" onchange=\"myFunction2(this)\">";
                                    item.Html = item.Html + "<output class=\"bubble\" id=\"bubble\">" + (int)min + " - " + (int)max + "</output>";
                                    item.Html = item.Html + "</div>";
                                }
@@ -187,9 +187,9 @@
                                    //}
                                    item.Html = "<div class=\"range-wrap\">";
                                    //item.Html = item.Html + "<input type=\"range\" min=\"" + min_ + "\" max=\" " + max_ + "\" value=\"" + min + "\" step=\"1\" id=\"daterangeInput1\">";
-                                   item.Html = item.Html + "<input type=\"date\" value=\"" + min.ToString("yyyy-MM-dd") + "\"  id=\"daterangeInput1\" min=\"" + min_.ToString("yyyy-MM-dd") + "\" max=\"" + max_.ToString("yyyy-MM-dd") + "\">";
+                                   item.Html = item.Html + "<input type=\"date\" value=\"" + min.ToString("yyyy-MM-dd") + "\"  id=\"daterangeInput1\" min=\"" + min_.ToString("yyyy-MM-dd") + "\" max=\"" + max_.ToString("yyyy-MM-dd") + "\" onblur=\"datemyFunction(this)\">";
                                    //item.Html = item.Html + "<input type=\"range\" min=\"" + min_ + "\" max=\" " + max_ + "\" value=\"" + max + "\" step=\"1\" id=\"daterangeInput2\">";
-                                   item.Html = item.Html + "<input type=\"date\"  value=\"" + max.ToString("yyyy-MM-dd") + "\" id=\"daterangeInput2\" min=\"" + min_.ToString("yyyy-MM-dd") + "\" max=\"" + max_.ToString("yyyy-MM-dd") + "\">";
+                                   item.Html = item.Html + "<input type=\"date\"  value=\"" + max.ToString("yyyy-MM-dd") + "\" id=\"daterangeInput2\" min=\"" + min_.ToString("yyyy-MM-dd") + "\" max=\"" + max_.ToString("yyyy-MM-dd") + "\" onblur=\"datemyFunction2(this)\">";
                                    //item.Html = item.Html + "<output class=\"bubble\" id=\"datebubble\">" + min.ToShortDateString() + " - " + max.ToShortDateString() + "</output>";
                                    item.Html = item.Html + "</div>";
                                }
@@ -224,11 +224,10 @@
 
 
 <script type="text/javascript">
-
-    document.getElementById('rangeInput1')?.addEventListener('change', function () {
-        const rangeInput1 = document.getElementById('rangeInput1');
-        const rangeInput2 = document.getElementById('rangeInput2');
-            value1 = parseInt(rangeInput1.value);
+    var xxxx = null;
+    myFunction = function (element) {
+        const rangeInput2 = element.parentNode.childNodes[1];
+        value1 = parseInt(element.value);
             value2 = parseInt(rangeInput2.value);
 
             if (value1 >= value2) {
@@ -237,9 +236,9 @@
                 document.getElementById('bubble').innerHTML = value1 + " - " + value2;
                 return;
             }
-            document.getElementById('bubble').innerHTML = value1 + " - " + value2;
+        element.parentNode.childNodes[2].innerHTML = value1 + " - " + value2;
             var x = new Object();
-            x.item = rangeInput1;
+        x.item = element;
 
             var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
             $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
@@ -258,13 +257,11 @@
                     facets_enable();
                 })
           refreshGrid();
-
-        });
-    document.getElementById('rangeInput2')?.addEventListener('change', function () {
-        const rangeInput1 = document.getElementById('rangeInput1');
-        const rangeInput2 = document.getElementById('rangeInput2');
+        };
+    myFunction2 = function (element) {
+        const rangeInput1 = element.parentNode.childNodes[0];
             value1 = parseInt(rangeInput1.value);
-            value2 = parseInt(rangeInput2.value);
+        value2 = parseInt(element.value)
 
             if (value2 <= value1) {
                 rangeInput1.value = value2 - 1;
@@ -273,10 +270,9 @@
                 return;
             }
 
-            document.getElementById('bubble').innerHTML = value1 + " - " + value2;
+        element.parentNode.childNodes[2].innerHTML = value1 + " - " + value2;
             var x = new Object();
-            x.item = rangeInput2;
-
+        x.item = element;
             var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
             $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
                 { SelectedItem: document.getElementById('bubble').innerHTML, Parent: parent },
@@ -295,20 +291,19 @@
                 })
 
             refreshGrid();
-        });
+        };
 
-    document.getElementById('daterangeInput1')?.addEventListener('focusout', function () {
-        const daterangeInput1 = document.getElementById('daterangeInput1');
-        const daterangeInput2 = document.getElementById('daterangeInput2');
-            const value1 = daterangeInput1.value;
-            const value2 = daterangeInput2.value;
+    function datemyFunction(element) {
+        const rangeInput2 = element.parentNode.childNodes[1];
+        value1 = parseInt(element.value);
+        value2 = parseInt(rangeInput2.value);
 
             if (value1 >= value2) {
                 daterangeInput2.value = value1;
                 return;
             }
             var x = new Object();
-            x.item = daterangeInput1;
+        x.item = element;
 
             var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
             $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
@@ -328,22 +323,22 @@
                 })
 
             refreshGrid();
-        });
-    document.getElementById('daterangeInput2')?.addEventListener('focusout', function () {
-        const daterangeInput1 = document.getElementById('daterangeInput1');
-        const daterangeInput2 = document.getElementById('daterangeInput2');
-        const value1 = daterangeInput1.value;
-        const value2 = daterangeInput2.value;
-
+        };
+    function datemyFunction2(element) {
+        const rangeInput1 = element.parentNode.childNodes[0];
+        value1 = rangeInput1.value;
+        value2 = element.value
             if (value2 <= value1) {
                 daterangeInput1.value = value2;
                 return;
             }
 
             var x = new Object();
-        x.item = daterangeInput2
+        x.item = element
         console.log(value1.replaceAll('-', '/') + " - " + value2.replaceAll('-', '/'))
-            var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
+        var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
+        console.log(parent);
+
         $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
             { SelectedItem: value1.replaceAll('-', '/') + " - " + value2.replaceAll('-', '/'), Parent: parent },
                 function (response) {
@@ -361,7 +356,7 @@
                 })
 
             refreshGrid();
-        });
+        };
 
 
 
