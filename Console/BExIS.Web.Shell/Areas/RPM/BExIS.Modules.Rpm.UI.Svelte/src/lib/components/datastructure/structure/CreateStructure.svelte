@@ -12,7 +12,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	import { save } from '../services';
+	import { create } from '../services';
 	import { goTo } from '$services/BaseCaller';
 
 	import type { DataStructureCreationModel } from '../types';
@@ -20,7 +20,7 @@
 	$: model;
 
 	async function onSaveHandler() {
-		const res = await save(model);
+		const res = await create(model);
 		console.log('save', res);
 
 		// here are 2 usecases
