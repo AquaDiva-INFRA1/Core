@@ -2,16 +2,18 @@
 
 @using Telerik.Web.Mvc.UI;
 @using BExIS.Modules.Ddm.UI.Models;
+@using BExIS.Dlm.Services.DataStructure;
+@using BExIS.Security.Services.Subjects;
 
 @model List<SearchAttributeViewModel>
 
 @{
     bool windowVisible = false;
     bool isPrimaryDataNodeExist = false;
-    
+
     SearchAttributeViewModel selectedSA = new SearchAttributeViewModel();
-    
-    if(ViewData["windowVisible"]!=null)
+
+    if (ViewData["windowVisible"] != null)
     {
         windowVisible = (bool)ViewData["windowVisible"];
     }
@@ -30,9 +32,10 @@
     if (ViewData["selectedSearchAttribute"] != null)
     {
         SearchAttributeViewModel sa = (SearchAttributeViewModel)ViewData["selectedSearchAttribute"];
-        if (sa.displayName!=null) {
-            windowTitle = "Edit Searchattribute: "+sa.displayName+" ("+sa.id+")";
-        
+        if (sa.displayName != null)
+        {
+            windowTitle = "Edit Searchattribute: " + sa.displayName + " (" + sa.id + ")";
+
         }
     }
 
@@ -44,47 +47,47 @@
     metadata are searchable and how they appear in the application. Changes made through the interface will
     alter the Lucene configuration file on the server. For a detailed description of each parameter please
     refer to the Lucene User Manual provided with the installation package.
-<p>
-    <a href="/ddm/Help/Index/#_Toc451435017" class="bx-informationLink" title="go to help" target="_blank">More</a>
-</p>
+    <p>
+        <a href="/ddm/Help/Index/#_Toc451435017" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
 
 }
 
 @*@section Scripts{
-    <script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.min.js")" type="text/javascript"></script>
-}*@
+        <script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+        <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+        <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.min.js")" type="text/javascript"></script>
+    }*@
 
 
-    @if (ViewData.ModelState.IsValid)
-    {
-<div id="options" style="position:relative; width:100%; height: 15px;">
-    <div style="position:absolute; left:0px;">
-        @Html.ActionLink("Create Search Attribute", "Add", "Admin", new { @class = "bx-button function", @title = "Create Search Item" })
+@if (ViewData.ModelState.IsValid)
+{
+    <div id="options" style="position:relative; width:100%; height: 15px;">
+        <div style="position:absolute; left:0px;">
+            @Html.ActionLink("Create Search Attribute", "Add", "Admin", new { @class = "bx-button function", @title = "Create Search Item" })
 
 
-    </div>
-
-    <div id="#searchDesigerOptions" style="position:absolute; right:0px;">
-        <div>
-            @Html.CheckBox("includePrimaryDataCheckBox", isPrimaryDataNodeExist) <b>include primary data</b>
-            @Html.ActionLink("Refresh Semantic Autocompletion", "buildDictionary", "SemanticSearch", new { }, new { @class = "bx-button action" })
-            @Html.ActionLink("Refresh Search", "RefreshSearch", "Admin", new { @class = "bx-button action", @title = "Refresh index from search", onclick = "$('#SearchDesignerGrid').preloader(20,'Reloading index ...')" })
-
-            @*@Html.ActionLink("Reset to last working setup", "ResetConfig", "Admin", new { @class = "bx-button function", @title = "Reset to Default" })*@
         </div>
-        <br />
+
+        <div id="#searchDesigerOptions" style="position:absolute; right:0px;">
+            <div>
+                @Html.CheckBox("includePrimaryDataCheckBox", isPrimaryDataNodeExist) <b>include primary data</b>
+                @Html.ActionLink("Refresh Semantic Autocompletion", "buildDictionary", "SemanticSearch", new { }, new { @class = "bx-button action" })
+                @Html.ActionLink("Refresh Search", "RefreshSearch", "Admin", new { @class = "bx-button action", @title = "Refresh index from search", onclick = "$('#SearchDesignerGrid').preloader(20,'Reloading index ...')" })
+
+                @*@Html.ActionLink("Reset to last working setup", "ResetConfig", "Admin", new { @class = "bx-button function", @title = "Reset to Default" })*@
+            </div>
+            <br />
+        </div>
     </div>
-</div>
-      
+
 
 
     <br />
     <br />
     @(Html.Telerik().Grid(Model)
             .Name("SearchDesignerGrid")
-            
+
                 .DataBinding(dataBinding => dataBinding
                     .Ajax()
                     .Select("_CustomSearchDesignerGridBinding", "Admin")
@@ -93,7 +96,7 @@
 
                 .Columns(columns =>
                 {
-                    
+
                     columns.Bound(o => o.displayName).Width(200);
                     columns.Bound(o => o.searchType).Width(180);//.ClientTemplate("<input type='text' name='Search Type' value='@Enum.GetName(typeof(SearchComponentBaseType)', Convert.ToInt32("<#= searchType #>") )' />");//.ClientTemplate(Enum.GetName(typeof(SearchComponentBaseType), Convert.ToInt32("<#= searchType #>") ));
                     columns.Bound(o => o.dataType).Width(100);
@@ -108,6 +111,21 @@
                                 {
                                   <span>@dt <br/></span>
                                 }
+                                using (DataStructureManager dsm = new DataStructureManager())
+                                {
+                                    foreach (string dt in item.Variables.Where(x => !x.IsEmpty()).Where(x=> dsm.VariableRepo.Get(Int32.Parse(x)) != null ))
+                                    {
+                                        <span><b>@Html.Raw( dsm.VariableRepo.Get(Int32.Parse(dt)).Label) </b><br/> </span>
+                                    }
+                                }
+                                using (GroupManager grpManager = new GroupManager())
+                                {
+                                    foreach (string dt in item.Projects.Where(x => !x.IsEmpty()) )
+                                    {
+                                      <span><i>@grpManager.FindByIdAsync(Int32.Parse(@dt)).Result.DisplayName </i></span>
+                                    }
+                                }
+
                               }
                         </text>
                     )
@@ -122,7 +140,7 @@
                      )
 
                     .ClientTemplate(
-                        @Html.ActionLink(" ", "Edit", "Admin", new { id = "<#= id #>" }, new { @class = "bx bx-grid-function bx-edit", @title = "Edit Search Item" }).ToString() +" " + 
+                        @Html.ActionLink(" ", "Edit", "Admin", new { id = "<#= id #>" }, new { @class = "bx bx-grid-function bx-edit", @title = "Edit Search Item" }).ToString() +" " +
                         @Html.ActionLink(" ", "Delete", "Admin", new { id = "<#= id #>" }, new { @class = "bx bx-grid-function bx-trash", @title = "Delete Search Item", onclick = "return confirm('Are you sure you want delete the search attribute <#= displayName #> ?')" }).ToString()
                     )
                     .Width(80);
@@ -136,7 +154,7 @@
 
 
 
-@(Html.Telerik().Window()
+    @(Html.Telerik().Window()
     .Name("EditSearchAttribute")
     .Visible(windowVisible)
     .Title(windowTitle)
@@ -159,7 +177,7 @@
 )
 
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
     function EditSearchAttribute_resizeOnRefresh() {
         var winContent = $('#EditSearchAttribute .t-window-content');
@@ -183,75 +201,67 @@
 
         window.location.href = "/ddm/Admin/SearchDesigner";
     }
-    
+
     $("#includePrimaryDataCheckBox").change(function(e)
     {
         //alert($("#includePrimaryDataCheckBox").is(':checked'));
         var includePrimaryData = $("#includePrimaryDataCheckBox").is(':checked');
-           
+
             $.post('@Url.Action("ChangeIncludePrimaryData", "Admin", new RouteValueDictionary { { "area", "ddm" } })', { includePrimaryData: includePrimaryData }, function (response) {
         })
     })
 
- </script>
-    
-    }
-    else
-    { 
-        @Html.ValidationSummary(true);
-    }
+    </script>
+
+}
+else
+{
+    @Html.ValidationSummary(true);
+}
 
 <style type="text/css">
     #metadataNodes {
         max-width: 350px;
     }
-    #SearchDesignerGrid .t-grid-content
-    {
-        height:auto !important;
-        overflow:auto;
-        max-height:490px;
+
+    #SearchDesignerGrid .t-grid-content {
+        height: auto !important;
+        overflow: auto;
+        max-height: 490px;
     }
 
-    #SearchDesignerGrid .t-grid-content td
-    {
-      padding-left:0;
+        #SearchDesignerGrid .t-grid-content td {
+            padding-left: 0;
+        }
+
+        #SearchDesignerGrid .t-grid-content a.bx {
+            text-decoration: none;
+            margin-right: 5px;
+        }
+
+    #SearchDesignerGrid .t-status {
+        display: none;
     }
 
-    #SearchDesignerGrid .t-grid-content a.bx
-    {
-        text-decoration:none;
-        margin-right:5px;
+    #EditSearchAttribute {
+        width: 900px;
     }
-
-    #SearchDesignerGrid .t-status 
-    {
-       display:none;
-    }
-
-    #EditSearchAttribute
-    {
-        width:900px;
-    }
-
 </style>
 
 <script type="text/javascript">
 
-    function loadClientTemplate(data)
-    {
+    function loadClientTemplate(data) {
         var template = ""
 
-        for (var i = 0; i < data.length ; i++)
-        {
+        for (var i = 0; i < data.length; i++) {
             template += "<span>" + data[i] + "<br/></data>";
         }
-        
+
         return template;
     }
 
 
-    function onDataBound()
-    {
+    function onDataBound() {
         resetAllTelerikIconTitles();
         addTooltips();
     }

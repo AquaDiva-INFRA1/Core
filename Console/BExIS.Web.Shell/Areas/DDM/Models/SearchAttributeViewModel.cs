@@ -20,6 +20,14 @@ namespace BExIS.Modules.Ddm.UI.Models
         [Required(ErrorMessage = "Please select a Metadata link.")]
         public List<string> metadataNames { get; set; }
 
+        [Display(Name = "Variable Node")]
+        [Required(ErrorMessage = "Please select a Variable name.")]
+        public List<string> Variables { get; set; }
+
+        [Display(Name = "Project Node")]
+        [Required(ErrorMessage = "Please select a group name.")]
+        public List<string> Projects { get; set; }
+
         //Type
         [Display(Name = "Search Component Type")]
         [Required(ErrorMessage = "Please select a Search Component")]
@@ -76,6 +84,8 @@ namespace BExIS.Modules.Ddm.UI.Models
             this.norm = true;
             this.boost = 5;
             this.metadataNames = new List<string>();
+            this.Variables = new List<string>();
+            this.Projects = new List<string>();
         }
 
         public static SearchAttribute GetSearchAttribute(SearchAttributeViewModel searchAttributeViewModel)
@@ -86,7 +96,9 @@ namespace BExIS.Modules.Ddm.UI.Models
             sa.displayName = searchAttributeViewModel.displayName;
             sa.sourceName = Regex.Replace(searchAttributeViewModel.displayName, "[^0-9a-zA-Z]+", "");
 
-            sa.metadataName = String.Join(",", searchAttributeViewModel.metadataNames.Where(x=> !string.IsNullOrEmpty(x)).ToArray());
+            sa.metadataName = string.Join(",", searchAttributeViewModel.metadataNames?.ToArray() ?? new List<string>().ToArray());
+            sa.variables = string.Join(",", searchAttributeViewModel.Variables?.ToArray() ?? new List<string>().ToArray());
+            sa.projects = string.Join(",", searchAttributeViewModel.Projects?.ToArray() ?? new List<string>().ToArray());
 
             //types
             sa.dataType = SearchAttribute.GetDataType(searchAttributeViewModel.dataType);
@@ -120,7 +132,8 @@ namespace BExIS.Modules.Ddm.UI.Models
             //names
             sa.displayName = searchAttribute.displayName;
             sa.metadataNames.AddRange(searchAttribute.metadataName.Split(','));
-
+            sa.Variables.AddRange(searchAttribute.variables.Split(','));
+            sa.Projects.AddRange(searchAttribute.projects.Split(','));
             //types
             sa.dataType = SearchAttribute.GetDataTypeAsDisplayString(searchAttribute.dataType);
             sa.searchType = SearchAttribute.GetSearchTypeAsDisplayString(searchAttribute.searchType);

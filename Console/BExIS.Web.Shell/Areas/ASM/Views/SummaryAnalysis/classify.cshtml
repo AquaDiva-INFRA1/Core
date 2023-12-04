@@ -154,7 +154,6 @@
         functABC().then(function (result) {
             g = result
             var domains = ["Sites", "Surface Inputs", "BioGeoChemichals", "Cycles", "Signals", "Matter Cycles", "Gases", "phages", "Tree Matter", "Groundwater BioGeoChem", "Viruses", "Pathways", ""];
-            
 
             var nodes = [];
             var links = [];
@@ -379,9 +378,12 @@
                 $("#mynetwork").height(700);
                 $("#mynetwork").css('border', '3px solid black');
 
-                
-                document.getElementById("datasets_list").setAttribute("hidden", true);
 
+                if (global_results.nodes.length == 0) {
+                    document.getElementById('mynetwork').innerHTML = "No Graph available for this dataset";
+                }
+
+                document.getElementById("datasets_list").setAttribute("hidden", true);
                 network.on('click', function (properties) {
                     document.getElementById("datasets_list").setAttribute("hidden", true);
                     var ids = properties.nodes;
@@ -420,7 +422,6 @@
             console.log(err)
         })
     }
-
     document.getElementById("semantic_flag").addEventListener("click", start);
 
 </script>

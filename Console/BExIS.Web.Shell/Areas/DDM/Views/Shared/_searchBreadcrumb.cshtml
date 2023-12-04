@@ -6,102 +6,142 @@
 @{ 
 
     string controller = Session["Controller"].ToString();
-
+    List<string> ops = new List<string>() { "AND","OR" };
+    string selected_operator_for_facets = (string)Session["occur"];
+    Boolean is_search_criteria_seperator = Session["is_search_criteria_seperator"] != null ? (Boolean)Session["is_search_criteria_seperator"] : false;
 }           
 
-<div id="breadCrumb">       
-@if (@Model.CriteriaComponent != null)
-{
-
-    SearchCriteria sc = Model.CriteriaComponent;
-
-    if (sc.SearchCriteriaList.Count > 0)
+<div id="breadCrumb">
+    @if (@Model.CriteriaComponent != null)
     {
-        foreach (var item in sc.SearchCriteriaList.Where(p => p.SearchComponent.IsVisible).ToList() )
+        SearchCriteria sc = Model.CriteriaComponent;
+
+        if (sc.SearchCriteriaList.Count > 0)
         {
-        <text>
-    
-          @*searchresult textinput*@
-          @if (item.SearchComponent.Name == "" && item.Values.Count == 1)
-          { 
-               <div class="breadCrumbValue"  >
-                
-                @foreach (string s in @item.Values)
-                {
-                   <b>@item.SearchComponent.DisplayName.ToString() :</b><span ><b id="@item.SearchComponent.Name.ToString()" title="deselect @item.SearchComponent.DisplayName.ToString() ">"@Html.ActionLink(@s.ToString(), "OnClickBreadCrumbItem", new { value = s })"</b></span>
-                }
-                </div>
-          }
-            
-            
-           @*searchresult selection one element*@
-           @if (item.Values.Count == 1 && item.SearchComponent.Name != "")
-           { 
-              <div  class="breadCrumbValue" >
-            
-                @* <!--add parent as tooltip-->
-                <span><b>@item.Key.ToString()</b></span>*@
-                | 
-               @foreach (string s in @item.Values)
-               {
-                   if (s != "")
-                   {             
-                   <b> @item.SearchComponent.DisplayName.ToString() :</b><span title="deselect @item.SearchComponent.DisplayName.ToString() "> @Html.ActionLink(@s.ToString(), "OnClickBreadCrumbItem", new { value = s, parent = @item.SearchComponent.Name.ToString() }) </span>
-                   }
-               }
-    
-            
-              </div>
-           } 
+            foreach (var item in sc.SearchCriteriaList.Where(p => p.SearchComponent.IsVisible).ToList())
+            {
+                <text>
+                    @{
+                        var fa = item.Values.Where(s => !string.IsNullOrEmpty(s.Trim())).Select(s => s.Trim().Split(new string[] { " - " }, StringSplitOptions.None).Length == 2).ToArray();
+                    }
+                    @*searchresult textinput*@
+                    @if (item.SearchComponent.Name == "" && item.Values.Count == 1)
+                    {
+                        <div class="breadCrumbValue">
 
-           
-            @*searchresult slection two elements*@
-           @if (item.Values.Count == 2)
-           { 
-               <div  class="breadCrumbValue" >></div>
-               <b> @item.SearchComponent.DisplayName.ToString() :</b>
-               <div id="@item.SearchComponent.Name.ToString()" class="breadCrumbValue" title="deselect @item.SearchComponent.DisplayName.ToString() " >
-                   (
-                   @foreach (string s in @item.Values)
-                   {
-                       @Html.ActionLink(@s.ToString(), "OnClickBreadCrumbItem", new { value = s, parent = @item.SearchComponent.Name.ToString() })
-                       if (s != @item.Values.Last())
-                       { <b> or </b>}
-                   }
-              
-                   )
-               </div>
-           } 
-            
-           @*searchresult slection more then three elements*@
-           @if (item.Values.Count >= 3)
-           {
+                            @foreach (string s in @item.Values)
+                            {
+                                <b>@item.SearchComponent.DisplayName.ToString() :</b><span><b id="@item.SearchComponent.Name.ToString()" title="deselect @item.SearchComponent.DisplayName.ToString() ">"@Html.ActionLink(@s.ToString(), "OnClickBreadCrumbItem", new { value = s })"</b></span>
+                            }
+                        </div>
+                    }
 
-               string l="";
-               
-               foreach(string value in item.Values)
-               {
-                   l += value + "\n";
-               }
-                   
-               <div class="breadCrumbValue">
-                 |
-                <a  id="@item.SearchComponent.Name.ToString()" class="t-link" title="@l" onclick="onSelect2(this)" > @item.Values.Count.ToString() </a> in <b ><b title="@l" >@item.SearchComponent.DisplayName.ToString()</b> @*@Html.ActionLink(@item.Name.ToString(), "OnClickBreadCrumbItem", new { value = "", parent = @item.Name.ToString() })*@</b>
-            
-               </div>
-        
-           } 
-        </text>
+
+                    @*searchresult selection one element*@
+                    @if (item.Values.Count == 1 && item.SearchComponent.Name != "")
+                    {
+                        <div class="breadCrumbValue">
+
+                            @* <!--add parent as tooltip-->
+                                <span><b>@item.Key.ToString()</b></span>*@
+                            |
+                            @foreach (string s in @item.Values)
+                            {
+                                if (s != "")
+                                {
+                                    <b> @item.SearchComponent.DisplayName.ToString() :</b><span title="deselect @item.SearchComponent.DisplayName.ToString() "> @Html.ActionLink(@s.ToString(), "OnClickBreadCrumbItem", new { value = s, parent = @item.SearchComponent.Name.ToString() }) </span>
+                                }
+                            }
+
+
+                        </div>
+                    }
+
+
+                    @*searchresult slection two elements*@
+                    @if ((item.Values.Count == 2))
+                    {
+                        <div class="breadCrumbValue">></div>
+                        <b> @item.SearchComponent.DisplayName.ToString() :</b>
+                        <div id="@item.SearchComponent.Name.ToString()" class="breadCrumbValue" title="deselect @item.SearchComponent.DisplayName.ToString() ">
+                            (
+                            @foreach (string s in @item.Values)
+                            {
+                                @Html.ActionLink(@s.ToString(), "OnClickBreadCrumbItem", new { value = s, parent = @item.SearchComponent.Name.ToString() })
+
+                                if (s != @item.Values.Last())
+                                {
+                                    @Html.DropDownListFor(m => ops, new SelectList(ops, item.ValueSearchOperation), new { onchange = "updateValueSearchOperation(this)" })
+                                    //<b>Or</b>
+                                }
+                            }
+
+                            )
+                        </div>
+                    }
+
+                    @*searchresult slection more then three elements*@
+                    @if (item.Values.Count >= 3)
+                    {
+                        if (fa.Length != item.Values.Count)
+                        {
+                            string l = "";
+
+                            foreach (string value in item.Values)
+                            {
+                                l += value + "\n";
+                            }
+
+                            <div class="breadCrumbValue">
+                                |
+                                <a id="@item.SearchComponent.Name.ToString()" class="t-link" title="@l" onclick="onSelect2(this)"> @item.Values.Count.ToString() </a> in <b><b title="@l">@item.SearchComponent.DisplayName.ToString()</b> @*@Html.ActionLink(@item.Name.ToString(), "OnClickBreadCrumbItem", new { value = "", parent = @item.Name.ToString() })*@</b>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="breadCrumbValue">></div>
+                            <b> @item.SearchComponent.DisplayName.ToString() :</b>
+                            <div id="@item.SearchComponent.Name.ToString()" class="breadCrumbValue" title="deselect @item.SearchComponent.DisplayName.ToString() ">
+                                (
+                                @foreach (string s in @item.Values)
+                                {
+                                    @Html.ActionLink(@s.ToString(), "OnClickBreadCrumbItem", new { value = s, parent = @item.SearchComponent.Name.ToString() })
+
+                                    if (s != @item.Values.Last())
+                                    {
+                                        @Html.DropDownListFor(m => ops, new SelectList(ops, item.ValueSearchOperation), new { onchange = "updateValueSearchOperation(this)" })
+                                        //<b>Or</b>
+                                    }
+                                }
+
+                                )
+                            </div>
+                        }
+
+                    }
+                </text>
+            }
+            if ((sc.SearchCriteriaList.Count > 1) )
+            {
+                            
+                <br />
+                <input type="radio" id="global_Search_facet_operator" name="global_Search_facet_operator" value="AND" checked onchange = "updateValueSearchOperation(this, 'global')">
+                <label for="global_Search_facet_operator">AND</label>
+                <input type="radio" id="global_Search_facet_operator" name="global_Search_facet_operator" value="OR" onchange = "updateValueSearchOperation(this, 'global')">
+                <label for="global_Search_facet_operator">OR</label><br>
+                            
+                //@Html.DropDownListFor(m => ops, new SelectList(ops, selected_operator_for_facets), new { onchange = "updateValueSearchOperation(this, '" + item.SearchComponent.Name.ToString() + "')" });
+            }
+        }
+        else
+        {
+            <text>
+                <div class="breadCrumbValue"><b> </b></div>
+
+            </text>
         }
     }
-    else
-    { 
-        <text>
-         <div class="breadCrumbValue"><b> </b></div>
-            
-        </text>
-    }
-}
 
 </div>
 <script type="text/javascript">
@@ -110,7 +150,7 @@
 
 
         var selectedItem = e.id
-    
+
         var dw = $("#MoreWindow").data("tWindow");
 
         if (dw != null) {
@@ -122,6 +162,32 @@
 
             dw.center().open();
         }
+    }
+
+    function updateValueSearchOperation(e, parent) {
+        console.log(e)
+        xxx = e;
+        is_search_criteria_seperator = false;
+        ValueSearchOperation = xxx.value;
+        if (typeof parent == 'undefined') {
+            parent = xxx.parentElement.id;
+        }
+        else {
+            is_search_criteria_seperator = true;
+            parent = null
+        }
+        $.post('@Url.Action("OnClickBreadCrumbItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
+            { value: "", parent: parent, occur: ValueSearchOperation, is_search_criteria_seperator: is_search_criteria_seperator },
+            function (response) {
+                /*$('select')
+                    .filter(function () {
+                        if (this.id.match(/ops/)) {
+                            this.value = xxx.value
+                        }
+                    });*/
+                refreshGrid();
+
+            });
     }
 
 

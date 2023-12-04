@@ -45,6 +45,8 @@ namespace BExIS.Utils.Models
             displayName = "";
             sourceName = "";
             metadataName = "";
+            variables = "";
+            projects = "";
 
             searchType = SearchComponentBaseType.General;
             dataType = TypeCode.String;
@@ -132,6 +134,20 @@ namespace BExIS.Utils.Models
         /// <remarks></remarks>
         /// <seealso cref=""/>
         public String metadataName { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        public String variables { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        public String projects { get; set; }
 
         /// <summary>
         ///

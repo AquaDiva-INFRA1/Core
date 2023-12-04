@@ -1,12 +1,16 @@
 ﻿using BExIS.Ddm.Api;
+using BExIS.Utils.Filters;
 using BExIS.Utils.Models;
 using BExIS.Xml.Helpers;
+using Lucene.Net.Search;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web.WebPages;
 using Telerik.Web.Mvc;
+using Telerik.Web.Mvc.Extensions;
 using Vaiona.IoC;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
@@ -158,8 +162,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         public ActionResult CheckedTreeViewItem(string SelectedItem, string Parent)
         {
             ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>();
-            provider.WorkingSearchModel.UpdateSearchCriteria(Parent, SelectedItem, SearchComponentBaseType.Facet, true);
-            provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent);
+            provider.WorkingSearchModel.UpdateSearchCriteria(Parent, SelectedItem, SearchComponentBaseType.Facet, true); // search criteria.cs update
+            provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent); // searchprovider.cs 
 
             return PartialView("_searchFacets", Tuple.Create(provider.WorkingSearchModel, provider.DefaultSearchModel.SearchComponent.Facets));
         }
@@ -290,22 +294,42 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         /// <param name="parent">patrent of selected value</param>
         /// <param name="model"></param>
         /// <returns></returns>
-        public ActionResult OnClickBreadCrumbItem(string value, string parent)
+        public ActionResult OnClickBreadCrumbItem(string value, string parent, string occur = "AND", Boolean is_search_criteria_seperator = false)
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Search", this.Session.GetTenant());
 
             ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>();
 
-            RemoveFromPropertiesDic(parent, value, provider.WorkingSearchModel.CriteriaComponent);
-
-            // if value exist / user clicked value
-            if (value != null && parent != null)
+            if (!value.IsEmpty()) 
             {
-                provider.WorkingSearchModel.CriteriaComponent.RemoveValueOfSearchCriteria(parent, value);
+                RemoveFromPropertiesDic(parent, value, provider.WorkingSearchModel.CriteriaComponent);
+
+                // if value exist / user clicked value
+                if (value != null && parent != null)
+                {
+                    provider.WorkingSearchModel.CriteriaComponent.RemoveValueOfSearchCriteria(parent, value);
+                    provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent);
+                }
             }
+            else
+            {
+                if (occur != null && parent != null && !is_search_criteria_seperator)
+                {
+                    List<SearchCriterion> Scs = provider.WorkingSearchModel.CriteriaComponent.SearchCriteriaList.Where(sc => sc.SearchComponent.Name.Contains(parent)).ToList();
+                    Scs.ForEach(x => x.ValueSearchOperation = occur);
+                    provider.WorkingSearchModel.CriteriaComponent.SearchCriteriaList = Scs;
+                    provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent);
 
-            provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent);
-
+                }
+                if (occur != null  && is_search_criteria_seperator)
+                {
+                    Session["occur"] = occur;
+                    if (occur == "OR")
+                        provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent, Occur.SHOULD);
+                    else
+                        provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent, Occur.MUST);
+                }
+            }
 
             //reset properties selected values
             var properties = provider.WorkingSearchModel.SearchComponent.Properties;
@@ -321,8 +345,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     if (!string.IsNullOrEmpty(p.SelectedValue)) p.SelectedValue = string.Empty;
                 }
             }
-
-
+            Session["is_search_criteria_seperator"] = is_search_criteria_seperator;
+            
             return View(Session["SubmissionAction"].ToString(), provider); //View("Index", provider);
         }
 
@@ -336,8 +360,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         public ActionResult _CustomBinding(GridCommand command)
         {
             ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>();
+            
+            return View(new GridModel(provider.WorkingSearchModel.ResultComponent.ConvertToDataTable()));
             DataTable table = provider.Get(provider.WorkingSearchModel.CriteriaComponent).ResultComponent.ConvertToDataTable();
-
             return View(new GridModel(table));
         }
 

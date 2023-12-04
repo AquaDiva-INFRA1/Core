@@ -31,10 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ChoETL">
+    <Reference Include="ChoETL, Version=1.2.1.52, Culture=neutral, PublicKeyToken=8138733ed69d3172, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\ChoETL.1.2.1.52\lib\net45\ChoETL.dll</HintPath>
     </Reference>
-    <Reference Include="ChoETL.JSON">
+    <Reference Include="ChoETL.JSON, Version=1.2.1.52, Culture=neutral, PublicKeyToken=f6c38caf4a08e6a4, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\ChoETL.JSON.1.2.1.52\lib\net45\ChoETL.JSON.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
