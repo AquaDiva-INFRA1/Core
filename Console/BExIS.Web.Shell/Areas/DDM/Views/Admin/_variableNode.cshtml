@@ -4,28 +4,27 @@
 @using BExIS.Modules.Ddm.UI.Helpers;
 @using BExIS.Utils.Models;
 @using BExIS.Dlm.Entities.DataStructure;
+@using BExIS.Aam.Entities.Mapping;
 
 @{
-    List<Variable> Variables = new List<Variable>();
-    if (Session["Variables"] != null)
+    List<Tuple<long, string>> xx_ = new List<Tuple<long, string>>();
+    if (Session["Entities"] != null)
     {
-        Variables = (List<Variable>)Session["Variables"];
+        xx_ = (List<Tuple<long, string>>)Session["Entities"];
     }
-    var xx = Variables.ToList<Variable>().OrderBy(x => x.Label).Select(c => new { id = c.Id, label = c.Id + " - " + c.Label });
-
 
     int var_count = int.Parse(Model);
 
     <div id="variable_node_container_@var_count" class="variable_node_container_@var_count">
         <div>
 
-                                    @Html.DropDownListFor(m => xx,
-                                                    new SelectList(
-                                                        xx,
-                                                        "id",
-                                                        "label"),
-                                                    "Select, please"
-                                    )
+            @Html.DropDownListFor(m => xx_,
+                            new SelectList(
+                                xx_,
+                                "Item1",
+                                "Item2"),
+                            "Select, please"
+            )
         </div>
         <div class="col-lg-1 text-left vcenter">
             <a class="removeVariableNode " onclick="delete_node('variable_node_container_@var_count')">

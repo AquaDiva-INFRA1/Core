@@ -83,6 +83,10 @@
       <Project>{782b71c1-707f-4ab1-80e9-90d2880635b4}</Project>
       <Name>BExIS.Utils</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\AAM\BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
+      <Project>{2B541D06-3259-4AA3-AE6A-452C8F67164D}</Project>
+      <Name>BExIS.Aam.Entities</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
