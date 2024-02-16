@@ -11,8 +11,6 @@ namespace BExIS.Modules.Asm.Etities
 {
     public class Data_container_analytics
     {
-        public List<DataAttributeStruct> DataAttributeStruct_list_in_use = new List<DataAttributeStruct>();
-        public List<DataAttributeStruct> DataAttributeStruct_list_non_use = new List<DataAttributeStruct>();
 
         public List<EditUnitModel> EditUnitModel_list_in_use = new List<EditUnitModel>();
         public List<EditUnitModel> EditUnitModel_list_non_use = new List<EditUnitModel>();
@@ -30,13 +28,6 @@ namespace BExIS.Modules.Asm.Etities
 
         private void fill_lists()
         {
-            DataAttributeManagerModel dam = new DataAttributeManagerModel(false);
-            foreach (DataAttributeStruct var_temp in dam.DataAttributeStructs)
-            {
-                if (var_temp.InUse) DataAttributeStruct_list_in_use.Add(var_temp);
-                else DataAttributeStruct_list_non_use.Add(var_temp);
-            }
-
             UnitManagerModel umm = new UnitManagerModel();
             foreach (EditUnitModel unit in umm.editUnitModelList)
             {

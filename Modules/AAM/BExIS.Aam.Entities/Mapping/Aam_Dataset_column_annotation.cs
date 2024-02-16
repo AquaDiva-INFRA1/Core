@@ -1,11 +1,10 @@
-﻿using BExIS.Dlm.Entities.Data;
-using BExIS.Dlm.Entities.DataStructure;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
+﻿using System;
 using System.Xml;
-using Vaiona.Entities.Common;
 using System.ComponentModel.DataAnnotations;
+using Vaiona.Entities.Common;
+using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.DataStructure;
+using System.Data.Entity;
 
 namespace BExIS.Aam.Entities.Mapping
 {

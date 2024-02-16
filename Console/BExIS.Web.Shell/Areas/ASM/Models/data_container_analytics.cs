@@ -11,6 +11,7 @@ namespace BExIS.Modules.Asm.UI.Models
 {
     public class Data_container_analytics
     {
+        /*
         public List<DataAttributeStruct> DataAttributeStruct_list_in_use = new List<DataAttributeStruct>();
         public List<DataAttributeStruct> DataAttributeStruct_list_non_use = new List<DataAttributeStruct>();
 
@@ -73,6 +74,6 @@ namespace BExIS.Modules.Asm.UI.Models
             }
 
         }
-
+        */
     }
 }

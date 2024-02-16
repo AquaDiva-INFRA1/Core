@@ -1,18 +1,16 @@
-﻿using BExIS.Dlm.Entities.Data;
-using BExIS.Dlm.Entities.DataStructure;
+﻿using BExIS.Dlm.Entities.DataStructure;
+using BExIS.IO.DataType.DisplayPattern;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BExIS.IO.Tests.Helper
 {
     public class DataGeneratorHelper
     {
 
-        public List<List<string>> GenerateRowsWithRandomValuesBasedOnDatastructure( StructuredDataStructure dataStructure,long numberOfTuples)
+        public List<List<string>> GenerateRowsWithRandomValuesBasedOnDatastructure(StructuredDataStructure dataStructure, long numberOfTuples)
         {
             List<List<string>> rows = new List<List<string>>();
 
@@ -23,18 +21,18 @@ namespace BExIS.IO.Tests.Helper
 
             try
             {
-                    for (int i = 0; i < numberOfTuples; i++)
-                    {
-                        List<string> row = new List<string>();
-                        row.Add(r.Next().ToString());
-                        row.Add("Test");
-                        row.Add(Convert.ToDouble(r.Next()).ToString());
-                        row.Add(true.ToString());
-                        row.Add(DateTime.Now.ToString());
+                for (int i = 0; i < numberOfTuples; i++)
+                {
+                    List<string> row = new List<string>();
+                    row.Add(r.Next().ToString());
+                    row.Add("Test");
+                    row.Add(Convert.ToDouble(r.Next()).ToString());
+                    row.Add(true.ToString());
+                    row.Add(DateTime.Now.ToString());
 
 
-                        rows.Add(row);
-                    }
+                    rows.Add(row);
+                }
 
                 return rows;
 
@@ -45,8 +43,10 @@ namespace BExIS.IO.Tests.Helper
             }
         }
 
-        public List<string> GenerateRowsWithRandomValuesBasedOnDatastructure(StructuredDataStructure dataStructure,string seperator, long numberOfTuples, bool withQuotes)
+        public List<string> GenerateRowsWithRandomValuesBasedOnDatastructure(StructuredDataStructure dataStructure, string seperator, long numberOfTuples, bool withQuotes)
         {
+            var datePattern = DataTypeDisplayPattern.Get(dataStructure.Variables.ElementAt(4).DisplayPatternId);
+
             List<string> rows = new List<string>();
 
 
@@ -61,12 +61,12 @@ namespace BExIS.IO.Tests.Helper
                     string row = r.Next().ToString();
 
 
-                    if(withQuotes) row+= seperator.ToString()+"\"Test\"";
-                    else row+= seperator.ToString()+"Test";
+                    if (withQuotes) row += seperator.ToString() + "\"Test\"";
+                    else row += seperator.ToString() + "Test";
 
                     row += seperator.ToString() + Convert.ToDouble(r.Next()).ToString();
                     row += seperator.ToString() + true.ToString();
-                    row += seperator.ToString() + DateTime.Now.ToString();
+                    row += seperator.ToString() + DateTime.Now.ToString(datePattern.DisplayPattern);
 
 
                     rows.Add(row);
@@ -116,5 +116,7 @@ namespace BExIS.IO.Tests.Helper
                 return null;
             }
         }
+
+
     }
 }

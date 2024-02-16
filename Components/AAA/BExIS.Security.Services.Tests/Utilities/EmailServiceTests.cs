@@ -1,30 +1,34 @@
 ﻿using BExIS.Security.Services.Utilities;
+using BExIS.Utils.Config;
+using BExIS.Utils.Config.Configurations;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BExIS.Security.Services.Tests.Utilities
 {
     [TestFixture]
     public class EmailServiceTests
     {
+        private SmtpConfiguration _smtpConfiguration;
+
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            ConfigurationManager.AppSettings["Email_Host_Name"] = "#";
-            ConfigurationManager.AppSettings["Email_Host_Port"] = "#";
-            ConfigurationManager.AppSettings["Email_Host_Anonymous"] = "#";
-            ConfigurationManager.AppSettings["Email_Host_SecureSocketOptions"] = "#";
-            ConfigurationManager.AppSettings["Email_Host_CertificateRevocation"] = "#";
-            ConfigurationManager.AppSettings["Email_Account_Name"] = "#";
-            ConfigurationManager.AppSettings["Email_Account_Password"] = "#";
-            ConfigurationManager.AppSettings["Email_From_Name"] = "#";
-            ConfigurationManager.AppSettings["Email_From_Address"] = "#";
+            _smtpConfiguration = new SmtpConfiguration()
+            {
+                HostName = "smtp.uni-jena.de",
+                HostPort = 587,
+                HostAnonymous = false,
+                HostCertificateRevocation = false,
+                HostSecureSocketOptions = 1,
+                AccountName = "<account_name>",
+                AccountPassword = "<account_password>",
+                FromName = "<from_name>",
+                FromAddress = "<from_address>"
+            };
         }
 
         [SetUp]
@@ -52,29 +56,29 @@ namespace BExIS.Security.Services.Tests.Utilities
 
             EmailService emailService = new EmailService();
 
-            emailService.Send("subject_test", "Hallo again!? Emails are working now!", new List<string>(){ "m6thsv2@googlemail.com"} , null, null, null, files);
+            emailService.Send("subject_test", "Hallo again!? Emails are working now!", new List<string>() { "m6thsv2@googlemail.com" }, null, null, null, files);
         }
 
         /*
          * Further test methods
          */
 
-        //[Test]
+        [Test]
         public void Send_EmailWithWhiteSpace_SendSuccess()
         {
-            EmailService emailService = new EmailService();
+            EmailService emailService = new EmailService(_smtpConfiguration);
             bool success = true;
             try
             {
-                emailService.Send("subject_test", "Hallo again!? Emails are working now!", new List<string>() { " david.blaa@googlemail.com " });
+                emailService.Send("subject_test", "Hallo again!? Emails are working now!", new List<string>() { "m6thsv2@googlemail.com" });
             }
             catch (Exception ex)
             {
                 success = false;
             }
             finally
-            { 
-                Assert.IsTrue(success,"send mail was not succesfull");
+            {
+                Assert.IsTrue(success, "send mail was not succesfull");
             }
 
         }
@@ -87,14 +91,14 @@ namespace BExIS.Security.Services.Tests.Utilities
             try
             {
                 emailService.Send("subject_test", "Hallo again!? Emails are working now!", new List<string>() { "david.blaa@googlemail.com" }, new List<string>() { "david.schoene@uni-jena.de " });
-        }
+            }
             catch (Exception ex)
             {
                 success = false;
             }
             finally
-            { 
-                Assert.IsTrue(success,"send mail was not succesfull");
+            {
+                Assert.IsTrue(success, "send mail was not succesfull");
             }
         }
 
@@ -106,7 +110,7 @@ namespace BExIS.Security.Services.Tests.Utilities
             bool success = true;
             try
             {
-                emailService.Send("subject_test", "Hallo again!? Emails are working now!", new List<string>() { "david.blaa@googlemail.com" }, null,new List<string>() { "david.schoene@uni-jena.de " });
+                emailService.Send("subject_test", "Hallo again!? Emails are working now!", new List<string>() { "david.blaa@googlemail.com" }, null, new List<string>() { "david.schoene@uni-jena.de " });
             }
             catch (Exception ex)
             {

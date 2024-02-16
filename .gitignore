@@ -261,7 +261,6 @@ paket-files/
 /Console/BExIS.Web.Shell/Web.Debug.config
 /Console/BExIS.Web.Shell/samples/Credentials.config.sample
 /Console/BExIS.Web.Shell/web.config
-/packages/
-*.Tests.csproj
-/Console/Workspace/
-/.vs/
+_backup_dcm
+svelte
+/Console/BExIS.Web.Shell/Areas/RPM/BExIS.Modules.Rpm.UI/Scripts/svelte

@@ -12,14 +12,10 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vaiona.Persistence.Api;
 
 namespace BExIS.Dlm.Tests.Services.Data
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Objekte verwerfen, bevor Bereich verloren geht", Justification = "<Ausstehend>")]
-
     [TestFixture()]
     public class DatasetManager_EditDatasetVersionTests
     {
@@ -37,6 +33,7 @@ namespace BExIS.Dlm.Tests.Services.Data
             var dm = new DatasetManager();
             var rsm = new ResearchPlanManager();
             var mdm = new MetadataStructureManager();
+            var etm = new EntityTemplateManager();
             dsHelper = new DatasetHelper();
 
             try
@@ -55,7 +52,10 @@ namespace BExIS.Dlm.Tests.Services.Data
                 var mds = mdm.Repo.Query().First();
                 mds.Should().NotBeNull("Failed to meet a precondition: a metadata strcuture is required.");
 
-                Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds);
+                var et = etm.Repo.Query().First();
+                et.Should().NotBeNull("Failed to meet a precondition: a entity template is required.");
+
+                Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds, et);
                 datasetId = dataset.Id;
 
                 // add datatuples
@@ -66,6 +66,7 @@ namespace BExIS.Dlm.Tests.Services.Data
             }
             finally
             {
+                etm.Dispose();
                 dm.CheckInDataset(datasetId, "for testing  datatuples with versions", username, ViewCreationBehavior.None);
             }
         }
@@ -99,25 +100,20 @@ namespace BExIS.Dlm.Tests.Services.Data
                 {
                     DatasetVersion workingCopy = datasetManager.GetDatasetWorkingCopy(datasetId);
 
-
                     List<DataTuple> deleteTuples = new List<DataTuple>();
                     deleteTuples.Add(tuple as DataTuple);
 
-                    workingCopy = datasetManager.EditDatasetVersion(workingCopy, null, null, deleteTuples.Select(d=>d.Id).ToList());
+                    workingCopy = datasetManager.EditDatasetVersion(workingCopy, null, null, deleteTuples.Select(d => d.Id).ToList());
 
                     datasetManager.CheckInDataset(datasetId, "delete one datatuple for testing", username, ViewCreationBehavior.None);
-
                 }
 
                 latest = datasetManager.GetDatasetLatestVersion(datasetId);
 
                 int after = datasetManager.GetDataTuplesCount(latest.Id);
 
-
                 //Assert
                 Assert.That(before, Is.GreaterThan(after));
-
-
             }
             catch (Exception ex)
             {
@@ -128,8 +124,6 @@ namespace BExIS.Dlm.Tests.Services.Data
                 datasetManager.Dispose();
             }
         }
-
-
 
         [Test()]
         public void EditDatasetVersion_DeleteADataTupleAfterUpdate_ReturnUpdatedVersion()
@@ -151,7 +145,6 @@ namespace BExIS.Dlm.Tests.Services.Data
             {
                 try
                 {
-
                     latest = datasetManager.GetDatasetLatestVersion(datasetId);
 
                     int before = datasetManager.GetDataTuplesCount(latest.Id);
@@ -162,25 +155,20 @@ namespace BExIS.Dlm.Tests.Services.Data
                     {
                         DatasetVersion workingCopy = datasetManager.GetDatasetWorkingCopy(datasetId);
 
-
                         List<AbstractTuple> deleteTuples = new List<AbstractTuple>();
                         deleteTuples.Add(tuple);
 
                         workingCopy = datasetManager.EditDatasetVersion(workingCopy, null, null, deleteTuples.Select(d => d.Id).ToList());
 
                         datasetManager.CheckInDataset(datasetId, "delete one datatuple for testing", username, ViewCreationBehavior.None);
-
                     }
 
                     latest = datasetManager.GetDatasetLatestVersion(datasetId);
 
                     int after = datasetManager.GetDataTuplesCount(latest.Id);
 
-
                     //Assert
                     Assert.That(before, Is.GreaterThan(after));
-
-
                 }
                 catch (Exception ex)
                 {
@@ -218,8 +206,6 @@ namespace BExIS.Dlm.Tests.Services.Data
             {
                 try
                 {
-
-
                     if (datasetManager.IsDatasetCheckedOutFor(datasetId, "David") || datasetManager.CheckOutDataset(datasetId, "David"))
                     {
                         DatasetVersion workingCopy = datasetManager.GetDatasetWorkingCopy(datasetId);
@@ -231,7 +217,7 @@ namespace BExIS.Dlm.Tests.Services.Data
                         // var 3 = double = 3
                         // var 4 = boolean = 4
                         // var 5 = datetime = 5
-                        List<long> varIds = ((StructuredDataStructure)workingCopy.Dataset.DataStructure).Variables.Select(v=>v.Id).ToList();
+                        List<long> varIds = ((StructuredDataStructure)workingCopy.Dataset.DataStructure).Variables.Select(v => v.Id).ToList();
 
                         primaryKeys.Add(varIds.ElementAt(primaryKeyIndex));
 
@@ -242,13 +228,10 @@ namespace BExIS.Dlm.Tests.Services.Data
                         datasetManager.EditDatasetVersion(workingCopy, splittedDatatuples["new"], splittedDatatuples["edit"], null);
                         datasetManager.CheckInDataset(datasetId, count + " rows", "David");
 
-
                         //Assert
                         long c = datasetManager.GetDatasetVersionEffectiveTupleCount(workingCopy);
                         Assert.That(c, Is.EqualTo(expectedCount));
-
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -256,7 +239,5 @@ namespace BExIS.Dlm.Tests.Services.Data
                 }
             }
         }
-
-
     }
 }

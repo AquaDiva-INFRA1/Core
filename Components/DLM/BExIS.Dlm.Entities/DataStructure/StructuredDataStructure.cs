@@ -1,17 +1,17 @@
-﻿using System.Collections.Generic;
-using BExIS.Dlm.Entities.Data;
+﻿using BExIS.Dlm.Entities.Data;
+using System.Collections.Generic;
 using System.Xml;
 
 /// <summary>
 ///
 /// </summary>        
 namespace BExIS.Dlm.Entities.DataStructure
-{   
+{
     /// <summary>
     ///
     /// </summary>
     /// <remarks></remarks>        
-    public class StructuredDataStructure: DataStructure
+    public class StructuredDataStructure : DataStructure
     {
 
         #region Attributes
@@ -28,8 +28,8 @@ namespace BExIS.Dlm.Entities.DataStructure
         /// </summary>
         /// <remarks> StructuredDataStructure is the controller of this association </remarks>
         /// <seealso cref=""/>        
-        public virtual ICollection<Variable> Variables { get; set; }
-     
+        public virtual ICollection<VariableInstance> Variables { get; set; }
+
         /*
         This relationship is used in respective to Data Structure Category.
         For time series it determines the time variable, for Coverage it determines the Location variable and for samplings it determines which variable will hold the information about the samples.
@@ -64,7 +64,7 @@ namespace BExIS.Dlm.Entities.DataStructure
         /// <remarks></remarks>
         /// <seealso cref=""/>
         /// <param>NA</param>       
-        public StructuredDataStructure(): this(DataStructureCategory.Generic)
+        public StructuredDataStructure() : this(DataStructureCategory.Generic)
         {
         }
 
@@ -78,7 +78,7 @@ namespace BExIS.Dlm.Entities.DataStructure
         {
             //sample: VariableUsages.First().DataAttribute.ParameterUsages.First().Parameter.
             Datasets = new List<Dataset>();
-            Variables = new List<Variable>();
+            Variables = new List<VariableInstance>();
             IndexerType = indexerType;
         }
 

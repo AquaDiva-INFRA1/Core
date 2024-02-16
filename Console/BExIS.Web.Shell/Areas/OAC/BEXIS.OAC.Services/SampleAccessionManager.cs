@@ -32,6 +32,7 @@ using System.Data;
 using BExIS.IO.Transform.Validation.DSValidation;
 using BExIS.Utils.NH.Querying;
 using Vaiona.Logging;
+using System.Security.Cryptography;
 
 namespace BExIS.OAC.Services
 {
@@ -114,7 +115,12 @@ namespace BExIS.OAC.Services
 
                 ResearchPlan rp = rpm.Repo.Get().First();
                 MetadataStructure metadataStructure = msm.Repo.Get().FirstOrDefault(x => x.Id == Int64.Parse(metadata));
-                ds = dm.CreateEmptyDataset(sds, rp, metadataStructure);
+                EntityTemplateManager etm = new EntityTemplateManager();
+                EntityTemplate et = new EntityTemplate("OMICs Template", "OMICs Template", null, metadataStructure);
+                EntityTemplate existing = etm.Repo.Get().FirstOrDefault(x => x == et);
+                if (existing != et) 
+                    et = etm.Create(et);
+                ds = dm.CreateEmptyDataset(sds, rp, metadataStructure, et);
                 if (dm.IsDatasetCheckedOutFor(ds.Id, username) || dm.CheckOutDataset(ds.Id, username))
                 {
                     DatasetVersion dsv = dm.GetDatasetWorkingCopy(ds.Id);
@@ -280,7 +286,7 @@ namespace BExIS.OAC.Services
                 {
                     //For now a datastructure is considered an exact match if it contains variables with
                     //the same names (labels), datatypes and units in the correct order
-                    List<Variable> variablesOfExistingStructure = existingStructure.Variables.ToList();
+                    List<VariableInstance> variablesOfExistingStructure = existingStructure.Variables.ToList();
                     foundReusableDataStructure = true;
                     if (variablesOfExistingStructure.Count != ((System.Reflection.TypeInfo)typeof(AccessionMetadataV2)).DeclaredFields.ToList().Count)
                         foundReusableDataStructure = false;
@@ -310,25 +316,20 @@ namespace BExIS.OAC.Services
             DataContainerManager dam = new DataContainerManager();
             var dataTypeRepo = this.GetUnitOfWork().GetReadOnlyRepository<Dlm.Entities.DataStructure.DataType>();
             var unitRepo = this.GetUnitOfWork().GetReadOnlyRepository<Unit>();
-            List<VariableIdentifier> vars = new List<VariableIdentifier>();
+            List<VariableInstance> vars = new List<VariableInstance>();
             string header = new AccessionMetadataV2().Initialise_header("");
             if (sds.Variables.Count == 0)
             {
-                foreach (string elem in header.Split(','))
+                foreach (string variable_name in header.Split(','))
                 {
-                    DataAttribute CurrentDataAttribute = dam.CreateDataAttribute(elem, elem, elem, false, false, "", MeasurementScale.Categorial,
-                        DataContainerType.ReferenceType, "", dataTypeRepo.Get().ToList<Dlm.Entities.DataStructure.DataType>().FirstOrDefault(x => x.Name == "String"),
-                        unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"), null, null, null, null, null, null);
-                    Variable newVariable = dsm.AddVariableUsage(sds, CurrentDataAttribute, true, elem, "", "", "",
+                    VariableManager vm = new VariableManager();
+                    VariableTemplate vt = vm.CreateVariableTemplate("OMICs variable template", 
+                        dataTypeRepo.Get().ToList<Dlm.Entities.DataStructure.DataType>().FirstOrDefault(x => x.Name == "String") ,
                         unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"));
-                    VariableIdentifier vi = new VariableIdentifier
-                    {
-                        name = newVariable.Label,
-                        id = newVariable.Id
-                    };
+                    VariableInstance vi = vm.CreateVariable(variable_name, sds.Id,vt.Id);
                     vars.Add(vi);
                     XmlElement newVariableXml = xmldoc.CreateElement("variable");
-                    newVariableXml.InnerText = Convert.ToString(newVariable.Id);
+                    newVariableXml.InnerText = Convert.ToString(vi.Id);
 
                     orderElement.AppendChild(newVariableXml);
                 }

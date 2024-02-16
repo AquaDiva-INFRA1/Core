@@ -214,7 +214,10 @@ namespace BExIS.IO.Transform.Output
                 createDirectoriesIfNotExist(storePath);
             }
 
-            return Path.Combine(storePath, title + extension);
+             // replace special chars to avoid invaild path names
+            string pathSaveTitle = string.Join("_", title.Split(Path.GetInvalidFileNameChars()));
+
+            return Path.Combine(storePath, pathSaveTitle + extension);
         }
 
         /// <summary>
@@ -377,12 +380,11 @@ namespace BExIS.IO.Transform.Output
                     dataStructure = dataStructureManager.StructuredDataStructureRepo.Get(id);
                     dataStructure.Variables = dataStructure.Variables.OrderBy(v => v.OrderNo).ToList();
 
-                    dataStructureManager.StructuredDataStructureRepo.LoadIfNot(dataStructure.Variables.Select(v => v.DataAttribute));
                     dataStructureManager.StructuredDataStructureRepo.LoadIfNot(dataStructure.Variables.Select(v => v.MissingValues));
 
                     foreach (var v in dataStructure.Variables)
                     {
-                        var d = v.DataAttribute.DataType.Description;
+                        var d = v.DataType.Description;
                         var m = v.MissingValues.ToList().Select(mis => mis.Id);
                     }
 
@@ -433,7 +435,7 @@ namespace BExIS.IO.Transform.Output
         /// <param name="source">full list of variables</param>
         /// <param name="selected">variablenames</param>
         /// <returns></returns>
-        protected List<Variable> GetSubsetOfVariables(List<Variable> source, String[] selected)
+        protected List<VariableInstance> GetSubsetOfVariables(List<VariableInstance> source, String[] selected)
         {
             return source.Where(p => selected.Contains(p.Id.ToString())).ToList();
         }
@@ -447,7 +449,7 @@ namespace BExIS.IO.Transform.Output
         /// <param name="source">full list of variables</param>
         /// <param name="selected">variablenames</param>
         /// <returns></returns>
-        protected List<long> GetSubsetOfVariableIds(IEnumerable<Variable> source, String[] selected)
+        protected List<long> GetSubsetOfVariableIds(IEnumerable<VariableInstance> source, String[] selected)
         {
             return source.Where(p => selected.Contains(p.Label.ToString())).ToList().Select(v => v.Id).ToList();
         }
@@ -466,9 +468,9 @@ namespace BExIS.IO.Transform.Output
             return source.Where(p => selected.Contains(p.Variable.Id.ToString())).ToList();
         }
 
-        protected string GetStringFormat(Dlm.Entities.DataStructure.DataType datatype)
+        protected string GetStringFormat(int id)
         {
-            DataTypeDisplayPattern ddp = DataTypeDisplayPattern.Materialize(datatype.Extra);
+            DataTypeDisplayPattern ddp = DataTypeDisplayPattern.Get(id);
             if (ddp != null)
                 return ddp.StringPattern;
 
@@ -543,7 +545,7 @@ namespace BExIS.IO.Transform.Output
         // add a single row to the output file
         protected abstract bool AddRow(AbstractTuple tuple, long rowIndex);
 
-        protected abstract bool AddRow(DataRow row, long rowIndex);
+        protected abstract bool AddRow(DataRow row, long rowIndex, bool internalId=false);
 
         protected abstract bool AddRow(string[] row, long rowIndex);
 
@@ -683,7 +685,7 @@ namespace BExIS.IO.Transform.Output
         /// <param name="filePath"></param>
         /// <param name="dataStructureId"></param>
         /// <returns></returns>
-        public List<Error> AddData(DataTable table, string filePath, long dataStructureId, string[] units = null)
+        public List<Error> AddData(DataTable table, string filePath, long dataStructureId, string[] units = null, bool internalId = false)
         {
             if (File.Exists(filePath))
             {
@@ -705,7 +707,7 @@ namespace BExIS.IO.Transform.Output
                     foreach (DataRow row in table.Rows)
                     {
                         // add row and increment current index
-                        if (AddRow(row, rowIndex))
+                        if (AddRow(row, rowIndex, internalId))
                         {
                             rowIndex += 1;
                         }

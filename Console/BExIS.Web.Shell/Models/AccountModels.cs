@@ -56,19 +56,68 @@ namespace BExIS.Web.Shell.Models
         }
     }
 
+    public class LdapLoginConfirmModel
+    {
+        [Required]
+        public long Id { get; set; }
+
+        public string Name { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Display(Name = "Terms and Conditions")]
+        [MustBeTrue(ErrorMessage = "You must agree to the Terms and Conditions before register.")]
+        public bool TermsAndConditions { get; set; }
+
+        //[Display(Name = "Privacy Policy")]
+        //[MustBeTrue(ErrorMessage = "You must agree to the Privacy Policy before register.")]
+        //public bool PrivacyPolicy { get; set; }
+
+        public static LdapLoginConfirmModel Convert(User user, string name)
+        {
+            return new LdapLoginConfirmModel()
+            {
+                Id = user.Id,
+                Name = name,
+                Email = user.Email,
+                TermsAndConditions = user.HasTermsAndConditionsAccepted,
+                //PrivacyPolicy = user.HasPrivacyPolicyAccepted
+            };
+        }
+    }
+
     public class LoginViewModel
     {
         [Display(Name = "Authenticator")]
         public string Authenticator { get; set; }
 
         [Required]
-        [Display(Name = "Email or Username")]
+        [Display(Name = "Email or UserName")]
+        public string UserName { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password")] 
+        public string Password { get; set; }
+
+        [Display(Name = "Remember me")]
+        public bool RememberMe { get; set; }
+    }
+
+    public class LdapLoginViewModel
+    {
+        public string Name { get; set; }
+
+        [Required]
+        [Display(Name = "Email or UserName")]
         public string UserName { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
-        [System.Web.Mvc.AllowHtml]
         public string Password { get; set; }
 
         [Display(Name = "Remember me")]
@@ -97,7 +146,7 @@ namespace BExIS.Web.Shell.Models
     public class RegisterViewModel
     {
         [Required]
-        [Display(Name = "Username")]
+        [Display(Name = "UserName")]
         [RegularExpression(@"^\S+(?:\s+\S+)*$", ErrorMessage = "Sorry, not a valid username. Please check there are no trailing spaces.")]
         public string UserName { get; set; }
 

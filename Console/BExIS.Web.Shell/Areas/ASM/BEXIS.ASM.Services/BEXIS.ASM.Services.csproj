@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BEXIS.ASM.Services</RootNamespace>
     <AssemblyName>BEXIS.ASM.Services</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,18 +55,18 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Vaiona.Entities">
-      <HintPath>..\..\..\..\..\Libraries\Vaiona\Vaiona.Entities.dll</HintPath>
+      <HintPath>..\..\..\..\..\Components\Vaiona\Vaiona.Entities\bin\Debug\Vaiona.Entities.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Logging, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Libraries\Vaiona\Vaiona.Logging.dll</HintPath>
+      <HintPath>..\..\..\..\..\Components\Vaiona\Vaiona.Logging\bin\Debug\Vaiona.Logging.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Persistence.Api">
-      <HintPath>..\..\..\..\..\Libraries\Vaiona\Vaiona.Persistence.Api.dll</HintPath>
+      <HintPath>..\..\..\..\..\Components\Vaiona\Vaiona.Persistence.Api\bin\Debug\Vaiona.Persistence.Api.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Utils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Libraries\Vaiona\Vaiona.Utils.dll</HintPath>
+      <HintPath>..\..\..\..\..\Components\Vaiona\Vaiona.Utils\bin\Debug\Vaiona.Utils.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -119,7 +120,7 @@
       <Project>{898568BE-061E-44D2-A94C-04729F07DDCA}</Project>
       <Name>BExIS.Aam.Services</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DCM\BExIS.Modules.Dcm.UI.csproj">
+    <ProjectReference Include="..\..\DCM\BExIS.Modules.Dcm.UI\BExIS.Modules.Dcm.UI.csproj">
       <Project>{44DD2A5E-0D2F-4FAB-B297-4211441030B7}</Project>
       <Name>BExIS.Modules.Dcm.UI</Name>
     </ProjectReference>
@@ -127,7 +128,7 @@
       <Project>{9472D367-8FB1-4009-B648-104B3D015CE9}</Project>
       <Name>BEXIS.OAC.Entities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\RPM\BExIS.Modules.Rpm.UI.csproj">
+    <ProjectReference Include="..\..\RPM\BExIS.Modules.Rpm.UI\BExIS.Modules.Rpm.UI.csproj">
       <Project>{76702A4F-D6E5-416F-BD81-58447514AF05}</Project>
       <Name>BExIS.Modules.Rpm.UI</Name>
     </ProjectReference>

@@ -56,7 +56,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
         }
         */
         #endregion
-
+        /*
 
         static JObject result;
 
@@ -112,7 +112,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
             return response;
         }
 
-
+        */
     }
 
 }

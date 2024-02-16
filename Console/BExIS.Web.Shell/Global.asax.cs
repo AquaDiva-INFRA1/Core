@@ -2,8 +2,9 @@
 using BExIS.UI.Helpers;
 using BExIS.Utils.Config;
 using BExIS.Web.Shell.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
-using System.Configuration;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -77,8 +78,8 @@ namespace BExIS.Web.Shell
             Tenant tenant = tenantResolver.Resolve(this.Request);
 
             // if the tenant has no landing page, set the application's default landing page for it.
-            GeneralSettings generalSettings = IoCFactory.Container.Resolve<GeneralSettings>();
-            var landingPage = generalSettings.GetEntryValue("landingPage").ToString();
+
+            var landingPage = GeneralSettings.LandingPage;
             tenant.LandingPage = landingPage; // checks and sets
 
             this.Session.SetTenant(tenant);
@@ -100,8 +101,8 @@ namespace BExIS.Web.Shell
             HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*");
             HttpContext.Current.Response.AddHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
             HttpContext.Current.Response.AddHeader("Access-Control-Allow-Headers", "content-type, append,delete,entries,foreach,get,has,keys,set,values,Authorization");
-            if (
-                   Request.HttpMethod == "OPTIONS")
+
+            if (Request.HttpMethod == "OPTIONS")
             {
                 Response.End();
             }
@@ -128,8 +129,10 @@ namespace BExIS.Web.Shell
 
         protected void Application_Error(object sender, EventArgs e)
         {
-            bool sendExceptions = false;
-            bool.TryParse(ConfigurationManager.AppSettings["SendExceptions"], out sendExceptions);
+
+
+
+            bool sendExceptions = GeneralSettings.SendExceptions;
 
             var error = Server.GetLastError();
             var code = (error is HttpException) ? (error as HttpException).GetHttpCode() : 500;

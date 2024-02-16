@@ -14,7 +14,7 @@
 }
 
 <div class="navbar navbar-default navbar-fixed-top" style="z-index: 1337">
-    <div class="container-fluid" id="menubar" style="background-color: #eff7f6">
+    <div class="container-fluid shadow-md" id="menubar" style="background-color: #eff7f6; height: 60px; padding: 8px 12px;">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
             <button type="button" data-target="#navbarCollapse" data-toggle="collapse" class="navbar-toggle">
@@ -24,7 +24,7 @@
                 <span class="icon-bar"></span>
             </button>
             <a href="@Url.Action("Index", "Home", new {area = ""})" class="navbar-brand">
-                @Html.Brand(Html.GetTenant().LogoPath, Html.GetTenant().ShortName)
+                @Html.Brand(Html.GetTenant().BrandPath, Html.GetTenant().ShortName)
             </a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -44,35 +44,43 @@
             {
                 using (Html.BeginForm("LogOff", "Account", new { Area = "" }, FormMethod.Post, new { @class = "navbar-right", id = "form_logoff" }))
                 {
-            @Html.AntiForgeryToken()
+                    @Html.AntiForgeryToken()
 
-            <ul class="nav navbar-nav">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">@User.Identity.GetUserName()<span class="caret"></span></a>
-                    <ul class='dropdown-menu'>
-                        <li>@Html.ActionLink("Profile", "Edit", "PartyService", new { area = "bam" }, null)</li>
-                        <li>@Html.ActionLink("Token", "Profile", "Account", new { area = "" }, null)</li>
-                        <li><a href="@Url.Content("~/apihelp/index")" target="_blank">Api</a></li>
-                        <li><a href="javascript:document.getElementById('form_logoff').submit()">Log Off</a></li>
+                    <ul class="nav navbar-nav">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">@User.Identity.GetUserName()<span class="caret"></span></a>
+                            <ul class='dropdown-menu'>
+                                <li>@Html.ActionLink("Profile", "Edit", "PartyService", new { area = "bam" }, null)</li>
+                                <li>@Html.ActionLink("Token", "Create", "Tokens", new { area = "" }, null)</li>
+                                <li><a href="@Url.Content("~/apihelp/index")" target="_blank">Api</a></li>
+                                <li><a href="javascript:document.getElementById('form_logoff').submit()">Log Off</a></li>
+                            </ul>
+                        </li>
                     </ul>
-                </li>
-            </ul>
                 }
             }
             else
             {
-            <ul class="nav navbar-nav navbar-right">
-                <li>@Html.ActionLink("Register", "Register", "Account", new { area = "" }, htmlAttributes: new { id = "registerLink" })</li>
-                <li>@Html.ActionLink("Login", "Login", "Account", new { area = "" }, htmlAttributes: new { id = "loginLink" })</li>
-            </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>@Html.ActionLink("Register", "Register", "Account", new { area = "" }, htmlAttributes: new { id = "registerLink" })</li>
+                    <li>@Html.ActionLink("Login", "Login", "Account", new { area = "" }, htmlAttributes: new { id = "loginLink" })</li>
+                </ul>
             }
 
             <ul class="nav navbar-nav navbar-right">
                 @if (Html.GetTenant().ExtendedMenus != null)
                 {
-                @Html.RenderExtendedMenu(Html.GetTenant().ExtendedMenus.Element("ExtendedMenu"))
+                    @Html.RenderExtendedMenu(Html.GetTenant().ExtendedMenus.Element("ExtendedMenu"))
                 }
             </ul>
         </div>
     </div>
 </div>
+
+<style>
+    .shadow-md {
+        --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+    }
+</style>

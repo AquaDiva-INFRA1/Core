@@ -9,19 +9,11 @@ using BExIS.Utils.Config;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Serialization;
-using Vaiona.Persistence.Api;
 
 namespace BExIS.Dlm.Tests.Services.Data
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Objekte verwerfen, bevor Bereich verloren geht", Justification = "<Ausstehend>")]
-
     [TestFixture()]
     public class DataTupleTests
     {
@@ -33,27 +25,22 @@ namespace BExIS.Dlm.Tests.Services.Data
         private DatasetHelper dsHelper;
         private long numberOfTuples = 10;
 
-
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-
             helper = new TestSetupHelper(WebApiConfig.Register, false);
 
             var dm = new DatasetManager();
             var rsm = new ResearchPlanManager();
             var mdm = new MetadataStructureManager();
+            var etm = new EntityTemplateManager();
             dsHelper = new DatasetHelper();
-
 
             try
             {
-
-
                 dsHelper.PurgeAllDatasets();
                 dsHelper.PurgeAllDataStructures();
                 dsHelper.PurgeAllResearchPlans();
-
 
                 // generate Data
                 numberOfTuples = 50000;
@@ -67,20 +54,19 @@ namespace BExIS.Dlm.Tests.Services.Data
                 var mds = mdm.Repo.Query().First();
                 mds.Should().NotBeNull("Failed to meet a precondition: a metadata strcuture is required.");
 
-                Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds);
+                var et = etm.Repo.Query().First();
+                et.Should().NotBeNull("Failed to meet a precondition: a entity template is required.");
+
+                Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds, et);
                 datasetId = dataset.Id;
-
-
 
                 // add datatuples
                 dataset = dsHelper.GenerateTuplesForDataset(dataset, dataStructure, numberOfTuples, username);
                 dm.CheckInDataset(dataset.Id, "for testing  datatuples with versions", username);
-
-       
-
             }
             finally
             {
+                etm.Dispose();
                 dm.CheckInDataset(datasetId, "for testing  datatuples with versions", username, ViewCreationBehavior.None);
             }
         }
@@ -99,7 +85,6 @@ namespace BExIS.Dlm.Tests.Services.Data
         [Test()]
         public void TransformDatatupleToJson()
         {
-
             //Arrange
             DatasetManager datasetManager = new DatasetManager();
 
@@ -123,9 +108,7 @@ namespace BExIS.Dlm.Tests.Services.Data
                     //dt.Materialize2();
 
                     //dt.Dematerialize2(); // convert variablevalues 1 to json
-
                 }
-
 
                 //Assert
                 Assert.That(result.Count(), Is.EqualTo(numberOfTuples));
@@ -158,8 +141,6 @@ namespace BExIS.Dlm.Tests.Services.Data
             {
                 datasetManager.Dispose();
             }
-
         }
-
     }
 }
