@@ -1,75 +1,76 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Map>
-  <MapItem ContentKey="Menu">
-    <ContentProviders>
-      <ContentProvider View="_Menu" Type="View" Enabled="true">
-        <Parameters>
-        </Parameters>
-      </ContentProvider>
-      <!--to be deleted-->
-      <ContentProvider Area="" Controller="Nav" Action="Menu" Type="Action" Enabled="false">
-        <Parameters>
-          <Parameter Name="oreintation" Value="1" />
-        </Parameters>
-      </ContentProvider>
-    </ContentProviders>
-  </MapItem>
+	<MapItem ContentKey="Menu">
+		<ContentProviders>
+			<ContentProvider View="_Menu" Type="View" Enabled="true">
+				<Parameters>
+				</Parameters>
+			</ContentProvider>
+			<!--to be deleted-->
+			<ContentProvider Area="" Controller="Nav" Action="Menu" Type="Action" Enabled="false">
+				<Parameters>
+					<Parameter Name="oreintation" Value="1" />
+				</Parameters>
+			</ContentProvider>
+		</ContentProviders>
+	</MapItem>
 
-  <MapItem ContentKey="Header">
-    <ContentProviders>
-      <ContentProvider View="_Header" Type="View" Enabled="true">
-        <Parameters>
-        </Parameters>
-      </ContentProvider>
-    </ContentProviders>
-  </MapItem>
+	<MapItem ContentKey="Header">
+		<ContentProviders>
+			<ContentProvider View="_Header" Type="View" Enabled="true">
+				<Parameters>
+				</Parameters>
+			</ContentProvider>
+		</ContentProviders>
+	</MapItem>
 
-  <MapItem ContentKey="Breadcrumb">
-    <ContentProviders>
-      <ContentProvider View="_Breadcrumb" Type="View" Enabled="true">
-        <Parameters>
-        </Parameters>
-      </ContentProvider>
-    </ContentProviders>
-  </MapItem>
+	<MapItem ContentKey="Breadcrumb">
+		<ContentProviders>
+			<ContentProvider View="_Breadcrumb" Type="View" Enabled="true">
+				<Parameters>
+				</Parameters>
+			</ContentProvider>
+		</ContentProviders>
+	</MapItem>
 
-  <MapItem ContentKey="Information">
-    <ContentProviders>
-      <ContentProvider View="_Information" Type="View" Enabled="true">
-        <Parameters>
-        </Parameters>
-      </ContentProvider>
-    </ContentProviders>
-  </MapItem>
+	<!--<MapItem ContentKey="Information">
+		<ContentProviders>
+			<ContentProvider View="_Information" Type="View" Enabled="true">
+				<Parameters>
+				</Parameters>
+			</ContentProvider>
+		</ContentProviders>
+	</MapItem>-->
 
-  <MapItem ContentKey="LogOnStatus">
-    <ContentProviders>
-      <ContentProvider View="_LogOnStatus" Type="View" Enabled="true">
-        <Parameters>
-        </Parameters>
-      </ContentProvider>
-    </ContentProviders>
-  </MapItem>
+	<MapItem ContentKey="LogOnStatus">
+		<ContentProviders>
+			<ContentProvider View="_LogOnStatus" Type="View" Enabled="true">
+				<Parameters>
+				</Parameters>
+			</ContentProvider>
+		</ContentProviders>
+	</MapItem>
 
-  <MapItem ContentKey="ThemeSelector">
-    <ContentProviders>
-      <ContentProvider View="_ThemeSelector" Type="View" Enabled="false"> <!--changes are applied after application restart -->
-        <Parameters>
-        </Parameters>
-      </ContentProvider>
-    </ContentProviders>
-  </MapItem>
+	<MapItem ContentKey="ThemeSelector">
+		<ContentProviders>
+			<ContentProvider View="_ThemeSelector" Type="View" Enabled="false">
+				<!--changes are applied after application restart -->
+				<Parameters>
+				</Parameters>
+			</ContentProvider>
+		</ContentProviders>
+	</MapItem>
 
-  <MapItem ContentKey="Footer">
-    <ContentProviders>
-      <ContentProvider View="_Footer" Type="View" Enabled="true">
-        <Parameters>
-        </Parameters>
-      </ContentProvider>
-    </ContentProviders>
-  </MapItem>
+	<MapItem ContentKey="Footer">
+		<ContentProviders>
+			<ContentProvider View="_Footer" Type="View" Enabled="true">
+				<Parameters>
+				</Parameters>
+			</ContentProvider>
+		</ContentProviders>
+	</MapItem>
 
-  <!--
+	<!--
   It is possible to create mapping nodes to point to action of controllers of desired areas. Also it possible to point to partial views in the "Partials" folders of themes.
   Mapping items can provide parameters to the content providers (actions and partial views).
   If the RenderAuto is called programmatically, there is a possibility to override the declarative parameter values.

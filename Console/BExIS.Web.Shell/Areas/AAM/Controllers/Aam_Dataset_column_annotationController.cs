@@ -135,11 +135,12 @@ namespace BExIS.Modules.Aam.UI.Controllers
         {
             DatasetManager dsmanager = new DatasetManager();
             DataStructureManager dsm = new DataStructureManager();
-            List<Variable> variables =dsm.VariableRepo.Get().ToList<Variable>();
+            VariableManager vm = new VariableManager();
+            List<Variable> variables = new List<Variable>();
             // fill variables
             if (ds_id != null)
             {
-                variables = variables.Where(x => x.DataStructure.Id ==dsmanager.GetDataset(Int64.Parse(ds_id)).DataStructure.Id).ToList<Variable>();
+                variables = vm.VariableInstanceRepo.Get().ToList().Where(x => x.DataStructure.Id ==dsmanager.GetDataset(Int64.Parse(ds_id)).DataStructure.Id).ToList<Variable>();
             }
             dca_M.DataAttributes.Clear();
             foreach (Variable ds in variables)
@@ -329,14 +330,14 @@ namespace BExIS.Modules.Aam.UI.Controllers
                         string charac_uri = clean_entity_URI_for_insert(excellineJson[7].ToString());
                         string charac_label = clean_entity_URI_for_insert(excellineJson[5].ToString());
 
-                        Variable variable = new Variable();
+                        VariableInstance variable = new VariableInstance();
                         DataStructureManager dataStructureManager = new DataStructureManager();
                         var structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
                         StructuredDataStructure dataStructure = structureRepo.Get(new DatasetManager().GetDataset(Int64.Parse(ds_id[0])).DataStructure.Id);
 
                         if (var_id != "")
                         {
-                            foreach (Variable var in dataStructure.Variables)
+                            foreach (VariableInstance var in dataStructure.Variables)
                             {
                                 if (var.Id == Int64.Parse(var_id)) variable = var;
                             }
@@ -422,7 +423,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
                         string characContextualizing_entity = clean_entity_URI_for_insert(excellineJson[7].ToString());
                         string characContextualizing_entity_label = clean_entity_URI_for_insert(excellineJson[5].ToString());
 
-                        Variable variable = new Variable();
+                        VariableInstance variable = new VariableInstance();
                         DataStructureManager dataStructureManager = new DataStructureManager();
                         var structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
                         StructuredDataStructure dataStructure = structureRepo.Get(new DatasetManager().GetDataset(Int64.Parse(ds_id[0])).DataStructure.Id);
@@ -431,7 +432,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
                         {
                             foreach (Variable var in dataStructure.Variables)
                             {
-                                if (var.Id == Int64.Parse(var_id)) variable = var;
+                                if (var.Id == Int64.Parse(var_id)) variable = (VariableInstance)var;
                             }
                         }
 

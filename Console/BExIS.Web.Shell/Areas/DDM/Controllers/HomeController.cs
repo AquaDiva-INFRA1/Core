@@ -1,8 +1,6 @@
 ﻿using BExIS.Ddm.Api;
-using BExIS.Utils.Filters;
 using BExIS.Utils.Models;
 using BExIS.Xml.Helpers;
-using Lucene.Net.Search;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -325,9 +323,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     Session["occur"] = occur;
                     if (occur == "OR")
-                        provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent, Occur.SHOULD);
+                        provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent, Lucene.Net.Search.Occur.SHOULD);
                     else
-                        provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent, Occur.MUST);
+                        provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent, Lucene.Net.Search.Occur.MUST);
                 }
             }
 

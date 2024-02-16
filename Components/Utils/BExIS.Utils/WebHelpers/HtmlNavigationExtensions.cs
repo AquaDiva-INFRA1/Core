@@ -38,16 +38,15 @@ namespace BExIS.Utils.WebHelpers
                     {
                         sb.Append($"<li><a href='");
                         if (!string.IsNullOrWhiteSpace(child.Attribute("area").Value))
-                            sb.Append(@"/").Append(child.Attribute("area").Value);
+                            sb.Append(@"/").Append(child.Attribute("area").Value.ToLower());
 
                         if (!string.IsNullOrWhiteSpace(child.Attribute("controller").Value))
-                            sb.Append(@"/").Append(child.Attribute("controller").Value);
+                            sb.Append(@"/").Append(child.Attribute("controller").Value.ToLower());
 
                         if (!string.IsNullOrWhiteSpace(child.Attribute("action").Value))
-                            sb.Append(@"/").Append(child.Attribute("action").Value);
-                        
+                            sb.Append(@"/").Append(child.Attribute("action").Value.ToLower());
+
                         sb.Append("' target=\"_blank\" >").Append(child.Attribute("title").Value).Append("</a></li>");
-                        sb.Append($"<li role=\"separator\" class=\"divider\"></li>");
                     }
 
                     sb.Append($"</ul></li>");
@@ -94,13 +93,13 @@ namespace BExIS.Utils.WebHelpers
 
                             menuItemSb.Append($"<li><a href='");
                             if (!string.IsNullOrWhiteSpace(child.Attribute("area").Value))
-                                menuItemSb.Append(@"/").Append(child.Attribute("area").Value);
+                                menuItemSb.Append(@"/").Append(child.Attribute("area").Value.ToLower());
 
                             if (!string.IsNullOrWhiteSpace(child.Attribute("controller").Value))
-                                menuItemSb.Append(@"/").Append(child.Attribute("controller").Value);
+                                menuItemSb.Append(@"/").Append(child.Attribute("controller").Value.ToLower());
 
                             if (!string.IsNullOrWhiteSpace(child.Attribute("action").Value))
-                                menuItemSb.Append(@"/").Append(child.Attribute("action").Value);
+                                menuItemSb.Append(@"/").Append(child.Attribute("action").Value.ToLower());
 
                             menuItemSb.Append("'>").Append(child.Attribute("title").Value).Append("</a></li>");
                         }
@@ -116,13 +115,13 @@ namespace BExIS.Utils.WebHelpers
                     {
                         sb.Append($"<li><a href='");
                         if (!string.IsNullOrWhiteSpace(menuBarItem.Attribute("area").Value))
-                            sb.Append(@"/").Append(menuBarItem.Attribute("area").Value);
+                            sb.Append(@"/").Append(menuBarItem.Attribute("area").Value.ToLower());
 
                         if (!string.IsNullOrWhiteSpace(menuBarItem.Attribute("controller").Value))
-                            sb.Append(@"/").Append(menuBarItem.Attribute("controller").Value);
+                            sb.Append(@"/").Append(menuBarItem.Attribute("controller").Value.ToLower());
 
                         if (!string.IsNullOrWhiteSpace(menuBarItem.Attribute("action").Value))
-                            sb.Append(@"/").Append(menuBarItem.Attribute("action").Value);
+                            sb.Append(@"/").Append(menuBarItem.Attribute("action").Value.ToLower());
 
                         sb.Append("'>").Append(menuBarItem.Attribute("title").Value).Append("</a></li>");
                     }
@@ -180,17 +179,17 @@ namespace BExIS.Utils.WebHelpers
                         sb.Append(@"/").Append(area);
 
                     if (!string.IsNullOrWhiteSpace(child.Attribute("controller").Value))
-                        sb.Append(@"/").Append(child.Attribute("controller").Value);
+                        sb.Append(@"/").Append(child.Attribute("controller").Value.ToLower());
 
                     if (!string.IsNullOrWhiteSpace(child.Attribute("action").Value))
-                        sb.Append(@"/").Append(child.Attribute("action").Value);
+                        sb.Append(@"/").Append(child.Attribute("action").Value.ToLower());
 
                     sb.Append("'>").Append(child.Attribute("title").Value).Append("</a></li>");
                 }
             }
 
             if (childAccess)
-                return new MvcHtmlString($"<li class='dropdown'><a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'><i class='fa fa-cog'></i></a><ul class='dropdown-menu seetings-menu'>" + sb.ToString() + $"</ul></li>");
+                return new MvcHtmlString($"<li class='dropdown'><a href='#' class='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'><i class='fa fa-cog'></i></a><ul class='dropdown-menu seetings-menu' style='max-height: 90vh;overflow-y: scroll;'>" + sb.ToString() + $"</ul></li>");
             else
                 return new MvcHtmlString("");
         }
@@ -199,7 +198,14 @@ namespace BExIS.Utils.WebHelpers
         {
             //get parameters for the function to check
             string name = userName;
-            string area = operation.Attribute("area").Value.ToLower();
+
+            // if operation come from the shell the area is empty
+            // operations are resgistered with area as shell
+            // set area as shell if its empty
+            string area = "";
+            if (string.IsNullOrEmpty(operation.Attribute("area").Value)) area = "shell";
+            else area = operation.Attribute("area").Value.ToLower();
+
             string controller = operation.Attribute("controller").Value.ToLower();
 
             string identifier = name + "_" + area + "_" + controller;

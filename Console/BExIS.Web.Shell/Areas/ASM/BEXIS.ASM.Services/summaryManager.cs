@@ -141,7 +141,7 @@ namespace BEXIS.ASM.Services
                                 ch = ch + dm.GetDatasetLatestVersion(id).Id + ";";
                                 ch = ch + var?.Id + ";";
                                 ch = ch + var?.Unit?.Name + ";";
-                                ch = ch + var?.DataAttribute?.DataType?.Name + ";";
+                                ch = ch + var?.DataType?.Name + ";";
                                 ch = ch + variable_annotation?.entity_id.Id + ";";
                                 ch = ch + variable_annotation?.entity_id.label + ";";
                                 ch = ch + variable_annotation?.entity_id.URI + ";";

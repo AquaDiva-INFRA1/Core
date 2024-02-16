@@ -36,6 +36,11 @@ namespace BExIS.Dlm.Entities.DataStructure
         public virtual string CultureId { get; set; }
 
         /// <summary>
+        /// A free form name of the constraint
+        /// </summary>
+        public virtual string Name { get; set; }
+
+        /// <summary>
         /// A free form description of the constraint
         /// </summary>
         public virtual string Description { get; set; }
@@ -60,6 +65,12 @@ namespace BExIS.Dlm.Entities.DataStructure
         /// </summary>
         public virtual string NegatedMessageTemplate { get; set; }
 
+        public virtual DateTime CreationDate { get; set; }
+
+        public virtual DateTime LastModified { get; set; }
+
+        public virtual long LastModifiedUserRef { get; set; }
+
         #endregion
 
         #region Associations
@@ -69,9 +80,11 @@ namespace BExIS.Dlm.Entities.DataStructure
         /// </summary>
         public virtual DataContainer DataContainer { get; set; }
 
+        public virtual ICollection<Variable> VariableConstraints { get; set; }
+
         #endregion
 
-        #region Mathods
+        #region Methods
         /// <summary>
         /// The method checks whether the input <paramref name="data"/> satisfies the constraint. To be implemented by concrete sub-classes.
         /// </summary>
@@ -172,6 +185,7 @@ namespace BExIS.Dlm.Entities.DataStructure
         {
             defaultMessageTemplate = "Provided value is not a domain item. The value should be one of these items: {0}.";
             defaultNegatedMessageTemplate = "Provided value is a domain item, but the constraint is negated. The value should not be one of these items: {0}.";
+            Items = new List<DomainItem>();
         }
 
         public DomainConstraint(ConstraintProviderSource provider, string constraintSelectionPredicate, string cultureId
@@ -202,7 +216,7 @@ namespace BExIS.Dlm.Entities.DataStructure
         /// <param name="auxiliary"></param>
         public override bool IsSatisfied(object data, object auxiliary = null)
         {
-            if(Items == null || !Items.Any())this.Materialize(); // test it
+            if (Items == null || !Items.Any()) this.Materialize(); // test it
 
             // Domain items are stored as string, so instead of converting them to the containers data type, it is easier and faster to convert the input data to string
             // it computes the XOR between the positive clause of the constraint and the "Negated" Boolean,
@@ -315,10 +329,11 @@ namespace BExIS.Dlm.Entities.DataStructure
         {
             defaultMessageTemplate = "Provided value does not match the pattern. The value should match {0} {1}.";
             defaultNegatedMessageTemplate = "Provided value matches the pattern, but the constraint is negated. The value should not match {0} {1}.";
+            CaseSensitive = true;
         }
 
         public PatternConstraint(ConstraintProviderSource provider, string constraintSelectionPredicate, string cultureId
-            , string description, bool negated, string context, string messageTemplate, string negatedMessageTemplate, string matchingPhrase, bool caseSensitive)
+            , string description, bool negated, string context, string messageTemplate, string negatedMessageTemplate, string matchingPhrase, bool caseSensitive=true)
         {
             Contract.Requires(!string.IsNullOrWhiteSpace(matchingPhrase));
 
@@ -348,6 +363,7 @@ namespace BExIS.Dlm.Entities.DataStructure
             else
                 return (Negated ^ (Regex.IsMatch(data.ToString(), MatchingPhrase)));
         }
+
 
         #endregion
     }
@@ -704,7 +720,7 @@ namespace BExIS.Dlm.Entities.DataStructure
             CultureId = cultureId;
             Description = description;
             Negated = negated;
-            Context = context != null ? context : "Default";
+            Context = context ?? "Default";
             MessageTemplate = messageTemplate;
             NegatedMessageTemplate = negatedMessageTemplate;
             Operator = comparisonOperator;

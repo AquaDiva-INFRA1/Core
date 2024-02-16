@@ -1,0 +1,44 @@
+{
+	"helpItems": [
+		{
+			"id": "create",
+			"name": "Create new Data Type",
+			"description": "Click here to create a new data type"
+		},
+		{
+			"id": "delete",
+			"name": "Delete Data Type",
+			"description": "Click here to delete the data type"
+		},
+		{
+			"id": "edit",
+			"name": "Edit Data Type",
+			"description": "Click here to edit the data type"
+		},
+		{
+			"id": "save",
+			"name": "Save Data Type",
+			"description": "Click here to save the data type"
+		},
+		{
+			"id": "cancel",
+			"name": "Cancel",
+			"description": "Click here to cancel"
+		},
+		{
+			"id": "name",
+			"name": "Name",
+			"description": "Name of the data type. <li>Has to be unique.</li>"
+		},
+		{
+			"id": "description",
+			"name": "Description",
+			"description": "Description of the data type. <li>A short overview how the data type should be used.</li>"
+		},
+		{
+			"id": "systemType",
+			"name": "System Type",
+			"description": "System type of the data type. <li>The system internal data type like integer, string etc. </li>"
+		}
+	]
+}

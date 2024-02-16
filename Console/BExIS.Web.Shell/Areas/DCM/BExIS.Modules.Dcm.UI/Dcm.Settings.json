@@ -1,0 +1,86 @@
+{
+  "id": "dcm",
+  "name": "Dataset Creation",
+  "description": "...",
+  "entries": [
+    {
+      "key": "help",
+      "title": "Help URL",
+      "value": "",
+      "type": "String",
+      "description": "URL to the manual. If empty, it links to the latest manual from BEXIS2"
+    },
+    {
+      "key": "celllimit",
+      "title": "Number of cells for direct upload instead of async",
+      "value": 2000,
+      "description": "This number of cells determines whether an upload of structured data should be executed directly or async.",
+      "type": "Int32",
+      "options": []
+    },
+    {
+      "key": "fileuploadDescription",
+      "title": "File upload description",
+      "value": "required",
+      "description": "If it is activated, adding a description per file is possible.",
+      "type": "String",
+      "options": [
+        "none",
+        "active",
+        "required"
+      ]
+    },
+    {
+      "key": "allowMultiFileupload",
+      "title": "Multiple file upload",
+      "value": true,
+      "description": "Allow multiple files to be uploaded at the same time.",
+      "type": "Boolean",
+      "options": []
+    },
+    {
+      "key": "attachmentDescription",
+      "title": "Attachment description",
+      "value": "active",
+      "description": "If it is activated, adding a description per file is possible.",
+      "type": "String",
+      "options": [
+        "none",
+        "active",
+        "required"
+      ]
+    },
+    {
+      "key": "allowMultiAttachmentUpload",
+      "title": "Multiple attachment upload",
+      "value": false,
+      "description": "Allow multiple files to be uploaded at the same time.",
+      "type": "Boolean",
+      "options": []
+    },
+    {
+      "key": "minToAnalyse",
+      "title": "File Analyze: Minimum row number",
+      "value": 100,
+      "description": "Min number of rows to analyze structure.",
+      "type": "Int32",
+      "options": []
+    },
+    {
+      "key": "maxToAnalyse",
+      "title": "File Analyze: Maximum row number",
+      "value": 10000,
+      "description": "Max number of rows to analyze structure.",
+      "type": "Int32",
+      "options": []
+    },
+    {
+      "key": "precentageToAnalyse",
+      "title": "File Analyze: Percentage of rows",
+      "value": 50,
+      "description": "Percentage of rows to analyze structure.",
+      "type": "Int32",
+      "options": []
+    }
+  ]
+}

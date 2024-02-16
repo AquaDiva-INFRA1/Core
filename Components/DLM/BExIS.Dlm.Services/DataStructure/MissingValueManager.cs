@@ -1,12 +1,10 @@
-﻿using System;
+﻿using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Services.TypeSystem;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using BExIS.Dlm.Entities.DataStructure;
-using Vaiona.Persistence.Api;
-using BExIS.Dlm.Services.Helpers;
 using System.Linq;
-
-using BExIS.Dlm.Services.TypeSystem;
+using Vaiona.Persistence.Api;
 
 namespace BExIS.Dlm.Services.DataStructure
 {
@@ -57,13 +55,15 @@ namespace BExIS.Dlm.Services.DataStructure
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<MissingValue> repo = uow.GetRepository<MissingValue>();
+                IRepository<VariableInstance> varRepo = uow.GetRepository<VariableInstance>();
+                var variable = varRepo.Get(variableId);
 
                 switch (typeCode)
                 {
                     case TypeCode.Int16:
                         try
                         {
-                            List<short> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => Convert.ToInt16(mv.Placeholder)).ToList();
+                            List<short> placeholders = variable.MissingValues.Select(mv=> Convert.ToInt16(mv.Placeholder)).ToList();
                             short temp = short.MaxValue - 1;
                             while (placeholders.Contains(temp) && temp > short.MinValue + 1)
                             {
@@ -79,7 +79,8 @@ namespace BExIS.Dlm.Services.DataStructure
                     case TypeCode.Int32:
                         try
                         {
-                            List<int> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => Convert.ToInt32(mv.Placeholder)).ToList();
+                            List<Int32> placeholders = variable.MissingValues.Select(mv => Convert.ToInt32(mv.Placeholder)).ToList();
+
                             int temp = int.MaxValue - 1;
                             while (placeholders.Contains(temp) && temp > int.MinValue + 1)
                             {
@@ -95,7 +96,7 @@ namespace BExIS.Dlm.Services.DataStructure
                     case TypeCode.Int64:
                         try
                         {
-                            List<long> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => Convert.ToInt64(mv.Placeholder)).ToList();
+                            List<long> placeholders = variable.MissingValues.Select(mv => Convert.ToInt64(mv.Placeholder)).ToList();
                             long temp = long.MaxValue - 1;
                             while (placeholders.Contains(temp) && temp > long.MinValue + 1)
                             {
@@ -111,7 +112,7 @@ namespace BExIS.Dlm.Services.DataStructure
                     case TypeCode.UInt16:
                         try
                         {
-                            List<ushort> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => Convert.ToUInt16(mv.Placeholder)).ToList();
+                            List<ushort> placeholders = variable.MissingValues.Select(mv => Convert.ToUInt16(mv.Placeholder)).ToList();
                             ushort temp = ushort.MaxValue - 1;
                             while (placeholders.Contains(temp) && temp > ushort.MinValue + 1)
                             {
@@ -127,7 +128,8 @@ namespace BExIS.Dlm.Services.DataStructure
                     case TypeCode.UInt32:
                         try
                         {
-                            List<uint> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => Convert.ToUInt32(mv.Placeholder)).ToList();
+                            List<uint> placeholders = variable.MissingValues.Select(mv => Convert.ToUInt32(mv.Placeholder)).ToList();
+
                             uint temp = uint.MaxValue - 1;
                             while (placeholders.Contains(temp) && temp > uint.MinValue + 1)
                             {
@@ -143,7 +145,8 @@ namespace BExIS.Dlm.Services.DataStructure
                     case TypeCode.UInt64:
                         try
                         {
-                            List<ulong> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => Convert.ToUInt64(mv.Placeholder)).ToList();
+                            List<ulong> placeholders = variable.MissingValues.Select(mv => Convert.ToUInt64(mv.Placeholder)).ToList();
+
                             ulong temp = ulong.MaxValue - 1;
                             while (placeholders.Contains(temp) && temp > ulong.MinValue + 1)
                             {
@@ -159,7 +162,8 @@ namespace BExIS.Dlm.Services.DataStructure
                     case TypeCode.Double:
                         try
                         {
-                            List<string> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => mv.Placeholder).ToList();
+                            List<string> placeholders = variable.MissingValues.Select(mv => mv.Placeholder).ToList();
+
                             double temp = double.MaxValue / 10 - 1.0;
                             while (placeholders.Contains(temp.ToString(format)) && temp > double.MinValue / 10 + 1.0)
                             {
@@ -175,7 +179,8 @@ namespace BExIS.Dlm.Services.DataStructure
                     case TypeCode.Decimal:
                         try
                         {
-                            List<string> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => mv.Placeholder).ToList();
+                            List<string> placeholders = variable.MissingValues.Select(mv => mv.Placeholder).ToList();
+
                             decimal temp = decimal.MaxValue - (decimal)1.0;
                             while (placeholders.Contains(temp.ToString(format)) && temp > decimal.MinValue + (decimal)1.0)
                             {
@@ -191,7 +196,8 @@ namespace BExIS.Dlm.Services.DataStructure
                     case TypeCode.Single:
                         try
                         {
-                            List<float> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => Convert.ToSingle(mv.Placeholder)).ToList();
+                            List<float> placeholders = variable.MissingValues.Select(mv => Convert.ToSingle(mv.Placeholder)).ToList();
+
                             float temp = float.MaxValue - (float)1.0;
                             while (placeholders.Contains(temp) && temp > float.MinValue + (float)1.0)
                             {
@@ -207,13 +213,14 @@ namespace BExIS.Dlm.Services.DataStructure
                     case TypeCode.DateTime:
                         try
                         {
-                            List<string> placeholders = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).Select(mv => mv.Placeholder).ToList();
+                            List<string> placeholders = variable.MissingValues.Select(mv => mv.Placeholder).ToList();
+
                             DateTime temp = DateTime.MaxValue.AddHours(-1);
                             while (placeholders.Contains(temp.ToString(format)))
                             {
                                 temp = temp.AddHours(-1);
                                 temp = temp.AddYears(-1); //Reduce also by 1 year to be able to distinguish placeholder also after application of display pattern e.g. YYYY-MM-DD
-                            }                            
+                            }
                             return temp.ToString(format);
                         }
                         catch
@@ -244,8 +251,10 @@ namespace BExIS.Dlm.Services.DataStructure
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<MissingValue> repo = uow.GetRepository<MissingValue>();
+                IRepository<VariableInstance> varRepo = uow.GetRepository<VariableInstance>();
+                var variable = varRepo.Get(variableId);
 
-                List<MissingValue> missingValues = repo.Query().Where(mv => mv.Variable.Id.Equals(variableId)).ToList();
+                List<MissingValue> missingValues = variable.MissingValues!=null? variable.MissingValues.ToList(): new List<MissingValue>();
 
                 switch (typeCode)
                 {
@@ -481,7 +490,7 @@ namespace BExIS.Dlm.Services.DataStructure
 
             foreach (DataTypeCode tc in Enum.GetValues(typeof(DataTypeCode)))
             {
-                if (tc.ToString() == variable.DataAttribute.DataType.SystemType)
+                if (tc.ToString() == variable.DataType.SystemType)
                 {
                     typecode = (TypeCode)tc;
                     break;
@@ -502,9 +511,7 @@ namespace BExIS.Dlm.Services.DataStructure
                     MissingValue missingValue = new MissingValue()
                     {
                         DisplayName = displayName,
-                        Placeholder = placeholder,
-                        Description = description,
-                        Variable = variable,
+                        Placeholder = placeholder
                     };
                     repo.Put(missingValue);
                     uow.Commit();
@@ -542,13 +549,18 @@ namespace BExIS.Dlm.Services.DataStructure
 
             Contract.Ensures(Contract.Result<MissingValue>() != null && Contract.Result<MissingValue>().Id >= 0, "No entity is persisted!");
 
+            
+
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
+                IRepository<VariableInstance> varRepo = uow.GetRepository<VariableInstance>();
+                var variable = varRepo.Query(v=>v.MissingValues.Contains(entity)).FirstOrDefault();
+
                 TypeCode typecode = new TypeCode();
 
                 foreach (DataTypeCode tc in Enum.GetValues(typeof(DataTypeCode)))
                 {
-                    if (tc.ToString() == entity.Variable.DataAttribute.DataType.SystemType)
+                    if (tc.ToString() == variable.DataType.SystemType)
                     {
                         typecode = (TypeCode)tc;
                         break;
@@ -557,10 +569,10 @@ namespace BExIS.Dlm.Services.DataStructure
 
                 if (String.IsNullOrEmpty(entity.Placeholder))
                 {
-                    entity.Placeholder = getPlaceholder(typecode, entity.Variable.Id);
+                    entity.Placeholder = getPlaceholder(typecode, variable.Id);
                 }
 
-                if (!String.IsNullOrEmpty(entity.Placeholder) && ValidatePlaceholder(typecode, entity.Placeholder, entity.Variable.Id, entity.Id))
+                if (!String.IsNullOrEmpty(entity.Placeholder) && ValidatePlaceholder(typecode, entity.Placeholder, variable.Id, entity.Id))
                 {
                     IRepository<MissingValue> repo = uow.GetRepository<MissingValue>();
                     repo.Merge(entity);

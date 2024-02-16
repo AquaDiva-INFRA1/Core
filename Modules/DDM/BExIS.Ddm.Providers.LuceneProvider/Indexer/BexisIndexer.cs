@@ -8,6 +8,7 @@ using BExIS.Dlm.Services.DataStructure;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Utilities;
+using BExIS.Utils.Config;
 using BExIS.Utils.Models;
 using BExIS.Xml.Helpers;
 using Lucene.Net.Analysis;
@@ -17,12 +18,10 @@ using Lucene.Net.Search;
 using Lucene.Net.Store;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Xml;
 using Vaiona.Logging;
 using Vaiona.Persistence.Api;
@@ -144,7 +143,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             pathIndex = FSDirectory.Open(new DirectoryInfo(luceneIndexPath));
             autoCompleteIndex = FSDirectory.Open(new DirectoryInfo(autoCompleteIndexPath));
 
-           
+
 
             using (var bexisAnalyzer = new BexisAnalyzer())
             using (var nGramAnalyzer = new NGramAnalyzer())
@@ -178,7 +177,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             List<string> errors = new List<string>();
             try
             {
-                
+
                 IList<long> ids = dm.GetDatasetLatestIds();
                 IList<long> ids_rev = ids.Reverse().ToList();
 
@@ -209,7 +208,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 if (errors.Count > 0)
                     throw new Exception(string.Join("\n\r", errors));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
 
@@ -219,10 +218,12 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 dm.Dispose();
                 GC.Collect();
 
+
+
                 var es = new EmailService();
                 es.Send(MessageHelper.GetSearchReIndexHeader(),
                     MessageHelper.GetSearchReIndexMessage(errors),
-                    ConfigurationManager.AppSettings["SystemEmail"]);
+                    GeneralSettings.SystemEmail);
 
             }
         }
@@ -257,7 +258,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                 if (vv.VariableId > 0)
                                 {
                                     Variable varr = sds.Variables.Where(p => p.Id == vv.VariableId).SingleOrDefault();
-                                    switch (varr.DataAttribute.DataType.SystemType)
+                                    switch (varr.DataType.SystemType)
                                     {
                                         case "String":
                                             {
@@ -280,12 +281,12 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
                         foreach (var variableId in sds.Variables.Select(v => v.Id))
                         {
-                            var variable = uow.GetReadOnlyRepository<Variable>().Get(variableId);
+                            var variable = uow.GetReadOnlyRepository<VariableInstance>().Get(variableId);
 
-                            generatedStrings.Add(variable.DataAttribute.Name);
+                            generatedStrings.Add(variable.VariableTemplate.Label);
                             generatedStrings.Add(variable.Label);
-                            if (!string.IsNullOrEmpty(variable.DataAttribute.Description))
-                                generatedStrings.Add(variable.DataAttribute.Description);
+                            if (!string.IsNullOrEmpty(variable.Description))
+                                generatedStrings.Add(variable.Description);
                         }
 
                         return generatedStrings;
@@ -329,31 +330,13 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
             foreach (var variable in structuredDataStructure.Variables)
             {
-                tmp.Add(variable.DataAttribute.Name);
+                tmp.Add(variable.VariableTemplate.Label);
                 tmp.Add(variable.Label);
-                if (!string.IsNullOrEmpty(variable.DataAttribute.Description) && variable.DataAttribute.Description != "Unknown")
-                    tmp.Add(variable.DataAttribute.Description);
+                if (!string.IsNullOrEmpty(variable.VariableTemplate.Description) && variable.VariableTemplate.Description != "Unknown")
+                    tmp.Add(variable.VariableTemplate.Description);
             }
 
             return tmp;
-
-            //using (var uow = this.GetUnitOfWork())
-            //{
-
-            //List<string> tmp = new List<string>();
-
-            //foreach (var variableId in structuredDataStructure.Variables.Select(v => v.Id))
-            //{
-            //    var variable = uow.GetReadOnlyRepository<Variable>().Get(variableId);
-
-            //    tmp.Add(variable.DataAttribute.Name);
-            //    tmp.Add(variable.Label);
-            //    if (!string.IsNullOrEmpty(variable.DataAttribute.Description))
-            //        tmp.Add(variable.DataAttribute.Description);
-            //}
-
-            //    return tmp;
-            //}
         }
 
         /// <summary>
@@ -370,11 +353,11 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
             if (BexisIndexSearcher.searcher != null)
             {
-                if(BexisIndexSearcher.searcher.IndexReader!=null)BexisIndexSearcher.searcher?.IndexReader?.Dispose();
+                if (BexisIndexSearcher.searcher.IndexReader != null) BexisIndexSearcher.searcher?.IndexReader?.Dispose();
                 BexisIndexSearcher.searcher.Dispose();
             }
 
-            
+
             BexisIndexSearcher.searcher = new IndexSearcher(_Reader);
             BexisIndexSearcher._Reader = _Reader;
             indexWriter.GetReader().Dispose();
@@ -475,24 +458,27 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 String multivalued = facet.Attributes.GetNamedItem("multivalued").Value;
 
                 string[] variable_names = facet.Attributes.GetNamedItem("variable_name")?.Value.Split(',').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-                if (variable_names.Length != 0)
+                if (variable_names?.Length != 0)
                     using (DataStructureManager dsm = new DataStructureManager())
                     {
                         List<string> vars_ = variable_names.Where(va => (dsm.VariableRepo.Get(Int32.Parse(va)) != null)).ToList(); 
                         //List<string> vars = vars_.Where(va => dsm.VariableRepo.Get(Int32.Parse(va)).DataStructure.Datasets.Where(d => d.Id == id).Count() > 0).ToList();
                         foreach (string variableName in vars_)
                         {
-                            using (DatasetManager dm = new DatasetManager())
+                            using (VariableManager vm = new VariableManager())
                             {
                                 try
                                 {
-                                    Variable variableObj = dsm.VariableRepo.Get(Int32.Parse(variableName));
-                                    if (!variableObj.DataStructure.Datasets.Any(x => x.Id == id))
+                                    VariableInstance v_instance = vm.VariableInstanceRepo.Get(Int32.Parse(variableName));
+                                    if (!v_instance.DataStructure.Datasets.Any(x => x.Id == id))
                                         break;
-                                    DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
-                                    var Xmin = table.Compute("min([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
-                                    var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
-                                    dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId, variableObj.Label);
+                                    using (DatasetManager dm = new DatasetManager())
+                                    {
+                                        DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
+                                        var Xmin = table.Compute("min([" + string.Concat("var", v_instance.Id.ToString()) + "])", string.Empty);
+                                        var Xmax = table.Compute("max([" + string.Concat("var", v_instance.Id.ToString()) + "])", string.Empty);
+                                        dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId, v_instance.Label);
+                                    }  
                                 }
                                 catch (Exception exc)
                                 {
@@ -823,6 +809,10 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     return;
 
                 DatasetVersion dsv = dm.GetDatasetLatestVersion(id);
+
+                // if dataset has no structure -> nothing to do
+                if (dsv.Dataset.DataStructure == null) return;
+
                 StructuredDataStructure sds = dsm.StructuredDataStructureRepo.Get(dsv.Dataset.DataStructure.Id);
                 if (sds == null)
                     return;

@@ -6,6 +6,7 @@ namespace BExIS.ASM.Services
 {
     public interface IStatisticsExtractor : IDisposable
     {
+        /*
         JObject get_extra_stats();
         JObject reset();
         JObject allAnnotation_extract(JObject obj);
@@ -15,7 +16,7 @@ namespace BExIS.ASM.Services
         JObject allMetadata_extract();
         JObject metadata_extract(string id);
 
-
+        */
 
     }
 }

@@ -15,7 +15,6 @@ using Vaiona.Utils.Cfg;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Entities.DataStructure;
 using Vaiona.Persistence.Api;
-using BExIS.Modules.Rpm.UI.Models;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using BExIS.Dlm.Entities.Data;
@@ -25,6 +24,7 @@ namespace BExIS.ASM.Services
 {
     public class StatisticsExtractor : IStatisticsExtractor
     {
+        /*
         static Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager();
         static DatasetManager dm = new DatasetManager();
         static DataStructureManager dataStructureManager = new DataStructureManager();
@@ -33,17 +33,17 @@ namespace BExIS.ASM.Services
         static List<StructuredDataStructure> structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>().Get().ToList<StructuredDataStructure>();
         static Dictionary<string, string> stats_extra = new Dictionary<string, string>();
 
-        public List<DataAttributeStruct> DataAttributeStruct_list_in_use = new List<DataAttributeStruct>();
-        public List<DataAttributeStruct> DataAttributeStruct_list_non_use = new List<DataAttributeStruct>();
+        public List<VariableInstance> DataAttributeStruct_list_in_use = new List<VariableInstance>();
+        public List<VariableInstance> DataAttributeStruct_list_non_use = new List<VariableInstance>();
 
-        public List<EditUnitModel> EditUnitModel_list_in_use = new List<EditUnitModel>();
-        public List<EditUnitModel> EditUnitModel_list_non_use = new List<EditUnitModel>();
+        public List<Unit> EditUnitModel_list_in_use = new List<Unit>();
+        public List<Unit> EditUnitModel_list_non_use = new List<Unit>();
 
         public List<DataType> DataType_in_use = new List<DataType>();
         public List<DataType> DataType_non_use = new List<DataType>();
 
-        public List<DataStructureResultStruct> DataStruct_in_use = new List<DataStructureResultStruct>();
-        public List<DataStructureResultStruct> DataStruc_non_use = new List<DataStructureResultStruct>();
+        public List<StructuredDataStructure> DataStruct_in_use = new List<StructuredDataStructure>();
+        public List<StructuredDataStructure> DataStruc_non_use = new List<StructuredDataStructure>();
         private readonly string temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
 
         static string DatastructAPI = "https://addp.uni-jena.de/api/structures/";
@@ -376,6 +376,10 @@ namespace BExIS.ASM.Services
 
         }
 
-
+        */
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

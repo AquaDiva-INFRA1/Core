@@ -1,8 +1,5 @@
 ﻿using BExIS.Aam.Entities.Mapping;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace BExIS.Modules.Aam.UI.Models
 {

@@ -1,10 +1,7 @@
 ﻿using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Vaiona.Entities.Common;
 
 namespace BExIS.Aam.Entities.Mapping
@@ -24,8 +21,9 @@ namespace BExIS.Aam.Entities.Mapping
         public virtual long CharacteristicId { get; set; }
         public virtual long StandardId { get; set; }
         
-        public Annotation(){ }
+        public Annotation(System.Data.DataSet dataset) { }
 
+        public Annotation() { }
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();

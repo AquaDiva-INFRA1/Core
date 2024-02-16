@@ -1,4 +1,6 @@
 ﻿
+using Newtonsoft.Json;
+using System.Collections.Generic;
 /// <summary>
 ///
 /// </summary>        
@@ -8,8 +10,11 @@ namespace BExIS.IO.Transform.Input
     /// This class is required to store information that is important to read of data from ascii files.
     /// </summary>
     /// <remarks></remarks>        
-    public class AsciiFileReaderInfo:FileReaderInfo
+    public class AsciiFileReaderInfo : FileReaderInfo
     {
+        public List<bool> Cells { get; set; }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -21,6 +26,9 @@ namespace BExIS.IO.Transform.Input
             Orientation = Orientation.columnwise;
             Variables = 1;
             Data = 2;
+            Unit = 0;
+            Description = 0;
+            Cells = new List<bool>();
         }
 
         /// <summary>
@@ -36,6 +44,12 @@ namespace BExIS.IO.Transform.Input
         /// <remarks></remarks>
         /// <seealso cref="TextMarker"/>        
         public TextMarker TextMarker { get; set; }
+
+        // return
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
 
         /// <summary>
         /// Get TextSeperator as string
@@ -84,6 +98,29 @@ namespace BExIS.IO.Transform.Input
         }
 
         /// <summary>
+        /// Get TextSeperator based on string as name 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="seperator">Name of TextSeperator</param>       
+        /// <returns>TextSeperator as enum TextSeperator</returns>
+        public static TextSeperator GetSeperator(char seperator)
+        {
+            switch (seperator)
+            {
+                case ',':
+                    return TextSeperator.comma;
+                case ';':
+                    return TextSeperator.semicolon;
+                case ' ':
+                    return TextSeperator.space;
+                case '\t':
+                    return TextSeperator.tab;
+                default: return TextSeperator.tab;
+            }
+        }
+
+        /// <summary>
         /// Get a Textseparator as a Character
         /// </summary>
         /// <param name="sep"></param>
@@ -101,6 +138,29 @@ namespace BExIS.IO.Transform.Input
                 case TextSeperator.space:
                     return ' ';
                 case TextSeperator.tab:
+                default:
+                    return '\t';
+            }
+        }
+
+        /// <summary>
+        /// Get a Textseparator as a Character
+        /// </summary>
+        /// <param name="sep"></param>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <returns>TextSeperator as character</returns>
+        public static char GetSeperator(int sep)
+        {
+            switch (sep)
+            {
+                case 44:
+                    return ',';
+                case 59:
+                    return ';';
+                case 32:
+                    return ' ';
+                case 9:
                 default:
                     return '\t';
             }
@@ -156,7 +216,7 @@ namespace BExIS.IO.Transform.Input
             switch (tmarker)
             {
                 case TextMarker.quotes:
-                    return  '\'';
+                    return '\'';
                 case TextMarker.doubleQuotes:
                     return '"';
                 default: return '"';

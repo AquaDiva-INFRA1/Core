@@ -190,19 +190,15 @@ namespace BExIS.Aam.Services
         }
         public List<Aam_Dataset_column_annotation> get_all_dataset_column_annotationByVariable_DataStructure(String variableLabel)
         {
-            using (IUnitOfWork uow = this.GetUnitOfWork())
+            using (VariableManager vm = new VariableManager())
             {
-                DataStructureManager dsm = new DataStructureManager();
-                //IRepository<Aam_Dataset_column_annotation> repo = uow.GetRepository<Aam_Dataset_column_annotation>();
-                List<Variable> variables = (List<Variable>)dsm.VariableRepo.Get().ToList<Variable>().Where(x => x.Label.ToLower() == variableLabel.ToLower()).ToList<Variable>();
-
+                List<VariableInstance> variables = (List<VariableInstance>)vm.VariableInstanceRepo.Get().Where(x => x.Label.ToLower() == variableLabel.ToLower());
                 List<Aam_Dataset_column_annotation> List = new List<Aam_Dataset_column_annotation>();
-                foreach (Variable v in variables)
+                foreach (VariableInstance v in variables)
                 {
-                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)AnnotationRepo.Where(an => (an.variable_id != null) && (an.variable_id.DataStructure == v.DataStructure)).ToList();
+                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)AnnotationRepo.Where(an => (an.variable_id != null) && v.DataStructure.Variables.Contains(an.variable_id)).ToList();
                     l.ForEach(x => List.Add(x));
                 }
-                dsm.Dispose();
                 return List;
             }
         }
@@ -218,7 +214,7 @@ namespace BExIS.Aam.Services
                 List<Aam_Dataset_column_annotation> List = new List<Aam_Dataset_column_annotation>();
                 foreach (Variable v in variables)
                 {
-                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)AnnotationRepo.Where(an => (an.variable_id != null) && (an.variable_id.DataAttribute.Unit == v.DataAttribute.Unit)).ToList();
+                    List<Aam_Dataset_column_annotation> l = (List<Aam_Dataset_column_annotation>)AnnotationRepo.Where(an => (an.variable_id != null) && (an.variable_id.Unit == v.Unit)).ToList();
                     l.ForEach(x => List.Add(x));
                 }
                 dsm.Dispose();

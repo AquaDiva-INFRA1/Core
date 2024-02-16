@@ -1,9 +1,5 @@
 ﻿using BExIS.Dlm.Entities.DataStructure;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BExIS.IO.Transform.Validation.ValueCheck
 {
@@ -76,6 +72,7 @@ namespace BExIS.IO.Transform.Validation.ValueCheck
             {
                 foreach (var missingValue in missingValues)
                 {
+                    if(!string.IsNullOrEmpty(missingValue.DisplayName))
                     this.missingValues.Add(missingValue.DisplayName, missingValue.Placeholder);
                 }
             }
