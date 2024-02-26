@@ -71,6 +71,12 @@
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="ChoETL, Version=1.2.1.64, Culture=neutral, PublicKeyToken=8138733ed69d3172, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ChoETL.1.2.1.64\lib\net45\ChoETL.dll</HintPath>
+    </Reference>
+    <Reference Include="ChoETL.JSON, Version=1.2.1.64, Culture=neutral, PublicKeyToken=f6c38caf4a08e6a4, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ChoETL.JSON.1.2.1.64\lib\net45\ChoETL.JSON.dll</HintPath>
+    </Reference>
     <Reference Include="CommonServiceLocator, Version=2.0.6.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\..\packages\CommonServiceLocator.2.0.6\lib\net45\CommonServiceLocator.dll</HintPath>
     </Reference>
@@ -178,16 +184,29 @@
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework" />
     <Reference Include="Swashbuckle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cd1bb07a5ac7c7bc, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Swashbuckle.Core.5.6.0\lib\net40\Swashbuckle.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
+    <Reference Include="System.CodeDom, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.CodeDom.4.4.0\lib\net461\System.CodeDom.dll</HintPath>
+    </Reference>
     <Reference Include="System.Collections.Immutable, Version=1.2.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Collections.Immutable.1.7.1\lib\net461\System.Collections.Immutable.dll</HintPath>
     </Reference>
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ComponentModel.Annotations.4.4.1\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration.ConfigurationManager, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Configuration.ConfigurationManager.4.4.1\lib\net461\System.Configuration.ConfigurationManager.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.SqlClient, Version=4.2.0.2, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Data.SqlClient.4.4.3\lib\net461\System.Data.SqlClient.dll</HintPath>
+    </Reference>
     <Reference Include="System.IdentityModel.Tokens.Jwt, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.IdentityModel.Tokens.Jwt.5.3.0\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
@@ -1036,6 +1055,62 @@
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\session.warning.js" />
     <Content Include="Shell.Manifest.xml" />
+    <Content Include="Themes\AquaDivaCustom\Layouts\_Layout.xml" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\css\font-awesome.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\css\font-awesome.min.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-custom-style.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-datatables-net.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-elements.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-font-awesome-extension.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-jquery-ui.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-metadata.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\bexis-telerik.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Copy of telerik.default.min.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\editor.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\imagebrowser.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\infoicon.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\loading.gif" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\preloader.GIF" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\slider-h.gif" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\slider-v.gif" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\sprite-vertical.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\sprite.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\treeview-line.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\treeview-nodes-rtl.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\Default\treeview-nodes.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\emptyPng.png" />
+    <Content Include="Themes\AquaDivaCustom\Styles\images.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\search.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\telerik.default.min.css" />
+    <Content Include="Themes\AquaDivaCustom\Styles\wizard.css" />
+    <Content Include="Themes\Aquadiva\Layouts\_Layout.xml" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.css" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\css\font-awesome.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-elements.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-font-awesome-extension.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-jquery-ui.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-metadata.css" />
+    <Content Include="Themes\Aquadiva\Styles\bexis-telerik.css" />
+    <Content Include="Themes\Aquadiva\Styles\Copy of telerik.default.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\Default\editor.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\imagebrowser.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\infoicon.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\loading.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\preloader.GIF" />
+    <Content Include="Themes\Aquadiva\Styles\Default\slider-h.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\slider-v.gif" />
+    <Content Include="Themes\Aquadiva\Styles\Default\sprite-vertical.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\sprite.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-line.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-nodes-rtl.png" />
+    <Content Include="Themes\Aquadiva\Styles\Default\treeview-nodes.png" />
+    <Content Include="Themes\Aquadiva\Styles\emptyPng.png" />
+    <Content Include="Themes\Aquadiva\Styles\images.css" />
+    <Content Include="Themes\Aquadiva\Styles\search.css" />
+    <Content Include="Themes\Aquadiva\Styles\telerik.default.min.css" />
+    <Content Include="Themes\Aquadiva\Styles\wizard.css" />
     <Content Include="Themes\Default\Styles\awesome\css\font-awesome.css" />
     <Content Include="Themes\Default\Styles\awesome\css\font-awesome.min.css" />
     <Content Include="Themes\Default\Styles\awesome\fonts\fontawesome-webfont.svg" />
@@ -1186,6 +1261,32 @@
     <Content Include="Views\Header\Content.cshtml" />
     <Content Include="Views\Tokens\Create.cshtml" />
     <Content Include="Views\Tokens\Read.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Layouts\_Layout.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Breadcrumb.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Footer.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Header.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Information.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_LogOnStatus.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_Menu.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Partials\_ThemeSelector.cshtml" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Themes\AquaDivaCustom\Styles\awesome\fonts\FontAwesome.otf" />
+    <Content Include="Themes\Aquadiva\Layouts\_Layout.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Breadcrumb.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Footer.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Header.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Information.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_LogOnStatus.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_Menu.cshtml" />
+    <Content Include="Themes\Aquadiva\Partials\_ThemeSelector.cshtml" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Themes\Aquadiva\Styles\awesome\fonts\FontAwesome.otf" />
     <None Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 @using BExIS.Dlm.Entities.DataStructure;
 
 @{
-    List<EditUnitModel> EditUnitModel_ = (List<EditUnitModel>)ViewData["EditUnitModel_"];
+    List<Unit> EditUnitModel_ = (List<Unit>)ViewData["EditUnitModel_"];
 }
 
 @{
@@ -26,23 +26,23 @@
                                     .Name("bx-rpm-unitGrid")
                                     .Columns(columns =>
                                     {
-                                        columns.Bound(c => c.Unit.Id)
+                                        columns.Bound(c => c.Id)
                                             .Width(100);
-                                        columns.Bound(c => c.Unit.Name);
-                                        columns.Bound(c => c.Unit.Abbreviation);
-                                        columns.Bound(c => c.Unit.Dimension.Name).Title("Dimension Name");
-                                        columns.Bound(c => c.Unit.MeasurementSystem);
+                                        columns.Bound(c => c.Name);
+                                        columns.Bound(c => c.Abbreviation);
+                                        columns.Bound(c => c.Dimension.Name).Title("Dimension Name");
+                                        columns.Bound(c => c.MeasurementSystem);
                                         columns.Template(
                                             @<text>
                                                 @{
                                                 temp = "";
-                                                if (item.Unit.Name.ToLower() == "none")
+                                                if (item.Name.ToLower() == "none")
                                                 {
                                                     temp = "All Data Types";
                                                 }
                                                 else
                                                 {
-                                                    foreach (DataType dt in item.Unit.AssociatedDataTypes.OrderBy(p => p.Name).ToList())
+                                                    foreach (DataType dt in item.AssociatedDataTypes.OrderBy(p => p.Name).ToList())
                                                     {
                                                         if (temp == "")
                                                         { temp = dt.Name; }
@@ -55,7 +55,7 @@
                                             </text>
                                                     )
                                                     .Title("Associated Data Types");
-                                columns.Bound(c => c.Unit.Description)
+                                columns.Bound(c => c.Description)
                             .HtmlAttributes(new { @style = "max-width:500px" });
 
                             })

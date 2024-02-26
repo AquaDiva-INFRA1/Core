@@ -2,10 +2,13 @@
 using BExIS.Aam.Services;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Entities.Meanings;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
+using BExIS.Dlm.Services.Meanings;
 using BExIS.Modules.Aam.UI.Models;
 using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Authorization;
 using BExIS.UI.Helpers;
 using BExIS.Utils.Models;
@@ -16,6 +19,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Web.Mvc;
 using Vaiona.Persistence.Api;
 
@@ -143,6 +147,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 variables = vm.VariableInstanceRepo.Get().ToList().Where(x => x.DataStructure.Id ==dsmanager.GetDataset(Int64.Parse(ds_id)).DataStructure.Id).ToList<Variable>();
             }
             dca_M.DataAttributes.Clear();
+            variables = vm.VariableInstanceRepo.Get().ToList<Variable>();
             foreach (Variable ds in variables)
             {
                 string k = null;
@@ -475,6 +480,55 @@ namespace BExIS.Modules.Aam.UI.Controllers
         public string clean_entity_URI_for_insert(string uri)
         {
             return uri.Replace("'", "''").Replace(System.Environment.NewLine, "").Replace("\n", "");
+        }
+
+        public void update_ExternalLink()
+        {
+            using (Aam_UriManager aam_uri = new Aam_UriManager())
+            using (MeaningManager meaning_mang = new MeaningManager())
+            {
+                foreach (Aam_Uri uri in aam_uri.get_all_Aam_Uri())
+                {
+                    if (uri.type_uri.ToLower().Contains("entity"))
+                        meaning_mang.GetOrCreateExternalLink(null, uri.label.ToLower(), uri.URI.ToLower(), ExternalLinkType.entity, null, null);
+                    if (uri.type_uri.ToLower().Contains
+                        ("charach"))
+                        meaning_mang.GetOrCreateExternalLink(null, uri.label.ToLower(), uri.URI.ToLower(), ExternalLinkType.characteristics, null, null);
+                }
+            }
+        }
+        public void update_meanings()
+        {
+            using (Aam_Dataset_column_annotationManager aam_annot = new Aam_Dataset_column_annotationManager())
+            using (Aam_Observation_ContextManager aam_obs = new Aam_Observation_ContextManager())
+            using (Aam_UriManager aam_uri = new Aam_UriManager())
+            using (MeaningManager meaning_mang = new MeaningManager())
+            using (VariableManager vm = new VariableManager())
+            {
+                foreach (Aam_Dataset_column_annotation anot in aam_annot.get_all_dataset_column_annotation())
+                {
+                    ExternalLink mapping_relation = meaning_mang.getExternalLinks().FirstOrDefault(x => x.URI.ToLower() == anot.characteristic_id.URI.ToLower());
+                    string meaning_name = anot.Id + " - " +anot.entity_id.label + " - " + anot.variable_id.Label;
+                    string short_name = anot.Id + " - " + anot.entity_id.label + " - " + anot.variable_id.Label;
+                    string descripttion = "exported from the annotation module ";
+                    bool selected = true; 
+                    bool approved = true;
+                    List<long> meanings = new List<long>();
+                    List<long> cons = new List<long>();
+                    MeaningEntry me = new MeaningEntry(mapping_relation, new List<ExternalLink>() { meaning_mang.getExternalLinks().FirstOrDefault(x => x.URI.ToLower() == anot.characteristic_id.URI.ToLower()) } );
+                    Meaning meaning = new Meaning(meaning_name, short_name,descripttion, true, true, new List<MeaningEntry>() { me }, null, null);
+                    if (meaning_mang.getMeanings().Where(x=> (x.Name==meaning.Name) && (x.ExternalLinks == meaning.ExternalLinks)).Count() == 0)
+                    {
+                        meaning = meaning_mang.addMeaning(meaning);
+                        anot.variable_id.Meanings.Add(meaning);
+                    }
+                    if (!anot.variable_id.Meanings.Contains(meaning))
+                    {
+                        meaning = meaning_mang.getMeanings().FirstOrDefault(x => (x.Name == meaning.Name) && (x.Related_meaning == meaning.Related_meaning));
+                        anot.variable_id.Meanings.Add(meaning);
+                    }
+                }
+            }
         }
     }
     

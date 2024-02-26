@@ -17,22 +17,34 @@
             controller="admin" action="searchDesigner" argument=""
             extends="./settingsRoot" />
 
+    <Export tag="menubar" id="dashboard" order="1"
+	    title="My Data" description="Quick Access to User Area" icon=""
+	    controller="dashboard" action="index"
+	    extends="./menubarRoot" />
+	  
     <Export tag="menubar" id="menuSearch" order="2"
             title="Search" description="Search datasets" icon=""
             controller="Home" action="index"
-            extends="./menubarRoot" />
+            extends="./menubarRoot/search" />
+	  
+	  <Export tag="menubar" id="semanticSearch" order="2"
+			title="Semantic Search" description="Search datasets semantically" icon=""
+			controller="SemanticSearch" action="index"
+			extends="./menubarRoot/search" />
+	  <!--
+	  <Export tag="menubar" id="interactiveSearch" order="2"
+				  title="Location Based" description="Interactive Search Based search on geo-localisation" icon=""
+				  controller="interactiveSearch" action="index"
+				  extends="./menubarRoot/search" />
+        -->
 
-    <!--<Export tag="menubar" id="menuSearchPublic" order="2"
+	  <!--<Export tag="menubar" id="menuSearchPublic" order="2"
             title="Public" description="Search in public datasets" icon=""
             controller="publicsearch" action="public"
             extends="./menubarRoot" />-->
 
-    <Export tag="menubar" id="dashboard" order="1"
-        title="My Data" description="Quick Access to User Area" icon=""
-        controller="dashboard" action="index"
-        extends="./menubarRoot" />
 
-    <Export tag="lunchbar" id="helpDdm" order="1"
+	  <Export tag="lunchbar" id="helpDdm" order="1"
             title="Search" description="Search Help Manual" icon=""
             controller="help" action="index"
             extends="./lunchbarRoot/help" />
@@ -43,7 +55,11 @@
             extends="./apiRoot" />-->
 
     <!-- INTERNAL-->
-
+	  <Export tag="internalApi" id="LandingPage"
+			  title="Landing Page " description="Landing Page" icon=""
+			  controller="LandingPage" action="Index"
+			  extends="" />
+	  
     <Export tag="internalApi" id="publicsearch"
             title="Public Search" description="public search" icon=""
             controller="PublicSearch" action="Index"
@@ -86,6 +102,13 @@
   </EntityActions>
     <!-- fill out alle the hook aatributes otherwise there will not be loaded -->
     <Hooks>
-       
+		<Hook
+			 name="analysis"
+			 displayName ="Analysis"
+			 mode="view"
+			 entity="dataset"
+			 place="details"
+			 module="asm"
+			 type="BExIS.Modules.Asm.UI.Hooks.AnalysisHook, BExIS.Modules.ASM.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
     </Hooks>
 </Manifest>

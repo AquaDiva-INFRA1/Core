@@ -95,8 +95,8 @@ namespace BEXIS.ASM.Services
                             string idMetadata = root.Attributes["id"].Value;
                             string owner = "none";
                             string project = "none";
-                            string title = xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) != "" ?
-                                xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) : "No title";
+                            string title = "";// xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) != "" ?
+                                //(xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) : "No title";
                             if (idMetadata == "1")
                             {
                                 XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Givenname/Name");

@@ -1,10 +1,16 @@
 ﻿
 @{
     string title = ViewBag.Title;
-
-    if (title.Contains("-"))
+    if (title != null)
     {
-        title = title.Split('-').Last();
+        if (title.Contains("-"))
+        {
+            title = title.Split('-').Last();
+        }
+    }
+    else
+    {
+        title = "";
     }
 }
 

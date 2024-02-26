@@ -43,6 +43,12 @@
 		  title="Manage Datasets" description="Manage Datasets" icon=""
 		  controller="datasets" action="index" argument="Datasets"
 		  extends="./settingsRoot" />
+		
+		<Export tag="settings" id="userpis" order="7"
+      title="Manage User PI Mapping" description="Manage User PI Mapping" icon=""
+      controller="UserPis" action="UserPis"
+      extends="./settingsRoot" />
+
 
 		<Export tag="settings" id="datasets" order="7"
 		  title="Manage Requests" description="Manage Requests" icon=""

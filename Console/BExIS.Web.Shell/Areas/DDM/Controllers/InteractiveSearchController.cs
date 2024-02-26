@@ -22,6 +22,7 @@ using BExIS.Aam.Services;
 using BExIS.Aam.Entities.Mapping;
 using System.Web.Configuration;
 using Npgsql;
+using System.Linq;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -121,8 +122,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     try
                     {
-                        string title = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.title);
-                        string description = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.description);
+                        string title = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.title) == null ? "" : xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.title);
+                        string description = xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.description) == null ? "" : xmlDatasetHelper.GetInformationFromVersion(kvp.Key, NameAttributeValues.description);
                         if (title.Contains(well_name) || (description.Contains(well_name))
                             || (title.IndexOf(well_name, StringComparison.OrdinalIgnoreCase) != -1)
                             || (description.IndexOf(well_name, StringComparison.OrdinalIgnoreCase) != -1))
@@ -545,6 +546,29 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             }
             else return false;
             //return View(m);
+        }
+
+        public void Update_dataset_versions()
+        {
+            using (DatasetManager dm = new DatasetManager())
+            {
+                foreach (long id in dm.GetDatasetIds())
+                {
+                    List<DatasetVersion> dsv = dm.DatasetVersionRepo.Get().ToList().Where(x=> x.Dataset.Id == id).ToList();
+                    dsv = dsv.OrderBy(x => x.Timestamp).ToList();
+                    long lastid = dsv.Last().Id;
+                    dsv.ForEach(v => { 
+                        if (v.Id != lastid)
+                        {
+                            if (v.Status != DatasetVersionStatus.Old)
+                            {
+                                v.Status = DatasetVersionStatus.Old;
+                                dm.UpdateDatasetVersion(v);
+                            }
+                        }
+                            });
+                }
+            }
         }
     }
 }

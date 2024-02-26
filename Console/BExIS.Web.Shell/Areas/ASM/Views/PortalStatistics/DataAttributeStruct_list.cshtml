@@ -4,7 +4,7 @@
 @using BExIS.Modules.Rpm.UI.Models;
 
 @{
-    List<DataAttributeStruct> DataAttributeStruct_ = (List<DataAttributeStruct>)ViewData["DataAttributeStruct"];
+    List<BExIS.Dlm.Entities.DataStructure.VariableTemplate> DataAttributeStruct_ = (List<BExIS.Dlm.Entities.DataStructure.VariableTemplate>)ViewData["DataAttributeStruct"];
 }
 
 @{
@@ -27,17 +27,17 @@
                     @(Html.Telerik().Grid(DataAttributeStruct_)
                                             .Name("bx-rpm-attributeGrid")
                                             .Columns(columns =>
-                                                {
-                                                    columns.Bound(c => c.Id)
+                                            {
+                                                columns.Bound(c => c.Id)
                                                     .Width(100);
-                                                    columns.Bound(c => c.Name);
-                                                    columns.Bound(c => c.ShortName);
-                                                    columns.Bound(c => c.Unit)
-                                                        .Title("Unit");
-                                                    columns.Bound(c => c.DataType)
-                                                        .Title("Data Type");
-                                                    columns.Bound(c => c.Description);
-                                                })
+                                                columns.Bound(c => c.Label)
+                                                    .Width(100);
+                                                columns.Bound(c => c.Unit.Name)
+                                                    .Title("Unit");
+                                                columns.Bound(c => c.DataType.Name)
+                                                    .Title("Data Type");
+                                                columns.Bound(c => c.Description);
+                                            })
                                                         .ClientEvents(events => events.OnDataBound("onDataBound"))
                     )
                 </div>

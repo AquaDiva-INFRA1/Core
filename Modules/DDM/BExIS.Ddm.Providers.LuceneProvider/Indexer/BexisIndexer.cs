@@ -204,6 +204,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 {
                     indexWriter.Dispose();
                     autoCompleteIndexWriter.Dispose();
+
                 }
                 if (errors.Count > 0)
                     throw new Exception(string.Join("\n\r", errors));
@@ -458,7 +459,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 String multivalued = facet.Attributes.GetNamedItem("multivalued").Value;
 
                 string[] variable_names = facet.Attributes.GetNamedItem("variable_name")?.Value.Split(',').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-                if (variable_names?.Length != 0)
+                if (variable_names!=null)
                     using (DataStructureManager dsm = new DataStructureManager())
                     {
                         List<string> vars_ = variable_names.Where(va => (dsm.VariableRepo.Get(Int32.Parse(va)) != null)).ToList(); 
@@ -717,7 +718,16 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
        private Document write_primary_data_facet(XmlNode facet, object Xmin, object Xmax, Document dataset, string docId,string variable_node_Label)
         {
-            if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "string")
+            if (Xmax == null)
+            {
+                dataset.Add(new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(),
+                    Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                dataset.Add(new Field("ng_all", Xmin.ToString(),
+                    Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
+                writeAutoCompleteIndex(docId, facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString());
+                writeAutoCompleteIndex(docId, "ng_all", Xmin.ToString());
+            }
+            else if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "string")
             {
                 dataset.Add(new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(),
                     Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
