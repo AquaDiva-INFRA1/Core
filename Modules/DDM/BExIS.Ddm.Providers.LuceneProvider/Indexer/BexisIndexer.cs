@@ -204,6 +204,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 {
                     indexWriter.Dispose();
                     autoCompleteIndexWriter.Dispose();
+
                 }
                 if (errors.Count > 0)
                     throw new Exception(string.Join("\n\r", errors));
@@ -458,7 +459,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 String multivalued = facet.Attributes.GetNamedItem("multivalued").Value;
 
                 string[] variable_names = facet.Attributes.GetNamedItem("variable_name")?.Value.Split(',').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-                if (variable_names?.Length != 0)
+                if (variable_names!=null)
                     using (DataStructureManager dsm = new DataStructureManager())
                     {
                         List<string> vars_ = variable_names.Where(va => (dsm.VariableRepo.Get(Int32.Parse(va)) != null)).ToList(); 

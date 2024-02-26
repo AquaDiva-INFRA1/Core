@@ -136,8 +136,8 @@ namespace BExIS.Modules.Dim.UI.Controllers
                     return request;
                 }
 
-                User user = ControllerContext.RouteData.Values["user"] as User;
-
+                //User user = ControllerContext.RouteData.Values["user"] as User;
+                User user = userManager.Users.Where(u => u.Token.Equals(token)).FirstOrDefault();
                 if (isPublic || user != null)
                 {
                     if (isPublic || entityPermissionManager.HasEffectiveRight(user.Name, typeof(Dataset), id, RightType.Read))

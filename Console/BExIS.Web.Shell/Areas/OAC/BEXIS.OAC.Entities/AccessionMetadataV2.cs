@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿/*
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -91,19 +93,19 @@ namespace BEXIS.OAC.Entities
     public class XREFLINK
     {
         public XREFLINK(
-            [JsonProperty("DB")] string db,
-            [JsonProperty("ID")] object id
+            [JsonProperty("DB")] string db_,
+            [JsonProperty("ID")] object id_
         )
         {
-            this.DB = db;
-            this.ID = id;
+            this.DB_ = db_;
+            this.ID_ = id_;
         }
 
         [JsonProperty("DB")]
-        public readonly string DB;
+        public readonly string DB_;
 
         [JsonProperty("ID")]
-        public readonly object ID;
+        public readonly object ID_;
     }
 
     public class SAMPLELINK
@@ -320,8 +322,8 @@ namespace BEXIS.OAC.Entities
             //header = 'sample link - DBs, sample link - cdata, sample link - IDs ';
             foreach (SAMPLELINK link in t.SAMPLELINK)
             {
-                DBs = DBs + (link.XREFLINK.DB?.Replace(',', ' ').Replace(';', ' ') ?? " ") + "; ";
-                (temp_ID, temp_cData) = ParseIDs(link.XREFLINK.ID?.ToString() ?? " ");
+                DBs = DBs + (link.XREFLINK.DB_.Replace(',', ' ').Replace(';', ' ') ?? " ") + "; ";
+                (temp_ID, temp_cData) = ParseIDs(link.XREFLINK.ID_.ToString() ?? " ");
                 IDs = IDs + (temp_ID?.Replace(',', ' ') ?? " ");
                 cData = cData + (temp_cData?.Replace(',', ' ') ?? " ");
             }
@@ -388,3 +390,4 @@ namespace BEXIS.OAC.Entities
     }
 }
 
+*/

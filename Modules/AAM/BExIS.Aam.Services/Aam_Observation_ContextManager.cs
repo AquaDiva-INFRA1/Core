@@ -144,7 +144,9 @@ namespace BExIS.Aam.Services
                 {
                     string k = null;
                     temp.TryGetValue(id, out k);
-                    if (k == null) temp.Add(id, id +" - "+ xmlDatasetHelper.GetInformation(id, NameAttributeValues.title));
+                    if (k == null)
+                        if (dm.GetDatasetLatestMetadataVersion(id) != null)
+                            temp.Add(id, id + " - " + xmlDatasetHelper.GetInformation(id, dm.GetDatasetLatestMetadataVersion(id), NameAttributeValues.title));
                 }
                 return temp;
             }

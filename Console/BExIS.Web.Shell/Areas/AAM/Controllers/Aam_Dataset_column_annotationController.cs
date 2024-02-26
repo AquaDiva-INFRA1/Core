@@ -143,6 +143,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 variables = vm.VariableInstanceRepo.Get().ToList().Where(x => x.DataStructure.Id ==dsmanager.GetDataset(Int64.Parse(ds_id)).DataStructure.Id).ToList<Variable>();
             }
             dca_M.DataAttributes.Clear();
+            variables = vm.VariableInstanceRepo.Get().ToList<Variable>();
             foreach (Variable ds in variables)
             {
                 string k = null;

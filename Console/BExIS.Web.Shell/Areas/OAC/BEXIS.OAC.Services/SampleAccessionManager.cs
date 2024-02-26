@@ -3,9 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web;
 using BEXIS.OAC.Entities;
-using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Services.DataStructure;
@@ -15,24 +13,24 @@ using BExIS.Xml.Helpers;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.MetadataStructure;
 using BExIS.Dlm.Services.Administration;
-using BExIS.Security.Services.Authorization;
-using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Dlm.Entities.Administration;
 using BExIS.Dlm.Entities.MetadataStructure;
 using System.Xml.Linq;
-using BExIS.Security.Entities.Authorization;
-using BExIS.Security.Entities.Subjects;
-using BExIS.IO;
 using Vaiona.Persistence.Api;
-using BExIS.IO.Transform.Input;
-using Vaiona.Entities.Common;
 using System.IO;
 using System.Web.Configuration;
-using System.Data;
-using BExIS.IO.Transform.Validation.DSValidation;
-using BExIS.Utils.NH.Querying;
 using Vaiona.Logging;
-using System.Security.Cryptography;
+using ChoETL;
+using System.Data;
+using BExIS.Security.Services.Subjects;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Entities.Authorization;
+using ServiceStack;
+using BExIS.IO.Transform.Input;
+using BExIS.IO.Transform.Validation.DSValidation;
+using BExIS.IO.Transform.Validation.Exceptions;
+using BExIS.IO;
 
 namespace BExIS.OAC.Services
 {
@@ -89,7 +87,7 @@ namespace BExIS.OAC.Services
                 string json = JsonConvert.SerializeXmlNode(doc);
                 JObject obj = JObject.Parse(json);
                 #endregion
-                accessions.Add(index.ToString() + " " + s, obj["SAMPLE_SET"]["SAMPLE"].ToString());
+                accessions.Add(index.ToString() + " " + s, obj.ToString());
                 index++;
             }
             #endregion
@@ -107,158 +105,134 @@ namespace BExIS.OAC.Services
                 Dataset ds = new Dataset();
                 MetadataStructureManager msm = new MetadataStructureManager();
                 ResearchPlanManager rpm = new ResearchPlanManager();
-                string temp_file_path = "";
+                Security.Services.Objects.EntityManager entityManager = new Security.Services.Objects.EntityManager();
+                EntityTemplateManager etm = new EntityTemplateManager();
+
+                #region get data as data table and list of list of strings
+                List<string> variables = new List<string>();
+                List<List<string>> values = new List<List<string>>();
+                foreach (KeyValuePair<string, string> kvp in xx)
+                {
+                    string accessionValue = kvp.Value.Replace("\r\n", "");
+                    if (variables.Count < 1)
+                    {
+                        foreach (JProperty property in JObject.Parse(accessionValue)["PROJECT_SET"]["PROJECT"])
+                        {
+                            variables.Add(property.Name.ToLower().Replace('@', ' ').Trim());
+                        }
+                    }
+                    List<string> line_cell_val = new List<string>();
+                    foreach (JProperty property in JObject.Parse(accessionValue)["PROJECT_SET"]["PROJECT"])
+                    {
+                        line_cell_val.Add(property.Value.ToString().ToLower().Replace('@', ' ').Trim());
+                    }
+                    values.Add(line_cell_val);
+                }
+                #endregion
+
+                StructuredDataStructure sds = find_data_struct(variables);
 
                 #region create empty dataset to be filled
 
-                StructuredDataStructure sds = find_data_struct();
-
-                ResearchPlan rp = rpm.Repo.Get().First();
+                ResearchPlan rp = rpm.Repo.Get(1);
                 MetadataStructure metadataStructure = msm.Repo.Get().FirstOrDefault(x => x.Id == Int64.Parse(metadata));
-                EntityTemplateManager etm = new EntityTemplateManager();
-                EntityTemplate et = new EntityTemplate("OMICs Template", "OMICs Template", null, metadataStructure);
-                EntityTemplate existing = etm.Repo.Get().FirstOrDefault(x => x == et);
-                if (existing != et) 
-                    et = etm.Create(et);
+                EntityTemplate et = (EntityTemplate)etm.Repo.Get(2);
                 ds = dm.CreateEmptyDataset(sds, rp, metadataStructure, et);
+
+                List< DataTuple > datatuples = new List< DataTuple >();
+                DataReader reader = new AsciiReader(sds, new AsciiFileReaderInfo() { Seperator = TextSeperator.semicolon }, new IO.IOUtility());
+                IEnumerable<string> vairableNames = sds.Variables.Select(v => v.Label);
+                List<VariableIdentifier> variableIdentifiers = reader.SetSubmitedVariableIdentifiers(vairableNames.ToList());
+                List<Error> errors = reader.ValidateComparisonWithDatatsructure(variableIdentifiers);
+                foreach (List<string> row in values)
+                {
+                    DataTuple dt = reader.ReadRow(row, 1);
+                    datatuples.Add(dt);
+                }
+                
+
                 if (dm.IsDatasetCheckedOutFor(ds.Id, username) || dm.CheckOutDataset(ds.Id, username))
                 {
                     DatasetVersion dsv = dm.GetDatasetWorkingCopy(ds.Id);
+                    dsv.ModificationInfo = new Vaiona.Entities.Common.EntityAuditInfo()
+                    {
+                        Performer = username,
+                        Comment = "Data",
+                        ActionType = Vaiona.Entities.Common.AuditActionType.Create
+                    };
+                    dm.EditDatasetVersion(dsv, datatuples.ToList(), null, null);
+                    dm.CheckInDataset(ds.Id, "Import data from OMIC archives  ", username, ViewCreationBehavior.Create);
+                }
+
+                if (dm.IsDatasetCheckedOutFor(ds.Id, username) || dm.CheckOutDataset(ds.Id, username))
+                {
+                    
                     long METADATASTRUCTURE_ID = metadataStructure.Id;
+
                     XmlMetadataWriter xmlMetadatWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
                     XDocument metadataX = xmlMetadatWriter.CreateMetadataXml(METADATASTRUCTURE_ID);
+
                     XmlDocument metadataXml = XmlMetadataWriter.ToXmlDocument(metadataX);
+
+                    DatasetVersion dsv = dm.GetDatasetWorkingCopy(ds.Id);
+                    dsv.Title = "OMICs Import";
+                    dsv.Description = "Imported OMICs data from user "+username;
                     dsv.Metadata = metadataXml;
                     dm.EditDatasetVersion(dsv, null, null, null);
                     dm.CheckInDataset(ds.Id, "Metadata Imported", username);
                 }
-                #endregion
-
-                # region create json object from json_array_data where every line represents the csv file content line including the header as an array of strings 
-                string json = "";
-
-                var json_array_data = new List<string[]>();
-                temp_file_path = temp_file_to_save_json_as_csv + ds.Id + ".csv";
-
-                //string data_csv = new AccessionMetadataV2().Initialise_header(temp_file_path);
-                string data_csv_ = new AccessionMetadataV2().Initialise_header(temp_file_path, false);
-
-                //json_array_data.Add(data_csv.Split(','));
-                json_array_data.Add(data_csv_.Split(','));
-
-                foreach (KeyValuePair<string, string> kvp in xx)
-                {
-                    string accessionValue = kvp.Value.Replace("\r\n", "");
-                    string json_string_ = JsonConvert.SerializeObject(accessionValue);
-                    AccessionMetadataV2 EBIresponseModel = JsonConvert.DeserializeObject<AccessionMetadataV2>(accessionValue);
-
-                    //data_csv = data_csv + EBIresponseModel.convertToCSV(EBIresponseModel, temp_file_path);
-                    data_csv_ = data_csv_ + EBIresponseModel.convertToCSV(EBIresponseModel, temp_file_path, false);
-
-                    json_array_data.Add(EBIresponseModel.convertToCSV(EBIresponseModel, "").Split(','));
-                }
-                //json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(json_array_data);
-                json = JsonConvert.SerializeObject(json_array_data);
 
                 #endregion
 
-                #region bulk upload and validate data against data structure and using json_array_data for AsciiFileReaderInfo dimensions
-                DataTuple[] rows = null;
-                int packageSize = 10000;
-                int counter = 0;
-                counter++;
-                List<string> selectedDataAreaJsonArray = new List<string>() { "[1 , 0 ," + xx.Count.ToString() + "," + (json_array_data[0].Length -1) + "]" };
-                string selectedHeaderAreaJsonArray = string.Join(" ,", new List<string>() { "[0, 0, 0, " + (json_array_data[0].Length-1) + "]" });
-                List<int[]> areaDataValuesList = new List<int[]>();
-                foreach (string area in selectedDataAreaJsonArray)
+                #region security
+                EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+                UserPiManager upm = new UserPiManager();
+                if (username != "DEFAULT")
                 {
-                    areaDataValuesList.Add(JsonConvert.DeserializeObject<int[]>(area));
-                }
-                int[] areaHeaderValues = JsonConvert.DeserializeObject<int[]>(selectedHeaderAreaJsonArray);
-                Orientation orientation = Orientation.columnwise;
-                //String worksheetUri = temp_file_path;
-                int batchSize = (new Object()).GetUnitOfWork().PersistenceManager.PreferredPushSize;
-                int batchnr = 1;
+                    //Full permissions for the user
+                    entityPermissionManager.Create<User>(username, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
 
-                dm.CheckOutDataset(ds.Id, username);
-                DatasetVersion workingCopy = dm.GetDatasetWorkingCopy(ds.Id);
-
-                foreach (int[] areaDataValues in areaDataValuesList)
-                {
-                    //First batch starts at the start of the current data area
-                    int currentBatchStartRow = areaDataValues[0] + 1;
-                    while (currentBatchStartRow <= areaDataValues[2] + 1) //While the end of the current data area has not yet been reached
+                    //Get PIs of the current user
+                    List<User> piList = upm.GetPisFromUserByName(username).ToList();
+                    foreach (User pi in piList)
                     {
-                        //End row is start row plus batch size
-                        int currentBatchEndRow = currentBatchStartRow + batchSize;
+                        //Full permissions for the pis
+                        entityPermissionManager.Create<User>(pi.Name, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
 
-                        //Set the indices for the reader
-                        EasyUploadFileReaderInfo fri = new EasyUploadFileReaderInfo
+                        //Get all users with the same pi
+                        List<User> piMembers = upm.GetAllPiMembers(pi.Id).ToList();
+                        //Give view and download rights to the members
+                        foreach (User piMember in piMembers)
                         {
-                            DataStartRow = currentBatchStartRow,
-                            //End row is either at the end of the batch or the end of the marked area
-                            //DataEndRow = (currentBatchEndRow > areaDataValues[2] + 1) ? areaDataValues[2] + 1 : currentBatchEndRow,
-                            DataEndRow = Math.Min(currentBatchEndRow, areaDataValues[2] + 1),
-                            //Column indices as marked in a previous step
-                            DataStartColumn = areaDataValues[1] + 1,
-                            DataEndColumn = areaDataValues[3] + 1,
-
-                            //Header area as marked in a previous step
-                            VariablesStartRow = areaHeaderValues[0] + 1,
-                            VariablesStartColumn = areaHeaderValues[1] + 1,
-                            VariablesEndRow = areaHeaderValues[2] + 1,
-                            VariablesEndColumn = areaHeaderValues[3] + 1,
-
-                            Offset = areaDataValues[1],
-                            Orientation = orientation
-                        };
-
-
-                        #region csv / txt parsing to get data tuples and variables
-                        AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
-                        afri.Seperator = TextSeperator.comma;
-
-                        List<String[]> Json_table_ = JsonConvert.DeserializeObject<List<String[]>>
-                            (json);
-
-
-                        AsciiReaderEasyUpload reader_ = new AsciiReaderEasyUpload(sds, afri);
-                        //FileStream Stream = reader_.Open(temp_file_path);
-                        rows = reader_.ReadFile(null , System.IO.Path.GetFileName(temp_file_path), Json_table_, afri, sds, ds.Id, packageSize, fri);
-                        //Stream.Close();
-                        if (rows != null)
-                        {
-                            dm.EditDatasetVersion(workingCopy, rows.ToList(), null, null);
+                            entityPermissionManager.Create<User>(piMember.Name, "Dataset", typeof(Dataset), ds.Id, new List<RightType> {
+                                        RightType.Read
+                                });
                         }
-
-                        //Close the Stream so the next ExcelReader can open it again
-                        //Stream.Close();
-
-                        //Debug information
-                        int lines = (areaDataValues[2] + 1) - (areaDataValues[0] + 1);
-                        int batches = lines / batchSize;
-                        batchnr++;
-
-                        //Next batch starts after the current one
-                        currentBatchStartRow = currentBatchEndRow + 1;
-
-                        #endregion csv parsing to get data tuples and variables 
                     }
                 }
-                workingCopy.ModificationInfo = new EntityAuditInfo()
+                // add security
+                if (username != "DEFAULT")
                 {
-                    Performer = username,
-                    Comment = "Data",
-                    ActionType = AuditActionType.Create
-                };
+                    foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
+                    {
+                        //The user gets full permissions
+                        // add security
+                        if (username != "DEFAULT")
+                        {
+                            entityPermissionManager.Create<User>(username, "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                        }
+                    }
+                }
 
-                dm.CheckInDataset(ds.Id, "Import data from OMIC archives  ", username);
-                #endregion
-
+                #endregion security
                 dsm.Dispose();
                 dm.Dispose();
                 msm.Dispose();
                 rpm.Dispose();
+                entityManager.Dispose();
+                etm.Dispose();
+                entityPermissionManager.Dispose();
+
                 var result = new
                 {
                     dataset_id = ds.Id
@@ -274,77 +248,74 @@ namespace BExIS.OAC.Services
 
         }
 
-        private StructuredDataStructure find_data_struct()
+        private StructuredDataStructure find_data_struct(List<string> variable_names)
         {
             DataStructureManager dsm = new DataStructureManager();
-            StructuredDataStructure sds = dsm.CreateStructuredDataStructure("sequence data" + "_" + System.DateTime.UtcNow.ToString("r"), "sequence data" + " " + System.DateTime.UtcNow.ToString("r"), "", "", DataStructureCategory.Generic);
             bool foundReusableDataStructure = false;
-            List<StructuredDataStructure> allDatastructures = dsm.StructuredDataStructureRepo.Get().ToList();
-            foreach (StructuredDataStructure existingStructure in allDatastructures)
+            foreach (StructuredDataStructure existingStructure in dsm.StructuredDataStructureRepo.Get().ToList())
             {
-                if (!foundReusableDataStructure)
+                List<VariableInstance> variablesOfExistingStructure = existingStructure.Variables.ToList();
+                for (int i = 0; i < variablesOfExistingStructure.Count; i++)
                 {
-                    //For now a datastructure is considered an exact match if it contains variables with
-                    //the same names (labels), datatypes and units in the correct order
-                    List<VariableInstance> variablesOfExistingStructure = existingStructure.Variables.ToList();
-                    foundReusableDataStructure = true;
-                    if (variablesOfExistingStructure.Count != ((System.Reflection.TypeInfo)typeof(AccessionMetadataV2)).DeclaredFields.ToList().Count)
+                    if (variablesOfExistingStructure.Count != variable_names.Count)
+                        break;
+                    Variable exVar = variablesOfExistingStructure.ElementAt(i);
+                    if (exVar.Label != variable_names.ElementAt(i))
+                    {
                         foundReusableDataStructure = false;
-                    else
-                    {
-                        for (int i = 0; i < variablesOfExistingStructure.Count; i++)
-                        {
-                            Variable exVar = variablesOfExistingStructure.ElementAt(i);
-                            if (exVar.Label != ((System.Reflection.TypeInfo)typeof(AccessionMetadataV2)).DeclaredFields.ToList().ElementAt(i).Name)
-                            {
-                                foundReusableDataStructure = false;
-                            }
-                        }
+                        break;
                     }
-                    if (foundReusableDataStructure)
-                    {
-                        sds = existingStructure;
-                    }
-
+                    foundReusableDataStructure = true;
                 }
+                
+                if (foundReusableDataStructure) 
+                    return existingStructure;
             }
 
             // if no data structure is found, we create a new onw
+            StructuredDataStructure sds = dsm.CreateStructuredDataStructure("sequence data" + "_" + System.DateTime.UtcNow.ToString("r"),
+                "sequence data" + " " + System.DateTime.UtcNow.ToString("r"), "", "", DataStructureCategory.Generic);
+
             XmlDocument xmldoc = new XmlDocument();
             XmlElement extraElement = xmldoc.CreateElement("extra");
             XmlElement orderElement = xmldoc.CreateElement("order");
             DataContainerManager dam = new DataContainerManager();
-            var dataTypeRepo = this.GetUnitOfWork().GetReadOnlyRepository<Dlm.Entities.DataStructure.DataType>();
+            var dataTypeRepo = this.GetUnitOfWork().GetReadOnlyRepository<DataType>();
             var unitRepo = this.GetUnitOfWork().GetReadOnlyRepository<Unit>();
             List<VariableInstance> vars = new List<VariableInstance>();
-            string header = new AccessionMetadataV2().Initialise_header("");
-            if (sds.Variables.Count == 0)
+            VariableManager vm = new VariableManager();
+            foreach (string variable_name in variable_names)
             {
-                foreach (string variable_name in header.Split(','))
-                {
-                    VariableManager vm = new VariableManager();
-                    VariableTemplate vt = vm.CreateVariableTemplate("OMICs variable template", 
-                        dataTypeRepo.Get().ToList<Dlm.Entities.DataStructure.DataType>().FirstOrDefault(x => x.Name == "String") ,
-                        unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name == "None"));
-                    VariableInstance vi = vm.CreateVariable(variable_name, sds.Id,vt.Id);
-                    vars.Add(vi);
-                    XmlElement newVariableXml = xmldoc.CreateElement("variable");
-                    newVariableXml.InnerText = Convert.ToString(vi.Id);
+                VariableTemplate vt = vm.CreateVariableTemplate("OMICs variable template",
+                    dataTypeRepo.Get().ToList<DataType>().FirstOrDefault(x => x.Name.ToLower() == "string"),
+                    unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name.ToLower() == "none"));
+                VariableInstance vi = vm.CreateVariable(variable_name, sds.Id, vt.Id);
+                vi.OrderNo = variable_names.IndexOf(variable_name) + 1;
+                VariableInstance vi_ = vm.CreateVariable(
+                   variable_name,
+                    dataTypeRepo.Get().ToList<DataType>().FirstOrDefault(x => x.Name.ToLower() == "string"),
+                    unitRepo.Get().ToList<Unit>().FirstOrDefault(x => x.Name.ToLower() == "none"),
+                    sds.Id,
+                    true,
+                    false,
+                    variable_names.IndexOf(variable_name)+1
+                );
 
-                    orderElement.AppendChild(newVariableXml);
-                }
-                extraElement.AppendChild(orderElement);
-                xmldoc.AppendChild(extraElement);
+                vars.Add(vi);
+                XmlElement newVariableXml = xmldoc.CreateElement("variable");
+                newVariableXml.InnerText = Convert.ToString(vi.Id);
 
-                sds.Extra = xmldoc;
-                sds.Name = "generated import structure " + System.DateTime.UtcNow.ToString("r");
-                sds.Description = "sequence data" + "_" + System.DateTime.UtcNow.ToString("r");
+                orderElement.AppendChild(newVariableXml);
             }
+            extraElement.AppendChild(orderElement);
+            xmldoc.AppendChild(extraElement);
+            sds.Extra = xmldoc;
+            sds.Name = "generated import structure " + System.DateTime.UtcNow.ToString("r");
+            sds.Description = "sequence data" + "_" + System.DateTime.UtcNow.ToString("r");
             dam.Dispose();
 
             dsm.Dispose();
             return sds;
         }
-
     }
 }

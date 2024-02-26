@@ -652,11 +652,10 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
                                 }
                             }
-
                             DatasetVersion dsv = dm.GetDatasetWorkingCopy(datasetId);
                             dsv.Metadata = metadataXml_target_cp;
                             dm.EditDatasetVersion(dsv, null, null, null);
-                            dm.CheckInDataset(datasetId, "Metadata Imported", GetUsernameOrDefault());
+                            dm.CheckInDataset(datasetId, "Metadata Imported", GetUsernameOrDefault(), ViewCreationBehavior.None);
 
                             using (IUnitOfWork unitOfWork = this.GetUnitOfWork())
                             {

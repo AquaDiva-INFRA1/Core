@@ -86,6 +86,13 @@
   </EntityActions>
     <!-- fill out alle the hook aatributes otherwise there will not be loaded -->
     <Hooks>
-       
+		<Hook
+			 name="analysis"
+			 displayName ="Analysis"
+			 mode="view"
+			 entity="dataset"
+			 place="details"
+			 module="asm"
+			 type="BExIS.Modules.Asm.UI.Hooks.AnalysisHook, BExIS.Modules.ASM.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
     </Hooks>
 </Manifest>

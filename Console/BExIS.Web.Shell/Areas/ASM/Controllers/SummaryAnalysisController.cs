@@ -217,7 +217,7 @@ namespace BExIS.Modules.Asm.UI.Controllers
                 dict_data.Add("username", username);
                 dict_data.Add("data", id.ToString());
 
-                string url = BaseAdress + "/api/Summary/getCategrocialAnalysis";
+                string url = BaseAdress + "/Api/Summary/getCategrocialAnalysis";
                 client.BaseAddress = new Uri(url);
 
                 var json = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);

@@ -574,6 +574,7 @@
     <Compile Include="Controllers\PortalStatisticsController.cs" />
     <Compile Include="Controllers\SummaryAnalysisController.cs" />
     <Compile Include="Helpers\AsmSeedDataGenerator.cs" />
+    <Compile Include="Hooks\AnalysisHook.cs" />
     <Compile Include="Models\Classification.cs" />
     <Compile Include="Models\coordinates_GPS.cs" />
     <Compile Include="Models\Dataset_analysis.cs" />
