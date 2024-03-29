@@ -93,8 +93,9 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 // I had to remove the feature to get dashboard running without DDM feature permissions.
                 // We have to think about how we can fix it in a long run. Maybe "DDM/Home" is not the proper
                 // place for dashboard!?
-                operationManager.Create("DDM", "PublicSearch", "*"); 
+                //operationManager.Create("DDM", "PublicSearch", "*");
                 operationManager.Create("DDM", "LandingPage", "*");
+                operationManager.Create("DDM", "SemanticSearch", "*", SearchFeature);
                 operationManager.Create("DDM", "Home", "*", SearchFeature);
                 operationManager.Create("DDM", "Data", "*", SearchFeature);
                 
@@ -122,8 +123,16 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 operationManager.Create("DDM", "RequestsManage", "*", RequestsManage);
                 operationManager.Create("DDM", "RequestsSend", "*", RequestsSend);
 
-                #endregion
 
+                #endregion
+                Feature DataTable = features.FirstOrDefault(f =>
+                   f.Name.Equals("Api") &&
+                   f.Parent != null &&
+                   f.Parent.Id.Equals(DataDiscovery.Id));
+
+                if (RequestsManage == null) RequestsManage = featureManager.Create("Api", "Api", DataDiscovery);
+
+                operationManager.Create("Api", "DataTable", "*", DataTable);
                 #endregion
 
 

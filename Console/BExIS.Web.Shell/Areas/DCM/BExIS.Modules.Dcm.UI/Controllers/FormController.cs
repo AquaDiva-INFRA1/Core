@@ -1,5 +1,6 @@
 ﻿using BExIS.App.Bootstrap.Attributes;
 using BExIS.Dcm.CreateDatasetWizard;
+using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
 using BExIS.Dim.Entities.Mapping;
 using BExIS.Dim.Helpers.Mapping;
@@ -63,6 +64,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
+            FormHelper.ClearCache();
             //var newMetadata = TaskManager.Bus[CreateTaskmanager.METADATA_XML];
 
             var stepInfoModelHelpers = new List<StepModelHelper>();
@@ -146,6 +148,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
+            FormHelper.ClearCache();
+
             // if dataset exist load metadata and metadata sturtcure id
             if (entityId > -1)
             {
@@ -164,10 +168,17 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         setDefaultAdditionalFunctions(TaskManager);
                     }
 
+                    if (dataset.EntityTemplate != null)
+                    {
+                        TaskManager.AddToBus(CreateTaskmanager.SAVE_WITH_ERRORS, dataset.EntityTemplate.MetadataInvalidSaveMode);
+                    }
+
                     //load taskmanager based onb metadata structure and maybe existing metadata
                     TaskManager = loadTaskManager(metadataStructureId, dataStructureId, -1, metadata, "", TaskManager, ref Model);
 
                     TaskManager.AddToBus(CreateTaskmanager.ENTITY_ID, entityId);
+
+                    Session["ViewDatasetTaskmanager"] = TaskManager;
                 }
             }
 
@@ -253,6 +264,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         {
             var loadFromExternal = true;
             long metadataStructureId = -1;
+
+            FormHelper.ClearCache();
 
             //load metadata from session if exist
             var metadata = Session[sessionKeyForMetadata] != null
@@ -516,10 +529,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             ViewData["ShowOptional"] = show;
             ViewData["EntityId"] = entityId;
 
+            FormHelper.ClearCache();
+
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Dataset", this.Session.GetTenant());
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            TaskManager?.AddToBus(CreateTaskmanager.SAVE_WITH_ERRORS, true);
+            //TaskManager?.AddToBus(CreateTaskmanager.SAVE_WITH_ERRORS, true);
 
             var stepInfoModelHelpers = new List<StepModelHelper>();
 
@@ -3137,6 +3152,14 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             errors.Add(new Error(ErrorType.MetadataAttribute, constraint.ErrorMessage, new object[] { aModel.DisplayName, aModel.Value, aModel.Number, aModel.ParentModelNumber, aModel.Parent.Label }));
                         }
                     }
+                }
+            }
+
+            // check parameters
+            if (aModel.Parameters.Any())
+            {
+                foreach (var p in aModel.Parameters) {
+                    p.Errors = validateParameter(p);
                 }
             }
 

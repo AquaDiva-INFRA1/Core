@@ -42,7 +42,9 @@ namespace BExIS.Security.Services.Authentication
                 var ldapConfiguration = _ldapConfigurations.Find(l => l.Name == name);
 
                 if (ldapConfiguration == null)
-                    return null;
+                    //return null;
+                    if (_ldapConfigurations.Count > 0 )
+                        ldapConfiguration = _ldapConfigurations[0];
 
                 using (var ldap = new LdapConnection(new LdapDirectoryIdentifier(ldapConfiguration.Host, ldapConfiguration.Port)))
                 {

@@ -156,15 +156,15 @@ namespace BExIS.Modules.Dcm.UI.Helpers
 
                 operationManager.Create("DCM", "Create", "*", DatasetCreationFeature);
                 operationManager.Create("DCM", "CreateDataset", "*", DatasetCreationFeature);
-                operationManager.Create("DCM", "Form", "*");
+                operationManager.Create("DCM", "Form", "*",DatasetCreationFeature);
 
                 operationManager.Create("Api", "DatasetIn", "*", DatasetCreationFeature);
                 operationManager.Create("Api", "Dataset", "*", DatasetCreationFeature);
                 operationManager.Create("Api", "MetadataIn", "*", DatasetCreationFeature);
                 operationManager.Create("Api", "Metadata", "*", DatasetCreationFeature);
 
-                operationManager.Create("DCM", "Edit", "*");
-                operationManager.Create("DCM", "View", "*");
+                operationManager.Create("DCM", "Edit", "*", DatasetCreationFeature);
+                operationManager.Create("DCM", "View", "*", DatasetCreationFeature);
                 operationManager.Create("DCM", "Metadata", "*", DatasetCreationFeature);
 
 
@@ -196,6 +196,7 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                 operationManager.Create("DCM", "Metadata", "*", DatasetUploadFeature);
                 operationManager.Create("DCM", "Messages", "*", DatasetUploadFeature);
                 operationManager.Create("DCM", "DataDescription", "*", DatasetUploadFeature);
+                operationManager.Create("DCM", "Test", "*", DatasetUploadFeature);
 
 
                 #endregion Update Dataset Workflow
@@ -233,10 +234,10 @@ namespace BExIS.Modules.Dcm.UI.Helpers
 
                 //because of reuse in ddm this controller must be public
                 // but the funktions should be secured
-                operationManager.Create("DCM", "Form", "*");
-                operationManager.Create("DCM", "EntityReference", "*");
+                operationManager.Create("DCM", "Form", "*", DatasetCreationFeature);
+                operationManager.Create("DCM", "EntityReference", "*", DatasetCreationFeature);
                 //Attachments
-                operationManager.Create("DCM", "Attachments", "*");
+                operationManager.Create("DCM", "Attachments", "*", DatasetCreationFeature);
 
                 #endregion public available
 

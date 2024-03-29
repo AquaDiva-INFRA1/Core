@@ -230,6 +230,11 @@ namespace BExIS.Security.Services.Authorization
                 // Anonymous
                 if (subject == null)
                 {
+                    return false;
+                }
+                // Logged In with restricted rights
+                if (subject != null)
+                {
                     while (feature != null)
                     {
                         if (Exists(null, feature.Id, PermissionType.Grant))

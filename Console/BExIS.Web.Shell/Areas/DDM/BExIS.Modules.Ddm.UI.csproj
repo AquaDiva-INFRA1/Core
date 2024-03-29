@@ -34,6 +34,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -141,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\Api\DataTableController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\DataController.cs" />
     <Compile Include="Controllers\HelpController.cs" />
@@ -632,7 +635,8 @@
   </Target>
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)Console\Workspace\Modules\DDM"
-C:\Windows\System32\xcopy "$(ProjectDir)Ddm.Settings.json" "$(SolutionDir)Console\Workspace\Modules\DDM" /C /Y /I</PostBuildEvent>
+C:\Windows\System32\xcopy "$(ProjectDir)Ddm.Settings.json" "$(SolutionDir)Console\Workspace\Modules\DDM" /C /Y /I
+</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\..\..\..\packages\Microsoft.CodeAnalysis.NetAnalyzers.6.0.0\build\Microsoft.CodeAnalysis.NetAnalyzers.targets" Condition="Exists('..\..\..\..\packages\Microsoft.CodeAnalysis.NetAnalyzers.6.0.0\build\Microsoft.CodeAnalysis.NetAnalyzers.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

@@ -30,7 +30,6 @@
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
     <PostSharpHostConfigurationFile>Web.config</PostSharpHostConfigurationFile>
-    <DontImportPostSharp>True</DontImportPostSharp>
     <TypeScriptCompileBlocked>True</TypeScriptCompileBlocked>
     <TypeScriptCompileOnSaveEnabled>False</TypeScriptCompileOnSaveEnabled>
   </PropertyGroup>
@@ -446,40 +445,41 @@
     <Content Include="Scripts\svelte\index.html" />
     <Content Include="Scripts\svelte\test\index.html" />
     <Content Include="Scripts\svelte\view\index.html" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\0.f715d65d.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\4.9bb49986.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.a592a64c.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.ebc1066a.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\Page.95b16411.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.4f1e9ba5.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.44266e30.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_page.9bb49986.css" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.6db8103b.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.3a44f70d.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.8af2c804.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.d5bc7278.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.a4167a6a.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.242fe422.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\paths.efe1d936.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.684c05eb.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\singletons.745e8459.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.79c9f709.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.ad25fb56.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.697f5513.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.b6e4a33c.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.e62ba8a5.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\TextInput.add658f8.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.149b3eca.js" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\app.f26bc108.js" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\start.c7ba2f7c.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\0.a8f598a2.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\1.16c563ce.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\2.4b1110f4.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\3.4290a24a.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\4.95bb06f5.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\5.87bc51ff.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\6.7e11f3e4.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\7.119d4a7c.js" />
+    <Content Include="Scripts\svelte\_app\env.js" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\0.DLsbjxsX.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\4.BJQo6MCZ.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.DMKri8do.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.bRh5xSvE.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.Cirlo5Z8.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.DyBfJzki.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_page.C5ZGgZNs.css" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.DjZVoOtO.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.B6CwSG2B.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.Ngf91g9x.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CH-8sbRF.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CiHPK1yE.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.DVhKrnJD.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.BhUOr-Xw.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.BJ9KW1aQ.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.C_o3LU93.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.CrjJV6mH.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.lCF0l7ta.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4f2X8Az.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4wH1ktA.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B7mFRYPc.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Table.RVhvsgSk.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\TextInput.AzYEG7aR.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.DZ6baSQo.js" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.BOZEeXGt.js" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.ByV_Ll1L.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\0.C5MW3ehp.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.fzGolj2c.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\2.DQuBHUHr.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\3.C60GoegN.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\4.CToUjJKn.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\5.DgmyieJF.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\6.CBLeLWwp.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\7.DkDIEchv.js" />
     <Content Include="Views\Help\Informations.xml" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -559,74 +559,76 @@
     <Content Include="Scripts\svelte\test\index.html.gz" />
     <Content Include="Scripts\svelte\view\index.html.br" />
     <Content Include="Scripts\svelte\view\index.html.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\0.f715d65d.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\0.f715d65d.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\4.9bb49986.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\4.9bb49986.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.a592a64c.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.a592a64c.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.ebc1066a.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.ebc1066a.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\Page.95b16411.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\Page.95b16411.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.4f1e9ba5.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.4f1e9ba5.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.44266e30.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.44266e30.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_page.9bb49986.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_page.9bb49986.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.6db8103b.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.6db8103b.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.3a44f70d.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.3a44f70d.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.8af2c804.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.8af2c804.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.d5bc7278.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.d5bc7278.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.a4167a6a.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.a4167a6a.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.242fe422.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.242fe422.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\paths.efe1d936.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\paths.efe1d936.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.684c05eb.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.684c05eb.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\singletons.745e8459.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\singletons.745e8459.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.79c9f709.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.79c9f709.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.ad25fb56.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.ad25fb56.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.697f5513.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.697f5513.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.b6e4a33c.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.b6e4a33c.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.e62ba8a5.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.e62ba8a5.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\TextInput.add658f8.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\TextInput.add658f8.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.149b3eca.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.149b3eca.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\app.f26bc108.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\app.f26bc108.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\start.c7ba2f7c.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\start.c7ba2f7c.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\0.a8f598a2.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\0.a8f598a2.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\1.16c563ce.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\1.16c563ce.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\2.4b1110f4.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\2.4b1110f4.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\3.4290a24a.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\3.4290a24a.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\4.95bb06f5.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\4.95bb06f5.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\5.87bc51ff.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\5.87bc51ff.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\6.7e11f3e4.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\6.7e11f3e4.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\7.119d4a7c.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\7.119d4a7c.js.gz" />
+    <Content Include="Scripts\svelte\_app\env.js.br" />
+    <Content Include="Scripts\svelte\_app\env.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\0.DLsbjxsX.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\0.DLsbjxsX.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\4.BJQo6MCZ.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\4.BJQo6MCZ.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.DMKri8do.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.DMKri8do.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.bRh5xSvE.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.bRh5xSvE.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.Cirlo5Z8.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.Cirlo5Z8.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.DyBfJzki.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.DyBfJzki.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_page.C5ZGgZNs.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_page.C5ZGgZNs.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.DjZVoOtO.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.DjZVoOtO.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.B6CwSG2B.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.B6CwSG2B.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.Ngf91g9x.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.Ngf91g9x.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CH-8sbRF.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CH-8sbRF.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CiHPK1yE.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CiHPK1yE.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.DVhKrnJD.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.DVhKrnJD.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.BhUOr-Xw.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.BhUOr-Xw.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.BJ9KW1aQ.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.BJ9KW1aQ.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.C_o3LU93.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.C_o3LU93.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.CrjJV6mH.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.CrjJV6mH.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.lCF0l7ta.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.lCF0l7ta.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4f2X8Az.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4f2X8Az.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4wH1ktA.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4wH1ktA.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B7mFRYPc.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B7mFRYPc.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Table.RVhvsgSk.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Table.RVhvsgSk.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\TextInput.AzYEG7aR.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\TextInput.AzYEG7aR.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.DZ6baSQo.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.DZ6baSQo.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.BOZEeXGt.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.BOZEeXGt.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.ByV_Ll1L.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.ByV_Ll1L.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\0.C5MW3ehp.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\0.C5MW3ehp.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.fzGolj2c.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.fzGolj2c.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\2.DQuBHUHr.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\2.DQuBHUHr.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\3.C60GoegN.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\3.C60GoegN.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\4.CToUjJKn.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\4.CToUjJKn.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\5.DgmyieJF.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\5.DgmyieJF.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\6.CBLeLWwp.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\6.CBLeLWwp.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\7.DkDIEchv.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\7.DkDIEchv.js.gz" />
     <Content Include="Scripts\svelte\_app\version.json" />
     <Content Include="Scripts\svelte\_app\version.json.br" />
     <Content Include="Scripts\svelte\_app\version.json.gz" />
@@ -687,10 +689,6 @@
     </Reference>
     <Reference Include="NHibernate">
       <HintPath>..\..\..\..\..\packages\NHibernate.5.3.10\lib\net461\NHibernate.dll</HintPath>
-    </Reference>
-    <Reference Include="PostSharp, Version=4.3.48.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\packages\PostSharp.4.3.48\lib\net35-client\PostSharp.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Remotion.Linq, Version=2.2.0.0, Culture=neutral, PublicKeyToken=fee00910d6e5f53b, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\Remotion.Linq.2.2.0\lib\net45\Remotion.Linq.dll</HintPath>
@@ -1094,11 +1092,6 @@ C:\Windows\System32\xcopy "$(ProjectDir)Dcm.Settings.json" "$(SolutionDir)Consol
     <Error Condition="!Exists('..\..\..\..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props'))" />
     <Error Condition="!Exists('..\..\..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props'))" />
     <Error Condition="!Exists('..\..\..\..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props'))" />
-  </Target>
-  <Import Project="..\..\..\..\..\packages\PostSharp.4.3.48\tools\PostSharp.targets" Condition="Exists('..\..\..\..\..\packages\PostSharp.4.3.48\tools\PostSharp.targets')" />
-  <Target Name="EnsurePostSharpImported" BeforeTargets="BeforeBuild" Condition="'$(PostSharp30Imported)' == ''">
-    <Error Condition="!Exists('..\..\..\..\..\packages\PostSharp.4.3.48\tools\PostSharp.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://www.postsharp.net/links/nuget-restore." />
-    <Error Condition="Exists('..\..\..\..\..\packages\PostSharp.4.3.48\tools\PostSharp.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://www.postsharp.net/links/nuget-restore." />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

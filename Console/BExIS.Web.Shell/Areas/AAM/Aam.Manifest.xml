@@ -25,32 +25,32 @@
 						extends="./settingsRoot" />
 
     <!-- INTERNAL-->
-    <Export tag="internalApi" id="update_semantics"
+	  <!-- <Export tag="internalApi" id="update_semantics"
               title="update_semantics" description="update_semantics" icon=""
               controller="Aam_Api" action="update_semantics"
-              extends="" />
+              extends="" />-->
 
-    <Export tag="internalApi" id="CreateAnnotation"
+	  <!-- <Export tag="internalApi" id="CreateAnnotation"
         title="Create Annotation" description="Create and persist a new annotation" icon=""
         controller="Annotation" action="CreateAnnotation"
-        extends="" />
+        extends="" />-->
 
-    <Export tag="internalApi" id="CreateAnnotationWithoutStandard"
+	  <!-- <Export tag="internalApi" id="CreateAnnotationWithoutStandard"
         title="Create Annotation Without Standard" description="Create and persist a new annotation" icon=""
         controller="Annotation" action="CreateAnnotationWithoutStandard"
-        extends="" />
+        extends="" />-->
 
-    <Export tag="internalApi" id="GetAnnotationsForVariableName"
+	  <!-- <Export tag="internalApi" id="GetAnnotationsForVariableName"
         title="Get Annotations for Variable Name" description="Get all Annotations for a given Variable Name" icon=""
         controller="Annotation" action="GetExistingAnnotationsByVariableLabel"
-        extends="" />
+        extends="" />-->
 
-    <Export tag="internalApi" id="GetExistingAnnotationsByUnitAndDatatype"
+	  <!-- <Export tag="internalApi" id="GetExistingAnnotationsByUnitAndDatatype"
         title="Get Annotations for Unit and Datatype" description="Get all Annotations for a given Unit and Datatype" icon=""
         controller="Annotation" action="GetExistingAnnotationsByUnitAndDatatype"
-        extends="" />
+        extends="" />-->
 
-    <!--<Export tag="lunchbar" id="helpAam" order="1"
+	  <!--<Export tag="lunchbar" id="helpAam" order="1"
 						title="Annotations" description="Annotations Help Manual" icon=""
 						controller="Help" action="index"
 						extends="./lunchbarRoot/help"

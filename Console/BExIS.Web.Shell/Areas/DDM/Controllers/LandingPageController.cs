@@ -21,6 +21,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
 
         [DoesNotNeedDataAccess]
+        [HttpGet]
         public ActionResult Index()
         {
             String temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
@@ -28,11 +29,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             ViewData["datasetCount"] = stats_obj["dataset_count"].ToString();
             ViewData["Datapoints"] = stats_obj["datapoints"].ToString();
 
-            using (VariableManager vm = new VariableManager())
-            using (Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager())
-            {
-                ViewData["semantic_Coverage"] = (double)vm.VariableInstanceRepo.Get().Count / (double)aam_manager.get_all_dataset_column_annotation().Count;
-            }
+            //using (VariableManager vm = new VariableManager())
+            //using (Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager())
+            //{
+            //    int var_count = vm.VariableInstanceRepo.Get().Count;
+            //    int covered_var = aam_manager.get_all_dataset_column_annotation().Count;
+            //    ViewData["semantic_Coverage"] = (covered_var / var_count * 100).ToString();
+            //}
 
             return View("Index");
 
