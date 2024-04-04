@@ -126,7 +126,18 @@ namespace BExIS.Web.Shell.Helpers
             }
 
             if(sortByModule) return menuItems.OrderBy(i=>i.Module).ToList();
-            
+
+            if (!string.IsNullOrEmpty(userName) && userName != "Default")
+            {
+                var tubeDBMenuItem = new MenuItem()
+                {
+                    Url = "http://aquadiva-tubedb.fmi.uni-jena.de/",
+                    Title = "TubeDB"
+                };
+
+                menuItems.Add(tubeDBMenuItem);
+            }
+
             return menuItems;
         }
 
