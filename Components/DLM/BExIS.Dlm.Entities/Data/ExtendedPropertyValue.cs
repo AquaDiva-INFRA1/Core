@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using BExIS.Dlm.Entities.DataStructure;
+using System;
 using System.Xml.Serialization;
-using BExIS.Dlm.Entities.DataStructure;
 
 /// <summary>
 ///
@@ -12,7 +11,7 @@ namespace BExIS.Dlm.Entities.Data
     ///
     /// </summary>
     /// <remarks></remarks>        
-    public class ExtendedPropertyValue: DataValue
+    public class ExtendedPropertyValue : DataValue
     {
         #region Attributes
 
@@ -45,24 +44,24 @@ namespace BExIS.Dlm.Entities.Data
         {
             get
             {
-                if (this.DatasetVersion.Dataset.DataStructure.Self is StructuredDataStructure)
-                {
-                    StructuredDataStructure sds = (this.DatasetVersion.Dataset.DataStructure.Self as StructuredDataStructure);
-                    ExtendedProperty ep = (from vu in sds.Variables
-                                          let da = vu.DataAttribute
-                                          from exp in da.ExtendedProperties
-                                          where exp.Id == ExtendedPropertyId
-                                          select exp).FirstOrDefault();
-                    if(ep == null)  ep = (from vu in sds.Variables
-                                           from pu in vu.Parameters  
-                                           let da = pu.DataAttribute
-                                           from exp in da.ExtendedProperties
-                                           where exp.Id == ExtendedPropertyId
-                                           select exp).FirstOrDefault();
-                                              
-                    return (ep);
-                }
-                return (null);
+                //if (this.DatasetVersion.Dataset.DataStructure.Self is StructuredDataStructure)
+                //{
+                //    StructuredDataStructure sds = (this.DatasetVersion.Dataset.DataStructure.Self as StructuredDataStructure);
+                //    ExtendedProperty ep = (from vu in sds.Variables
+                //                          let da = vu.DataAttribute
+                //                          from exp in da.ExtendedProperties
+                //                          where exp.Id == ExtendedPropertyId
+                //                          select exp).FirstOrDefault();
+                //    if(ep == null)  ep = (from vu in sds.Variables
+                //                           from pu in vu.Parameters  
+                //                           let da = pu.DataAttribute
+                //                           from exp in da.ExtendedProperties
+                //                           where exp.Id == ExtendedPropertyId
+                //                           select exp).FirstOrDefault();
+
+                //    return (ep);
+                //}
+                throw new NotImplementedException();
             }
         }
 

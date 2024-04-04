@@ -21,28 +21,8 @@
     </style>
 
     @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
+    @*@Scripts.Render("~/bundles/modernizr")*@
     @Styles.Render("~/bundles/general_bexis")
-
-    @*(Html.Telerik().StyleSheetRegistrar().DefaultGroup(group => group
-                .DefaultPath(Themes.ThemeDirectory) //  "~/Themes/"
-                        .Add("~" + Themes.GetResourcePath("Styles", "bexis-custom-style.css"))
-                        .Add("~" + Themes.GetResourcePath("Styles", "bexis-jquery-ui.css"))
-                        .Add("~" + Themes.GetResourcePath("Styles", "bexis-font-awesome-extension.css"))
-                        .Add("~" + Themes.GetResourcePath("Styles", "bexis-elements.css"))
-                        .Add("~" + Themes.GetResourcePath("Styles", "bexis-datatables-net.css"))
-                        .Add("~" + Themes.GetResourcePath("Styles", "bexis-telerik.css"))
-        //.Add("~" + Themes.GetResourcePath("Styles", "bexis-metadata.css"))
-
-        //.Add("telerik.common.css")
-        //.Add("~" + Themes.GetResourcePath("Styles", "Copy of telerik.default.min.css"))
-        //.Add("~" + Themes.GetResourcePath("Styles", "telerik.default.min.css"))
-        //.Add(Themes.GetResourcePath("Styles", "mycss.css"))
-        // add RTL support when internationalization is enabled
-        .Combined(true)
-        .Compress(true)))*@
-
-    @Scripts.Render("~/bundles/modernizr")
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryval")
@@ -58,65 +38,65 @@
 </head>
 
 <body>
-
+    @Html.RenderAuto("Header")
     <div id="informationContainer">
 
         @*pass the ModuleManger.ExportTree to the layout's menu view, it must be populated by now!*@
         @Html.RenderAuto("Menu")
 
-        <div id="information-container" class="container-fluid">
-            <a href="#information" data-toggle="collapse" style="color: white">@ViewBag.Title <i class="fa fa-angle-double-down"></i></a>
+        <div id="information-container" class="container-fluid" style="display:none">
+            @*<a href="#information" data-toggle="collapse" style="color: white">@ViewBag.Title <i class="fa fa-angle-double-down"></i></a>*@
             <div class="collapse" id="information">
-                <div class="container" style="padding: 0pt 48pt 24pt 48pt; text-align: justify;">
+                <div class="container" style="padding: 0pt; text-align: justify;">
                     @RenderSection("Information", false)
                 </div>
             </div>
         </div>
     </div>
 
-    @*<div class="container-fluid">
-            @Html.RenderAuto("Breadcrumb")
-        </div>*@
+    <div class="container-fluid">
+        @Html.RenderAuto("Breadcrumb")
+    </div>
 
-<div class="main-content container-fluid" style="margin-top: 36pt; width: 100%;">
-    <table style="table-layout: fixed;">
-        <tr>
+    <div class="main-content container-fluid" style=" width: 100%;">
+        <table style="table-layout: fixed;">
+            <tr>
 
-            @if (IsSectionDefined("LeftPane"))
-            {
-                <td style="border-top: #9B9B9B solid thin; border-bottom: #9B9B9B solid thin; padding: 12pt 0 12pt 0; width: 250px; max-width: 350px; vertical-align: top;">
+                @if (IsSectionDefined("LeftPane"))
+                {
+                    <td style="border-top: #9B9B9B solid thin; border-bottom: #9B9B9B solid thin; padding: 12pt 0 12pt 0; width: 250px; max-width: 350px; vertical-align: top;">
+                        <div>
+                            @RenderSection("LeftPane", false)
+                        </div>
+                    </td>
+                    <td style="width: 20pt; border: none" />
+                }
+
+                <td style="border-top: #9B9B9B solid thin; border-bottom: #9B9B9B solid thin; padding: 12pt 0 12pt 0; vertical-align: top;">
                     <div>
-                        @RenderSection("LeftPane", false)
+                        @RenderBody()
                     </div>
                 </td>
-                <td style="width: 20pt; border: none" />
-            }
 
-            <td style="border-top: #9B9B9B solid thin; border-bottom: #9B9B9B solid thin; padding: 12pt 0 12pt 0; vertical-align: top;">
-                <div>
-                    @RenderBody()
-                </div>
-            </td>
+                @if (IsSectionDefined("RightPane"))
+                {
+                    <td style="width: 20pt; border: none" />
 
-            @if (IsSectionDefined("RightPane"))
-            {
-                <td style="width: 20pt; border: none" />
+                    <td style="border-top: #9B9B9B solid thin; border-bottom: #9B9B9B solid thin; padding: 12pt 0 12pt 0; width: 250px; max-width: 350px; vertical-align: top;">
+                        <div>
+                            @RenderSection("RightPane", false)
+                        </div>
+                    </td>
+                }
+            </tr>
+        </table>
+    </div>
 
-                <td style="border-top: #9B9B9B solid thin; border-bottom: #9B9B9B solid thin; padding: 12pt 0 12pt 0; width: 250px; max-width: 350px; vertical-align: top;">
-                    <div>
-                        @RenderSection("RightPane", false)
-                    </div>
-                </td>
-            }
-        </tr>
-    </table>
-</div>
-
-@(Html.Telerik().ScriptRegistrar()
-                            .DefaultGroup(group => group.Combined(true).Compress(true)
-                            //.DefaultPath("~/Scripts/2013.2.611/")
-                            )
-                            .jQuery(false)
+    @(Html.Telerik().ScriptRegistrar()
+            .DefaultGroup(group => group.Combined(true).Compress(true)
+            //.DefaultPath("~/Scripts/2013.2.611/")
+            )
+            .jQuery(false)
     )
 
     @Html.RenderAuto("Footer")

@@ -1,12 +1,11 @@
-﻿using System;
+﻿using BExIS.Utils.NH.Querying;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Vaiona.Persistence.Api;
 using Vaiona.Utils.Cfg;
-using BExIS.Utils.NH.Querying;
 
 namespace BExIS.Dlm.Orm.NH.Utils
 {
@@ -21,11 +20,6 @@ namespace BExIS.Dlm.Orm.NH.Utils
         public MaterializedViewHelper()
         {
         }
-
-        //public MaterializedViewHelper(string dbDialect)
-        //{
-        //    this.dbDialect = dbDialect;
-        //}
 
         public DataTable Retrieve(long datasetId)
         {
@@ -43,25 +37,28 @@ namespace BExIS.Dlm.Orm.NH.Utils
             return retrieve(mvBuilder.ToString(), datasetId);
         }
 
-        public DataTable Retrieve(long datasetId, FilterExpression filter, OrderByExpression orderBy, ProjectionExpression projection, int pageNumber = 0, int pageSize = 0)
+        public DataTable Retrieve(long datasetId, string q, FilterExpression filter, OrderByExpression orderBy, ProjectionExpression projection, int pageNumber = 0, int pageSize = 0)
         {
             // Would be better to additionally have a ToHQL() method.
             var projectionClause = projection?.ToSQL();
             var orderbyClause = orderBy?.ToSQL();
             var whereClause = filter?.ToSQL();
 
-            return Retrieve(datasetId, whereClause, orderbyClause, projectionClause, pageNumber, pageSize);
+            return Retrieve(datasetId,q, whereClause, orderbyClause, projectionClause, pageNumber, pageSize);
         }
 
         // can be public, but after the other overloads got matured enough.
-        protected DataTable Retrieve(long datasetId, string whereClause, string orderbyClause, string projectionClause, int pageNumber = 0, int pageSize = 0)
+        protected DataTable Retrieve(long datasetId,string q, string whereClause, string orderbyClause, string projectionClause, int pageNumber = 0, int pageSize = 0)
         {
+            if (!string.IsNullOrEmpty(q))
+                whereClause += " m::text like '%" + q + "%'";
+
             // the following query must be converted to HQL for DB portability purpose. Also, all other dynamically created queries.
             StringBuilder mvBuilder = new StringBuilder();
             mvBuilder
                 .Append("SELECT ")
                 .Append(string.IsNullOrWhiteSpace(projectionClause) ? "*" : projectionClause).Append(" ") // projection
-                .Append("FROM ").Append(this.BuildName(datasetId).ToLower()).Append(" ") // source mat. view
+                .Append("FROM ").Append(this.BuildName(datasetId).ToLower() + " as m").Append(" ") // source mat. view
                 .Append(string.IsNullOrWhiteSpace(whereClause) ? "" : "WHERE (" + whereClause + ")").Append(" ") // where
                 .Append(string.IsNullOrWhiteSpace(orderbyClause) ? "Order by Id" : "Order By " + orderbyClause).Append(" ") //order by
                 .Append(pageNumber <= 0 ? "" : "OFFSET " + pageNumber * pageSize).Append(" ") //offset
@@ -383,10 +380,10 @@ namespace BExIS.Dlm.Orm.NH.Utils
             string fieldType = dbDataType(dataType);
             fieldType = !string.IsNullOrEmpty(fieldType) ? " AS " + fieldType : "";
 
-            string accessPathTemplate = @"xpath('/Content/Item[Property[@Name=""VariableId"" and @value=""{0}""]][1]/Property[@Name=""Value""]/@value', t.xmlvariablevalues)";
-            string accessPath = string.Format(accessPathTemplate, Id);
+            //string accessPathTemplate = @"xpath('/Content/Item[Property[@Name=""VariableId"" and @value=""{0}""]][1]/Property[@Name=""Value""]/@value', t.xmlvariablevalues)";
+            //string accessPath = string.Format(accessPathTemplate, Id);
 
-//            string fieldDef = $"CASE WHEN ({accessPath}::text = '{{\"\"}}'::text) THEN NULL WHEN ({accessPath}::text = '{{_null_null}}'::text) THEN NULL ELSE cast(({accessPath}::character varying[])[1] {fieldType}) END AS {this.BuildColumnName(Id).ToLower()}";
+            //            string fieldDef = $"CASE WHEN ({accessPath}::text = '{{\"\"}}'::text) THEN NULL WHEN ({accessPath}::text = '{{_null_null}}'::text) THEN NULL ELSE cast(({accessPath}::character varying[])[1] {fieldType}) END AS {this.BuildColumnName(Id).ToLower()}";
             string fieldDef = $"cast((t.values::character varying[])[{order}]  {fieldType}) AS {this.BuildColumnName(Id).ToLower()}";
 
             //string fieldDef = string.Format(fieldTemplate, accessPath, fieldType, this.BuildColumnName(Id).ToLower());
@@ -405,9 +402,13 @@ namespace BExIS.Dlm.Orm.NH.Utils
                 { "double", "float8" },
                 { "int", "integer" },
                 { "integer", "integer" },
+                { "int16", "integer" },
                 { "int32", "integer" },
                 { "long", "bigint" },
                 { "int64", "bigint" },
+                { "uint16", "bigint" },
+                { "uint32", "bigint" },
+                { "uint64", "bigint" },
                 { "text", "" }, // not needed -> character varying()
                 { "string", "character varying" } //changed from 255 to unlimited to avoid data does not fit e.g. Sequence data
             };

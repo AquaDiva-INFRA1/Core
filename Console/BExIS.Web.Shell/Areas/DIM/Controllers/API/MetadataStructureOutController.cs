@@ -8,14 +8,11 @@ using BExIS.Security.Services.Objects;
 using BExIS.Utils.Route;
 using BExIS.Xml.Helpers;
 using BEXIS.JSON.Helpers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Xml;
@@ -86,7 +83,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
                 using (var metadataStructureManager = new MetadataStructureManager())
                 {
                     if (metadataStructureManager.Repo.Get(id) == null)
-                    { 
+                    {
                         return Request.CreateResponse(HttpStatusCode.PreconditionFailed, String.Format("The metadata structure with id ({0}) not exist.", id));
 
                     }
@@ -117,7 +114,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
     }
 
-        
+
 
     public class MetadataStructureViewObject
     {

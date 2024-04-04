@@ -1,154 +1,134 @@
-﻿@model BEXIS.OAC.Entities.AccessionMetadataV2
+﻿@model BEXIS.OAC.Entities.SequencedataNCBI
 @using BEXIS.OAC.Entities;
 
 <div>
     <h4>AccessionMetadataV2</h4>
     <hr />
-	<dl class="dl-horizontal">
-		<dt>
-			@Html.DisplayNameFor(model => model.Accession)
-		</dt>
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.accession)
+        </dt>
 
-		<dd>
-			@Html.DisplayFor(model => model.Accession)
-		</dd>
+        <dd>
+            @Html.DisplayFor(model => model.accession)
+        </dd>
 
-		<dt>
-			@Html.DisplayNameFor(model => model.Alias)
-		</dt>
+        <dt>
+            @Html.DisplayNameFor(model => model.alias)
+        </dt>
 
-		<dd>
-			@Html.DisplayFor(model => model.Alias)
-		</dd>
+        <dd>
+            @Html.DisplayFor(model => model.alias)
+        </dd>
 
-		<dt>
-			@Html.DisplayNameFor(model => model.CenterName)
-		</dt>
+        <dt>
+            @Html.DisplayNameFor(model => model.center_name)
+        </dt>
 
-		<dd>
-			@Html.DisplayFor(model => model.CenterName)
-		</dd>
+        <dd>
+            @Html.DisplayFor(model => model.center_name)
+        </dd>
 
-		<dt>
-			@Html.DisplayNameFor(model => model.TITLE)
-		</dt>
+        <dt>
+            @Html.DisplayNameFor(model => model.TITLE)
+        </dt>
 
-		<dd>
-			@Html.DisplayFor(model => model.TITLE)
-		</dd>
+        <dd>
+            @Html.DisplayFor(model => model.TITLE)
+        </dd>
 
-		<dt>
-			@Html.DisplayNameFor(model => model.DESCRIPTION)
-		</dt>
+        <dt>
+            @Html.DisplayNameFor(model => model.DESCRIPTION)
+        </dt>
 
-		<dd>
-			@Html.DisplayFor(model => model.DESCRIPTION)
-		</dd>
+        <dd>
+            @Html.DisplayFor(model => model.DESCRIPTION)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.NAME)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NAME)
+        </dd>
 
         <!--  IDENTIFIERS    -->
 
-		<dt>
-			@Html.DisplayNameFor(model => model.IDENTIFIERS.EXTERNALID.Namespace)
-		</dt>
-		<dd>
-			@Html.DisplayFor(model => model.IDENTIFIERS.EXTERNALID.Namespace)
-		</dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.IDENTIFIERS.PRIMARY_ID)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.IDENTIFIERS.PRIMARY_ID)
+        </dd>
 
-		<dt>
-			@Html.DisplayNameFor(model => model.IDENTIFIERS.EXTERNALID.Text)
-		</dt>
-		<dd>
-			@Html.DisplayFor(model => model.IDENTIFIERS.EXTERNALID.Text)
-		</dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.IDENTIFIERS.SECONDARY_ID)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.IDENTIFIERS.SECONDARY_ID)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.IDENTIFIERS.SUBMITTER_ID.namespace_)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.IDENTIFIERS.SUBMITTER_ID.namespace_)
+        </dd>
 
-		<dt>
-			@Html.DisplayNameFor(model => model.IDENTIFIERS.PRIMARYID)
-		</dt>
-		<dd>
-			@Html.DisplayFor(model => model.IDENTIFIERS.PRIMARYID)
-		</dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.IDENTIFIERS.SUBMITTER_ID.text_)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.IDENTIFIERS.SUBMITTER_ID.text_)
+        </dd>
 
-		<dt>
-			@Html.DisplayNameFor(model => model.IDENTIFIERS.SUBMITTERID.Namespace)
-		</dt>
-		<dd>
-			@Html.DisplayFor(model => model.IDENTIFIERS.SUBMITTERID.Namespace)
-		</dd>
+        <!-- PROJECTLINKS -->
 
-		<dt>
-			@Html.DisplayNameFor(model => model.IDENTIFIERS.SUBMITTERID.Text)
-		</dt>
-		<dd>
-			@Html.DisplayFor(model => model.IDENTIFIERS.SUBMITTERID.Text)
-		</dd>
+        @{
+            List<PROJECTLINK> sls = (List<PROJECTLINK>)Model.PROJECT_LINKS.PROJECT_LINK;
+            foreach (PROJECTLINK sl in sls)
+            {
+                <dt>
+                    @Html.DisplayNameFor(model => sl.XREF_LINK.ID)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => sl.XREF_LINK.ID);
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => sl.XREF_LINK.DB)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => sl.XREF_LINK.DB);
+                </dd>
 
-        <!-- SAMPLENAME -->
+            }
 
-		<dt>
-			@Html.DisplayNameFor(model => model.SAMPLENAME.TAXONID)
-		</dt>
-		<dd>
-			@Html.DisplayFor(model => model.SAMPLENAME.TAXONID)
-		</dd>
+        }
 
-		<dt>
-			@Html.DisplayNameFor(model => model.SAMPLENAME.SCIENTIFICNAME)
-		</dt>
-		<dd>
-			@Html.DisplayFor(model => model.SAMPLENAME.SCIENTIFICNAME)
-		</dd>
+        <!-- PROJECTATTRIBUTES -->
 
-        <!-- SAMPLELINKS -->
+        @{
+            List<PROJECTATTRIBUTE> sls_ = (List<PROJECTATTRIBUTE>)Model.PROJECT_ATTRIBUTES.PROJECT_ATTRIBUTE;
+            foreach (PROJECTATTRIBUTE sl in sls_)
+            {
+                <dt>
+                    @Html.DisplayNameFor(model => sl.TAG)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => sl.TAG);
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => sl.VALUE)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => sl.VALUE);
+                </dd>
 
-		@{
-			List<SAMPLELINK> sls = (List<SAMPLELINK>)Model.SAMPLELINKS.SAMPLELINK;
-			foreach (SAMPLELINK sl in sls)
-			{
-				<dt>
-					@Html.DisplayNameFor(model => sl.XREFLINK.DB)
-				</dt>
-				<dd>
-					@Html.DisplayFor(model => sl.XREFLINK.DB);
-				</dd>
-				<dt>
-					@Html.DisplayNameFor(model => sl.XREFLINK.ID)
-				</dt>
-				<dd>
-					@Html.DisplayFor(model => sl.XREFLINK.ID);
-				</dd>
+            }
 
-			}
+        }
 
-		}
 
-		@{
-			List<SAMPLEATTRIBUTE> sas = (List<SAMPLEATTRIBUTE>)Model.SAMPLEATTRIBUTES.SAMPLEATTRIBUTE;
-			foreach (SAMPLEATTRIBUTE sa in sas)
-			{
-				<dt>
-					@Html.DisplayNameFor(model => sa.TAG)
-				</dt>
-				<dd>
-					@Html.DisplayFor(model => sa.TAG);
-				</dd>
-				<dt>
-					@Html.DisplayNameFor(model => sa.VALUE)
-				</dt>
-				<dd>
-					@Html.DisplayFor(model => sa.VALUE);
-				</dd>
-				<dt>
-					@Html.DisplayNameFor(model => sa.UNITS)
-				</dt>
-				<dd>
-					@Html.DisplayFor(model => sa.UNITS);
-				</dd>
-
-			}
-
-		}
-
-	</dl>
+    </dl>
 </div>
 
 <script type="text/javascript">

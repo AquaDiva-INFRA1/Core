@@ -199,7 +199,6 @@
             Combines multiple String-similarities with equal weight
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:BExIS.Modules.Dcm.UI.Controllers.EasyUploadVerificationController.NoConceptFound(System.Int32,System.String,System.Boolean)" -->
         <member name="M:BExIS.Modules.Dcm.UI.Controllers.EntityReferenceController.Delete(System.Int64)">
              <summary>
             
@@ -394,27 +393,6 @@
             <param name="columnName">Column Name (ie. A or AB)</param>
             <returns>Zero based index if the conversion was successful; otherwise null</returns>
         </member>
-        <member name="T:BExIS.Modules.Dcm.UI.Models.AsciiReaderEasyUpload">
-            <summary>
-            this class is used to read and validate ascii files
-            </summary>
-            <remarks></remarks>        
-        </member>
-        <member name="M:BExIS.Modules.Dcm.UI.Models.AsciiReaderEasyUpload.ReadFile(System.IO.Stream,System.String,System.Collections.Generic.List{System.String[]},BExIS.IO.Transform.Input.AsciiFileReaderInfo,BExIS.Dlm.Entities.DataStructure.StructuredDataStructure,System.Int64,System.Int32,BExIS.IO.Transform.Input.EasyUploadFileReaderInfo)">
-            <summary>
-            Read line by line based on a packageSize. 
-            Convert the lines into a datatuple based on the datastructure.
-            Return value is a list of datatuples
-            </summary>
-        </member>
-        <member name="M:BExIS.Modules.Dcm.UI.Models.AsciiReaderEasyUpload.convertAndAddToSubmitedVariableIdentifier">
-            <summary>
-            Convert a list of variable names to 
-            VariableIdentifiers
-            </summary>
-            <seealso cref="T:BExIS.IO.Transform.Validation.DSValidation.VariableIdentifier"/>
-            <param name="variablesRow"></param>
-        </member>
         <member name="M:BExIS.Modules.Dcm.UI.Models.CreateDataset.StepModelHelper.SetActiveByPreload">
             <summary>
             When a Component is required and not in a choice object
@@ -450,6 +428,11 @@
         <member name="P:BExIS.Modules.Dcm.UI.Models.FileInfoModel.Dateformat">
             <summary>
             Format of the Date
+            </summary>
+        </member>
+        <member name="P:BExIS.Modules.Dcm.UI.Models.Metadata.MetadataParameterModel.Id">
+            <summary>
+            Parameter Usage Id
             </summary>
         </member>
         <member name="T:BExIS.Modules.Dim.UI.Controllers.MetadataInController">

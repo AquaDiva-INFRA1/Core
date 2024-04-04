@@ -10,7 +10,6 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -346,22 +345,19 @@ namespace BExIS.IO.Transform.Output
                 string type = "";
                 Cell cell = new Cell();
                 cell.CellReference = cellRef;
-                DataAttribute dataAttribute = null;
 
                 // get Variable
-                var variable = new Variable();
+                var variable = new VariableInstance();
 
                 if (value is VariableValue)
                 {
                     var id = ((VariableValue)value).VariableId;
                     variable = ((VariableValue)value).Variable;
-                    dataAttribute = uow.GetReadOnlyRepository<Variable>().Query(p => p.Id == id).Select(p => p.DataAttribute).FirstOrDefault();
-                    type = dataAttribute.DataType.SystemType;
+                    type = variable.DataType.SystemType;
                 }
                 else
                 {
                     variable = dataStructure.Variables.ElementAt(columnIndex - offset);
-                    dataAttribute = variable.DataAttribute;
                     type = value.GetType().Name;
                 }
 
@@ -409,9 +405,9 @@ namespace BExIS.IO.Transform.Output
                         if (value.ToString() != "")
                         {
                             DateTime dt;
-                            if (dataAttribute.DataType != null && dataAttribute.DataType.Extra != null)
+                            if (variable.DataType != null)
                             {
-                                DataTypeDisplayPattern pattern = DataTypeDisplayPattern.Materialize(dataAttribute.DataType.Extra);
+                                DataTypeDisplayPattern pattern = DataTypeDisplayPattern.Get(variable.DisplayPatternId);
                                 if (!string.IsNullOrEmpty(pattern.StringPattern))
                                 {
                                     IOUtility.ExportDateTimeString(value.ToString(), pattern.StringPattern, out dt);
@@ -1283,7 +1279,7 @@ namespace BExIS.IO.Transform.Output
         /// <param name="row"></param>
         /// <param name="rowIndex"></param>
         /// <returns></returns>
-        protected override bool AddRow(DataRow row, long rowIndex)
+        protected override bool AddRow(DataRow row, long rowIndex, bool idInclude = false)
         {
             // column count
             int colCount = row.Table.Columns.Count;

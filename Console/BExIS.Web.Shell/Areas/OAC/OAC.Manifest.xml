@@ -12,10 +12,10 @@
 	</Dependencies>
 	<Exports>
 
-    <Export tag="menubar" id="Import OMIC Archives" order="5"
+    <Export tag="menubar" id="OMICs" order="5"
         title="Import OMIC Archives" description="Import OMIC Archives as samples to be integrated to the portal" icon=""
         controller="Home" action="Index"
-        extends="./menubarRoot/collect" />
+        extends="./menubarRoot/" />
 
     <Export tag="internalApi" id="SampleAccession"
             title="SampleAccession" description="SampleAccession" icon=""

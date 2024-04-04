@@ -1,6 +1,5 @@
 ﻿using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
-using BExIS.IO.Transform.Input;
 using BExIS.IO.Transform.Validation.DSValidation;
 using BExIS.IO.Transform.Validation.Exceptions;
 using DocumentFormat.OpenXml.Packaging;
@@ -9,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
 
 namespace BExIS.IO.Transform.Input
 {
@@ -37,7 +35,7 @@ namespace BExIS.IO.Transform.Input
             }
             if (fri.VariablesStartRow <= 0)
             {
-                this.ErrorMessages.Add(new Error(ErrorType.Other, "Startrow of Variable can´t be 0"));
+                this.ErrorMessages.Add(new Error(ErrorType.Other, "Startrow of Variables can´t be 0"));
             }
             if (fri.DataStartRow <= 0)
             {

@@ -1,17 +1,13 @@
-﻿using BExIS.App.Bootstrap;
+﻿using BExIS.App.Bootstrap.Attributes;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Subjects;
 using BExIS.Security.Services.Versions;
+using BExIS.Utils.Config;
 using BExIS.Web.Shell.Models;
-using BExIS.Xml.Helpers;
 using System;
 using System.Configuration;
-using System.IO;
 using System.Web.Mvc;
-using System.Xml.Linq;
-using Vaiona.IoC;
-using Vaiona.Utils.Cfg;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Data;
 using Vaiona.Web.Mvc.Models;
@@ -35,8 +31,8 @@ namespace BExIS.Web.Shell.Controllers
             if (!string.IsNullOrEmpty(HttpContext.User?.Identity?.Name)) //user
             {
                 // User exist : load ladingpage for users
-                GeneralSettings generalSettings = IoCFactory.Container.Resolve<GeneralSettings>();
-                var landingPageForUsers = generalSettings.GetEntryValue("landingPageForUsers").ToString();
+
+                var landingPageForUsers = GeneralSettings.LandingPageForUsers;
 
                 if (landingPageForUsers.Split(',').Length == 3)//check wheter 3 values exist for teh action
                 {
@@ -49,7 +45,7 @@ namespace BExIS.Web.Shell.Controllers
                 //if the landingPage not null and the action is accessable
                 if (landingPage == null || !this.IsAccessible(landingPage.Item1, landingPage.Item2, landingPage.Item3) || !checkPermission(landingPage))
                 {
-                    landingPageForUsers = generalSettings.GetEntryValue("landingPageForUsersNoPermission").ToString();
+                    landingPageForUsers = GeneralSettings.LandingPageForUsersNoPermission;
 
                     if (landingPageForUsers.Split(',').Length == 3)//check wheter 3 values exist for teh action
                     {
@@ -63,7 +59,10 @@ namespace BExIS.Web.Shell.Controllers
                     // this.IsAccessible not possible for shell
                     if (checkPermission(landingPage) == false)
                     {
-                        landingPage = this.Session.GetTenant().LandingPageTuple;
+                        landingPage = new Tuple<string, string, string>(
+                            GeneralSettings.LandingPage.Split(',')[0].Trim(), //module id
+                            GeneralSettings.LandingPage.Split(',')[1].Trim(), //controller
+                            GeneralSettings.LandingPage.Split(',')[2].Trim());//action
                     }
 
                     // Default forward, if no other path given for no permission page
@@ -76,7 +75,16 @@ namespace BExIS.Web.Shell.Controllers
             // use defined landing page without login
             else
             {
-                landingPage = this.Session.GetTenant().LandingPageTuple;
+                landingPage = new Tuple<string, string, string>(
+                            GeneralSettings.LandingPage.Split(',')[0].Trim(), //module id
+                            GeneralSettings.LandingPage.Split(',')[1].Trim(), //controller
+                            GeneralSettings.LandingPage.Split(',')[2].Trim());//action
+
+                // Default forward, if no other path given for no permission page
+                if (landingPage.Item1.ToLower() == "shell" && landingPage.Item2.ToLower() == "home")
+                {
+                    return View(landingPage.Item3);
+                }
             }
 
             //if the landingPage is null and the action is not accessible forward to shell/home/index
@@ -94,6 +102,23 @@ namespace BExIS.Web.Shell.Controllers
         public ActionResult Nopermission()
         {
             return View("NoPermission");
+        }
+
+        [JsonNetFilter]
+        [HttpGet]
+        public JsonResult GetApplicationName()
+        {
+            try
+            {
+                var generalSettings = new GeneralSettings();
+                var applicationName = generalSettings.GetApplicationName();
+
+                return Json(applicationName, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json("BEXIS2", JsonRequestBehavior.AllowGet);
+            }
         }
 
         [DoesNotNeedDataAccess]
@@ -115,13 +140,11 @@ namespace BExIS.Web.Shell.Controllers
             {
                 var database = versionManager.GetLatestVersion().Value;
 
-                // Workspace
-                string filePath = Path.Combine(AppConfiguration.WorkspaceGeneralRoot, "General.Settings.xml");
-                XDocument settings = XDocument.Load(filePath);
-                XElement entry = XmlUtility.GetXElementByAttribute("entry", "key", "version", settings);
-                var workspace = entry.Attribute("value")?.Value;
+                // load version from workspace in settings file of general
 
-                var model = new VersionModel()
+                string workspace = GeneralSettings.ApplicationVersion;
+
+                var model = new ReadVersionsModel()
                 {
                     Site = site,
                     Database = database,

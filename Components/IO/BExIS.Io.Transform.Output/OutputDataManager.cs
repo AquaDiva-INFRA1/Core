@@ -2,7 +2,6 @@
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Xml.Helpers;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -34,7 +33,7 @@ namespace BExIS.IO.Transform.Output
             }
         }
 
-        public string GenerateAsciiFile(long id, long versionId, string mimeType, bool withUnits)
+        public string GenerateAsciiFile(long id, long versionId, string mimeType, bool withUnits, bool internalId = false)
         {
             DatasetManager datasetManager = new DatasetManager();
             DataStructureManager datasetStructureManager = new DataStructureManager();
@@ -89,7 +88,7 @@ namespace BExIS.IO.Transform.Output
 
                 //ascii allready exist
                 if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(contentDescriptorTitle) &&
-                    p.URI.Contains(datasetVersion.Id.ToString())) > 0 &&
+                    p.URI.Contains("_"+versionNr.ToString()+"_")) > 0 &&
                     !withUnits)
                 {
                     #region FileStream exist
@@ -106,7 +105,7 @@ namespace BExIS.IO.Transform.Output
                 }
 
                 // not exist, needs to generated - get data first as datatable
-                DataTable data = getData(id, versionId);
+                DataTable data = getData(id, versionId, internalId);
 
                 long datastuctureId = datasetVersion.Dataset.DataStructure.Id;
 
@@ -118,7 +117,7 @@ namespace BExIS.IO.Transform.Output
                 string[] units = null;
                 if (withUnits) units = getUnits(datastuctureId, null);
 
-                writer.AddData(data, path, datastuctureId, units);
+                writer.AddData(data, path, datastuctureId, units, internalId);
 
                 return path;
             }
@@ -203,8 +202,8 @@ namespace BExIS.IO.Transform.Output
             return path;
         }
 
-        
-        
+
+
         /// <summary>
         /// version id = 0 == latest version
         /// </summary>
@@ -239,12 +238,13 @@ namespace BExIS.IO.Transform.Output
             try
             {
                 DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
+                int versionNr = datasetManager.GetDatasetVersionNr(datasetVersion);
                 ExcelWriter writer = new ExcelWriter(createAsTemplate);
 
                 string path = "";
 
                 //excel allready exist
-                if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(contentDescriptorTitle) && p.URI.Contains(datasetVersion.Id.ToString())) > 0 &&
+                if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(contentDescriptorTitle) && p.URI.Contains("_"+versionNr+"_")) > 0 &&
                     data == null)
                 {
                     #region FileStream exist
@@ -273,11 +273,10 @@ namespace BExIS.IO.Transform.Output
 
                 if (data == null)
                 {
-                    data = getData(id,versionId);
+                    data = getData(id, versionId);
                 }
 
                 long datastuctureId = datasetVersion.Dataset.DataStructure.Id;
-                int versionNr = datasetManager.GetDatasetVersionNr(datasetVersion);
                 if (createAsTemplate)
                 {
                     string[] columnNames = (from dc in data.Columns.Cast<DataColumn>()
@@ -424,7 +423,7 @@ namespace BExIS.IO.Transform.Output
                 int versionNr = dm.GetDatasetVersionNr(datasetVersion);
 
                 // create the generated FileStream and determine its location
-                string dynamicPath = IOHelper.GetDynamicStorePath(datasetId, versionNr, "data"+nameExt, ext);
+                string dynamicPath = IOHelper.GetDynamicStorePath(datasetId, versionNr, "data" + nameExt, ext);
                 //Register the generated data FileStream as a resource of the current dataset version
                 //ContentDescriptor generatedDescriptor = new ContentDescriptor()
                 //{
@@ -498,7 +497,7 @@ namespace BExIS.IO.Transform.Output
 
         #region get Data
 
-        private DataTable getData(long id, long versionId = 0)
+        private DataTable getData(long id, long versionId = 0, bool keepId = false)
         {
             DatasetManager dm = new DatasetManager();
 
@@ -508,12 +507,12 @@ namespace BExIS.IO.Transform.Output
                 // if versionid = 0 - get latest Version
                 // if version is not 0
                 // check if version is latest version
-                if (id != 0 && (versionId == 0 ||dm.GetDatasetLatestVersionId(id).Equals(versionId)))
+                if (id != 0 && (versionId == 0 || dm.GetDatasetLatestVersionId(id).Equals(versionId)))
                 {
                         DataTable data;
                     
                         data = dm.GetLatestDatasetVersionTuples(id);
-                        data.Strip();
+                        data.Strip(keepId);
                         return data;
                 }
 
@@ -588,6 +587,15 @@ namespace BExIS.IO.Transform.Output
 
             return newDt;
         }
+
+        //public static DataTable SkipAndTakeDataTable(DataTable dt, int skip = 0, int take = 0)
+        //{
+        //    // skip and take higher 0 use both
+        //    if (skip > 0 && take > 0)
+        //        return dt.AsEnumerable().Skip(skip * take).Take(take).CopyToDataTable();
+
+        //    return dt;
+        //}
 
         public static void ClearTempDirectory()
         {

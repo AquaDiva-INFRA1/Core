@@ -1,6 +1,7 @@
 ﻿using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Objects;
 using BExIS.Security.Entities.Subjects;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -229,6 +230,11 @@ namespace BExIS.Security.Services.Authorization
                 // Anonymous
                 if (subject == null)
                 {
+                    return false;
+                }
+                // Logged In with restricted rights
+                if (subject != null)
+                {
                     while (feature != null)
                     {
                         if (Exists(null, feature.Id, PermissionType.Grant))
@@ -275,81 +281,11 @@ namespace BExIS.Security.Services.Authorization
             }
         }
 
-        /*
-        public Dictionary<long,bool> HasAccess(IEnumerable<Subject> subjects, long featureId)
-        {
-            Dictionary<long, bool> tmp = new Dictionary<long, bool>();
-
-            using (var uow = this.GetUnitOfWork())
-            {
-                var featureRepository = uow.GetReadOnlyRepository<Feature>();
-                var subjectRepository = uow.GetReadOnlyRepository<Subject>();
-
-                var feature = featureRepository.Get(featureId);
-
-                foreach (var subject in subjects)
-                {
-  
-                    bool hasAccess = false;
-
-                    // Anonymous
-                    if (subject == null)
-                    {
-                        while (feature != null)
-                        {
-                            if (Exists(null, feature.Id, PermissionType.Grant))
-                                hasAccess =  true;
-
-                            feature = feature.Parent;
-                        }
-
-                        hasAccess = true;
-                    }
-
-                    // Non-Anonymous
-                    while (feature != null)
-                    {
-                        if (Exists(null, feature.Id, PermissionType.Grant))
-                            hasAccess = true;
-                        else
-                        if (Exists(subject.Id, feature.Id, PermissionType.Deny))
-                            hasAccess = false;
-                        else
-                        if (Exists(subject.Id, feature.Id, PermissionType.Grant))
-                            hasAccess = true;
-                        
-
-                        if (subject is User)
-                        {
-                            var user = subject as User;
-                            var groupIds = user.Groups.Select(g => g.Id).ToList();
-
-                            if (Exists(groupIds, new[] { feature.Id }, PermissionType.Deny))
-                            {
-                                hasAccess = false;
-                            }
-                            else
-                            if (Exists(groupIds, new[] { feature.Id }, PermissionType.Grant))
-                            {
-                                hasAccess = true;
-                            }
-                        }
-
-                        feature = feature.Parent;
-                    }
-
-                    tmp.Add(subject.Id, hasAccess);
-                }
-
-                return tmp;
-            }
-        }
-        */
-
-        public Dictionary<long, bool> HasAccess(IEnumerable<Subject> subjects, long featureId)
+        public Dictionary<long, bool> GetAccessList(IEnumerable<Subject> subjects, long featureId)
         {
             Dictionary<long, bool> accessDictionary = new Dictionary<long, bool>();
-        
+
+            // check user rights
             foreach (var subject in subjects)
             {
                 if (subject != null)

@@ -1,7 +1,5 @@
 ﻿using BExIS.Modules.UDAM.UI.Helpers;
 using System;
-using Vaiona.Logging;
-using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.UDAM.UI
 {

@@ -2,11 +2,8 @@
 using BExIS.IO.DataType.DisplayPattern;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BExIS.IO.Transform.Output
 {
@@ -27,14 +24,14 @@ namespace BExIS.IO.Transform.Output
 
             CellFormats cellFormats = styleSheet.Elements<CellFormats>().First();
 
-            
+
             //number 0,00
             CellFormat cellFormat = new CellFormat() { NumberFormatId = (UInt32Value)2U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U, FormatId = (UInt32Value)1U, ApplyNumberFormat = true };
             cellFormat.Protection = new Protection();
             cellFormat.Protection.Locked = false;
             cellFormats.Append(cellFormat);
             styleIndex.Add(new StyleIndexStruct() { Name = "Decimal", Index = (uint)cellFormats.Count++, DisplayPattern = null });
-            
+
             //number 0
             cellFormat = new CellFormat() { NumberFormatId = (UInt32Value)1U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U, FormatId = (UInt32Value)1U, ApplyNumberFormat = true };
             cellFormat.Protection = new Protection();
@@ -74,7 +71,7 @@ namespace BExIS.IO.Transform.Output
                 //if (pattern.Name.Equals("Time")) uInt32Value = 21U;
                 ///UInt32Value uInt32Value = 0U;
 
-                
+
 
                 cellFormat = new CellFormat() { NumberFormatId = newNumberFortmat.NumberFormatId, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U, FormatId = (UInt32Value)1U, ApplyNumberFormat = true };
                 cellFormat.Protection = new Protection();
@@ -106,7 +103,7 @@ namespace BExIS.IO.Transform.Output
         /// <param name="systemType"></param>
         /// <param name="styleIndex"></param>
         /// <returns></returns>
-        public static uint GetExcelStyleIndex(BExIS.Dlm.Entities.DataStructure.DataType dataType, List<StyleIndexStruct> styleIndex)
+        public static uint GetExcelStyleIndex(BExIS.Dlm.Entities.DataStructure.DataType dataType, List<StyleIndexStruct> styleIndex, int displayPatternId)
         {
             if (dataType.SystemType == DataTypeCode.Double.ToString() || dataType.SystemType == DataTypeCode.Decimal.ToString())
                 return styleIndex.Where(p => p.Name.Equals("Decimal")).FirstOrDefault().Index;
@@ -118,7 +115,7 @@ namespace BExIS.IO.Transform.Output
             {
                 if (dataType.Extra != null)
                 {
-                    DataTypeDisplayPattern pattern = DataTypeDisplayPattern.Materialize(dataType.Extra);
+                    DataTypeDisplayPattern pattern = DataTypeDisplayPattern.Get(displayPatternId);
                     if (pattern != null)
                     {
                         StyleIndexStruct tmp = styleIndex.Where(p => p.Name.Equals(pattern.Name)).FirstOrDefault();

@@ -2,23 +2,37 @@
 using BExIS.Security.Services.Authentication;
 using BExIS.Security.Services.Subjects;
 using BExIS.Security.Services.Utilities;
+using BExIS.Utils.Config;
+using BExIS.Utils.Config.Configurations;
 using BExIS.Web.Shell.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin.Security;
-using System.Configuration;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Vaiona.Utils.Cfg;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
 using Vaiona.Web.Mvc.Modularity;
+using Exceptionless;
 
 namespace BExIS.Web.Shell.Controllers
 {
     public class AccountController : Controller
     {
+        public ActionResult ClearSession()
+        {
+            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+
+            return RedirectToAction("SessionTimeout", "Home", new { area = "" });
+        }
+
         //
         // GET: /Account/ConfirmEmail
         public async Task<ActionResult> ConfirmEmail(long userId, string code)
@@ -41,7 +55,7 @@ namespace BExIS.Web.Shell.Controllers
                 var es = new EmailService();
                 es.Send(MessageHelper.GetRegisterUserHeader(),
                     MessageHelper.GetRegisterUserMessage(user.Id, user.Name, user.Email),
-                    ConfigurationManager.AppSettings["SystemEmail"]
+                    GeneralSettings.SystemEmail
                     );
 
                 return this.IsAccessible("bam", "PartyService", "UserRegistration")
@@ -214,13 +228,6 @@ namespace BExIS.Web.Shell.Controllers
             return View();
         }
 
-        public ActionResult ClearSession()
-        {
-            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-
-            return RedirectToAction("SessionTimeout", "Home", new { area = "" });
-        }
-
         //
         // POST: /Account/Login
         [HttpPost]
@@ -293,6 +300,11 @@ namespace BExIS.Web.Shell.Controllers
         //
         // GET: /Account/Register
 
+        public async Task<ActionResult> Profile()
+        {
+            return View();
+        }
+
         public ActionResult Register()
         {
             return View();
@@ -330,10 +342,12 @@ namespace BExIS.Web.Shell.Controllers
                     var es = new EmailService();
                     es.Send(MessageHelper.GetTryToRegisterUserHeader(),
                         MessageHelper.GetTryToRegisterUserMessage(user.Id, user.Name, user.Email),
-                        ConfigurationManager.AppSettings["SystemEmail"]
+                        GeneralSettings.SystemEmail
                         );
 
                     ViewBag.Message = "Before you can log in to complete your registration, please check your email and verify your email address. If you did not receive an email, please also check your spam folder.";
+
+                    ExceptionlessClient.Default.SubmitLog("Account Registration", $"{user.Name} has registered sucessfully.", Exceptionless.Logging.LogLevel.Info);
 
                     return View("Info");
                 }
@@ -348,14 +362,13 @@ namespace BExIS.Web.Shell.Controllers
             }
         }
 
-        //
-        // GET: /Account/ResetPassword
-
         public ActionResult ResetPassword(string code)
         {
             return code == null ? View("Error") : View();
         }
 
+        //
+        // GET: /Account/ResetPassword
         //
         // POST: /Account/ResetPassword
         [HttpPost]
@@ -414,7 +427,7 @@ namespace BExIS.Web.Shell.Controllers
                 var policyUrl = Url.Action("Index", "PrivacyPolicy", null, Request.Url.Scheme);
                 var termsUrl = Url.Action("Index", "TermsAndConditions", null, Request.Url.Scheme);
 
-                var applicationName = AppConfiguration.ApplicationName;
+                var applicationName = GeneralSettings.ApplicationName;
 
                 await identityUserService.SendEmailAsync(userId, subject,
                     $"<p>Dear user,</p>" +
@@ -429,35 +442,6 @@ namespace BExIS.Web.Shell.Controllers
             finally
             {
                 identityUserService.Dispose();
-            }
-        }
-
-        public async Task<ActionResult> Profile()
-        {
-            var identityUserService = new IdentityUserService();
-            var userManager = new UserManager();
-
-            try
-            {
-                long userId = 0;
-                long.TryParse(this.User.Identity.GetUserId(), out userId);
-
-                var user = identityUserService.FindById(userId);
-
-                if (string.IsNullOrEmpty(user.Token))
-                {
-                    await userManager.SetTokenAsync(user);
-                }
-
-                user = identityUserService.FindById(userId);
-                var token = await userManager.GetTokenAsync(user);
-
-                return View(model: token);
-            }
-            finally
-            {
-                identityUserService.Dispose();
-                userManager.Dispose();
             }
         }
 

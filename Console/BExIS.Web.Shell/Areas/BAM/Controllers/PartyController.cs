@@ -4,9 +4,9 @@ using BExIS.Modules.Bam.UI.Helpers;
 using BExIS.Modules.Bam.UI.Models;
 using BExIS.Security.Services.Subjects;
 using BExIS.Security.Services.Utilities;
+using BExIS.Utils.Config;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
@@ -81,7 +81,7 @@ namespace BExIS.Modules.Bam.UI.Controllers
                     ViewBag.partyTypeId = partyType.First().Id;
 
                     return PartialView("_partiesDynamicGridPartial");
-                    
+
                 }
                 else
                 {
@@ -90,7 +90,7 @@ namespace BExIS.Modules.Bam.UI.Controllers
                         partiesForGrid.Add(new partyGridModel() { Id = party.Id, Name = party.Name, PartyTypeTitle = party.PartyType.DisplayName, StartDate = (party.StartDate != null && party.StartDate < new DateTime(1000, 1, 1) ? "" : party.StartDate.ToString("yyyy-MM-dd")), EndDate = (party.EndDate != null && party.EndDate > new DateTime(3000, 1, 1) ? "" : party.EndDate.ToString("yyyy-MM-dd")), IsTemp = party.IsTemp });
                     return PartialView("_partiesPartial", partiesForGrid.OrderByDescending(cc => cc.IsTemp).ThenByDescending(cc => cc.StartDate).ThenBy(cc => cc.Name).ToList());
                 }
-                
+
             }
         }
 
@@ -102,7 +102,7 @@ namespace BExIS.Modules.Bam.UI.Controllers
                 partyTypeManager = new PartyTypeManager();
                 ViewBag.Title = PresentationModel.GetGenericViewTitle("Create Party");
                 var model = new PartyModel();
-                model.PartyTypeList = partyTypeManager.PartyTypeRepository.Get(cc=>!cc.SystemType).ToList();
+                model.PartyTypeList = partyTypeManager.PartyTypeRepository.Get(cc => !cc.SystemType).ToList();
                 ViewBag.RelationTabAsDefault = false;
                 ViewBag.Title = "Create party";
                 return View("CreateEdit", model);
@@ -172,15 +172,15 @@ namespace BExIS.Modules.Bam.UI.Controllers
                     party = Helper.EditParty(partyModel, partyCustomAttributeValues, systemPartyRelationships);
 
                     // check if an email is configured
-                    if (ConfigurationManager.AppSettings["usePersonEmailAttributeName"] == "true")
+                    if (GeneralSettings.UsePersonEmailAttributeName)
                     {
                         // get property name of custom attribute which holds the email
-                        var nameProp = partyTypeManager.PartyCustomAttributeRepository.Get(attr => (attr.PartyType == party.PartyType) && (attr.Name == ConfigurationManager.AppSettings["PersonEmailAttributeName"])).FirstOrDefault();
+                        var nameProp = partyTypeManager.PartyCustomAttributeRepository.Get(attr => (attr.PartyType == party.PartyType) && (attr.Name == GeneralSettings.PersonEmailAttributeName)).FirstOrDefault();
                         if (nameProp != null)
                         {
                             // get value from custom attribute
                             var entity = party.CustomAttributeValues.FirstOrDefault(item => item.CustomAttribute.Id == nameProp.Id);
-                            
+
                             // get user based on party 
                             var userid = partyManager.GetUserIdByParty(party.Id);
                             var userTask = userManager.FindByIdAsync(userid);
@@ -190,16 +190,20 @@ namespace BExIS.Modules.Bam.UI.Controllers
                             // compare user and party email
                             if (user.Email != entity.Value)
                             {
+
+
+
+
                                 var es = new EmailService();
                                 es.Send(MessageHelper.GetUpdateEmailHeader(),
                                     MessageHelper.GetUpdaterEmailMessage(user.DisplayName, user.Email, entity.Value),
-                                    ConfigurationManager.AppSettings["SystemEmail"]
+                                    GeneralSettings.SystemEmail
                                     );
 
                                 // Update user email
                                 user.Email = entity.Value;
                                 userManager.UpdateAsync(user);
-                            }      
+                            }
                         }
                     }
                 }
@@ -328,12 +332,12 @@ namespace BExIS.Modules.Bam.UI.Controllers
                 foreach (var partyRelationship in partyRelationships)
                 {
                     // Party TargetParty = partyManager.PartyRepository.Get(partyRelationship.TargetParty.Id);
-                   // PartyRelationshipType partyRelationshipType = partyRelationshipManager.PartyRelationshipTypeRepository.Get(partyRelationship.PartyRelationshipType.Id);
+                    // PartyRelationshipType partyRelationshipType = partyRelationshipManager.PartyRelationshipTypeRepository.Get(partyRelationship.PartyRelationshipType.Id);
                     PartyTypePair partyTypePair = partyRelationshipManager.PartyTypePairRepository.Get(partyRelationship.PartyTypePair.Id);
                     //Min date value is sent from telerik date time element, if it was empty
                     if (partyRelationship.EndDate == DateTime.MinValue)
                         partyRelationship.EndDate = DateTime.MaxValue;
-                    partyManager.AddPartyRelationship(partyRelationship.SourceParty, partyRelationship.TargetParty,  partyRelationship.Title, partyRelationship.Description, partyTypePair, partyRelationship.StartDate, partyRelationship.EndDate, partyRelationship.Scope);
+                    partyManager.AddPartyRelationship(partyRelationship.SourceParty, partyRelationship.TargetParty, partyRelationship.Title, partyRelationship.Description, partyTypePair, partyRelationship.StartDate, partyRelationship.EndDate, partyRelationship.Scope);
                 }
                 partyManager?.Dispose();
                 return RedirectToAction("CreateEdit", "party", new { id = partyId, relationTabAsDefault = true });
@@ -472,7 +476,7 @@ namespace BExIS.Modules.Bam.UI.Controllers
         {
             using (PartyManager partyManager = new PartyManager())
             {
-                return partyManager.UpdatePartyRelationship(partyRelationship.Id, partyRelationship.Title, partyRelationship.Description, partyRelationship.StartDate, partyRelationship.EndDate, partyRelationship.Scope,partyRelationship.Permission);
+                return partyManager.UpdatePartyRelationship(partyRelationship.Id, partyRelationship.Title, partyRelationship.Description, partyRelationship.StartDate, partyRelationship.EndDate, partyRelationship.Scope, partyRelationship.Permission);
             }
         }
 

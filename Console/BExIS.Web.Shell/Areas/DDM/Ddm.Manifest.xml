@@ -5,6 +5,7 @@
   </Description>
   <Assemblies>
     <Assembly fullName="BExIS.Ddm.Api" role="" />
+    <!--<Assembly fullName="BExIS.Ddm.Model" role="" />-->
     <Assembly fullName="BExIS.Ddm.Providers.LuceneProvider" role="" />
   </Assemblies>
   <Dependencies>
@@ -17,57 +18,52 @@
             extends="./settingsRoot" />
 
     <Export tag="menubar" id="dashboard" order="1"
-        title="Dashboard" description="Quick Access to User Area" icon=""
-        controller="dashboard" action="ShowMyDatasetsInFullPage"
-        extends="./menubarRoot" />
-
+	    title="My Data" description="Quick Access to User Area" icon=""
+	    controller="dashboard" action="index"
+	    extends="./menubarRoot" />
+	  
     <Export tag="menubar" id="menuSearch" order="2"
             title="Search" description="Search datasets" icon=""
             controller="Home" action="index"
             extends="./menubarRoot/search" />
+	  
+	  <Export tag="menubar" id="semanticSearch" order="2"
+			title="Semantic Search" description="Search datasets semantically" icon=""
+			controller="SemanticSearch" action="index"
+			extends="./menubarRoot/search" />
+	  <!--
+	  <Export tag="menubar" id="interactiveSearch" order="2"
+				  title="Location Based" description="Interactive Search Based search on geo-localisation" icon=""
+				  controller="interactiveSearch" action="index"
+				  extends="./menubarRoot/search" />
+        -->
 
-    <!--<Export tag="menubar" id="menuSearchPublic" order="2"
+	  <!--<Export tag="menubar" id="menuSearchPublic" order="2"
             title="Public" description="Search in public datasets" icon=""
             controller="publicsearch" action="public"
             extends="./menubarRoot" />-->
-    <!--
-    <Export tag="menubar" id="dashboard" order="1"
-        title="Dashboard" description="Quick Access to User Area" icon=""
-        controller="dashboard" action="index"
-        extends="./menubarRoot" />
-    -->
 
-    <Export tag="menubar" id="semanticSearch" order="2"
-            title="Semantic Search" description="Search datasets" icon=""
-            controller="SemanticSearch" action="index"
-            extends="./menubarRoot/search" />
 
-    <Export tag="lunchbar" id="helpDdm" order="1"
+	  <Export tag="lunchbar" id="helpDdm" order="1"
             title="Search" description="Search Help Manual" icon=""
             controller="help" action="index"
             extends="./lunchbarRoot/help" />
 
-    <Export tag="api" id="tntList"
+    <!--<Export tag="api" id="tntList"
             title="No thing" description="Change me!" icon=""
-            controller="home" action="index"
-            extends="./apiRoot" />
+            controller="publicsearch" action="public"
+            extends="./apiRoot" />-->
 
+    <!-- INTERNAL-->
+	  <Export tag="internalApi" id="LandingPage"
+			  title="Landing Page " description="Landing Page" icon=""
+			  controller="LandingPage" action="Index"
+			  extends="" />
+	  
     <Export tag="internalApi" id="publicsearch"
             title="Public Search" description="public search" icon=""
             controller="PublicSearch" action="Index"
             extends="" />
-
-    <Export tag="internalApi" id="landingPage"
-            title="Landing Page" description="Landing Page" icon=""
-            controller="LandingPage" action="Index"
-            extends="" />
-
-    <Export tag="menubar" id="interactiveSearch" order="2"
-            title="Interactive Search" description="Interactive Search Based search on geo-localisation" icon=""
-            controller="interactiveSearch" action="index"
-            extends="./menubarRoot/search" />
-
-    <!-- INTERNAL-->
 
     <Export tag="internalApi" id="showData"
             title="Show Data" description="ShowData" icon=""
@@ -90,25 +86,29 @@
         extends="" />
 
     <Export tag="internalApi" id="freeTextSearch"
-            title="Free Text Search" description="free Text Search" icon=""
+            title="Free Text Search" description="free Text Search" icon="" 
             controller="SearchIndex" action="Get"
             extends="" />
 
-    <Export tag="internalApi" id="showDatasetsInDashboard"
+    <!--<Export tag="internalApi" id="showDatasetsInDashboard"
             title="Show one's datasets" description="Shows the datasets of the logged in user" icon=""
-            controller="home" action="ShowMyDatasets"
-            extends="" />
-
-    <Export tag="internalApi" id="findOntologyLabels"
-            title="Find Ontology Labels" description="Find the Labels of the given URIs" icon=""
-            controller="SemanticSearch" action="FindOntologyLabels"
-            extends="" />
-
+            controller="home" action="index"
+            extends="" />-->
   </Exports>
 
   <EntityActions>
     <EntityAction id="showDataset" entity="dataset" controller="data" action="Showdata" area="DDM" modus="show" />
     <EntityAction id="uploadDataset" entity="dataset" controller="Submit" action="Upload" area="DCM" modus="upload" />
   </EntityActions>
-	
+    <!-- fill out alle the hook aatributes otherwise there will not be loaded -->
+    <Hooks>
+		<Hook
+			 name="analysis"
+			 displayName ="Analysis"
+			 mode="view"
+			 entity="dataset"
+			 place="details"
+			 module="asm"
+			 type="BExIS.Modules.Asm.UI.Hooks.AnalysisHook, BExIS.Modules.ASM.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+    </Hooks>
 </Manifest>

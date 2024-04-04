@@ -1,18 +1,18 @@
-﻿using System;
+﻿using BExIS.App.Testing;
+using BExIS.Utils.Config;
+using BExIS.Xml.Helpers.Mapping;
+using BEXIS.JSON.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
-using BExIS.App.Testing;
-using BExIS.Utils.Config;
-using BEXIS.JSON.Helpers;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
-using NUnit.Framework;
-using Vaiona.Utils.Cfg;
 using Assert = NUnit.Framework.Assert;
 
 namespace BExIS.Xml.Helpers.UnitTests
@@ -104,7 +104,7 @@ namespace BExIS.Xml.Helpers.UnitTests
             XmlDocument metadataOriginal = new XmlDocument();
             metadataOriginal.Load(metadataOriginalXMlPath);
 
-            using (StreamReader r = new StreamReader(metadataInputPath, Encoding.Default))
+            using (StreamReader r = new StreamReader(metadataInputPath))
             {
                 XmlMetadataConverter metadataConverter = new XmlMetadataConverter();
 
@@ -119,8 +119,8 @@ namespace BExIS.Xml.Helpers.UnitTests
                 Assert.IsNotNull(metadataOut);
 
                 // check content
-                string aText = metadataOut.InnerText;
-                string bText = metadataOriginal.InnerText;
+                string aText = metadataOriginal.InnerText;
+                string bText = metadataOut.InnerText;
 
                 Assert.AreEqual(aText, bText, "the content between output and original xml is not equal");
 
@@ -244,13 +244,13 @@ namespace BExIS.Xml.Helpers.UnitTests
             string path = AppDomain.CurrentDomain.BaseDirectory;
             string metadataInputPath = Path.Combine(path, metadataInput);
 
-            using (StreamReader r = new StreamReader(metadataInputPath, Encoding.Default))
+            using (StreamReader r = new StreamReader(metadataInputPath, Encoding.UTF8, true))
             {
                 XmlMetadataConverter metadataConverter = new XmlMetadataConverter();
 
                 string json = r.ReadToEnd();
                 JObject metadataInputJson = JObject.Parse(json);
-                
+
                 //Act
                 XmlMetadataConverter xmlMetadataConverter = new XmlMetadataConverter();
                 List<string> errors = new List<string>();
@@ -271,7 +271,7 @@ namespace BExIS.Xml.Helpers.UnitTests
             List<String> errors = new List<string>();
 
             //Act & Assert
-            Assert.That(() => xmlMetadataHelper.HasValidStructure(null,1,out errors), Throws.ArgumentNullException);
+            Assert.That(() => xmlMetadataHelper.HasValidStructure(null, 1, out errors), Throws.ArgumentNullException);
         }
 
         [Test()]
@@ -303,8 +303,36 @@ namespace BExIS.Xml.Helpers.UnitTests
 
             // Assert
             Assert.IsFalse(valid, "The result of the function should be false, but is true");
-            Assert.That(errors.Count,Is.EqualTo(4), "The number of errors should be 4");
+            Assert.That(errors.Count, Is.EqualTo(4), "The number of errors should be 4");
 
         }
+
+        //[Test()]
+        //public void ConvertTo_XmlToXml_returnXml()
+        //{
+        //    string path = AppDomain.CurrentDomain.BaseDirectory;
+        //    string dic = Path.Combine(path, "App_Data/gbif/");
+        //    string xsdPath = Path.Combine(path, dic, "eml.xsd");
+        //    string internalXmlPath = Path.Combine(path, dic, "internalConcept.xml");
+        //    string outputPath = Path.Combine(path, dic, "metadata.xml");
+
+        //    // arrange
+            
+        //    XmlDocument internalXml = new XmlDocument();
+        //    internalXml.Load(internalXmlPath);
+
+        //    XmlMetadataConverter converter = new XmlMetadataConverter();
+
+        //    // act
+        //    var output = converter.ConvertTo(internalXml, xsdPath);
+
+
+        //    // assert
+
+
+
+        //}
+
+
     }
 }

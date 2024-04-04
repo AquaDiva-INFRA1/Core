@@ -11,7 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BExIS.Dlm.Entities</RootNamespace>
     <AssemblyName>BExIS.Dlm.Entities</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
@@ -56,16 +56,12 @@
       <HintPath>..\..\..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="Vaiona.Entities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Libraries\Vaiona\Vaiona.Entities.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Administration\ResearchPlan.cs" />
@@ -93,6 +89,7 @@
     <Compile Include="Data\ContentDescriptor.cs" />
     <Compile Include="Data\DatasetVersion.cs" />
     <Compile Include="Data\DataValue.cs" />
+    <Compile Include="Data\EntityTemplate.cs" />
     <Compile Include="Data\ExtendedPropertyValue.cs" />
     <Compile Include="Data\ParameterValue.cs" />
     <Compile Include="Data\DataTupleVersion.cs" />
@@ -100,12 +97,19 @@
     <Compile Include="Data\VariableValueCollection.cs" />
     <Compile Include="Data\Dataset.cs" />
     <Compile Include="Data\DataTuple.cs" />
+    <Compile Include="Meanings\ExternalLinkType.cs" />
+    <Compile Include="Meanings\MeaningEntry.cs" />
+    <Compile Include="Meanings\PrefixCategory.cs" />
+    <Compile Include="MetadataStrcuture\MetadataParameterUsage.cs" />
+    <Compile Include="Meanings\ExternalLink.cs" />
+    <Compile Include="Meanings\Meaning.cs" />
     <Compile Include="MetadataStrcuture\MetadataNestedAttributeUsage.cs" />
     <Compile Include="MetadataStrcuture\MetadataAttribute.cs" />
     <Compile Include="MetadataStrcuture\MetadataAttributeUsage.cs" />
     <Compile Include="MetadataStrcuture\MetadataCompoundAttribute.cs" />
     <Compile Include="MetadataStrcuture\MetadataPackage.cs" />
     <Compile Include="MetadataStrcuture\MetadataPackageUsage.cs" />
+    <Compile Include="MetadataStrcuture\MetadataParameter.cs" />
     <Compile Include="MetadataStrcuture\MetadataSimpleAttribute.cs" />
     <Compile Include="MetadataStrcuture\MetadataStructure.cs" />
     <Compile Include="Metadata\Metadata.cs" />
@@ -133,6 +137,20 @@
   <ItemGroup>
     <Analyzer Include="..\..\..\packages\Microsoft.CodeAnalysis.NetAnalyzers.6.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" />
     <Analyzer Include="..\..\..\packages\Microsoft.CodeAnalysis.NetAnalyzers.6.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\AAA\BExIS.Security.Entities\BExIS.Security.Entities.csproj">
+      <Project>{c230693b-d780-438b-b26c-82257642dd5c}</Project>
+      <Name>BExIS.Security.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Vaiona\Vaiona.Entities\Vaiona.Entities.csproj">
+      <Project>{0815d220-3625-4e23-bbbc-8152345637fe}</Project>
+      <Name>Vaiona.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Vaiona\Vaiona.Persistence.Api\Vaiona.Persistence.Api.csproj">
+      <Project>{640BF81D-354A-4BF0-85FC-F0AD587CF8A2}</Project>
+      <Name>Vaiona.Persistence.Api</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

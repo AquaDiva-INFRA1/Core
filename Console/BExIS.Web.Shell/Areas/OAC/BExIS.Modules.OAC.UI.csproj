@@ -14,7 +14,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BExIS.Modules.OAC.UI</RootNamespace>
     <AssemblyName>BExIS.Modules.OAC.UI</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -25,6 +25,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <Use64BitIISExpress />
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -203,6 +204,7 @@
     </Reference>
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\System.Diagnostics.DiagnosticSource.4.0.0\lib\portable-net45+win8+wpa81\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
@@ -221,6 +223,9 @@
     <Reference Include="System.Text.Encodings.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\System.Text.Encodings.Web.4.0.0\lib\netstandard1.0\System.Text.Encodings.Web.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
@@ -249,47 +254,47 @@
     <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="Telerik.Web.Mvc, Version=2013.2.611.340, Culture=neutral, PublicKeyToken=29ac1a93ec063d92, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\TelerikMvcExtensions.2013.2.611\lib\net40\Telerik.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Core">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Core.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.Core\bin\Debug\Vaiona.Core.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Entities">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Entities.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.Entities\bin\Debug\Vaiona.Entities.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.IoC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.IoC.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.IoC\bin\Debug\Vaiona.IoC.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Logging">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Logging.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.Logging\bin\Debug\Vaiona.Logging.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Model">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Model.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.Model\bin\Debug\Vaiona.Model.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.MultiTenancy.Services">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.MultiTenancy.Services.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.MultiTenancy.Services\bin\Debug\Vaiona.MultiTenancy.Services.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Persistence.Api">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Persistence.Api.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.Persistence.Api\bin\Debug\Vaiona.Persistence.Api.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Utils">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Utils.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.Utils\bin\Debug\Vaiona.Utils.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Web">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Web.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.Web\bin\Debug\Vaiona.Web.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Web.Mvc">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Web.Mvc.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.Web.Mvc\bin\Debug\Vaiona.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="Vaiona.Web.Mvc.Modularity">
-      <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Web.Mvc.Modularity.dll</HintPath>
+      <HintPath>..\..\..\..\Components\Vaiona\Vaiona.Web.Mvc.Modularity\bin\Debug\Vaiona.Web.Mvc.Modularity.dll</HintPath>
     </Reference>
     <Reference Include="WebActivator, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\WebActivator.1.2.0.0\lib\NETFramework40\WebActivator.dll</HintPath>
@@ -857,7 +862,7 @@
       <Project>{4c00a9c4-5a27-485a-bc14-147567b29332}</Project>
       <Name>BExIS.Modules.Bam.UI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DCM\BExIS.Modules.Dcm.UI.csproj">
+    <ProjectReference Include="..\DCM\BExIS.Modules.Dcm.UI\BExIS.Modules.Dcm.UI.csproj">
       <Project>{44dd2a5e-0d2f-4fab-b297-4211441030b7}</Project>
       <Name>BExIS.Modules.Dcm.UI</Name>
     </ProjectReference>
@@ -865,9 +870,9 @@
       <Project>{9472D367-8FB1-4009-B648-104B3D015CE9}</Project>
       <Name>BEXIS.OAC.Entities</Name>
     </ProjectReference>
-    <ProjectReference Include="BEXIS.OAC.Services\BExIS.OAC.Services.csproj">
+    <ProjectReference Include="BEXIS.OAC.Services\BEXIS.OAC.Services.csproj">
       <Project>{b423a986-eb03-4696-aade-a5e8ea11fc73}</Project>
-      <Name>BExIS.OAC.Services</Name>
+      <Name>BEXIS.OAC.Services</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

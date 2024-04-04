@@ -1,12 +1,14 @@
-﻿using BExIS.Security.Services.Authorization;
+﻿using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Linq;
 using BExIS.Security.Services.Subjects;
 using System;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
-using BExIS.Security.Entities.Subjects;
+using System.Text;
+using System.Web.Http;
+using System.Web.Http.Controllers;
 
 namespace BExIS.App.Bootstrap.Attributes
 {
@@ -21,22 +23,31 @@ namespace BExIS.App.Bootstrap.Attributes
                 using (var userManager = new UserManager())
                 using (var identityUserService = new IdentityUserService())
                 {
+                    var areaName = "Api";
+                    var controllerName = actionContext.ActionDescriptor.ControllerDescriptor.ControllerName;
+                    var actionName = actionContext.ActionDescriptor.ActionName;
+                    var operation = operationManager.Find(areaName, controllerName, "*");
+
+                    if (operation == null)
+                    {
+                        actionContext.Response = new HttpResponseMessage(HttpStatusCode.Forbidden);
+                        return;
+                    }
+
                     User user = null;
 
-                    // User
-                    switch(actionContext.Request.Headers.Authorization.Scheme)
-                    {
-                        case "Basic":
-                            var basic = actionContext.Request.Headers.Authorization?.ToString().Substring("Basic ".Length).Trim();
-                            if (basic == null)
-                            {
-                                actionContext.Response = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
-                                actionContext.Response.Content = new StringContent("The basic authentication information is not valid.");
-                                return;
-                            }
+                    // 1. principal
+                    var principal = actionContext.ControllerContext.RequestContext.Principal;
 
-                            var name = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(basic)).Split(':')[0];
-                            if(name.Contains('@'))
+                    // 1.1. check basic auth in case of principal is empty!
+                    if (principal == null || principal.Identity == null || !principal.Identity.IsAuthenticated)
+                    {
+                        if (actionContext.Request.Headers.Authorization?.Scheme.ToLower() == "basic")
+                        {
+                            string basicParameter = actionContext.Request.Headers.Authorization.Parameter;
+
+                            var name = Encoding.UTF8.GetString(Convert.FromBase64String(basicParameter)).Split(':')[0];
+                            if (name.Contains('@'))
                             {
                                 user = userManager.FindByEmailAsync(name).Result;
                             }
@@ -45,57 +56,33 @@ namespace BExIS.App.Bootstrap.Attributes
                                 user = userManager.FindByNameAsync(name).Result;
                             }
 
-                            if(user == null)
+                            if (user == null)
                             {
-                                actionContext.Response = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
+                                actionContext.Response = new HttpResponseMessage(HttpStatusCode.Forbidden);
                                 actionContext.Response.Content = new StringContent("There is no user with the given username.");
                                 return;
                             }
 
-                            var result = identityUserService.CheckPasswordAsync(user, System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(basic)).Split(':')[1]).Result;
+                            var result = identityUserService.CheckPasswordAsync(user, Encoding.UTF8.GetString(Convert.FromBase64String(basicParameter)).Split(':')[1]).Result;
+
                             if (!result)
                             {
-                                actionContext.Response = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
+                                actionContext.Response = new HttpResponseMessage(HttpStatusCode.Forbidden);
                                 actionContext.Response.Content = new StringContent("The username and/or password are incorrect.");
                                 return;
                             }
-
-                            break;
-                        case "Bearer":
-                            var token = actionContext.Request.Headers.Authorization?.ToString().Substring("Bearer ".Length).Trim();
-                            if (token == null)
-                            {
-                                actionContext.Response = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
-                                actionContext.Response.Content = new StringContent("The token is not valid.");
-                                return;
-                            }
-
-                            var users = userManager.Users.Where(u => u.Token == token);
-                            if(users.Count() != 1)
-                            {
-                                actionContext.Response = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
-                                actionContext.Response.Content = new StringContent("The token is not valid.");
-                                return;
-                            }
-
-                            user = users.First();
-
-                            break;
-                        default:
-                            actionContext.Response = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
-                            return;
+                        }
                     }
-
-                    // Feature & Operation
-                    var areaName = "Api";
-                    var controllerName = actionContext.ActionDescriptor.ControllerDescriptor.ControllerName;
-                    var actionName = actionContext.ActionDescriptor.ActionName;
-                    var operation = operationManager.Find(areaName, controllerName, "*");
-
-                    if (operation == null)
+                    else
                     {
-                        actionContext.Response = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
-                        return;
+                        user = userManager.FindByNameAsync(principal.Identity.Name).Result;
+
+                        if (user == null)
+                        {
+                            actionContext.Response = new HttpResponseMessage(HttpStatusCode.Forbidden);
+                            actionContext.Response.Content = new StringContent("The system denied the access.");
+                            return;
+                        }
                     }
 
                     var feature = operation.Feature;
@@ -103,7 +90,7 @@ namespace BExIS.App.Bootstrap.Attributes
                     {
                         if (!featurePermissionManager.HasAccess(user.Id, feature.Id))
                         {
-                            actionContext.Response = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
+                            actionContext.Response = new HttpResponseMessage(HttpStatusCode.Forbidden);
                             actionContext.Response.Content = new StringContent("The system denied the access.");
                             return;
                         }
@@ -112,10 +99,9 @@ namespace BExIS.App.Bootstrap.Attributes
                     actionContext.ControllerContext.RouteData.Values.Add("user", user);
                     return;
                 }
-            } 
+            }
             catch (Exception ex)
             {
-
             }
         }
     }
