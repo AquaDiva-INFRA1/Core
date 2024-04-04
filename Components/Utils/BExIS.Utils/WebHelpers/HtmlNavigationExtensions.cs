@@ -128,6 +128,11 @@ namespace BExIS.Utils.WebHelpers
                 }
             }
 
+            if (!string.IsNullOrEmpty(userName) && userName != "Default")
+            {
+                sb.Append($"<li><a href='http://aquadiva-tubedb.fmi.uni-jena.de/'>TubeDB</a></li>");
+            }
+
             return new MvcHtmlString(sb.ToString());
         }
 
