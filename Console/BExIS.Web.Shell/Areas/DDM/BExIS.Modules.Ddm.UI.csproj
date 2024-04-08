@@ -472,6 +472,10 @@
     <Content Include="Views\SemanticSearch\_metaDataResultGridViewSemantic.cshtml" />
     <Content Include="Views\SemanticSearch\_searchBar.cshtml" />
     <Content Include="Views\SemanticSearch\_semedicoSearchContent.cshtml" />
+    <Content Include="Views\Admin\_GroupNode.cshtml" />
+    <Content Include="Views\Admin\_metadataNode_partial.cshtml" />
+    <Content Include="Views\Admin\_variableNode.cshtml" />
+    <Content Include="Views\Admin\__editSearchAttribute.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

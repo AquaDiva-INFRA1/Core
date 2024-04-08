@@ -460,32 +460,28 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
                 string[] variable_names = facet.Attributes.GetNamedItem("variable_name")?.Value.Split(',').Where(x => !string.IsNullOrEmpty(x)).ToArray();
                 if (variable_names!=null)
-                    using (DataStructureManager dsm = new DataStructureManager())
+                    using (VariableManager vm_ = new VariableManager())
                     {
-                        List<string> vars_ = variable_names.Where(va => (dsm.VariableRepo.Get(Int32.Parse(va)) != null)).ToList(); 
-                        //List<string> vars = vars_.Where(va => dsm.VariableRepo.Get(Int32.Parse(va)).DataStructure.Datasets.Where(d => d.Id == id).Count() > 0).ToList();
+
+                        List<string> vars_ = variable_names.Where(va => (vm_.VariableInstanceRepo.Get(Int32.Parse(va)) != null) ).ToList();
                         foreach (string variableName in vars_)
                         {
-                            using (VariableManager vm = new VariableManager())
+                            try
                             {
-                                try
-                                {
-                                    VariableInstance v_instance = vm.VariableInstanceRepo.Get(Int32.Parse(variableName));
-                                    if (!v_instance.DataStructure.Datasets.Any(x => x.Id == id))
-                                        break;
+                                VariableInstance v_instance = vm_.VariableInstanceRepo.Get(Int32.Parse(variableName));
+                                if ((v_instance!= null) && (v_instance.DataStructure != null) && (v_instance.DataStructure.Datasets.Any(x => x.Id == id))){
                                     using (DatasetManager dm = new DatasetManager())
                                     {
                                         DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
                                         var Xmin = table.Compute("min([" + string.Concat("var", v_instance.Id.ToString()) + "])", string.Empty);
                                         var Xmax = table.Compute("max([" + string.Concat("var", v_instance.Id.ToString()) + "])", string.Empty);
                                         dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId, v_instance.Label);
-                                    }  
+                                    }
                                 }
-                                catch (Exception exc)
-                                {
-                                    LoggerFactory.GetFileLogger().LogCustom(exc.Message);
-                                    LoggerFactory.GetFileLogger().LogCustom(exc.InnerException.Message);
-                                }
+                            }
+                            catch (Exception exc)
+                            {
+                                LoggerFactory.GetFileLogger().LogCustom(exc.Message);
                             }
                         }
                     }
@@ -499,20 +495,28 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         if (extracted_values.Count() == 0)
                         {
                             Debug_EMpty_nodes(metadataElementName, " Node ", docId);
+                            //using (DatasetManager dm = new DatasetManager())
+                            //{
+                            //    foreach (DatasetVersion dv in dm.DatasetVersionRepo.Get().Where(x => x.Dataset.Id == id))
+                            //    {
+                            //        extracted_values = Extract_nodes(ref concatenated_values, metadataElementName, dv.Metadata);
+                            //        if (extracted_values.Count() != 0)
+                            //            break;
+                            //    }
+                            //}
                         }
-                        else 
-                            foreach (string res in extracted_values)
+                        foreach (string res in extracted_values)
+                        {
+                            try
                             {
-                                try
-                                {
-                                    dataset = write_primary_data_facet(facet, res, null, dataset, docId, metadataElementName);
-                                }
-                                catch (Exception ex)
-                                {
-                                    LoggerFactory.GetFileLogger().LogCustom(ex.Message);
-                                    LoggerFactory.GetFileLogger().LogCustom(ex.InnerException.Message);
-                                }
+                                dataset = write_primary_data_facet(facet, res, null, dataset, docId, metadataElementName);
                             }
+                            catch (Exception ex)
+                            {
+                                LoggerFactory.GetFileLogger().LogCustom(ex.Message);
+                                LoggerFactory.GetFileLogger().LogCustom(ex.InnerException.Message);
+                            }
+                        }
                     }
             }
 
@@ -718,7 +722,8 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
        private Document write_primary_data_facet(XmlNode facet, object Xmin, object Xmax, Document dataset, string docId,string variable_node_Label)
         {
-            if (Xmax == null)
+            // the function is called with xmax null to point it is a metadata node with 1 element to write
+            if (Xmax == null) // writing a metadata node 
             {
                 dataset.Add(new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(),
                     Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
@@ -727,6 +732,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 writeAutoCompleteIndex(docId, facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString());
                 writeAutoCompleteIndex(docId, "ng_all", Xmin.ToString());
             }
+            //writing a range of strings from variables 
             else if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "string")
             {
                 dataset.Add(new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(),
@@ -736,6 +742,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 writeAutoCompleteIndex(docId, facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString());
                 writeAutoCompleteIndex(docId, "ng_all", Xmin.ToString());
             }
+            //writing dates and numeric
             else
             {
                 if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "date")

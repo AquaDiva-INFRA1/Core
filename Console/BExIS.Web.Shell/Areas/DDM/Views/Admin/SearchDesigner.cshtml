@@ -111,13 +111,14 @@
                                 {
                                   <span>@dt <br/></span>
                                 }
-                                using (DataStructureManager dsm = new DataStructureManager())
+                                using (VariableManager vm_ = new VariableManager())
                                 {
-                                    foreach (string dt in item.Variables.Where(x => !x.IsEmpty()).Where(x=> dsm.VariableRepo.Get(Int32.Parse(x)) != null ))
+                                    foreach (string dt in item.Variables.Where(x => !x.IsEmpty()).Where(x => vm_.VariableInstanceRepo.Get(Int32.Parse(x)) != null ))
                                     {
-                                        <span><b>@Html.Raw( dsm.VariableRepo.Get(Int32.Parse(dt)).Label) </b><br/> </span>
+                                        <span><b>@Html.Raw(vm_.VariableInstanceRepo.Get(Int32.Parse(dt)).Label) </b><br/> </span>
                                     }
                                 }
+
                                 using (GroupManager grpManager = new GroupManager())
                                 {
                                     foreach (string dt in item.Projects.Where(x => !x.IsEmpty()) )

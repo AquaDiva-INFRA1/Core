@@ -21,7 +21,7 @@ namespace BExIS.Ddm.Api
         void Dispose();
 
         List<SearchMetadataNode> GetMetadataNodes();
-        List<Variable> GetVariablesNodes();
+        List<VariableInstance> GetVariablesNodes();
 
         bool IsPrimaryDataIncluded();
         List<Group> GetProjectsNodes();

@@ -40,7 +40,7 @@
 
 <br />
 
-<button onclick="update()" >Update sematic table</button>
+<button onclick="update()" >Update Meanings table</button>
 
 
 
@@ -150,9 +150,9 @@
         });
     });
 
-    function update() {
-        $.ajax({
-            url: '/aam/Aam_Uri/update_semantics',
+    async function update() {
+        const result = await $.ajax({
+            url: '/aam/Aam_Dataset_column_annotation/update_ExternalLink',
             type: 'POST',
             error: function (xhr) {
                 alert('Error occured, please contact your administrator');
@@ -161,6 +161,17 @@
             success: function (result) {
                 alert(result)
             }
-        })
+        });
+        const result_ = await $.ajax({
+            url: '/aam/Aam_Dataset_column_annotation/update_meanings',
+            type: 'POST',
+            error: function (xhr) {
+                alert('Error occured, please contact your administrator');
+                console.log(xhr)
+            },
+            success: function (result) {
+                alert(result)
+            }
+        });
     }
 </script>

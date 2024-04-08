@@ -233,20 +233,6 @@ namespace BExIS.Security.Services.Authorization
                     return false;
                 }
                 // Logged In with restricted rights
-                if (subject != null)
-                {
-                    while (feature != null)
-                    {
-                        if (Exists(null, feature.Id, PermissionType.Grant))
-                            return true;
-
-                        feature = feature.Parent;
-                    }
-
-                    return false;
-                }
-
-                // Non-Anonymous
                 while (feature != null)
                 {
                     if (Exists(null, feature.Id, PermissionType.Grant))

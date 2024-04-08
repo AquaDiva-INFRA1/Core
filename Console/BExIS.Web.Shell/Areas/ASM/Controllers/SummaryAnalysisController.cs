@@ -266,8 +266,8 @@ namespace BExIS.Modules.Asm.UI.Controllers
             for (int index__ = 0; index__ < results.Count; index__++)
             {
                 string var_name = results[index__][0];
-                JToken obj = JToken.Parse(bexis_analysis_dataset).Where(x => x["VariableName"].ToString() == var_name).FirstOrDefault();
-                nullsCount.Add(JToken.Parse(bexis_analysis_dataset).Where(x => x["VariableName"].ToString() == var_name).FirstOrDefault()["missingValues"].Count());
+                JToken obj = JToken.Parse(bexis_analysis_dataset).Where(x => x["variableName"].ToString() == var_name).FirstOrDefault();
+                nullsCount.Add(JToken.Parse(bexis_analysis_dataset).Where(x => x["variableName"].ToString() == var_name).FirstOrDefault()["missingValues"].Count());
                 string min = obj["min"].ToString();
                 string max = obj["max"].ToString();
                 var data_range = new

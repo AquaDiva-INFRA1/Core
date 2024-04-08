@@ -88,6 +88,7 @@ namespace BExIS.Modules.Ddm.UI.Models
             this.Projects = new List<string>();
         }
 
+
         public static SearchAttribute GetSearchAttribute(SearchAttributeViewModel searchAttributeViewModel)
         {
             SearchAttribute sa = new SearchAttribute();
@@ -96,7 +97,10 @@ namespace BExIS.Modules.Ddm.UI.Models
             sa.displayName = searchAttributeViewModel.displayName;
             sa.sourceName = Regex.Replace(searchAttributeViewModel.displayName, "[^0-9a-zA-Z]+", "");
 
-            sa.metadataName = String.Join(",", searchAttributeViewModel.metadataNames.Where(x => !string.IsNullOrEmpty(x)).ToArray());
+            sa.metadataName = string.Join(",", searchAttributeViewModel.metadataNames?.ToArray() ?? new List<string>().ToArray());
+            sa.variables = string.Join(",", searchAttributeViewModel.Variables?.ToArray() ?? new List<string>().ToArray());
+            sa.projects = string.Join(",", searchAttributeViewModel.Projects?.ToArray() ?? new List<string>().ToArray());
+
 
             //types
             sa.dataType = SearchAttribute.GetDataType(searchAttributeViewModel.dataType);

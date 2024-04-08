@@ -57,10 +57,10 @@
         metadataNodes = (List<SearchMetadataNode>)Session["metadatNodes"];
     }
 
-    List<Variable> Variables = new List<Variable>();
+    List<VariableInstance> Variables = new List<VariableInstance>();
     if (Session["Variables"] != null)
     {
-        Variables = (List<Variable>)Session["Variables"];
+        Variables = (List<VariableInstance>)Session["Variables"];
     }
     var xx = Variables.ToList<Variable>().OrderBy(x => x.Label).Select(c => new { id = c.Id, label = c.Id + " - " + c.Label });
 

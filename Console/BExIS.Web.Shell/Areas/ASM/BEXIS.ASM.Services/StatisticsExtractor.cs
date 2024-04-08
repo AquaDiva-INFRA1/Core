@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using BExIS.Dlm.Entities.Data;
 using Vaiona.Logging;
+using System.Web.Configuration;
 
 namespace BExIS.ASM.Services
 {
@@ -46,7 +47,7 @@ namespace BExIS.ASM.Services
         public List<StructuredDataStructure> DataStruc_non_use = new List<StructuredDataStructure>();
         private readonly string temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
 
-        static string DatastructAPI = "https://addp.uni-jena.de/api/structures/";
+        static string DatastructAPI = WebConfigurationManager.AppSettings["BaseAdress"] + "/api/structures/";
 
 
         public StatisticsExtractor()
