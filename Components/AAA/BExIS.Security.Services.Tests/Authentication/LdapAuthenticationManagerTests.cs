@@ -3,11 +3,7 @@ using BExIS.Security.Services.Authentication;
 using BExIS.Utils.Config;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BExIS.Security.Services.Tests.Authentication
 {
@@ -52,7 +48,7 @@ namespace BExIS.Security.Services.Tests.Authentication
         {
             LdapAuthenticationManager ldapAuthenticationManager = new LdapAuthenticationManager();
 
-            var x = ldapAuthenticationManager.ValidateUser("username", "password");
+            var x = ldapAuthenticationManager.ValidateUser("ldap", "username", "password");
 
             Console.WriteLine(x.ToString());
         }

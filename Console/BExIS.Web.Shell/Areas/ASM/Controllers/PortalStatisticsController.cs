@@ -19,6 +19,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
 {
     public class PortalStatisticsController : Controller
     {
+
         static string DatastructAPI = "https://addp.uni-jena.de/api/structures/";
         static List<Variable_analytics> VA_list;
         static String temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
@@ -169,12 +170,13 @@ namespace BExIS.Modules.ASM.UI.Controllers
 
             return File(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "REPORT.csv"), "text/csv", "REPORT.csv");
         }
-        public ActionResult DataAttributeStruct_list(List<DataAttributeStruct> DataAttributeStruct_)
+        
+        public ActionResult DataAttributeStruct_list(List<VariableTemplate> DataAttributeStruct_)
         {
             ViewData["DataAttributeStruct"] = DataAttributeStruct_;
             return PartialView();
         }
-        public ActionResult EditUnitModel_list(List<EditUnitModel> EditUnitModel_)
+        public ActionResult EditUnitModel_list(List<Unit> EditUnitModel_)
         {
             ViewData["EditUnitModel_"] = EditUnitModel_;
             return PartialView();
@@ -184,6 +186,7 @@ namespace BExIS.Modules.ASM.UI.Controllers
             ViewData["DataTypeModel_"] = DataTypeModel_;
             return PartialView();
         }
+        
     }
     
 }

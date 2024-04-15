@@ -11,7 +11,7 @@
 }
 
 @{
-    string semantic_Coverage = String.Format("{0:0.00}", (double)(ViewData["semantic_Coverage"]) * 100);
+    //string semantic_Coverage = (string)ViewData["semantic_Coverage"].ToString();
     string datasetCount = (string)ViewData["datasetCount"];
     string Datapoints = (string)ViewData["Datapoints"];
 }
@@ -70,7 +70,7 @@
     <header>
         <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
             <ol class="carousel-indicators">
-                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"  style="color: #000000;background-color: #000000;"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active" style="color: #000000;background-color: #000000;"></li>
                 <li data-target="#carouselExampleIndicators" data-slide-to="1" style="color: #000000;background-color: #000000;"></li>
             </ol>
             <div class="carousel-inner" role="listbox">

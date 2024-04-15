@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Vaiona.Entities.Common;
+﻿using Vaiona.Entities.Common;
 
 namespace BExIS.Dlm.Entities.Common
 {
-    public class BaseUsage: BaseEntity
+    public class BaseUsage : BaseEntity
     {
         /// <summary>
         ///
@@ -45,7 +41,12 @@ namespace BExIS.Dlm.Entities.Common
         public virtual string DefaultValue { get; set; }
 
         /// <summary>
-        ///
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>        
+        public virtual string FixedValue { get; set; }
+
+        /// <summary>
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>        

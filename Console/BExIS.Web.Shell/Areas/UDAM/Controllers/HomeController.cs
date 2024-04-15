@@ -13,7 +13,6 @@ using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Xml.Helpers;
-using Vaiona.Utils.Cfg;
 using System.Web.Configuration;
 using BExIS.Security.Services.Authentication;
 using BExIS.Security.Services.Subjects;

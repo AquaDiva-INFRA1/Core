@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BExIS.Modules.Ddm.UI.Models
 {
@@ -88,6 +88,7 @@ namespace BExIS.Modules.Ddm.UI.Models
             this.Projects = new List<string>();
         }
 
+
         public static SearchAttribute GetSearchAttribute(SearchAttributeViewModel searchAttributeViewModel)
         {
             SearchAttribute sa = new SearchAttribute();
@@ -99,6 +100,7 @@ namespace BExIS.Modules.Ddm.UI.Models
             sa.metadataName = string.Join(",", searchAttributeViewModel.metadataNames?.ToArray() ?? new List<string>().ToArray());
             sa.entities = string.Join(",", searchAttributeViewModel.Entities?.ToArray() ?? new List<string>().ToArray());
             sa.projects = string.Join(",", searchAttributeViewModel.Projects?.ToArray() ?? new List<string>().ToArray());
+
 
             //types
             sa.dataType = SearchAttribute.GetDataType(searchAttributeViewModel.dataType);

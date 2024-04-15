@@ -68,6 +68,7 @@
     if (Session["Entities"] != null)
     {
         xx_ = (List<Tuple<long, string>>)Session["Entities"];
+        xx_ = xx_.OrderBy(x => x.Item2).ToList();
     }
 
     @*

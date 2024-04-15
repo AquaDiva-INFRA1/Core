@@ -67,7 +67,7 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                         DataColumn col = dt.Columns.Add("ID" + vu.Id.ToString()); // or DisplayName also
                         col.Caption = vu.Label;
 
-                        switch (vu.DataAttribute.DataType.SystemType)
+                        switch (vu.DataType.SystemType)
                         {
                             case "String":
                                 {
@@ -118,17 +118,6 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                                 }
                         }
 
-
-
-                        if (vu.Parameters.Count > 0)
-                        {
-                            foreach (var pu in vu.Parameters)
-                            {
-                                DataColumn col2 = dt.Columns.Add(pu.Label.Replace(" ", "")); // or DisplayName also
-                                col2.Caption = pu.Label;
-
-                            }
-                        }
                     }
 
 
@@ -172,7 +161,7 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                     DataColumn col = dt.Columns.Add("ID" + vu.Id.ToString()); // or DisplayName also
                     col.Caption = vu.Label;
 
-                    switch (vu.DataAttribute.DataType.SystemType)
+                    switch (vu.DataType.SystemType)
                     {
                         case "String":
                             {
@@ -224,16 +213,6 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                     }
 
 
-
-                    if (vu.Parameters.Count > 0)
-                    {
-                        foreach (var pu in vu.Parameters)
-                        {
-                            DataColumn col2 = dt.Columns.Add(pu.Label.Replace(" ", "")); // or DisplayName also
-                            col2.Caption = pu.Label;
-
-                        }
-                    }
                 }
 
                 foreach (var tuple in dsVersionTuples)
@@ -274,7 +253,7 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                         valueAsString = vv.Value.ToString();
 
                         Variable varr = sts.Variables.Where(p => p.Id == vv.VariableId).SingleOrDefault();
-                        switch (varr.DataAttribute.DataType.SystemType)
+                        switch (varr.DataType.SystemType)
                         {
                             case "String":
                                 {
@@ -390,6 +369,8 @@ namespace BExIS.Modules.Ddm.UI.Helpers
             //dt.Columns.Add("Parameters");      
             dt.Columns.Add("DataType");
             dt.Columns.Add("Category");
+            dt.Columns.Add("MissingValues");
+            dt.Columns.Add("Meanings");
             dt.Columns.Add("Optional");
             dt.Columns.Add("VariableId");
 
@@ -398,11 +379,11 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 StructuredDataStructure datastructure = uow.GetReadOnlyRepository<StructuredDataStructure>().Get(sds.Id);
                 if (datastructure != null)
                 {
-                    List<Variable> variables = SortVariablesOnDatastructure(datastructure.Variables.ToList(), datastructure);
+                    List<VariableInstance> variables = SortVariablesOnDatastructure(datastructure.Variables.ToList(), datastructure);
 
                     foreach (Variable var in variables)
                     {
-                        Variable sdvu = uow.GetReadOnlyRepository<Variable>().Get(var.Id);
+                        VariableInstance sdvu = uow.GetReadOnlyRepository<VariableInstance>().Get(var.Id);
 
                         DataRow dr = dt.NewRow();
                         if (sdvu.Label != null)
@@ -417,8 +398,8 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                         else
                             dr["VariableId"] = "n/a";
 
-                        if (sdvu.DataAttribute.DataType != null)
-                            dr["Category"] = sdvu.DataAttribute.ShortName;
+                        if (sdvu.VariableTemplate != null)
+                            dr["Category"] = sdvu.VariableTemplate.Label;
                         else
                             dr["Category"] = "n/a";
 
@@ -435,10 +416,20 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                         else
                             dr["Unit"] = "n/a";
 
-                        if (sdvu.DataAttribute.DataType != null)
-                            dr["DataType"] = sdvu.DataAttribute.DataType.Name;
+                        if (sdvu.DataType != null)
+                            dr["DataType"] = sdvu.DataType.Name;
                         else
                             dr["DataType"] = "n/a";
+
+                        if (sdvu.MissingValues != null)
+                            dr["MissingValues"] = String.Join(", ", sdvu.MissingValues.Select(m=> m.DisplayName).ToArray());
+                        else
+                            dr["MissingValues"] = "n/a";
+
+                        if (sdvu.Meanings != null)
+                            dr["Meanings"] = String.Join(", ", sdvu.Meanings.Select(m => m.Name).ToArray());
+                        else
+                            dr["Meanings"] = "n/a";
 
                         dt.Rows.Add(dr);
                     }
@@ -474,7 +465,7 @@ namespace BExIS.Modules.Ddm.UI.Helpers
         }
 
 
-        private static List<Variable> SortVariablesOnDatastructure(List<Variable> variables, DataStructure datastructure)
+        private static List<VariableInstance> SortVariablesOnDatastructure(List<VariableInstance> variables, DataStructure datastructure)
         {
             return variables.OrderBy(v => v.OrderNo).ToList();
         }

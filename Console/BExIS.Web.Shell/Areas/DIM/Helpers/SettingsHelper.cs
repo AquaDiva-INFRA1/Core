@@ -1,60 +1,63 @@
-﻿using BExIS.Dim.Helpers.Models;
-using BExIS.Modules.Dim.UI.Models;
+﻿using BExIS.Dim.Helpers.Configurations;
+using BExIS.Dim.Helpers.Models;
 using BExIS.Xml.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
-using System.Xml;
+using System.Web.Helpers;
 using System.Xml.Linq;
 using Vaiona.Utils.Cfg;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Dim.UI.Helpers
 {
     public class SettingsHelper
     {
-        string filePath = "";
+        private ModuleSettings _settings;
+        private string filePath = "";
 
         public SettingsHelper()
         {
-            filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DIM"), "Dim.Settings.xml");
+            _settings = ModuleManager.GetModuleSettings("dim");
         }
 
-        public bool KeyExist(string key)
+        public DataCiteDOICredentials GetDataCiteDOICredentials()
         {
-            XDocument settings = XDocument.Load(filePath);
-            XElement element = XmlUtility.GetXElementByAttribute("entry", "name", key.ToLower(), settings);
-
-            return element != null ? true : false;
+            try
+            {
+                return _settings.GetValueByKey<DataCiteDOICredentials>("dataCiteDOICredentials");
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
-        public string GetValue(string key)
+        public List<DataCiteDOIMapping> GetDataCiteDOIMappings()
         {
-            XDocument settings = XDocument.Load(filePath);
-            XElement element = XmlUtility.GetXElementByAttribute("entry", "name", key.ToLower(), settings);
-
-            string value = "";
-            value = element.Attribute("value")?.Value;
-
-            return value;
+            try
+            {
+                return _settings.GetValueByKey<List<DataCiteDOIMapping>>("dataCiteDOIMappings");
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
-        public List<DataCiteSettingsItem> GetDataCiteSettings(string name)
+        public List<DataCiteDOIPlaceholder> GetDataCiteDOIPlaceholders()
         {
-            XDocument settings = XDocument.Load(filePath);
-            List<XElement> mappings = XmlUtility.GetXElementByNodeName(name, settings).Descendants().ToList();
-
-            //return mappings.Select(m => new DataCiteMapping(m.Attribute("name")?.Value, m.Attribute("type")?.Value, m.Attribute("value")?.Value, m.Attribute("partyAttributes")?.Value.Split(';').Select(part => part.Split('=')).Where(part => part.Length == 2).ToDictionary(sp => sp[0], sp => sp[1]))).ToList();
-            return mappings.Select(m => new DataCiteSettingsItem(m.Attribute("name")?.Value, m.Attribute("type")?.Value, m.Attribute("value")?.Value, m.Attribute("extra")?.Value)).ToList();
-        }
-
-        public string GetDataCiteProperty(string propertyName)
-        {
-            XDocument settings = XDocument.Load(filePath);
-            List<XElement> datacite = settings.Elements("datacite").ToList();
-
-            return datacite.Select(m => m.Attribute(propertyName).Value).FirstOrDefault();
+            try
+            {
+                return _settings.GetValueByKey<List<DataCiteDOIPlaceholder>>("dataCiteDOIPlaceholders");
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 }

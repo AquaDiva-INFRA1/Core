@@ -27,6 +27,20 @@ namespace BExIS.IO.Transform.Validation.Exceptions
         private string _issue = "";
         private ErrorType _errorType;
 
+        // getter
+        public string Name { get { return _name; } set { _name = value; } }
+        public string Value { get { return _value; } set { _value = value; } } 
+        public int Row { get { return _row; } set { _row = value; } }
+        public int Number { get { return _number; } set { _number = value; }  }
+        public string Package { get { return _package; } set { _package = value; } }
+        public string PackageLabel { get { return _packageLabel; } set { _packageLabel = value; } }
+        public ErrorType ErrorType { get { return _errorType; } set { _errorType = value; } }
+        public string DataType { get { return _dataType; } set { _dataType = value; } }
+        public string DatePattern { get { return _datePattern; } set { _datePattern = value; } }
+
+        public string Issue { get { return _issue; } set { _issue = value; } }
+
+
         public String getName()
         {
             return this._name;
@@ -45,6 +59,12 @@ namespace BExIS.IO.Transform.Validation.Exceptions
         public String getDataType()
         {
             return this._dataType;
+        }
+
+        public Error()
+        {
+            _issue = string.Empty;
+            _errorType = ErrorType.Other;
         }
 
         /// <summary>
@@ -72,6 +92,7 @@ namespace BExIS.IO.Transform.Validation.Exceptions
         {
             _name = name;
             _issue = issue;
+            _errorType = errorType;
         }
 
         /// <summary>
@@ -84,7 +105,7 @@ namespace BExIS.IO.Transform.Validation.Exceptions
         /// <param name="valueList">Value :(0 = name, 1 = value, 2 = row, 3 = datatype)
         /// MetadataAttribute: (0=name, 1=value, 2=attributeNumber, 3= packageNumber)
         /// </param>
-        public Error(ErrorType errorType ,string issue, params object[] valueList)
+        public Error(ErrorType errorType, string issue, params object[] valueList)
         {
             _errorType = errorType;
             _issue = issue;
@@ -142,12 +163,12 @@ namespace BExIS.IO.Transform.Validation.Exceptions
         /// <returns></returns>
         public override string ToString()
         {
-            switch(_errorType)
+            switch (_errorType)
             {
-                case ErrorType.Value: return String.Format("{0} : Variable : {1} , Value : {2}, in Row : {3}, DataType : {4} {5}", _issue, _name, _value, _row.ToString(), _dataType, _datePattern);
+                case ErrorType.Value: return String.Format("{0} : Variables : {1} , Value : {2}, in Row : {3}, DataType : {4} {5}", _issue, _name, _value, _row.ToString(), _dataType, _datePattern);
                 case ErrorType.Dataset: return String.Format("{0} ({1})", _issue, _name);
                 case ErrorType.Datastructure: return String.Format("{0} ({1})", _issue, _name);
-                case ErrorType.MetadataAttribute: return String.Format("(Attribute number {3} name = <b>{0}</b> in {5} with value = {1} ) : {2} in {5} Number {4}", _name, _value, _issue , _number, _package,_packageLabel);
+                case ErrorType.MetadataAttribute: return String.Format("(Attribute number {3} name = <b>{0}</b> in {5} with value = {1} ) : {2} in {5} Number {4}", _name, _value, _issue, _number, _package, _packageLabel);
                 default: return String.Format("{0}", _issue);
             }
         }
@@ -162,21 +183,22 @@ namespace BExIS.IO.Transform.Validation.Exceptions
         {
             switch (_errorType)
             {
-                case ErrorType.Value: return String.Format("{0} : Variable : {1} , Value : {2}, in Row : {3}, DataType : {4}", _issue, _name, _value, _row.ToString(), _dataType);
+                case ErrorType.Value: return String.Format("{0} : Variables : {1} , Value : {2}, in Row : {3}, DataType : {4}", _issue, _name, _value, _row.ToString(), _dataType);
                 case ErrorType.Dataset: return String.Format("{0} : {1}", _issue, _name);
                 case ErrorType.Datastructure: return String.Format("{0} : {1}", _issue, _name);
-                case ErrorType.MetadataAttribute:{
+                case ErrorType.MetadataAttribute:
+                    {
 
-                    if (String.IsNullOrEmpty(_value))
-                        return String.Format("in Package : <b>{5} ({4})</b><br> Attribute : <b>{0} ({3})</b> <br> with value = <b>{1}</b><br>{2} <br>  <hr>", _name, _value, _issue, _number, _package, _packageLabel);
-                    else
-                        return String.Format("in Package : <b>{5} ({4})</b><br> Attribute : <b>{0} ({3})</b> <br>{2} <br>  <hr>", _name, _value, _issue, _number, _package, _packageLabel);
+                        if (String.IsNullOrEmpty(_value))
+                            return String.Format("in Package : <b>{5} ({4})</b><br> Attribute : <b>{0} ({3})</b> <br> with value = <b>{1}</b><br>{2} <br>  <hr>", _name, _value, _issue, _number, _package, _packageLabel);
+                        else
+                            return String.Format("in Package : <b>{5} ({4})</b><br> Attribute : <b>{0} ({3})</b> <br>{2} <br>  <hr>", _name, _value, _issue, _number, _package, _packageLabel);
 
-                } 
+                    }
                 default: return String.Format("{0}", _issue);
             }
         }
-      
+
     }
 
     /// <summary>
@@ -188,6 +210,9 @@ namespace BExIS.IO.Transform.Validation.Exceptions
         Datastructure,
         Value,
         MetadataAttribute,
-        Other
+        Other,
+        FileReader,
+        PrimaryKey,
+        File
     }
 }

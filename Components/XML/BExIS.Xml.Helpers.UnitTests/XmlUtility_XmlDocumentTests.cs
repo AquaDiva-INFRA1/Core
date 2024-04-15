@@ -1,6 +1,6 @@
-﻿using System;
+﻿using NUnit.Framework;
+using System;
 using System.Xml;
-using NUnit.Framework;
 using Assert = NUnit.Framework.Assert;
 
 namespace BExIS.Xml.Helpers.UnitTests
@@ -265,6 +265,18 @@ namespace BExIS.Xml.Helpers.UnitTests
 
             Assert.IsInstanceOf<XmlNode>(result);
             Assert.That(result.Name, Is.EqualTo("test"));
+        }
+
+        [Test()]
+        public void GenerateNodeFromXpath_XpathIsSame_Xpath()
+        {
+            //Arrange
+            string xpath = "root/a/b/c";
+            //Act
+            var result = XmlUtility.GenerateNodeFromXPath(_document,null, xpath);
+            string resultXPath = XmlUtility.GetXPathToNode(result);
+            //Assert
+            Assert.That(resultXPath, Is.EqualTo(xpath));
         }
 
         [Test()]

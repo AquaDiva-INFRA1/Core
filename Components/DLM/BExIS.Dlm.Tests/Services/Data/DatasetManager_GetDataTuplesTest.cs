@@ -11,14 +11,11 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Vaiona.Persistence.Api;
 
 namespace BExIS.Dlm.Tests.Services.Data
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Objekte verwerfen, bevor Bereich verloren geht", Justification = "<Ausstehend>")]
-
     [TestFixture()]
     public class DatasetManager_GetDataTuplesTest
     {
@@ -36,6 +33,7 @@ namespace BExIS.Dlm.Tests.Services.Data
             using (var dm = new DatasetManager())
             using (var rsm = new ResearchPlanManager())
             using (var mdm = new MetadataStructureManager())
+            using (var etm = new EntityTemplateManager())
             {
                 dsHelper = new DatasetHelper();
 
@@ -55,7 +53,10 @@ namespace BExIS.Dlm.Tests.Services.Data
                     var mds = mdm.Repo.Query().First();
                     mds.Should().NotBeNull("Failed to meet a precondition: a metadata strcuture is required.");
 
-                    Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds);
+                    var et = etm.Repo.Query().First();
+                    et.Should().NotBeNull("Failed to meet a precondition: a entity template is required.");
+
+                    Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds, et);
                     datasetId = dataset.Id;
 
                     // add datatuples
@@ -126,16 +127,13 @@ namespace BExIS.Dlm.Tests.Services.Data
         [Test()]
         public void GetDataTuples_CallOlderVersionAfterTwoUpdates_ReturnIQueryable()
         {
-            
-            
             List<long> datatupleIds;
-            
+
             try
             {
                 //Arrange
                 using (var datasetManager = new DatasetManager())
                 {
-
                     var dataset = datasetManager.GetDataset(datasetId);
                     var datasetVersion = datasetManager.GetDatasetLatestVersion(datasetId);
 
@@ -154,7 +152,6 @@ namespace BExIS.Dlm.Tests.Services.Data
                     dataset = dsHelper.UpdateOneTupleForDataset(dataset, (StructuredDataStructure)dataset.DataStructure, datatupleIds[1], 2000, datasetManager);
                     datasetManager.CheckInDataset(dataset.Id, "for testing  datatuples with versions", username, ViewCreationBehavior.None);
                 }
-
 
                 //Act
                 using (var datasetManager = new DatasetManager())
@@ -177,7 +174,6 @@ namespace BExIS.Dlm.Tests.Services.Data
             {
                 throw ex;
             }
-
         }
 
         [Test()]

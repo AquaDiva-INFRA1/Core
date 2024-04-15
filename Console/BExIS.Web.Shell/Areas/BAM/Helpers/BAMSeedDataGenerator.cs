@@ -60,7 +60,7 @@ namespace BExIS.Modules.Bam.UI.Helpers
                 var partyFeature = featureManager.Create("Party", "", bamFeature);
 
                 var partyOperation = operationManager.Create("BAM", "Party", "*", partyFeature);
-                var partyServiceOperation = operationManager.Create("BAM", "PartyService", "*");
+                //var partyServiceOperation = operationManager.Create("BAM", "PartyService", "*");
                 var partyHelp = operationManager.Create("BAM", "Help", "*");
                 return true;
             }

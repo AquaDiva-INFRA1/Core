@@ -95,8 +95,8 @@ namespace BEXIS.ASM.Services
                             string idMetadata = root.Attributes["id"].Value;
                             string owner = "none";
                             string project = "none";
-                            string title = xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) != "" ?
-                                xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) : "No title";
+                            string title = "";// xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) != "" ?
+                                //(xmlDatasetHelper.GetInformationFromVersion(dm.GetDatasetLatestVersion(id).Id, NameAttributeValues.title) : "No title";
                             if (idMetadata == "1")
                             {
                                 XmlNodeList nodeList_givenName = xmlDoc.SelectNodes("/Metadata/Creator/PersonEML/Givenname/Name");
@@ -141,7 +141,7 @@ namespace BEXIS.ASM.Services
                                 ch = ch + dm.GetDatasetLatestVersion(id).Id + ";";
                                 ch = ch + var?.Id + ";";
                                 ch = ch + var?.Unit?.Name + ";";
-                                ch = ch + var?.DataAttribute?.DataType?.Name + ";";
+                                ch = ch + var?.DataType?.Name + ";";
                                 ch = ch + variable_annotation?.entity_id.Id + ";";
                                 ch = ch + variable_annotation?.entity_id.label + ";";
                                 ch = ch + variable_annotation?.entity_id.URI + ";";

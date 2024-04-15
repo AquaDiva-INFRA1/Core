@@ -15,16 +15,17 @@ using Vaiona.Utils.Cfg;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Entities.DataStructure;
 using Vaiona.Persistence.Api;
-using BExIS.Modules.Rpm.UI.Models;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using BExIS.Dlm.Entities.Data;
 using Vaiona.Logging;
+using System.Web.Configuration;
 
 namespace BExIS.ASM.Services
 {
     public class StatisticsExtractor : IStatisticsExtractor
     {
+        
         static Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager();
         static DatasetManager dm = new DatasetManager();
         static DataStructureManager dataStructureManager = new DataStructureManager();
@@ -33,20 +34,20 @@ namespace BExIS.ASM.Services
         static List<StructuredDataStructure> structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>().Get().ToList<StructuredDataStructure>();
         static Dictionary<string, string> stats_extra = new Dictionary<string, string>();
 
-        public List<DataAttributeStruct> DataAttributeStruct_list_in_use = new List<DataAttributeStruct>();
-        public List<DataAttributeStruct> DataAttributeStruct_list_non_use = new List<DataAttributeStruct>();
+        public List<VariableTemplate> DataAttributeStruct_list_in_use = new List<VariableTemplate>();
+        public List<VariableTemplate> DataAttributeStruct_list_non_use = new List<VariableTemplate>();
 
-        public List<EditUnitModel> EditUnitModel_list_in_use = new List<EditUnitModel>();
-        public List<EditUnitModel> EditUnitModel_list_non_use = new List<EditUnitModel>();
+        public List<Unit> EditUnitModel_list_in_use = new List<Unit>();
+        public List<Unit> EditUnitModel_list_non_use = new List<Unit>();
 
         public List<DataType> DataType_in_use = new List<DataType>();
         public List<DataType> DataType_non_use = new List<DataType>();
 
-        public List<DataStructureResultStruct> DataStruct_in_use = new List<DataStructureResultStruct>();
-        public List<DataStructureResultStruct> DataStruc_non_use = new List<DataStructureResultStruct>();
+        public List<StructuredDataStructure> DataStruct_in_use = new List<StructuredDataStructure>();
+        public List<StructuredDataStructure> DataStruc_non_use = new List<StructuredDataStructure>();
         private readonly string temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
 
-        static string DatastructAPI = "https://addp.uni-jena.de/api/structures/";
+        static string DatastructAPI = WebConfigurationManager.AppSettings["BaseAdress"] + "/api/structures/";
 
 
         public StatisticsExtractor()
@@ -166,7 +167,7 @@ namespace BExIS.ASM.Services
                 Aam_Dataset_column_annotation annot = null;
                 try
                 {
-                    annot = aam_list.Find(x => (x.Dataset.Id == long.Parse(id)) && (x.variable_id.Id == long.Parse(json_variable["Id"].ToString())));
+                    annot = aam_list.Where(x=> x.variable_id != null).ToList().Find(x => (x.Dataset.Id == long.Parse(id)) && (x.variable_id.Id == long.Parse(json_variable["Id"].ToString())));
                 }
                 catch (Exception e)
                 {
@@ -323,17 +324,17 @@ namespace BExIS.ASM.Services
 
         private void fill_lists()
         {
-            DataAttributeManagerModel dam = new DataAttributeManagerModel(false);
-            foreach (DataAttributeStruct var_temp in dam.DataAttributeStructs)
+            VariableManager dam = new VariableManager();
+            foreach (VariableTemplate var_temp in dam.VariableTemplateRepo.Get())
             {
-                if (var_temp.InUse) DataAttributeStruct_list_in_use.Add(var_temp);
+                if (var_temp.Approved) DataAttributeStruct_list_in_use.Add(var_temp);
                 else DataAttributeStruct_list_non_use.Add(var_temp);
             }
 
-            UnitManagerModel umm = new UnitManagerModel();
-            foreach (EditUnitModel unit in umm.editUnitModelList)
+            UnitManager umm = new UnitManager();
+            foreach (Unit unit in umm.Repo.Get())
             {
-                if (unit.inUse) EditUnitModel_list_in_use.Add(unit);
+                if (unit.AssociatedDataTypes.Count()>0) EditUnitModel_list_in_use.Add(unit);
                 else EditUnitModel_list_non_use.Add(unit);
             }
 
@@ -358,10 +359,9 @@ namespace BExIS.ASM.Services
                 dataTypeManager.Dispose();
             }
 
-            List<DataStructureResultStruct> datastruct_list = new DataStructureResultsModel(null, "").dataStructureResults;
-            foreach (DataStructureResultStruct ds in datastruct_list)
+            foreach (StructuredDataStructure ds in structureRepo)
             {
-                if (ds.inUse) this.DataStruct_in_use.Add(ds);
+                if (ds.Datasets.Count()>0) this.DataStruct_in_use.Add(ds);
                 else this.DataStruc_non_use.Add(ds);
             }
 
@@ -375,7 +375,6 @@ namespace BExIS.ASM.Services
             stats_extra.Add("DataStruc_non_use", DataStruc_non_use.Count().ToString());
 
         }
-
 
     }
 }

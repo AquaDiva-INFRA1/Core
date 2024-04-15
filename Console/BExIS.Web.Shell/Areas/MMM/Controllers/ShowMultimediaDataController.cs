@@ -1,29 +1,29 @@
-﻿using BExIS.Dlm.Entities.Data;
+﻿using BExIS.Dim.Entities.Mapping;
+using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Services.Data;
 using BExIS.IO;
+using BExIS.Modules.Mmm.UI.Helpers;
+using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Services.Authorization;
+using BExIS.Security.Services.Utilities;
+using BExIS.Utils.Config;
+using ICSharpCode.SharpZipLib.Zip;
+using IDIV.Modules.Mmm.UI.Models;
+using MediaInfoLib;
+using MetadataExtractor;
+using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using Vaiona.Utils.Cfg;
-using System.Net;
-using IDIV.Modules.Mmm.UI.Models;
 using System.Xml;
-using ICSharpCode.SharpZipLib.Zip;
-using Microsoft.VisualBasic.FileIO;
-using BExIS.Security.Services.Authorization;
-using BExIS.Security.Entities.Authorization;
-using Vaiona.Persistence.Api;
 using Vaiona.Entities.Common;
-using BExIS.Dim.Entities.Mapping;
-using BExIS.Modules.Mmm.UI.Helpers;
-using BExIS.Security.Services.Utilities;
-using System.Configuration;
-using MediaInfoLib;
 using Vaiona.Logging;
-using MetadataExtractor;
+using Vaiona.Persistence.Api;
+using Vaiona.Utils.Cfg;
 
 namespace IDIV.Modules.Mmm.UI.Controllers
 {
@@ -45,8 +45,7 @@ namespace IDIV.Modules.Mmm.UI.Controllers
 
                 if (access)
                 {
-                    
-                    return View(getFilesByDatasetId(datasetID , entityType));
+                    return View(getFilesByDatasetId(datasetID, entityType));
                 }
                 else
                 {
@@ -72,7 +71,6 @@ namespace IDIV.Modules.Mmm.UI.Controllers
             {
                 try
                 {
-
                     bool isLatestVersion = false;
                     if (versionId == datasetManager.GetDatasetLatestVersion(datasetID).Id)
                         isLatestVersion = true;
@@ -185,10 +183,12 @@ namespace IDIV.Modules.Mmm.UI.Controllers
                         var es = new EmailService();
                         if (send_mail == "true")
                         {
+
+
                             es.Send(MessageHelper.GetFileDownloadHeader(datasetID, versionNr),
-                                MessageHelper.GetFileDownloadMessage(GetUsernameOrDefault(), datasetID, fileInfo.Name),
-                                ConfigurationManager.AppSettings["SystemEmail"]
-                                );
+                                                    MessageHelper.GetFileDownloadMessage(GetUsernameOrDefault(), datasetID, fileInfo.Name),
+                                                    GeneralSettings.SystemEmail
+                                                    );
                         }
                         return File(path, MimeMapping.GetMimeMapping(fileInfo.Name), filename);
                     }
@@ -198,7 +198,7 @@ namespace IDIV.Modules.Mmm.UI.Controllers
                         return null;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return null;
                 }
@@ -275,7 +275,7 @@ namespace IDIV.Modules.Mmm.UI.Controllers
                                 // set system key values
                                 int v = 1;
                                 if (workingCopy.Dataset.Versions != null && workingCopy.Dataset.Versions.Count > 1) v = workingCopy.Dataset.Versions.Count();
-                                workingCopy.Metadata = setSystemValuesToMetadata(v, workingCopy.Dataset.MetadataStructure.Id, workingCopy.Metadata);
+                                workingCopy.Metadata = setSystemValuesToMetadata(v, workingCopy.Dataset.Id, workingCopy.Dataset.MetadataStructure.Id, workingCopy.Metadata);
 
                                 datasetManager.EditDatasetVersion(workingCopy, null, null, null);
 
@@ -318,7 +318,7 @@ namespace IDIV.Modules.Mmm.UI.Controllers
                     }
                 }
             }
-               
+
             return null;
         }
 
@@ -459,7 +459,6 @@ namespace IDIV.Modules.Mmm.UI.Controllers
                 {
                     return exif;
                 }
-                
             }
             catch
             {
@@ -504,16 +503,21 @@ namespace IDIV.Modules.Mmm.UI.Controllers
 
         public FileInformation getFileInfo(ContentDescriptor contentDescriptor)
         {
-            
             try
             {
                 if (contentDescriptor.Name.ToLower().Equals("unstructureddata"))
-                    return getFileInfo(contentDescriptor.URI);
+                {
+                    var fileInfo = getFileInfo(contentDescriptor.URI);
+                    fileInfo.Description = contentDescriptor.Description;
+                    return fileInfo;
+                }
                 else
                     return new FileInformation()
                     {
                         Name = contentDescriptor.Name,
+                        Description = contentDescriptor.Description,
                         Path = contentDescriptor.URI,
+                        MimeType = contentDescriptor.MimeType
                     };
             }
             catch
@@ -660,7 +664,7 @@ namespace IDIV.Modules.Mmm.UI.Controllers
             }
         }
 
-        public List<FileInformation> getFilesByDataset(Dataset dataset, DatasetManager datasetManager,string entityType, long versionId = 0)
+        public List<FileInformation> getFilesByDataset(Dataset dataset, DatasetManager datasetManager, string entityType, long versionId = 0)
         {
             EntityPermissionManager entityPermissionManager = null;
             try
@@ -970,7 +974,7 @@ namespace IDIV.Modules.Mmm.UI.Controllers
             return new Measurement();
         }
 
-        private XmlDocument setSystemValuesToMetadata(long version, long metadataStructureId, XmlDocument metadata)
+        private XmlDocument setSystemValuesToMetadata(long version,long datasetId, long metadataStructureId, XmlDocument metadata)
         {
             SystemMetadataHelper SystemMetadataHelper = new SystemMetadataHelper();
 
@@ -978,8 +982,7 @@ namespace IDIV.Modules.Mmm.UI.Controllers
 
             myObjArray = new Key[] { Key.Id, Key.Version, Key.DateOfVersion, Key.DataLastModified };
 
-
-            metadata = SystemMetadataHelper.SetSystemValuesToMetadata(metadataStructureId, version, metadataStructureId, metadata, myObjArray);
+            metadata = SystemMetadataHelper.SetSystemValuesToMetadata(datasetId, version, metadataStructureId, metadata, myObjArray);
 
             return metadata;
         }

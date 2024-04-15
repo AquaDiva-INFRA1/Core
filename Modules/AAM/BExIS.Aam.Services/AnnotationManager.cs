@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Vaiona.Persistence.Api;
 using BExIS.Aam.Entities.Mapping;
 using System.Diagnostics.Contracts;
-using BExIS.Dlm.Entities.Data;
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Dlm.Services.Data;
 using System.IO;
-using Vaiona.Utils.Cfg;
 using VDS.RDF;
 using VDS.RDF.Query;
 using Npgsql;
 using System.Configuration;
 using System.Diagnostics;
+using Vaiona.Persistence.Api;
+using Vaiona.Utils.Cfg;
+using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Services.Data;
 using Vaiona.Logging;
 
 namespace BExIS.Aam.Services

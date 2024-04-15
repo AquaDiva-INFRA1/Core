@@ -4,7 +4,6 @@
 @using BExIS.Modules.Ddm.UI.Models;
 @using BExIS.Dlm.Services.DataStructure;
 @using BExIS.Security.Services.Subjects;
-@using BExIS.Aam.Services;
 
 @model List<SearchAttributeViewModel>
 
@@ -112,13 +111,14 @@
                                 {
                                   <span>@dt <br/></span>
                                 }
-                                using (Aam_UriManager  aam_manag = new Aam_UriManager())
+                                using (BExIS.Dlm.Services.Meanings.MeaningManager  meaning_manager = new BExIS.Dlm.Services.Meanings.MeaningManager())
                                 {
                                     foreach (string dt in item.Entities.Where(x => !x.IsEmpty()) )
                                     {
-                                        <span><b>@Html.Raw(aam_manag.get_Aam_Uri_by_id(Int64.Parse(dt)).label) </b><br/> </span>
+                                        <span><b>@Html.Raw(meaning_manager.getMeaning(Int64.Parse(dt)).Name) </b><br/> </span>
                                     }
                                 }
+
                                 using (GroupManager grpManager = new GroupManager())
                                 {
                                     foreach (string dt in item.Projects.Where(x => !x.IsEmpty()) )

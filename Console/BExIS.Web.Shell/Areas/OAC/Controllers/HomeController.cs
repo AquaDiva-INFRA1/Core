@@ -8,6 +8,7 @@ using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Subjects;
 using BEXIS.OAC.Entities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -126,8 +127,8 @@ namespace BExIS.Modules.OAC.UI.Controllers
         public async System.Threading.Tasks.Task<ActionResult> LoadSamplesViewMetadataAsync(string sample, string project)
         {
             string accessionValue = model.Accessions.FirstOrDefault(xx => xx.Key.Contains(sample)).Value.Replace("\r\n", "");//.Replace("@", "").Replace("\n", "").Replace('"', '\"');
-            string json_string_ = JsonConvert.SerializeObject(accessionValue);
-            AccessionMetadataV2 metadata = JsonConvert.DeserializeObject<AccessionMetadataV2>(accessionValue);
+            JObject json = JObject.Parse(accessionValue);
+            SequencedataNCBI metadata = JsonConvert.DeserializeObject<SequencedataNCBI>(json["PROJECT_SET"]["PROJECT"].ToString());
             //AccessionMetadata metadata = new AccessionMetadata(JObject.Parse(accessionValue));
             string json_string = JsonConvert.SerializeObject(metadata);
             return PartialView("View1", metadata);

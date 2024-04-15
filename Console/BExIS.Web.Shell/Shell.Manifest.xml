@@ -1,68 +1,55 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Manifest moduleId="Shell" displayName="BEXIS" version="2.11.0" builtin="true">
   <Description>
-    Research Data Management Platform
+	Research Data Management Platform
   </Description>
   <Dependencies>
   </Dependencies>
   <Exports>
-    <!--tag: menubar, lunchbar, settings, api-->
-    <!-- . is the root of each menu category. menu categories are represended by tags-->
-    <!--order is at each tag, in document and catalog order, when order is eqaul-->
-    <!--icons should be provided by the modules in the /content/icons folder-->
-    <!-- Area can not be set here, it will be done automatically to prevent cross-referencing-->
-    <Export tag="menubar" id="menubarRoot" order="1"
-            title="" description="" icon=""
-            controller="" action=""
-            extends="." />
-    <!--<Export tag="menubar" id="dashboard" order="1"
-            title="Dashboard" description="Quick Access to User Area" icon=""
-            controller="home" action="index"
-            extends="./menubarRoot"
-            />-->
+	<!--tag: menubar, lunchbar, settings, api-->
+	<!-- . is the root of each menu category. menu categories are represended by tags-->
+	<!--order is at each tag, in document and catalog order, when order is eqaul-->
+	<!--icons should be provided by the modules in the /content/icons folder-->
+	<!-- Area can not be set here, it will be done automatically to prevent cross-referencing-->
+	<Export tag="menubar" id="menubarRoot" order="1"
+			title="" description="" icon=""
+			controller="" action=""
+			extends="." />
 
-    <Export tag="lunchbar" id="lunchbarRoot" order="1"
-            title="" description="" icon=""
-            controller="" action=""
-            extends="." />
-    
-    <Export tag="lunchbar" id="help" order="2"
-            title="Help" description="Help" icon=""
-            controller="" action=""
-            extends="./lunchbarRoot" />
-           
+	<Export tag="lunchbar" id="lunchbarRoot" order="1"
+			title="" description="" icon=""
+			controller="" action=""
+			extends="." />
+	
+	<Export tag="lunchbar" id="help" order="2"
+			title="Help" description="Help" icon=""
+			controller="" action=""
+			extends="./lunchbarRoot" />
+		   
 
-    <!--<Export tag="settings" id="settingsRoot" order="2"
-            title="" description="" icon=""
-            controller="" action=""
-            extends="."
-            />-->
 
-    <Export tag="settings" id="settingsRoot" order=""
-            title="Settings" description="Settings, configuration, and Management" icon="settings.icon"
-            controller="" action=""
-            extends="." />
+	<Export tag="settings" id="settingsRoot" order=""
+			title="Settings" description="Settings, configuration, and Management" icon="settings.icon"
+			controller="" action=""
+			extends="." />
 
-    <Export tag="api" id="apiRoot" order="4"
-            title="" description="" icon=""
-            controller="" action=""
-            extends="." />
+	<Export tag="api" id="apiRoot" order="4"
+			title="" description="" icon=""
+			controller="" action=""
+			extends="." />
 
-    <!--FAQ-->
-    <!-- <Export tag="lunchbar" id="helpDdm" order="1"
-            title="FAQ" description="Link to the faq page" icon=""
-            controller="help" action="faq"
-            extends="./lunchbarRoot/help" />
-            -->
-    <!-- Aquadiva customs-->
-    <Export tag="lunchbar" id="ADHowTo" order="98"
-          title="Aquadiva Wiki" description="Aquadiva Wiki" icon=""
-          controller="home" action="redirectToWiki"
-          extends="./lunchbarRoot/help" />
-    <Export tag="lunchbar" id="ADBugtracker" order="99"
-            title="Report a Bug" description="Aquadiva Bugtracker" icon=""
-            controller="home" action="redirectToBugtracker"
-            extends="./lunchbarRoot/help" />
+	<!--FAQ-->
+	<!-- <Export tag="lunchbar" id="helpDdm" order="1"
+			title="FAQ" description="Link to the faq page" icon=""
+			controller="help" action="faq"
+			extends="./lunchbarRoot/help" />-->
+	  
+	<!--Settings-->
+	<Export tag="settings" id="apisettings" order="1"
+		title="Application Settings" description="..." icon=""
+		controller="settings" action=""
+		extends="./settingsRoot" />
+
   </Exports>
 
 

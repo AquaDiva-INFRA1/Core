@@ -245,7 +245,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
                 {
                     moreThanOneEntityFound = true;
                 }
-                valueLastEntity = ValueList[1].ToString();  
+                valueLastEntity = ValueList[1].ToString();
 
                 foreach (XmlNode ade in headerItemXmlNodeList)
                 {
@@ -269,7 +269,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
                 r.Values = ValueList;
                 RowList.Add(r);
             }
-          
+
             // show column of entities, if there are more than one found
             if (moreThanOneEntityFound == true)
             {
