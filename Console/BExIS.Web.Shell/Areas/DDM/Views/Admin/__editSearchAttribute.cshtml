@@ -5,7 +5,7 @@
 @using BExIS.Modules.Ddm.UI.Models;
 @using BExIS.Utils.Models;
 @using BExIS.Dlm.Entities.DataStructure;
-
+@using BExIS.Aam.Entities.Mapping;
 @{
 
     string Title = "New Search Attribute";
@@ -57,19 +57,20 @@
         metadataNodes = (List<SearchMetadataNode>)Session["metadatNodes"];
     }
 
-    List<VariableInstance> Variables = new List<VariableInstance>();
-    if (Session["Variables"] != null)
-    {
-        Variables = (List<VariableInstance>)Session["Variables"];
-    }
-    var xx = Variables.ToList<Variable>().OrderBy(x => x.Label).Select(c => new { id = c.Id, label = c.Id + " - " + c.Label });
-
     List<BExIS.Security.Entities.Subjects.Group> groups = new List<BExIS.Security.Entities.Subjects.Group>();
     if (Session["Projects"] != null)
     {
         groups = (List<BExIS.Security.Entities.Subjects.Group>)Session["Projects"];
     }
     var _groups = groups.ToList<BExIS.Security.Entities.Subjects.Group>().OrderBy(x => x.DisplayName).Select(c => new { id = c.Id, label = c.Id + " - " + c.DisplayName });
+
+    List<Tuple<long, string>> xx_ = new List<Tuple<long, string>>();
+    if (Session["Entities"] != null)
+    {
+        xx_ = (List<Tuple<long, string>>)Session["Entities"];
+        xx_ = xx_.OrderBy(x => x.Item2).ToList();
+    }
+
     @*
         Int64 count;
         if (Session["count"] != null)
@@ -96,8 +97,8 @@ String color = "";
     new AjaxOptions
     {
         HttpMethod = "Post",
-//UpdateTargetId = "searchAttributeForm",
-OnSuccess = "Submit",
+        //UpdateTargetId = "searchAttributeForm",
+        OnSuccess = "Submit",
         OnFailure = "OnFailure"
     },
     new { id = "Form_Edit_search" }
@@ -106,320 +107,320 @@ OnSuccess = "Submit",
 {
     <div id="searchAttributeForm" class="bx-content" style="height:410px; overflow:auto">
         @{
-                <table>
-                    <tr>
-                        <td style="width:250px;"><h3>General</h3></td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label>Id</label>
-                            @(Html.HiddenFor(m => m.id))
-                        </td>
-                        <td>
-                            @Html.TextBoxFor(m => m.id, new { @disabled = "disabled" })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.displayName))<span class="bx bx-required" title="Required">
-                        </td>
-                        <td>
-                            @(Html.TextBoxFor(m => m.displayName, new { @class = "t-input", title = "Display name of the item in the search user interface." }))
-                            @Html.ValidationMessageFor(m => m.displayName)
-                        </td>
-                    </tr>
+            <table>
+                <tr>
+                    <td style="width:250px;"><h3>General</h3></td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Id</label>
+                        @(Html.HiddenFor(m => m.id))
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.id, new { @disabled = "disabled" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.displayName))<span class="bx bx-required" title="Required">
+                    </td>
+                    <td>
+                        @(Html.TextBoxFor(m => m.displayName, new { @class = "t-input", title = "Display name of the item in the search user interface." }))
+                        @Html.ValidationMessageFor(m => m.displayName)
+                    </td>
+                </tr>
 
-                    <tr>
-                        <td style="vertical-align:top;">
-                            @(Html.LabelFor(m => m.metadataNames))
-                            <span class="bx bx-required" title="Required">
-                        </td>
-                        <td class="listOfNodes">
-                            <div id="metadataNodes">
-                                @if (Model.metadataNames != null)
-                                {
-                                    foreach (string xpath in Model.metadataNames)
-                                    {
-                                        count = count + 1;
-                                        @*
-                            if(count != 1)
+                <tr>
+                    <td style="vertical-align:top;">
+                        @(Html.LabelFor(m => m.metadataNames))
+                        <span class="bx bx-required" title="Required">
+                    </td>
+                    <td class="listOfNodes">
+                        <div id="metadataNodes">
+                            @if (Model.metadataNames != null)
                             {
-                                <hr>
+                                foreach (string xpath in Model.metadataNames)
+                                {
+                                    count = count + 1;
+                                    @*
+                                        if(count != 1)
+                                        {
+                                            <hr>
+                                        }
+                                    *@
+
+                                    if ((xpath != null) && (xpath.Contains(";")))
+                                    {
+                                        string[] list_composed_xpath = xpath.Split(';');
+
+                                        <div id="node_container_@count" class="node_container_@count">
+                                            <div id="_nodes_@count" class=" _nodes_@count">
+                                                @foreach (var item in list_composed_xpath)
+                                                {
+                                                    @Html.DropDownListFor(m => metadataNodes, new SelectList(metadataNodes, "XPath", "DisplayNameLong", item.ToString().Trim()),
+                                                                   "Select, please", new { title = "Corresponding metadata node to be used for the Lucene index.", style = "width: 350px;" })
+
+                                                }
+                                            </div>
+                                            <div class="col-lg-1 text-left vcenter">
+                                                <a class="removeMetadataNode" onclick="delete_node('node_container_@count')">
+                                                    <span class="glyphicon glyphicon-remove-circle"></span>
+                                                </a>
+                                                <a onclick="add_composed_node('_nodes_@count')" title="Add Composed Node!">
+                                                    <span class="glyphicon glyphicon-plus"></span>
+                                                </a>
+                                            </div><br />
+                                        </div>
+
+
+                                    }
+                                    else
+                                    {
+                                        <div id="node_container_@count" class="node_container_@count">
+                                            <div id="_nodes_@count" class="_nodes_@count">
+
+                                                @Html.DropDownListFor(m => metadataNodes, new SelectList(metadataNodes, "XPath", "DisplayNameLong", xpath.ToString().Trim()),
+                                                     "Select, please", new { title = "Corresponding metadata node to be used for the Lucene index.", style = "width: 350px;" })
+
+                                            </div>
+                                            <div class="col-lg-1 text-left vcenter">
+                                                <a class="removeMetadataNode " onclick="delete_node('node_container_@count')">
+                                                    <span class="glyphicon glyphicon-remove-circle"></span>
+                                                </a>
+                                                <a onclick="add_composed_node('_nodes_@count')" title="Add Composed Node!">
+                                                    <span class="glyphicon glyphicon-plus"></span>
+                                                </a>
+                                            </div><br />
+                                        </div>
+
+                                    }
+
+                                }
+                                <br />
                             }
-                                        *@
+                        </div>
+                    </td>
+                    <br />
+                    <td style="vertical-align:bottom;">
+                        <div class="vcenter" style="width:55px;">
+                            @*
+                                    @Html.ActionLink(" ", "AddMetadataNode_", "Admin", new {
+                                           id = "addNode",
+                                           count = count ,
+                                           @class = "bx-add bx-function",
+                                           title = "Corresponding metadata node to be used for the Lucene index." }
+                                    )
 
-                                        if ((xpath != null) && (xpath.Contains(";")))
-                                        {
-                                            string[] list_composed_xpath = xpath.Split(';');
+                                    @Html.ActionLink(" ", "AddMetadataNode_", "Admin",
+                                           new { area = "ddm", count = count },
+                                           new { @class = "bx-add bx-function", @id = "addNode", title = "Corresponding metadata node to be used for the Lucene index." })
 
-                                            <div id="node_container_@count" class="node_container_@count">
-                                                <div id="_nodes_@count" class=" _nodes_@count">
-                                                    @foreach (var item in list_composed_xpath)
-                                                    {
-                                                        @Html.DropDownListFor(m => metadataNodes, new SelectList(metadataNodes, "XPath", "DisplayNameLong", item.ToString().Trim()),
-                                                                       "Select, please", new { title = "Corresponding metadata node to be used for the Lucene index.", style = "width: 350px;" })
-
-                                                    }
-                                                </div>
-                                                <div class="col-lg-1 text-left vcenter">
-                                                    <a class="removeMetadataNode" onclick="delete_node('node_container_@count')">
-                                                        <span class="glyphicon glyphicon-remove-circle"></span>
-                                                    </a>
-                                                    <a onclick="add_composed_node('_nodes_@count')" title="Add Composed Node!">
-                                                        <span class="glyphicon glyphicon-plus"></span>
-                                                    </a>
-                                                </div><br />
-                                            </div>
-
-
-                                        }
-                                        else
-                                        {
-                                            <div id="node_container_@count" class="node_container_@count">
-                                                <div id="_nodes_@count" class="_nodes_@count">
-
-                                                    @Html.DropDownListFor(m => metadataNodes, new SelectList(metadataNodes, "XPath", "DisplayNameLong", xpath.ToString().Trim()),
-                                                         "Select, please", new { title = "Corresponding metadata node to be used for the Lucene index.", style = "width: 350px;" })
-
-                                                </div>
-                                                <div class="col-lg-1 text-left vcenter">
-                                                    <a class="removeMetadataNode " onclick="delete_node('node_container_@count')">
-                                                        <span class="glyphicon glyphicon-remove-circle"></span>
-                                                    </a>
-                                                    <a onclick="add_composed_node('_nodes_@count')" title="Add Composed Node!">
-                                                        <span class="glyphicon glyphicon-plus"></span>
-                                                    </a>
-                                                </div><br />
-                                            </div>
-
-                                        }
-
-                                    }
-                                    <br />
-                                }
-                            </div>
-                        </td>
-                        <br />
-                        <td style="vertical-align:bottom;">
-                            <div class="vcenter" style="width:55px;">
-                                @*
-                        @Html.ActionLink(" ", "AddMetadataNode_", "Admin", new {
-                               id = "addNode",
-                               count = count ,
-                               @class = "bx-add bx-function",
-                               title = "Corresponding metadata node to be used for the Lucene index." }
-                        )
-
-                        @Html.ActionLink(" ", "AddMetadataNode_", "Admin",
-                               new { area = "ddm", count = count },
-                               new { @class = "bx-add bx-function", @id = "addNode", title = "Corresponding metadata node to be used for the Lucene index." })
-
-                    @Html.ValidationMessageFor(m => m.metadataNames)
-                                *@
-                                <a id="add_node" class="add_node" onclick="add_node()" title="Add Node!">
-                                    <span class="bx-add bx-function"></span>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="vertical-align:top;">
-                            @(Html.LabelFor(m => m.Variables))
-                            <span class="bx bx-required" title="Required">
-                        </td>
-                        <td class="listOfNodes">
-                            <div id="variableNodes">
-                                @if (Model.Variables != null)
+                                @Html.ValidationMessageFor(m => m.metadataNames)
+                            *@
+                            <a id="add_node" class="add_node" onclick="add_node()" title="Add Node!">
+                                <span class="bx-add bx-function"></span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:top;">
+                        @(Html.LabelFor(m => m.Entities))
+                        <span class="bx bx-required" title="Required">
+                    </td>
+                    <td class="listOfNodes">
+                        <div id="variableNodes">
+                            @if (Model.Entities != null)
+                            {
+                                foreach (string va in Model.Entities)
                                 {
-                                    foreach (string va in Model.Variables)
-                                    {
-                                        var_count = var_count + 1;
-                                        <div id="variable_node_container_@var_count" class="variable_node_container_@var_count">
-                                            <div>
-                                                @Html.DropDownListFor(m => xx,
-                                                             new SelectList(
-                                                                 xx,
-                                                                 "id",
-                                                                 "label",
-                                                                 va.Trim()),
-                                                             "Select, please"
-                                             )
-                                            </div>
-                                            <div class="col-lg-1 text-left vcenter">
-                                                <a class="removeVariableNode " onclick="delete_node('variable_node_container_@var_count')">
-                                                    <span class="glyphicon glyphicon-remove-circle"></span>
-                                                </a>
-                                            </div><br />
+                                    var_count = var_count + 1;
+                                    <div id="variable_node_container_@var_count" class="variable_node_container_@var_count">
+                                        <div>
+                                            @Html.DropDownListFor(m => xx_,
+                                                         new SelectList(
+                                                             xx_,
+                                                             "Item1",
+                                                             "Item2",
+                                                             va.Trim()),
+                                                         "Select, please"
+                                         )
                                         </div>
-                                    }
+                                        <div class="col-lg-1 text-left vcenter">
+                                            <a class="removeVariableNode " onclick="delete_node('variable_node_container_@var_count')">
+                                                <span class="glyphicon glyphicon-remove-circle"></span>
+                                            </a>
+                                        </div><br />
+                                    </div>
                                 }
-                                </div>
-                        </td>
-                        <td style="vertical-align:bottom;">
-                            <div class="vcenter" style="width:55px;">
+                            }
+                        </div>
+                    </td>
+                    <td style="vertical-align:bottom;">
+                        <div class="vcenter" style="width:55px;">
 
-                                <a id="add_node_variable" class="add_node_variable" onclick="add_node_variable()" title="Add Variable!">
-                                    <span class="bx-add bx-function"></span>
-                                </a>
+                            <a id="add_node_variable" class="add_node_variable" onclick="add_node_variable()" title="Add Variable!">
+                                <span class="bx-add bx-function"></span>
+                            </a>
 
-                            </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
+                </tr>
 
-                    <tr>
-                        <td style="vertical-align:top;">
-                            @(Html.LabelFor(m => m.Projects))
-                            <span class="bx bx-required" title="Required">
-                        </td>
-                        <td class="listOfNodes">
-                            <div id="ProjectNodes">
-                                @if (Model.Projects != null)
+                <tr>
+                    <td style="vertical-align:top;">
+                        @(Html.LabelFor(m => m.Projects))
+                        <span class="bx bx-required" title="Required">
+                    </td>
+                    <td class="listOfNodes">
+                        <div id="ProjectNodes">
+                            @if (Model.Projects != null)
+                            {
+                                foreach (string pr in Model.Projects)
                                 {
-                                    foreach (string pr in Model.Projects)
-                                    {
-                                        var_count = var_count + 1;
-                                        <div id="project_node_container_@group_count" class="project_node_container_@group_count">
-                                            <div>
-                                                @Html.DropDownListFor(m => _groups,
-                                                             new SelectList(
-                                                                 _groups,
-                                                                 "id",
-                                                                 "label",
-                                                                 pr.Trim()),
-                                                             "Select, please"
-                                             )
-                                            </div>
-                                            <div class="col-lg-1 text-left vcenter">
-                                                <a class="removeProjectNode " onclick="delete_node('project_node_container_@group_count')">
-                                                    <span class="glyphicon glyphicon-remove-circle"></span>
-                                                </a>
-                                            </div><br />
+                                    var_count = var_count + 1;
+                                    <div id="project_node_container_@group_count" class="project_node_container_@group_count">
+                                        <div>
+                                            @Html.DropDownListFor(m => _groups,
+                                                         new SelectList(
+                                                             _groups,
+                                                             "id",
+                                                             "label",
+                                                             pr.Trim()),
+                                                         "Select, please"
+                                         )
                                         </div>
-                                    }
+                                        <div class="col-lg-1 text-left vcenter">
+                                            <a class="removeProjectNode " onclick="delete_node('project_node_container_@group_count')">
+                                                <span class="glyphicon glyphicon-remove-circle"></span>
+                                            </a>
+                                        </div><br />
+                                    </div>
                                 }
-                                </div>
-                        </td>
-                        <td style="vertical-align:bottom;">
-                            <div class="vcenter" style="width:55px;">
+                            }
+                        </div>
+                    </td>
+                    <td style="vertical-align:bottom;">
+                        <div class="vcenter" style="width:55px;">
 
-                                <a id="add_node_project" class="add_node_project" onclick="add_node_project()" title="Add Project!">
-                                    <span class="bx-add bx-function"></span>
-                                </a>
+                            <a id="add_node_project" class="add_node_project" onclick="add_node_project()" title="Add Project!">
+                                <span class="bx-add bx-function"></span>
+                            </a>
 
-                            </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
+                </tr>
 
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.headerItem))
-                        </td>
-                        <td>
-                            @Html.CheckBoxFor(m => m.headerItem, new { title = "Tick if this item should be available as a category (e.g. as a grid column)." })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.defaultHeaderItem))
-                        </td>
-                        <td>
-                            @Html.CheckBoxFor(m => m.defaultHeaderItem, new { title = "Tick if the header item should be visible upon page load." })
-                        </td>
-                    </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.headerItem))
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(m => m.headerItem, new { title = "Tick if this item should be available as a category (e.g. as a grid column)." })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.defaultHeaderItem))
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(m => m.defaultHeaderItem, new { title = "Tick if the header item should be visible upon page load." })
+                    </td>
+                </tr>
 
-                    <tr><td><h3>Type</h3></td></tr>
+                <tr><td><h3>Type</h3></td></tr>
 
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.searchType))<span class="bx bx-required" title="Required">
-                        </td>
-                        <td>
-                            @Html.DropDownListFor(m => m.searchType, new SelectList(SearchComponentBaseType, Model.searchType), "Select, please")
-                            <label title="Search pattern to be used for this item.">?</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.dataType))<span class="bx bx-required" title="Required">
-                        </td>
-                        <td>
-                            @Html.DropDownListFor(m => m.dataType, new SelectList(DataType, Model.dataType), "Select, please", new { title = "Data type to be indexed." })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><h3>Index Parameters</h3></td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.store))
-                        </td>
-                        <td>
-                            @Html.CheckBoxFor(m => m.store, new { title = "Tick to store the entire item value in addition to the index." })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.multiValue))
-                        </td>
-                        <td>
-                            @Html.CheckBoxFor(m => m.multiValue, new { title = "Tick if this item contains multiple values per field (e.g. Name A; Name B; Name C)." })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.analysed))
-                        </td>
-                        <td>
-                            @Html.CheckBoxFor(m => m.analysed, new { title = "Tick if this item should be analyzed for the index (default)." })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.norm))
-                        </td>
-                        <td>
-                            @Html.CheckBoxFor(m => m.norm)
-                            <label title="....">?</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.boost))
-                        </td>
-                        <td>
-                            @Html.TextBoxFor(m => m.boost, new { type = "number", min = "0.0", max = "10.0", title = "Specify the priority of this item within the search index (10=highest priority)." })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><h3>Property Parameters</h3></td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.uiComponent))
-                        </td>
-                        <td>
-                            @Html.DropDownListFor(m => m.uiComponent, new SelectList(UiComponents, Model.uiComponent), new { title = "Choose a UI component Type according to the number of options (1-3  = item, 3-15 = list, >15= range)." })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.aggregationType))
-                        </td>
-                        <td>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.searchType))<span class="bx bx-required" title="Required">
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(m => m.searchType, new SelectList(SearchComponentBaseType, Model.searchType), "Select, please")
+                        <label title="Search pattern to be used for this item.">?</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.dataType))<span class="bx bx-required" title="Required">
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(m => m.dataType, new SelectList(DataType, Model.dataType), "Select, please", new { title = "Data type to be indexed." })
+                    </td>
+                </tr>
+                <tr>
+                    <td><h3>Index Parameters</h3></td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.store))
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(m => m.store, new { title = "Tick to store the entire item value in addition to the index." })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.multiValue))
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(m => m.multiValue, new { title = "Tick if this item contains multiple values per field (e.g. Name A; Name B; Name C)." })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.analysed))
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(m => m.analysed, new { title = "Tick if this item should be analyzed for the index (default)." })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.norm))
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(m => m.norm)
+                        <label title="....">?</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.boost))
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.boost, new { type = "number", min = "0.0", max = "10.0", title = "Specify the priority of this item within the search index (10=highest priority)." })
+                    </td>
+                </tr>
+                <tr>
+                    <td><h3>Property Parameters</h3></td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.uiComponent))
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(m => m.uiComponent, new SelectList(UiComponents, Model.uiComponent), new { title = "Choose a UI component Type according to the number of options (1-3  = item, 3-15 = list, >15= range)." })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.aggregationType))
+                    </td>
+                    <td>
 
-                            @Html.DropDownListFor(m => m.aggregationType, new SelectList(AggregationTypes, Model.aggregationType), new { title = "Choose a selection type based how many choices should be allowed (single, multiple)." })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @(Html.LabelFor(m => m.direction))
-                        </td>
-                        <td>
-                            @Html.DropDownListFor(m => m.direction, new SelectList(Directions, Model.direction), new { title = "Default sort direction for this item (ascending, descending)." })
-                        </td>
-                    </tr>
+                        @Html.DropDownListFor(m => m.aggregationType, new SelectList(AggregationTypes, Model.aggregationType), new { title = "Choose a selection type based how many choices should be allowed (single, multiple)." })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @(Html.LabelFor(m => m.direction))
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(m => m.direction, new SelectList(Directions, Model.direction), new { title = "Default sort direction for this item (ascending, descending)." })
+                    </td>
+                </tr>
 
-                </table>
+            </table>
         }
     </div>
 
@@ -644,7 +645,7 @@ OnSuccess = "Submit",
         //    }
         //);
 
-        
+
 
         var form = $('#Form_Edit_search');
         var formDataa = $(form).serialize();

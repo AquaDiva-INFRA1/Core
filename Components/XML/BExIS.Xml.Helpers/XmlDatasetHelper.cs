@@ -105,7 +105,7 @@ namespace BExIS.Xml.Helpers
                 XElement temp = XmlUtility.GetXElementByAttribute(nodeNames.nodeRef.ToString(), "name", name.ToString(),
                     xDoc);
 
-                string xpath = temp.Attribute("value").Value.ToString();
+                string xpath = temp?.Attribute("value").Value.ToString();
 
                 return dm.GetMetadataValueFromDatasetVersion(datasetVersionId, xpath);
             }

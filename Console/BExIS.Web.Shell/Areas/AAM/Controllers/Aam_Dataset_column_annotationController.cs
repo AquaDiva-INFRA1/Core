@@ -508,8 +508,8 @@ namespace BExIS.Modules.Aam.UI.Controllers
                 foreach (Aam_Dataset_column_annotation anot in aam_annot.get_all_dataset_column_annotation())
                 {
                     ExternalLink mapping_relation = meaning_mang.getExternalLinks().FirstOrDefault(x => x.URI.ToLower() == anot.characteristic_id.URI.ToLower());
-                    string meaning_name = anot.Id + " - " +anot.entity_id.label + " - " + anot.variable_id.Label;
-                    string short_name = anot.Id + " - " + anot.entity_id.label + " - " + anot.variable_id.Label;
+                    string meaning_name = anot.entity_id.label + " - " + anot.variable_id.Label;
+                    string short_name = anot.entity_id.label + " - " + anot.variable_id.Label;
                     string descripttion = "exported from the annotation module ";
                     bool selected = true; 
                     bool approved = true;

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Security.Entities.Subjects;
+using BExIS.Aam.Entities.Mapping;
+using System;
 
 namespace BExIS.Ddm.Api
 {
@@ -21,7 +23,7 @@ namespace BExIS.Ddm.Api
         void Dispose();
 
         List<SearchMetadataNode> GetMetadataNodes();
-        List<VariableInstance> GetVariablesNodes();
+        List<Tuple<long, string>> GetEntitieNodes();
 
         bool IsPrimaryDataIncluded();
         List<Group> GetProjectsNodes();

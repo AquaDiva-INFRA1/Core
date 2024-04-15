@@ -111,11 +111,11 @@
                                 {
                                   <span>@dt <br/></span>
                                 }
-                                using (VariableManager vm_ = new VariableManager())
+                                using (BExIS.Dlm.Services.Meanings.MeaningManager  meaning_manager = new BExIS.Dlm.Services.Meanings.MeaningManager())
                                 {
-                                    foreach (string dt in item.Variables.Where(x => !x.IsEmpty()).Where(x => vm_.VariableInstanceRepo.Get(Int32.Parse(x)) != null ))
+                                    foreach (string dt in item.Entities.Where(x => !x.IsEmpty()) )
                                     {
-                                        <span><b>@Html.Raw(vm_.VariableInstanceRepo.Get(Int32.Parse(dt)).Label) </b><br/> </span>
+                                        <span><b>@Html.Raw(meaning_manager.getMeaning(Int64.Parse(dt)).Name) </b><br/> </span>
                                     }
                                 }
 

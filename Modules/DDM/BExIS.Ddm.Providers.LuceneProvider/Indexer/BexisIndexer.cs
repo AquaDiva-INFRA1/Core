@@ -1,10 +1,13 @@
-﻿using BExIS.Ddm.Api;
+﻿using BExIS.Aam.Services;
+using BExIS.Ddm.Api;
 using BExIS.Ddm.Providers.LuceneProvider.Helpers;
 using BExIS.Ddm.Providers.LuceneProvider.Searcher;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Entities.Meanings;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
+using BExIS.Dlm.Services.Meanings;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Utilities;
@@ -458,33 +461,47 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
             {
                 String multivalued = facet.Attributes.GetNamedItem("multivalued").Value;
 
-                string[] variable_names = facet.Attributes.GetNamedItem("variable_name")?.Value.Split(',').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-                if (variable_names!=null)
-                    using (VariableManager vm_ = new VariableManager())
+                List<string> meaning_id_facet = facet.Attributes.GetNamedItem("entityIds")?.Value.Split(',').Where(x => !string.IsNullOrEmpty(x)).ToList();
+                if (meaning_id_facet.Count != 0)
+                {
+                    using (MeaningManager meaningManager = new MeaningManager())
                     {
-
-                        List<string> vars_ = variable_names.Where(va => (vm_.VariableInstanceRepo.Get(Int32.Parse(va)) != null) ).ToList();
-                        foreach (string variableName in vars_)
+                        using (VariableManager vm_ = new VariableManager())
                         {
-                            try
+                            foreach(string meanin_id in meaning_id_facet)
                             {
-                                VariableInstance v_instance = vm_.VariableInstanceRepo.Get(Int32.Parse(variableName));
-                                if ((v_instance!= null) && (v_instance.DataStructure != null) && (v_instance.DataStructure.Datasets.Any(x => x.Id == id))){
+                                Meaning m = meaningManager.getMeaning(long.Parse(meanin_id));
+                                List<Variable>  vars = vm_.VariableInstanceRepo.Get().Where(v => (v.Meanings.Where(me => me.Id == m.Id).Count() > 0) && (v.DataStructure.Datasets.Where(x => x.Id == id).Count() > 0 )).ToList<Variable>();
+                                //var typeCounts = vars
+                                //.GroupBy(a => a.Unit)
+                                //.Select(group => new
+                                //{
+                                //    Type = group.Key,
+                                //    Count = group.Count()
+                                //})
+                                //.OrderBy(x => x.Count).ToList();
+                                foreach (Variable variableObj in vars)
+                                {
                                     using (DatasetManager dm = new DatasetManager())
                                     {
-                                        DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
-                                        var Xmin = table.Compute("min([" + string.Concat("var", v_instance.Id.ToString()) + "])", string.Empty);
-                                        var Xmax = table.Compute("max([" + string.Concat("var", v_instance.Id.ToString()) + "])", string.Empty);
-                                        dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId, v_instance.Label);
+                                        try
+                                        {
+                                            DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
+                                            var Xmin = table.Compute("min([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
+                                            var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
+                                            dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId, variableObj.Label);
+                                        }
+                                        catch (Exception exc)
+                                        {
+                                            LoggerFactory.GetFileLogger().LogCustom(exc.Message);
+                                            LoggerFactory.GetFileLogger().LogCustom(exc.InnerException.Message);
+                                        }
                                     }
                                 }
                             }
-                            catch (Exception exc)
-                            {
-                                LoggerFactory.GetFileLogger().LogCustom(exc.Message);
-                            }
                         }
                     }
+                }  
                 string[] metadataElementNames = facet.Attributes.GetNamedItem("metadata_name")?.Value.Split(',');
                 String lucene_name = facet.Attributes.GetNamedItem("lucene_name").Value;
                 if (metadataElementNames != null) 
@@ -750,16 +767,8 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
                     DateTime dateValue = DateTime.MinValue;
                     DateTime dateValue_ = dateValue;
-                    string[] formats = {"M/d/yyyy h:mm:ss tt", "M/d/yyyy h:mm tt",
-                                                       "MM/dd/yyyy hh:mm:ss", "M/d/yyyy h:mm:ss",
-                                                       "M/d/yyyy hh:mm tt", "M/d/yyyy hh tt",
-                                                       "M/d/yyyy h:mm", "M/d/yyyy h:mm",
-                                                       "MM/dd/yyyy hh:mm", "M/dd/yyyy hh:mm"};
-                    DateTime.TryParseExact(Xmin.ToString(),
-                        formats,
-                        new CultureInfo("en-US"),
-                        DateTimeStyles.None,
-                        out dateValue);
+
+                    DateTime.TryParse(Xmin.ToString(), out dateValue);
                     if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmin.ToString())))
                     {
                         Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
@@ -767,23 +776,23 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                     }
                     else
                     {
-                        Debug_EMpty_nodes(variable_node_Label, " Variable ", docId);
+                        Debug_EMpty_nodes(variable_node_Label, " ", docId);
                     }
                     dateValue = DateTime.MinValue;
                     dateValue_ = dateValue;
-                    DateTime.TryParseExact(Xmax.ToString(),
-                            formats,
-                            new CultureInfo("en-US"),
-                            DateTimeStyles.None,
-                            out dateValue);
-                    if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmax.ToString())))
+
+                    if (Xmax != null)
                     {
-                        Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
-                        dataset.Add(newField_);
-                    }
-                    else
-                    {
-                        Debug_EMpty_nodes(variable_node_Label, " Variable ", docId);
+                        DateTime.TryParse(Xmax?.ToString(), out dateValue);
+                        if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmax.ToString())))
+                        {
+                            Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
+                            dataset.Add(newField_);
+                        }
+                        else
+                        {
+                            Debug_EMpty_nodes(variable_node_Label, " ", docId);
+                        }
                     }
                 }
                 else if ((facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("int")) ||
@@ -796,14 +805,14 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         dataset.Add(newField_);
                     else
                     {
-                        Debug_EMpty_nodes(variable_node_Label, " Variable ", docId);
+                        Debug_EMpty_nodes(variable_node_Label, " ", docId);
                     }
                     newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmax.ToString()));
                     if (!string.IsNullOrEmpty(Xmax.ToString()))
                         dataset.Add(newField_);
                     else
                     {
-                        Debug_EMpty_nodes(variable_node_Label, " Variable ", docId);
+                        Debug_EMpty_nodes(variable_node_Label, " ", docId);
                     }
 
                 }
