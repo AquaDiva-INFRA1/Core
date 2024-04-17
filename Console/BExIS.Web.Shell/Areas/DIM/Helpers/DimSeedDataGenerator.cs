@@ -77,6 +77,7 @@ namespace BExIS.Modules.Dim.UI.Helpers
                 if (!operationManager.Exists("dim", "admin", "*")) operationManager.Create("DIM", "Admin", "*", DataDissemination);
                 if (!operationManager.Exists("dim", "datacitedoi", "*")) operationManager.Create("DIM", "DataCiteDoi", "*", DataDissemination);
                 if (!operationManager.Exists("dim", "mapping", "*")) operationManager.Create("DIM", "Mapping", "*", Mapping);
+                if (!operationManager.Exists("dim", "UnitMapping", "*")) operationManager.Create("DIM", "UnitMapping", "*", Mapping);
 
                 #endregion Admin Workflow
 

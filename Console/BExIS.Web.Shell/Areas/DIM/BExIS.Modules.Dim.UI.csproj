@@ -503,6 +503,7 @@
     <Compile Include="Controllers\API\MetadataStructureOutController.cs" />
     <Compile Include="Controllers\DataCiteDOIController.cs" />
     <Compile Include="Controllers\ExportController.cs" />
+    <Compile Include="Controllers\UnitMappingController.cs" />
     <Compile Include="Controllers\PublicationController.cs" />
     <Compile Include="Controllers\API\DataOutController.cs" />
     <Compile Include="Controllers\ExportGFBIOController.cs" />
@@ -855,6 +856,10 @@
     <Content Include="Views\DataCiteDoi\Create.cshtml" />
     <Content Include="Views\DataCiteDoi\_Creator.cshtml" />
     <Content Include="Views\DataCiteDoi\_Affiliation.cshtml" />
+    <Content Include="Views\UnitMapping\Index_.cshtml" />
+    <Content Include="Views\UnitMapping\Index.cshtml" />
+    <Content Include="Views\UnitMapping\Create.cshtml" />
+    <Content Include="Views\UnitMapping\Edit.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -866,6 +871,7 @@
     <Folder Include="Content\Images\" />
     <Folder Include="Scripts\Models\Mapping\" />
     <Folder Include="Views\Api\" />
+    <Folder Include="Views\MappingUnit\" />
     <Folder Include="Views\Shared\" />
   </ItemGroup>
   <ItemGroup>

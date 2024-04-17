@@ -1,10 +1,15 @@
 ﻿using BExIS.Ddm.Api;
 using BExIS.Ddm.Providers.LuceneProvider;
+using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Entities.Meanings;
+using BExIS.Dlm.Services.DataStructure;
+using BExIS.Dlm.Services.Meanings;
 using BExIS.Modules.Ddm.UI.Models;
 using BExIS.Utils.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -430,7 +435,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {               
                 return Json(false);
             }
-
             Dictionary<string, string> form_name_value = new Dictionary<string, string>();
             string[] form_data = inputs.Split('&');
             foreach (string s in form_data)
@@ -513,6 +517,38 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 return Json(true);
             }
             return Json(false);
+        }
+
+
+        public ActionResult checkunits(string variables)
+        {
+            using (UnitManager unitmanager = new UnitManager())
+            using (MeaningManager meaningManager = new MeaningManager())
+            using (VariableManager vm_ = new VariableManager())
+            {
+                List<Meaning> Ms = meaningManager.getMeanings().Where(v => variables.Split(',').Where(s => s == v.Id.ToString()).Count() > 0).ToList();
+                List<Variable> vars = vm_.VariableInstanceRepo.Get().Where(v => (v.Meanings.Where(me => Ms.Where(i => i.Id == me.Id).Count() > 0).Count() > 0)).ToList<Variable>();
+                var typeCounts = vars
+                .GroupBy(a => a.Unit)
+                .Select(group => new
+                {
+                    Type = group.Key,
+                    Count = group.Count()
+                })
+                .OrderBy(x => x.Count).ToList();
+                List<Unit> unitsConversions = new List<Unit>();
+                vars.ForEach(x =>
+                {
+                    unitsConversions.AddRange(x.Unit.ConversionsIamTheSource.Select(y => y.Source));
+                    unitsConversions.AddRange(x.Unit.ConversionsIamTheSource.Select(y => y.Target));
+                });
+                unitsConversions = unitsConversions.Distinct().ToList();
+                if (unitsConversions.Count() == 0)
+                {
+                    return Json(false);
+                }
+                return Json(true);
+            }
         }
 
         #endregion

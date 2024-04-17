@@ -85,10 +85,10 @@
         }
     *@
 
-int count = 0;
-int var_count = 0;
-int group_count = 0;
-String color = "";
+    int count = 0;
+    int var_count = 0;
+    int group_count = 0;
+    String color = "";
 
 }
 
@@ -107,6 +107,9 @@ String color = "";
 {
     <div id="searchAttributeForm" class="bx-content" style="height:410px; overflow:auto">
         @{
+                <div>
+                    <input type="checkbox" id="checkUnits" name="Check Units" value="true"> Force Conversion Between Units of different variables connected to selected meanings / entites
+                </div>
             <table>
                 <tr>
                     <td style="width:250px;"><h3>General</h3></td>
@@ -203,20 +206,6 @@ String color = "";
                     <br />
                     <td style="vertical-align:bottom;">
                         <div class="vcenter" style="width:55px;">
-                            @*
-                                    @Html.ActionLink(" ", "AddMetadataNode_", "Admin", new {
-                                           id = "addNode",
-                                           count = count ,
-                                           @class = "bx-add bx-function",
-                                           title = "Corresponding metadata node to be used for the Lucene index." }
-                                    )
-
-                                    @Html.ActionLink(" ", "AddMetadataNode_", "Admin",
-                                           new { area = "ddm", count = count },
-                                           new { @class = "bx-add bx-function", @id = "addNode", title = "Corresponding metadata node to be used for the Lucene index." })
-
-                                @Html.ValidationMessageFor(m => m.metadataNames)
-                            *@
                             <a id="add_node" class="add_node" onclick="add_node()" title="Add Node!">
                                 <span class="bx-add bx-function"></span>
                             </a>
@@ -623,54 +612,56 @@ String color = "";
             }
         })
 
-        //var inputs = $('#Form_Edit_search :input');
-        //var json = [];
-        //inputs.each(function () {
-        //    if (this.name != "metadataNodes") {
-        //        //console.log("Match = "+this.name+" - "+ $(this).val());
-        //        json[this.name] = $(this).val();
-        //    }
-        //
-        //});
-
-        //var inputs = [];
-        //$('#Form_Edit_search input').each(
-        //    function (index) {
-        //        var input = $(this);
-        //        var obj = `{"id" : `+ input.attr('id')+`,"type" :`+ input.attr('type') +`,"name" :`+ input.attr('name') +`,"Value" :`+ input.val() +`,}`;
-        //        var obj_ = '{"id" : ' + input.attr('id') + ',"type" :' + input.attr('type') + ',"name" :' + input.attr('name') + ',"Value" :' + input.val() + ',}';
-        //        obj_.replace(/\n/g, '');
-        //        obj_.trim();
-        //        inputs.push(obj_);
-        //    }
-        //);
-
-
+        checked = false;
+        checkedunits = document.getElementById("checkUnits").checked;
+        if (checkedunits == true) {
+            $.ajax({
+                url: '/DDM/Admin/checkunits',
+                data: { 'variables': Variables.toString() },
+                type: "POST",
+                dataType: "json",
+                success: function (result) {
+                    if (result) {
+                        alert("There a Conversion Methods between different variables of the selected Meanings");
+                        checked = true;
+                    }
+                    else {
+                        alert("Please Check the Conversion Between the Units connected to the Variables of the corresponding selected Meaning")
+                        checked = false;
+                    }
+                },
+                error: function (xhr) {
+                    alert('Error: ' + xhr);
+                }
+            });
+        }
 
         var form = $('#Form_Edit_search');
         var formDataa = $(form).serialize();
         var formData = unescape(formDataa);
 
-        console.log("form data  : " + formData);
-        console.log("results :  " + JSON.stringify(metadatanodes));
-        data = { 'form': JSON.stringify(metadatanodes), 'inputs': formData, 'variables': Variables.toString(), 'projects': projects.toString() };
-        console.log(data);
-        $.ajax({
-            url: '/DDM/Admin/save_new',
-            data: { 'form': JSON.stringify(metadatanodes), 'inputs': formData, 'variables': Variables.toString(), 'projects': projects.toString() },
-            type: "POST",
-            dataType: "json",
-            success: function (result) {
-                if (result) {
-                    alert("success");
-                    var window = $('#EditSearchAttribute').data('tWindow');
-                    window.close();
+        if ((checked == true)|| (checkedunits == false)) {
+            console.log("form data  : " + formData);
+            console.log("results :  " + JSON.stringify(metadatanodes));
+            data = { 'form': JSON.stringify(metadatanodes), 'inputs': formData, 'variables': Variables.toString(), 'projects': projects.toString() };
+            console.log(data);
+            $.ajax({
+                url: '/DDM/Admin/save_new',
+                data: { 'form': JSON.stringify(metadatanodes), 'inputs': formData, 'variables': Variables.toString(), 'projects': projects.toString() },
+                type: "POST",
+                dataType: "json",
+                success: function (result) {
+                    if (result) {
+                        alert("success");
+                        var window = $('#EditSearchAttribute').data('tWindow');
+                        window.close();
+                    }
+                },
+                error: function (xhr) {
+                    alert('Error: ' + xhr);
                 }
-            },
-            error: function (xhr) {
-                alert('Error: ' + xhr);
-            }
-        });
+            });
+        }
 
     }
 
