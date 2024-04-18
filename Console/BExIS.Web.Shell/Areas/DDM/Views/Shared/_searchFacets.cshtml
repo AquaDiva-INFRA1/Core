@@ -52,14 +52,14 @@
 
                        .BindTo<Facet>(Facets, (item, facet) =>
                        {
-                           item.Text = facet.DisplayName + " (" + facet.Count + ")";
-                           item.Value = facet.Name;
+                           item.Text = facet.DisplayName.Replace('+',' ') + " (" + facet.Count + ")";
+                           item.Value = facet.Name.Replace('+', ' ');
                            item.Enabled = true;
                            item.Checkable = false;
                            item.Checked = false;
                            item.Expanded = false;
                            item.LinkHtmlAttributes["class"] = "searchFacet t-headeritem bx-trunc-child";
-                           item.LinkHtmlAttributes["title"] = facet.Text + " (" + facet.Count + ")";
+                           item.LinkHtmlAttributes["title"] = facet.Text.Replace('+', ' ') + " (" + facet.Count + ")";
 
                            var l = from f in facet.Childrens
                                    orderby f.Count descending, f.Name

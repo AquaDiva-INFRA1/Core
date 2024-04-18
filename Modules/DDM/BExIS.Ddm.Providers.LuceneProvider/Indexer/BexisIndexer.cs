@@ -465,42 +465,66 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                 if (meaning_id_facet.Count != 0)
                 {
                     using (MeaningManager meaningManager = new MeaningManager())
+                    using (DatasetManager dm = new DatasetManager())
+                    using (VariableManager vm_ = new VariableManager())
                     {
-                        using (VariableManager vm_ = new VariableManager())
+                        List<Meaning> Ms = meaningManager.getMeanings().Where(v => meaning_id_facet.Where(s => s == v.Id.ToString()).Count() > 0).ToList();
+                        List<VariableInstance> varss = new List<VariableInstance>();
+                        List<VariableTemplate> VariableTemplates = new List<VariableTemplate>();
+                        meaning_id_facet.ForEach(mf =>
                         {
-                            foreach(string meanin_id in meaning_id_facet)
-                            {
-                                Meaning m = meaningManager.getMeaning(long.Parse(meanin_id));
-                                List<Variable>  vars = vm_.VariableInstanceRepo.Get().Where(v => (v.Meanings.Where(me => me.Id == m.Id).Count() > 0) && (v.DataStructure.Datasets.Where(x => x.Id == id).Count() > 0 )).ToList<Variable>();
-                                //var typeCounts = vars
-                                //.GroupBy(a => a.Unit)
-                                //.Select(group => new
-                                //{
-                                //    Type = group.Key,
-                                //    Count = group.Count()
-                                //})
-                                //.OrderBy(x => x.Count).ToList();
-                                foreach (Variable variableObj in vars)
+                            VariableTemplates.AddRange(vm_.VariableTemplateRepo.Get().Where(v => v.Meanings.Where(m => m.Id.ToString() == mf.Trim()).Count() > 0).ToList<VariableTemplate>());
+                            varss.AddRange(vm_.VariableInstanceRepo.Get().Where(v => v.Meanings.Where(m => m.Id.ToString() == mf.Trim()).Count() > 0).ToList<VariableInstance>());
+                        });
+                        VariableTemplates.ForEach(x =>
+                        {
+                            varss.AddRange(vm_.VariableInstanceRepo.Get().Where(v => VariableTemplates.Where(cc => cc.Id == v.VariableTemplate.Id).Count() > 0));
+                        });
+                        varss = varss.Distinct().ToList();
+                        if (varss.Where(v => v.DataStructure.Datasets.Where(d => d.Id == id).Count() > 0).Count() != 0)
+                        {
+                            var typeCounts = varss
+                                .GroupBy(a => a.Unit)
+                                .Select(group => new
                                 {
-                                    using (DatasetManager dm = new DatasetManager())
+                                    Type = group.Key,
+                                    Count = group.Count()
+                                })
+                                .OrderBy(x => x.Count).ToList();
+                            List<Unit> unitsConversions = new List<Unit>();
+                            varss.ForEach(x =>
+                            {
+                                unitsConversions.AddRange(x.Unit.ConversionsIamTheSource.Select(y => y.Source));
+                                unitsConversions.AddRange(x.Unit.ConversionsIamTheSource.Select(y => y.Target));
+                            });
+                            unitsConversions = unitsConversions.Distinct().ToList().Where(u => typeCounts.Where(tc => tc.Type.Id == u.Id).Count() > 0).ToList();
+                            Unit mainUnit = typeCounts[typeCounts.Count()-1].Type;
+                            foreach (VariableInstance variableObj in varss.Where(v => v.DataStructure.Datasets.Where(d => d.Id == id).Count() > 0).ToList())
+                            {
+                                try
+                                {
+                                    DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
+                                    var Xmin = table.Compute("min([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
+                                    var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
+                                    if (variableObj.Unit.Id != mainUnit.Id)
                                     {
-                                        try
-                                        {
-                                            DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
-                                            var Xmin = table.Compute("min([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
-                                            var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
-                                            dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId, variableObj.Label);
-                                        }
-                                        catch (Exception exc)
-                                        {
-                                            LoggerFactory.GetFileLogger().LogCustom(exc.Message);
-                                            LoggerFactory.GetFileLogger().LogCustom(exc.InnerException.Message);
-                                        }
+                                        string formula = variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id).Formula;
+
+                                        Xmin = Convert.ToDouble(new DataTable().Compute(Xmin.ToString() + formula, null));
+                                        Xmax = Convert.ToDouble(new DataTable().Compute(Xmax.ToString() + formula, null));
                                     }
+                                    dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId, variableObj.Label);
+                                }
+                                catch (Exception exc)
+                                {
+                                    LoggerFactory.GetFileLogger().LogCustom(exc.Message);
+                                    LoggerFactory.GetFileLogger().LogCustom(exc.InnerException.Message);
                                 }
                             }
                         }
+
                     }
+                    
                 }  
                 string[] metadataElementNames = facet.Attributes.GetNamedItem("metadata_name")?.Value.Split(',');
                 String lucene_name = facet.Attributes.GetNamedItem("lucene_name").Value;
@@ -739,52 +763,39 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
 
        private Document write_primary_data_facet(XmlNode facet, object Xmin, object Xmax, Document dataset, string docId,string variable_node_Label)
         {
-            // the function is called with xmax null to point it is a metadata node with 1 element to write
-            if (Xmax == null) // writing a metadata node 
+            try
             {
-                dataset.Add(new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(),
-                    Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
-                dataset.Add(new Field("ng_all", Xmin.ToString(),
-                    Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
-                writeAutoCompleteIndex(docId, facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString());
-                writeAutoCompleteIndex(docId, "ng_all", Xmin.ToString());
-            }
-            //writing a range of strings from variables 
-            else if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "string")
-            {
-                dataset.Add(new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(),
-                    Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
-                dataset.Add(new Field("ng_all", Xmin.ToString(),
-                    Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
-                writeAutoCompleteIndex(docId, facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString());
-                writeAutoCompleteIndex(docId, "ng_all", Xmin.ToString());
-            }
-            //writing dates and numeric
-            else
-            {
-                if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "date")
+                // the function is called with xmax null to point it is a metadata node with 1 element to write
+                if (Xmax == null) // writing a metadata node 
                 {
-
-                    DateTime dateValue = DateTime.MinValue;
-                    DateTime dateValue_ = dateValue;
-
-                    DateTime.TryParse(Xmin.ToString(), out dateValue);
-                    if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmin.ToString())))
+                    dataset.Add(new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(),
+                        Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                    dataset.Add(new Field("ng_all", Xmin.ToString(),
+                        Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
+                    writeAutoCompleteIndex(docId, facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString());
+                    writeAutoCompleteIndex(docId, "ng_all", Xmin.ToString());
+                }
+                //writing a range of strings from variables 
+                else if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "string")
+                {
+                    dataset.Add(new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString(),
+                        Lucene.Net.Documents.Field.Store.YES, Field.Index.NOT_ANALYZED));
+                    dataset.Add(new Field("ng_all", Xmin.ToString(),
+                        Lucene.Net.Documents.Field.Store.YES, Field.Index.ANALYZED));
+                    writeAutoCompleteIndex(docId, facet.Attributes.GetNamedItem("lucene_name").Value, Xmin.ToString());
+                    writeAutoCompleteIndex(docId, "ng_all", Xmin.ToString());
+                }
+                //writing dates and numeric
+                else
+                {
+                    if (facet.Attributes.GetNamedItem("primitive_type")?.Value.ToLower() == "date")
                     {
-                        Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
-                        dataset.Add(newField_);
-                    }
-                    else
-                    {
-                        Debug_EMpty_nodes(variable_node_Label, " ", docId);
-                    }
-                    dateValue = DateTime.MinValue;
-                    dateValue_ = dateValue;
 
-                    if (Xmax != null)
-                    {
-                        DateTime.TryParse(Xmax?.ToString(), out dateValue);
-                        if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmax.ToString())))
+                        DateTime dateValue = DateTime.MinValue;
+                        DateTime dateValue_ = dateValue;
+
+                        DateTime.TryParse(Xmin.ToString(), out dateValue);
+                        if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmin.ToString())))
                         {
                             Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
                             dataset.Add(newField_);
@@ -793,29 +804,50 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                         {
                             Debug_EMpty_nodes(variable_node_Label, " ", docId);
                         }
-                    }
-                }
-                else if ((facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("int")) ||
-                    (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("double")) ||
-                    (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("decimal")) ||
-                    (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("number")))
-                {
-                    NumericField newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmin.ToString()));
-                    if (!string.IsNullOrEmpty(Xmin.ToString()))
-                        dataset.Add(newField_);
-                    else
-                    {
-                        Debug_EMpty_nodes(variable_node_Label, " ", docId);
-                    }
-                    newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmax.ToString()));
-                    if (!string.IsNullOrEmpty(Xmax.ToString()))
-                        dataset.Add(newField_);
-                    else
-                    {
-                        Debug_EMpty_nodes(variable_node_Label, " ", docId);
-                    }
+                        dateValue = DateTime.MinValue;
+                        dateValue_ = dateValue;
 
+                        if (Xmax != null)
+                        {
+                            DateTime.TryParse(Xmax?.ToString(), out dateValue);
+                            if ((dateValue != dateValue_) && (!string.IsNullOrEmpty(Xmax.ToString())))
+                            {
+                                Field newField_ = new Field("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, DateTools.DateToString(dateValue, DateTools.Resolution.DAY), Field.Store.YES, Field.Index.ANALYZED);
+                                dataset.Add(newField_);
+                            }
+                            else
+                            {
+                                Debug_EMpty_nodes(variable_node_Label, " ", docId);
+                            }
+                        }
+                    }
+                    else if ((facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("int")) ||
+                        (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("double")) ||
+                        (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("decimal")) ||
+                        (facet.Attributes.GetNamedItem("primitive_type").Value.ToLower().Contains("number")))
+                    {
+                        NumericField newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmin.ToString()));
+                        if (!string.IsNullOrEmpty(Xmin.ToString()))
+                            dataset.Add(newField_);
+                        else
+                        {
+                            Debug_EMpty_nodes(variable_node_Label, " ", docId);
+                        }
+                        newField_ = new NumericField("facet_" + facet.Attributes.GetNamedItem("lucene_name").Value, Field.Store.YES, true).SetDoubleValue(double.Parse(Xmax.ToString()));
+                        if (!string.IsNullOrEmpty(Xmax.ToString()))
+                            dataset.Add(newField_);
+                        else
+                        {
+                            Debug_EMpty_nodes(variable_node_Label, " ", docId);
+                        }
+
+                    }
                 }
+            }
+            catch (Exception exc)
+            {
+                LoggerFactory.GetFileLogger().LogCustom(exc.Message);
+                LoggerFactory.GetFileLogger().LogCustom(exc.InnerException.Message);
             }
             return dataset;
         }

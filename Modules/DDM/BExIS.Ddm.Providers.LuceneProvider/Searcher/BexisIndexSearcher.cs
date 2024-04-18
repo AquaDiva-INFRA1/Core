@@ -395,7 +395,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
                                 cCount++;
                                 foreach (XmlElement item in configXML.GetElementsByTagName("field"))
                                 {
-                                    if ((!item.Attributes["primitive_type"].InnerText.ToLower().Contains("date")) && (!item.Attributes["primitive_type"].InnerText.ToLower().Contains("string")) && (item.Attributes["display_name"].InnerText.ToLower().Contains(c.Name.ToLower())))
+                                    if ((!item.Attributes["primitive_type"].InnerText.ToLower().Contains("date")) && (!item.Attributes["primitive_type"].InnerText.ToLower().Contains("string")) && (item.Attributes["display_name"].InnerText.ToLower().Contains(c.DisplayName.ToLower())))
                                     {
                                         foreach (var doc in hpg.Documents)
                                         {

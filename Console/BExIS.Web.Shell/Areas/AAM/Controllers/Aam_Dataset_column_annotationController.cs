@@ -493,7 +493,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
                         meaning_mang.GetOrCreateExternalLink(null, uri.label.ToLower(), uri.URI.ToLower(), ExternalLinkType.entity, null, null);
                     if (uri.type_uri.ToLower().Contains
                         ("charach"))
-                        meaning_mang.GetOrCreateExternalLink(null, uri.label.ToLower(), uri.URI.ToLower(), ExternalLinkType.characteristics, null, null);
+                        meaning_mang.GetOrCreateExternalLink(null, uri.label.ToLower(), uri.URI.ToLower(), ExternalLinkType.relationship, null, null);
                 }
             }
         }
@@ -507,25 +507,61 @@ namespace BExIS.Modules.Aam.UI.Controllers
             {
                 foreach (Aam_Dataset_column_annotation anot in aam_annot.get_all_dataset_column_annotation())
                 {
+                    VariableInstance vi = vm.VariableInstanceRepo.Get(anot.variable_id.Id);
+                    VariableTemplate vt = vm.VariableTemplateRepo.Get(vi.VariableTemplate.Id);
+
                     ExternalLink mapping_relation = meaning_mang.getExternalLinks().FirstOrDefault(x => x.URI.ToLower() == anot.characteristic_id.URI.ToLower());
-                    string meaning_name = anot.entity_id.label + " - " + anot.variable_id.Label;
-                    string short_name = anot.entity_id.label + " - " + anot.variable_id.Label;
+                    string meaning_name = anot.characteristic_id.label+" - "+ anot.entity_id.label;
+                    string short_name = anot.characteristic_id.label + " " + anot.entity_id.label;
                     string descripttion = "exported from the annotation module ";
                     bool selected = true; 
                     bool approved = true;
                     List<long> meanings = new List<long>();
                     List<long> cons = new List<long>();
-                    MeaningEntry me = new MeaningEntry(mapping_relation, new List<ExternalLink>() { meaning_mang.getExternalLinks().FirstOrDefault(x => x.URI.ToLower() == anot.characteristic_id.URI.ToLower()) } );
+                    MeaningEntry me = new MeaningEntry(mapping_relation, new List<ExternalLink>() { meaning_mang.getExternalLinks().FirstOrDefault(x => x.URI.ToLower().Trim() == anot.entity_id.URI.ToLower().Trim()) } );
                     Meaning meaning = new Meaning(meaning_name, short_name,descripttion, true, true, new List<MeaningEntry>() { me }, null, null);
-                    if (meaning_mang.getMeanings().Where(x=> (x.Name==meaning.Name) && (x.ExternalLinks == meaning.ExternalLinks)).Count() == 0)
+                    try
                     {
-                        meaning = meaning_mang.addMeaning(meaning);
-                        anot.variable_id.Meanings.Add(meaning);
+                        if (meaning_mang.getMeanings().Where(x => (x.Name == meaning.Name)).Count() == 0)
+                        {
+                            meaning = meaning_mang.addMeaning(meaning);
+                            vi.Meanings.Add(meaning);
+                            vm.UpdateVariable(vi);
+                            if (vi.VariableTemplate != null)
+                            {
+                                vt.Meanings.Add(meaning);
+                                vm.UpdateVariableTemplate(vt);
+                            }
+                        }
+                        else
+                        {
+                            meaning = meaning_mang.getMeanings().FirstOrDefault(x => (x.Name == meaning.Name));
+                            if (meaning.ExternalLinks.Where(x => x.MappingRelation.URI.ToLower().Trim() == me.MappingRelation.URI.ToLower().Trim()).Count() == 0)
+                            {
+                                meaning.ExternalLinks.Add(me);
+                                meaning_mang.editMeaning(meaning);
+                            }
+                            if (meaning.ExternalLinks.Where(x => x.MappedLinks.Where(y => y.URI.ToLower().Trim() == me.MappedLinks[0].URI.ToLower().Trim()).Count() > 0).Count() == 0)
+                            {
+                                meaning.ExternalLinks.Where(x => x.MappingRelation.URI == me.MappingRelation.URI).First().MappedLinks.Add(me.MappedLinks[0]);
+                                meaning_mang.editMeaning(meaning);
+                            }
+                        }
+                        if (!vi.Meanings.Contains(meaning))
+                        {
+                            meaning = meaning_mang.getMeanings().FirstOrDefault(x => (x.Name == meaning.Name));
+                            vi.Meanings.Add(meaning);
+                            vm.UpdateVariable(vi);
+                            if (vi.VariableTemplate != null)
+                            {
+                                vt.Meanings.Add(meaning);
+                                vm.UpdateVariableTemplate(vt);
+                            }
+                        }
                     }
-                    if (!anot.variable_id.Meanings.Contains(meaning))
+                    catch (Exception ex)
                     {
-                        meaning = meaning_mang.getMeanings().FirstOrDefault(x => (x.Name == meaning.Name) && (x.Related_meaning == meaning.Related_meaning));
-                        anot.variable_id.Meanings.Add(meaning);
+                        Debug.WriteLine(ex.Message);
                     }
                 }
             }

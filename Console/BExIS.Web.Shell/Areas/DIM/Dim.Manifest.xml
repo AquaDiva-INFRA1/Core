@@ -25,6 +25,11 @@
         controller="DataCiteDoi" action="index"
         extends="./settingsRoot"
             />
+		<Export tag="settings" id="UnitConversion" order="1"
+        title="Unit Conversion Management" description="Unit Conversion Management" icon=""
+        controller="unitMapping" action="index"
+        extends="./settingsRoot"
+            />
 		
 		<Export tag="lunchbar" id="helpDim" order="5"
 				title="Data Dissemination" description="Data Dissemination Help Manual" icon=""
