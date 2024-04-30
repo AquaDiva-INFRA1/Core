@@ -9,9 +9,11 @@ using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
+using Lucene.Net.Store;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Vaiona.Logging;
 using SearchCriteria = BExIS.Utils.Models.SearchCriteria;
 using SearchCriterion = BExIS.Utils.Models.SearchCriterion;
 using SearchModel = BExIS.Utils.Models.SearchModel;
@@ -87,8 +89,8 @@ namespace BExIS.Ddm.Providers.LuceneProvider
         {
             if (forceReset == true)
                 SearchConfig.Reset();
-            SearchConfig.LoadConfig();
 
+            SearchConfig.LoadConfig();
             this.DefaultSearchModel = initDefault();
             this.WorkingSearchModel = initWorking(); //init(WorkingSearchModel); // its better to make a clone form DefualtSearchModel than calling the function twice
             //this.DefaultSearchModel = Get(this.WorkingSearchModel.CriteriaComponent);

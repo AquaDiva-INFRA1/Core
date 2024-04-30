@@ -545,20 +545,19 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 unitsConversions = unitsConversions.Distinct().ToList().Where(u => typeCounts.Where(tc => tc.Type.Id == u.Id).Count() > 0).ToList();
                 Unit mainUnit = typeCounts[typeCounts.Count() - 1].Type;
 
-
-                if (unitsConversions.Count() != typeCounts.Count())
-                {
-                    string msg = "";
-                    typeCounts.ForEach(tc => { 
-                        if (!unitsConversions.Contains(tc.Type))
-                        {
-                            if (tc.Type.Id != mainUnit.Id)
-                                msg = msg + "please map unit " + tc.Type.Id + " - "+ tc.Type.Name +" to the most used unit connected t thease meanings : "+ mainUnit.Id + " - " + mainUnit.Name + Environment.NewLine;
-                        }
-                    });
+                string msg = "";
+                typeCounts.ForEach(tc => {
+                    if (!unitsConversions.Contains(tc.Type))
+                    {
+                        if (tc.Type.Id != mainUnit.Id)
+                            msg = msg + "please map unit " + tc.Type.Id + " - " + tc.Type.Name + " to the most used unit connected t thease meanings : " + mainUnit.Id + " - " + mainUnit.Name + Environment.NewLine;
+                    }
+                });
+                if (string.IsNullOrEmpty(msg))
+                    return Json(true);
+                else
                     return Json(msg);
-                }
-                return Json(true);
+
             }
         }
 

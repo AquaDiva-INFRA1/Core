@@ -52,8 +52,8 @@
 
                        .BindTo<Facet>(Facets, (item, facet) =>
                        {
-                           item.Text = facet.DisplayName.Replace('+',' ') + " (" + facet.Count + ")";
-                           item.Value = facet.Name.Replace('+', ' ');
+                           item.Text = facet.DisplayName.Replace("+"," ") + " (" + facet.Count + ")";
+                           item.Value = facet.Name.Replace("+","");
                            item.Enabled = true;
                            item.Checkable = false;
                            item.Checked = false;
@@ -307,7 +307,7 @@
         facets_disable();
 
         $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
-            { SelectedItem: selectedItemValue, Parent: parent },
+            { SelectedItem: selectedItemValue, Parent: parent.replaceAll('+', '') },
             function(response) {
                 $("#searchTreeView").html(response);
                 facets_disable();
@@ -464,7 +464,7 @@
 
             var parent = $(x.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
             $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
-                { SelectedItem: value1 + " - " + value2, Parent: parent },
+                { SelectedItem: value1.replaceAll('-', '/') + " - " + value2.replaceAll('-', '/'), Parent: parent.replaceAll('+', '') },
                 function (response) {
                     $("#searchTreeView").html(response);
                     facets_disable();
@@ -498,7 +498,7 @@
         console.log(parent);
 
         $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
-            { SelectedItem: value1.replaceAll('-', '/') + " - " + value2.replaceAll('-', '/'), Parent: parent },
+            { SelectedItem: value1.replaceAll('-', '/') + " - " + value2.replaceAll('-', '/'), Parent: parent.replaceAll('+', '') },
                 function (response) {
                     $("#searchTreeView").html(response);
                     facets_disable();
@@ -519,7 +519,7 @@
     function refresh_sliders(element,from, to) {
         var parent = element.getAttribute('data');
         $.post('@Url.Action("CheckedTreeViewItem", @controller, new RouteValueDictionary {{"area", "ddm"}})',
-            { SelectedItem: from +" - "+ to , Parent: parent },
+            { SelectedItem: from + " - " + to, Parent: parent.replaceAll('+', '') },
             function(response) {
                 $("#searchTreeView").html(response);
                 facets_disable();

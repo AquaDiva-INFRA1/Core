@@ -13,7 +13,7 @@
     {
       "key": "formerMemberRole",
       "title": "Former Member Role/Group",
-      "value": "alumni",
+      "value": "Alumni",
       "type": "String",
       "options": [],
       "description": "The role/group that is assigned to a user when he/she is no longer a member of the project."
