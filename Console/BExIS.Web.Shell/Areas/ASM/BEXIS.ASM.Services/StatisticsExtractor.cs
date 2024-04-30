@@ -210,6 +210,8 @@ namespace BExIS.ASM.Services
         public JObject datastructure_extract (string datastructure_id)
         {
             JObject json_ds_struct = new JObject();
+            if (datastructure_id == null) return json_ds_struct;
+
             //Set the searchTerm as query-String
             String param = HttpUtility.UrlEncode(datastructure_id);
 
@@ -238,7 +240,7 @@ namespace BExIS.ASM.Services
             Dictionary<long, JObject> result = new Dictionary<long, JObject>();
             foreach (long id in dm.GetDatasetLatestIds())
             {
-                result.Add(id, datastructure_extract(dm.GetDataset(id).DataStructure.Id.ToString()));
+                result.Add(id, datastructure_extract(dm.GetDataset(id)?.DataStructure?.Id.ToString()));
             }
 
             string json_string = JsonConvert.SerializeObject(result);

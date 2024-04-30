@@ -303,11 +303,15 @@
     <Content Include="Scripts\svelte\_app\immutable\chunks\index.20173155.js" />
     <Content Include="Scripts\svelte\_app\immutable\chunks\index.d1e5e4fd.js" />
     <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.4cdbdd88.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\singletons.008f0096.js" />
     <Content Include="Scripts\svelte\_app\immutable\chunks\singletons.6fb210df.js" />
     <Content Include="Scripts\svelte\_app\immutable\chunks\Table.ae35a596.js" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.940a2a50.js" />
     <Content Include="Scripts\svelte\_app\immutable\entry\app.d4717431.js" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.2385574f.js" />
     <Content Include="Scripts\svelte\_app\immutable\entry\start.59dce394.js" />
     <Content Include="Scripts\svelte\_app\immutable\nodes\0.e206440d.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.6f423fc9.js" />
     <Content Include="Scripts\svelte\_app\immutable\nodes\1.c9ff591e.js" />
     <Content Include="Scripts\svelte\_app\immutable\nodes\2.9a877a6b.js" />
     <Content Include="Scripts\svelte\_app\immutable\nodes\3.251b54b3.js" />
@@ -406,6 +410,14 @@
     <Content Include="Scripts\svelte\_app\version.json" />
     <Content Include="Scripts\svelte\_app\version.json.br" />
     <Content Include="Scripts\svelte\_app\version.json.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\singletons.008f0096.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\singletons.008f0096.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.940a2a50.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.940a2a50.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.2385574f.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.2385574f.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.6f423fc9.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.6f423fc9.js.gz" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
