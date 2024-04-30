@@ -82,7 +82,7 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 //if (workflow == null) workflow = workflowManager.Create("Search Help", "", DataDiscovery);
 
                 //operationManager.Create("DDM", "Help", "*", null, workflow);
-                operationManager.Create("DDM", "Help", "*");
+                operationManager.Create("DDM", "Help", "*", DataDiscovery);
 
                 #endregion
 
@@ -98,11 +98,10 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 operationManager.Create("DDM", "SemanticSearch", "*", SearchFeature);
                 operationManager.Create("DDM", "Home", "*", SearchFeature);
                 operationManager.Create("DDM", "Data", "*", SearchFeature);
-                
 
 
-                if (!featurePermissionManager.Exists(null, SearchFeature.Id, PermissionType.Grant))
-                    featurePermissionManager.Create(null, SearchFeature.Id, PermissionType.Grant);
+                //if (!featurePermissionManager.Exists(null, SearchFeature.Id, PermissionType.Grant))
+                //    featurePermissionManager.Create(null, SearchFeature.Id, PermissionType.Grant);
 
                 #endregion
 

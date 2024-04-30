@@ -113,7 +113,7 @@ namespace BExIS.Modules.Rpm.UI.Helpers
                     operationManager.Create("RPM", "Home", "*", dataTypeFeature);
 
                 if (!operationManager.Exists("RPM", "Help", "*"))
-                    operationManager.Create("RPM", "Help", "*");
+                    operationManager.Create("RPM", "Help", "*", dataPlanning);
 
 
                 Feature newDataTypeFeature = features.FirstOrDefault(f =>
@@ -142,7 +142,7 @@ namespace BExIS.Modules.Rpm.UI.Helpers
                     operationManager.Create("API", "Structures", "*", api);
 
                 //set api public
-                featurePermissionManager.Create(null, api.Id, Security.Entities.Authorization.PermissionType.Grant);
+                //featurePermissionManager.Create(null, api.Id, Security.Entities.Authorization.PermissionType.Grant);
 
 
                 //meanings features and security levels
@@ -166,7 +166,7 @@ namespace BExIS.Modules.Rpm.UI.Helpers
                 if (!operationManager.Exists("API", "Meanings", "*"))
                 {
                     operationManager.Create("API", "Meanings", "*", dataMeaning_pub);
-                    featurePermissionManager.Create(null, dataMeaning_pub.Id, Security.Entities.Authorization.PermissionType.Grant);
+                    //featurePermissionManager.Create(null, dataMeaning_pub.Id, Security.Entities.Authorization.PermissionType.Grant);
                 }
 
                 if (!operationManager.Exists("RPM", "Meaning", "*"))
@@ -179,7 +179,7 @@ namespace BExIS.Modules.Rpm.UI.Helpers
                     operationManager.Create("RPM", "ExternalLink", "*", dataMeaning);
                 }
 
-                if (!operationManager.Exists("RPM", "Help", "*"))operationManager.Create("RPM", "Help", "*");
+                if (!operationManager.Exists("RPM", "Help", "*"))operationManager.Create("RPM", "Help", "*", dataPlanning);
 
             }
             finally

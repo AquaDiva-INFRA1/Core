@@ -62,13 +62,13 @@ namespace BExIS.Modules.Dim.UI.Helpers
                 if (API == null) API = featureManager.Create("API", "API", DataDissemination);
 
                 //set api public
-                featurePermissionManager.Create(null, API.Id, Security.Entities.Authorization.PermissionType.Grant);
+                //featurePermissionManager.Create(null, API.Id, Security.Entities.Authorization.PermissionType.Grant);
 
                 Operation operation = null;
 
                 #region Help Workflow
 
-                if (!operationManager.Exists("dim", "help", "*")) operationManager.Create("DIM", "Help", "*");
+                if (!operationManager.Exists("dim", "help", "*")) operationManager.Create("DIM", "Help", "*", DataDissemination);
 
                 #endregion Help Workflow
 

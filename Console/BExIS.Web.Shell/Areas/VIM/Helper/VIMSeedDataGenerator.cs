@@ -22,7 +22,7 @@ namespace BExIS.Modules.Vim.UI.Helper
 
                     operationManager.Create("VIM", "Visualization", "*", visualization);
 
-                    operationManager.Create("VIM", "Help", "*");
+                    operationManager.Create("VIM", "Help", "*", visualization);
 
                 }
                 catch (Exception ex)
