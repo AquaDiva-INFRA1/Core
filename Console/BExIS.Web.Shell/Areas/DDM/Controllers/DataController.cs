@@ -758,10 +758,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                             table = dm.GetDatasetVersionTuples(versionId, command.Page - 1, command.PageSize);
                             ViewData["gridTotal"] = dm.GetDatasetVersionEffectiveTuples(dsv).Count;
                         }
-
-                        model = new GridModel(table);
-                        model.Total = Convert.ToInt32(ViewData["gridTotal"]); // (int)Session["gridTotal"];
                     }
+                    model = new GridModel(table);
+                    model.Total = Convert.ToInt32(ViewData["gridTotal"]); // (int)Session["gridTotal"];
                 }
                 else
                 {
