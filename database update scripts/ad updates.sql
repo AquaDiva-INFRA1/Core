@@ -29,3 +29,7 @@ where (vartemplateref is null) and (id in (select distinct (vartemplateref) from
 
 delete from datasets where datastructureref is null
 delete from datasetversions where datasetref in (select id from datasets where datastructureref is null)
+
+update variables
+set displaypatternid = -1
+where datatyperef in (select id from datatypes where UPPER(name) like '%DATE%' and UPPER(name) not like '%TIME%') 
