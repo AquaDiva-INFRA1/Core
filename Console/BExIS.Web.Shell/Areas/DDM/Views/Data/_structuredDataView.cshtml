@@ -142,59 +142,59 @@
 
             .Columns(columns =>
             {
-            for (int i = 0; i < Model.Data.Columns.Count; i++)
-            {
-
-                DataColumn column = Model.Data.Columns[i];
-
-                string title;
-                bool visible = false;
-
-                if (column.Caption == "")
+                for (int i = 0; i < Model.Data.Columns.Count; i++)
                 {
-                    title = column.ColumnName;
-                }
-                else
-                {
-                    title = column.Caption;
-                }
 
-                if (column.ColumnName.ToLower().StartsWith("var"))
-                {
-                    visible = true;
+                    DataColumn column = Model.Data.Columns[i];
 
-                    DisplayFormatObject dfo = Model.DisplayFormats.FirstOrDefault(a => a.Column.Equals(title));
+                    string title;
+                    bool visible = false;
 
-                    string format = "";
-
-                    if (dfo != null && !string.IsNullOrEmpty(dfo.Format))
+                    if (column.Caption == "")
                     {
-                        //string unit = "";
-                        //if (dfo.Unit != "None") unit = dfo.Unit;
-
-                        format = "{0:" + dfo.Format + "}";
-
-                        columns.Bound(column.DataType, column.ColumnName)
-                .Title(title)
-                .Format(format)
-                .Hidden(!visible)
-                .Sortable(latestVersion)
-                .Filterable(latestVersion);
+                        title = column.ColumnName;
                     }
                     else
                     {
-                        columns.Bound(column.DataType, column.ColumnName)
-                .Title(title)
-                .Hidden(!visible)
-                .Sortable(latestVersion)
-                .Filterable(latestVersion);
+                        title = column.Caption;
+                    }
+
+                    if (column.ColumnName.ToLower().StartsWith("var"))
+                    {
+                        visible = true;
+
+                        DisplayFormatObject dfo = Model.DisplayFormats.FirstOrDefault(a => a.Column.Equals(title));
+
+                        string format = "";
+
+                        if (dfo != null && !string.IsNullOrEmpty(dfo.Format))
+                        {
+                            //string unit = "";
+                            //if (dfo.Unit != "None") unit = dfo.Unit;
+
+                            format = "{0:" + dfo.Format + "}";
+
+                            columns.Bound(column.DataType, column.ColumnName)
+                    .Title(title)
+                    .Format(format)
+                    .Hidden(!visible)
+                    .Sortable(latestVersion)
+                    .Filterable(latestVersion);
+                        }
+                        else
+                        {
+                            columns.Bound(column.DataType, column.ColumnName)
+                    .Title(title)
+                    .Hidden(!visible)
+                    .Sortable(latestVersion)
+                    .Filterable(latestVersion);
+                        }
                     }
                 }
-            }
-        })
+            })
 
         .Pageable(paging =>
-            paging.PageSize(20, new int[] { 10, 20, 50, 100, 500 })
+            paging.PageSize(int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["defautPageSize"]), new int[] { 10, 20, 50, 100, 500 })
                 .Style(pagerStyles)
                 .Position(GridPagerPosition.Both)
                 .Total(total)

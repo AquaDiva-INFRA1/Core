@@ -236,7 +236,8 @@ namespace BExIS.Modules.Dim.UI.Controllers
                     return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "Bearer token not exist.");
                 }
 
-                User user = ControllerContext.RouteData.Values["user"] as User;
+                User user = userManager.Users.Where(u => u.Token.Equals(token)).FirstOrDefault();
+                //User user = ControllerContext.RouteData.Values["user"] as User;
 
                 if (isPublic || user != null)
                 {

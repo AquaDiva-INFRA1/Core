@@ -50,6 +50,7 @@ using BExIS.Security.Entities.Subjects;
 using BExIS.Dlm.Services.MetadataStructure;
 using System.Web.UI.WebControls;
 using System.Security.Cryptography;
+using System.Web.Configuration;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 
@@ -652,7 +653,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                             try
                             {
                                 long count = dm.RowCount(datasetID, null);
-                                if (count > 0) table = dm.GetLatestDatasetVersionTuples(datasetID, null, null, null, "", 0, 10);
+                                if (count > 0) table = dm.GetLatestDatasetVersionTuples(datasetID, null, null, null, "", 0, int.Parse( WebConfigurationManager.AppSettings["defautPageSize"] ) );
                                 else ModelState.AddModelError(string.Empty, "<span style=\"color: black;\"> There is no primary data available/uploaded. </span><br/><br/> <span style=\"font-weight: normal;color: black;\">Please note that the data may have been uploaded to another repository and is referenced here in the metadata.</span>");
                             }
                             catch
@@ -662,7 +663,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         }
                         else
                         {
-                            table = dm.GetDatasetVersionTuples(versionId, 0, 10);
+                            table = dm.GetDatasetVersionTuples(versionId, 0, int.Parse(WebConfigurationManager.AppSettings["defautPageSize"]));
                             ViewData["gridTotal"] = dm.GetDatasetVersionEffectiveTuples(dsv).Count;
                         }
 

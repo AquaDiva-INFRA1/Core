@@ -7,7 +7,7 @@
 
 @{
 
-    int PageSize = 50;//Convert.ToInt16(ViewData["PageSize"]);
+    int PageSize = int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["defautPageSize"]);//Convert.ToInt16(ViewData["PageSize"]);
     int CurrentPage =  Convert.ToInt16(ViewData["CurrentPage"]);
     List<HeaderItem> DefaultHeaderList = (List<HeaderItem>)ViewData["DefaultHeaderList"];
     HeaderItem Id = (HeaderItem)ViewData["Id"];

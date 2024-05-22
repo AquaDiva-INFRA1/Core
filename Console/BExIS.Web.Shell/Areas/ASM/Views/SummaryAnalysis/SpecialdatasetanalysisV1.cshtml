@@ -390,8 +390,7 @@
                 document.getElementById("spinner_loader").setAttribute("hidden", true);
 
                 if (result != "") {
-
-                    document.getElementById("pnk_notif_id").removeAttribute("hidden");
+                    console.log(result);
 
                     var jsonObject = JSON.parse(result);
                     const ordered = {};
@@ -399,18 +398,21 @@
                         ordered[key] = jsonObject[key];
                     });
 
-                    console.log(ordered["PNK Number"]);
                     samples = "";
                     keys = Object.keys(ordered)
                     console.log(keys)
-                    for (let i = 0; i < ordered["PNK Number"].length; i++) {
-                        console.log(ordered["PNK Number"][i]);
-                        console.log(ordered[keys[0]][i]);
-                        samples = samples + " <button onclick=\"show_dataset_pnk(\'" + ordered["PNK Number"][i] + "\') ; \" type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\"  data-target=\"#exampleModalLong\" > "
-                            + ordered["PNK Number"][i] + " <span class=\"badge\">" + ordered[keys[0]][i] + "</span></button> ";
-                    }
-                    for (var key of ordered["PNK Number"]) {
-                        
+                    if (keys.length != 0) {
+                        for (let i = 0; i < ordered["PNK Number"].length; i++) {
+                            console.log(ordered["PNK Number"][i]);
+                            console.log(ordered[keys[0]][i]);
+                            samples = samples + " <button onclick=\"show_dataset_pnk(\'" + ordered["PNK Number"][i] + "\') ; \" type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\"  data-target=\"#exampleModalLong\" > "
+                                + ordered["PNK Number"][i] + " <span class=\"badge\">" + ordered[keys[0]][i] + "</span></button> ";
+                        }
+
+                        document.getElementById("pnk_notif_id").removeAttribute("hidden");
+                        for (var key of ordered["PNK Number"]) {
+
+                        }
                     }
                     /*
                     header = ordered[Object.keys(ordered)[Object.keys(ordered).length - 1]]
