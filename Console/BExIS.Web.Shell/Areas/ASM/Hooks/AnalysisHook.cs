@@ -20,9 +20,8 @@ namespace BExIS.Modules.Asm.UI.Hooks
             // check status
             checkStatus(id, username);
 
-            // check if subject is checked in
-            // only check if status is open
-            checkAvailablity(id);
+            // if status is open then check if data is available
+            if (Status == HookStatus.Open) checkDataStatus(id, username);
         }
 
         private void checkStatus(long id, string username)
@@ -31,22 +30,25 @@ namespace BExIS.Modules.Asm.UI.Hooks
             bool hasAccess = hasUserAccessRights(username);
 
             // user rights to the dataset
-            bool hasRights = hasUserEntityRights(id, username, RightType.Write);
+            bool hasRights = hasUserEntityRights(id, username, RightType.Read);
 
-            hasRights = true;
             // if one fail then access is denied
             if (hasAccess == false || hasRights == false) Status = HookStatus.AccessDenied;
             else Status = HookStatus.Open;
         }
 
-
-        private void checkAvailablity(long id)
+        private void checkDataStatus(long id, string username)
         {
-            // check if subject is checked in
-            // only check if status is open
-            if (Status == HookStatus.Open)
-                using (var datasetManager = new DatasetManager())
-                    Status = datasetManager.IsDatasetCheckedIn(id) == true ? HookStatus.Open : HookStatus.Waiting;
+            // check if dataset has description
+            using (var datasetManager = new DatasetManager())
+            {
+                var dataset = datasetManager.GetDataset(id);
+                if (dataset == null && dataset.DataStructure == null) { Status = HookStatus.Disabled; return; }
+                else Status = HookStatus.Open;
+
+                if (dataset.Status != Dlm.Entities.Data.DatasetStatus.CheckedIn) Status = HookStatus.Disabled;
+
+            }
         }
     }
 }
