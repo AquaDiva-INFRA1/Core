@@ -21,6 +21,7 @@ using Lucene.Net.Search;
 using Lucene.Net.Store;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Globalization;
 using System.IO;
@@ -508,8 +509,9 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                     var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
                                     if (variableObj.Unit.Id != mainUnit.Id)
                                     {
-                                        string formula = variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id).Formula;
-
+                                        string formula = variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id) != null ?
+                                            variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id).Formula :  "";
+                                        
                                         Xmin = Convert.ToDouble(new DataTable().Compute(Xmin.ToString() + formula, null));
                                         Xmax = Convert.ToDouble(new DataTable().Compute(Xmax.ToString() + formula, null));
                                     }
