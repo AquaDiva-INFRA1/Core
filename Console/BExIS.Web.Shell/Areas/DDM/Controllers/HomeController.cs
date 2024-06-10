@@ -1,10 +1,21 @@
 ﻿using BExIS.Ddm.Api;
+using BExIS.Ddm.Providers.LuceneProvider;
+using BExIS.Ddm.Providers.LuceneProvider.Config;
+using BExIS.Ddm.Providers.LuceneProvider.Searcher;
 using BExIS.Utils.Models;
 using BExIS.Xml.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.WebPages;
 using Telerik.Web.Mvc;
@@ -64,7 +75,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Index(string autoComplete, string FilterList, string searchType)
+        public ActionResult Index(string autoComplete, string FilterList, string searchType, string Seamntic_depth, string Error_distance, bool seamnticflag = false)
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Search", this.Session.GetTenant());
             Session["SubmissionAction"] = "Index";
@@ -89,7 +100,15 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             }
 
             provider.SearchAndUpdate(provider.WorkingSearchModel.CriteriaComponent);
-
+            if (seamnticflag)
+            {
+                SearchResult semanticSearchResults = BexisIndexSearcher.SemanticSearch(autoComplete.Trim().ToLower(), SearchConfig.headerItemXmlNodeList, Seamntic_depth, Error_distance);
+                List<Row> rows = new List<Row>();
+                rows.AddRange(provider.WorkingSearchModel.ResultComponent.Rows);
+                rows.AddRange(semanticSearchResults.Rows);
+                provider.WorkingSearchModel.ResultComponent.Rows = rows.Distinct();
+            }
+            Session["seamnticflag"] = seamnticflag;
             //reset searchType
             // after every search - searchType must be based on
             SetSearchType("basedon");
