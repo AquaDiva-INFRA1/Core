@@ -511,16 +511,21 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                     {
                                         string formula = variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id) != null ?
                                             variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id).Formula :  "";
-                                        
-                                        Xmin = Convert.ToDouble(new DataTable().Compute(Xmin.ToString() + formula, null));
-                                        Xmax = Convert.ToDouble(new DataTable().Compute(Xmax.ToString() + formula, null));
+                                        try
+                                        {
+                                            Xmin = Convert.ToDouble(new DataTable().Compute(Xmin.ToString() + formula, null));
+                                            Xmax = Convert.ToDouble(new DataTable().Compute(Xmax.ToString() + formula, null));
+                                        }
+                                        catch (Exception ec)
+                                        {
+                                            LoggerFactory.GetFileLogger().LogCustom(ec.Message);
+                                        }
                                     }
                                     dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId, variableObj.Label);
                                 }
                                 catch (Exception exc)
                                 {
                                     LoggerFactory.GetFileLogger().LogCustom(exc.Message);
-                                    LoggerFactory.GetFileLogger().LogCustom(exc.InnerException.Message);
                                 }
                             }
                         }
