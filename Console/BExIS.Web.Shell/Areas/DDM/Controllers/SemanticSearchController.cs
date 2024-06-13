@@ -1035,12 +1035,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         {
             String Semedico_Result = "";
             string Semedico_Result_AD = "";
-            Semedico_Result = "";
             String Query_4_API;
             if (id != "")
             {
                 Query_4_API = get_observations_contextualized_contextualizing(id);
-                if (Query_4_API.Length < 3)
+                if (string.IsNullOrEmpty(Query_4_API))
                 {
                     return "";
                 }

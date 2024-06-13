@@ -298,7 +298,8 @@
             success: function (_result) {
                 if (_result=="") {
                     var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
-                    $('#results').html(text);
+                    $('#results').html(text); 
+                    $('#resultsAD').html(text); 
                     console.log("check the labes or annotations table that are sent to the semedico server !!");
                     return true;
                 }

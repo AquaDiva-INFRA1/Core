@@ -8,7 +8,7 @@
 @{
 
     int PageSize = int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["defautPageSize"]);//Convert.ToInt16(ViewData["PageSize"]);
-    int CurrentPage =  Convert.ToInt16(ViewData["CurrentPage"]);
+    int CurrentPage = Convert.ToInt16(ViewData["CurrentPage"]);
     List<HeaderItem> DefaultHeaderList = (List<HeaderItem>)ViewData["DefaultHeaderList"];
     HeaderItem Id = (HeaderItem)ViewData["Id"];
 
@@ -26,6 +26,9 @@
 
 }
 
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
 
 @(Html.Telerik().Grid<System.Data.DataRow>()
         .Name("resultGrid")
@@ -95,7 +98,25 @@
                     .Groupable(false)
                     .Sortable(false)
                     .Filterable(false);
-                }
+
+                    columns.Bound("").Width(100).ClientTemplate(
+                 "<div>  <center> " +
+                     "<a>" +
+                         "<i class=\"far fa-newspaper fa-2x \"  " +
+                         "data-toggle=\"modal\" " +
+                         "data-target=\"#exampleModalLong\" " +
+                         "onclick='get_dataset_related_papers_by_ID(this)' " +
+                         "id='<#= " + @Model.Columns[Id.Name].ColumnName + "#>'" +
+                         "title=\"Load Related Publication\" ></i> " +
+                     "</a>" +
+
+                 "</center> </div>"
+                     )
+                    .Title("Publications")
+                     .Groupable(false)
+                     .Sortable(false)
+                     .Filterable(false);
+                        }
 
             })
 
@@ -122,98 +143,501 @@
             .ColumnContextMenu()
 
 )
+<!-- Modal -->
+<div id="papers">
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" style="padding-top: 3cm;">
+        <div class="modal-dialog" tabindex="-1" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle"><h1 class="display-4">RELATED PUBLICATIONS</h1> </h5>
+                    <!--
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    -->
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="row col-md-6">
+                            <h5 class="modal-title" id="exampleModalLongTitle"><h1 class="display-4">CRC AquaDiva</h1> </h5>
+                            <div id="resultsAD">
+                                <h3> Error Occured, please contact the Portal's administrator</h3>
+                            </div>
+                        </div>
+                        <div class="row col-md-6">
+                            <h5 class="modal-title" id="exampleModalLongTitle"><h1 class="display-4">PubMed</h1> </h5>
+                            <div id="results">
+                                <h3> Error Occured, please contact the Portal's administrator</h3>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <!--<button type="button" class="btn btn-secondary" data-dismiss="modal" id="Close_button">Close</button>-->
+                    <button id="previous" type="button" style="float: right" onclick="get_dataset_related_papers_by_ID('','nextpage')">
+                        <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Next
+                    </button>
+                    <button id="next" type="button" style="float: left" onclick="get_dataset_related_papers_by_ID('','prevpage')">
+                        <i id="spinner" class="fa fa-spinner fa-spin" style="display:none"></i>Previous
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- loader : spinner  -->
+<div id="spinner_" hidden="true">
+    <div class="container">
+        <div class="row">
+            <div id="loader">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="lading"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 
 <script type="text/javascript">
 
-	$('document')
-		.ready(function() {
+    $('document')
+        .ready(function () {
 
-			$('.t-filter').attr("title", "Filter");
+            $('.t-filter').attr("title", "Filter");
 
-		});
+        });
 
-	function resultGrid_OnColumnChanged(e)
-	{
-		//alert("changed");
-	
-	}
+    function resultGrid_OnColumnChanged(e) {
+        //alert("changed");
 
-
-	function resultGrid_OnRowDataBound(e) {
-
-		//alert("changed");
-		//truncateTitle();
-
-		////alert(e.item);
-		//var obj = e.row.childNodes;
-
-		//$.each(obj, function (i) {
-
-		//	obj[i].title = obj[i].textContent;
-		//	if (obj[i].textContent.length > 35) {
-		//		obj[i].textContent = jQuery.trim(obj[i].textContent).substring(0, 35).trim(this) + "...";
-		//	}
-		//});
-
-	}
-
-	function onclickDataset(e) {
-
-		// checked
-		var id = e.getAttribute("id");
+    }
 
 
-		var data = {
-			id: id
-		}
+    function resultGrid_OnRowDataBound(e) {
 
-		$.ajax({
-			url: '/ddm/Data/IsDatasetCheckedIn',
-			type: 'POST',
-			data: JSON.stringify(data),
-			dataType: 'json',
-			contentType: 'application/json; charset=utf-8',
-			error: function (xhr) {
-				alert('Error: ' + xhr.statusText);
+        //alert("changed");
+        //truncateTitle();
 
-			},
-			success: function (result) {
-				if (result) {
-					window.open("/ddm/Data/Show/" + id, "_blank");
-				} else {
-					
-					alert("Dataset is locked. Please try again later.");
-				}
-			}
-		});
-	}
+        ////alert(e.item);
+        //var obj = e.row.childNodes;
+
+        //$.each(obj, function (i) {
+
+        //	obj[i].title = obj[i].textContent;
+        //	if (obj[i].textContent.length > 35) {
+        //		obj[i].textContent = jQuery.trim(obj[i].textContent).substring(0, 35).trim(this) + "...";
+        //	}
+        //});
+
+    }
+
+    function onclickDataset(e) {
+
+        // checked
+        var id = e.getAttribute("id");
 
 
-	function onDataBound()
-	{
-		resetAllTelerikIconTitles();
-		addTooltips();
-	}
+        var data = {
+            id: id
+        }
+
+        $.ajax({
+            url: '/ddm/Data/IsDatasetCheckedIn',
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            error: function (xhr) {
+                alert('Error: ' + xhr.statusText);
+
+            },
+            success: function (result) {
+                if (result) {
+                    window.open("/ddm/Data/Show/" + id, "_blank");
+                } else {
+
+                    alert("Dataset is locked. Please try again later.");
+                }
+            }
+        });
+    }
+
+    function get_dataset_related_papers_by_ID(e, behaviour) {
+        document.addEventListener("click", handler, true);
+
+        document.getElementById("spinner_").removeAttribute("hidden");
+
+        $('#button').prop('disabled', true);
+        $('#Close_button').prop('disabled', true);
+
+        $('#results').hide();
+        $('#resultsAD').hide();
+
+        $('#papers').hide();
+
+        var id = null;
+        if (e) {
+            id = e.getAttribute("id");
+        }
+        $.ajax({
+            url: '/DDM/SemanticSearch/get_dataset_related_papers_by_ID',
+            type: 'POST',
+            data: { 'id': id, 'flag': behaviour },
+            success: function (_result) {
+                if (_result == "") {
+                    var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
+                    $('#results').html(text);
+                    $('#resultsAD').html(text);
+                    console.log("check the labes or annotations table that are sent to the semedico server !!");
+                    return true;
+                }
+                try {
+                    _result = JSON.parse(_result);
+                    l = _result.subsetstart;
+                    result = _result.semedico_Result
+                    resultAD = _result.semedico_Result_AD
+                    console.log(l)
+                    console.log(result)
+                    console.log(resultAD)
+                    console.log(result)
+                    if (l == 0) {
+                        $('#next').prop('disabled', true);
+                    }
+                    else {
+                        $('#previous').prop('disabled', false);
+                        $('#next').prop('disabled', false);
+                    }
+
+                    try {
+                        // PubMed publication
+                        res = JSON.parse(result);
+                        if (result.length == 0) {
+                            var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
+                            $('#results').html(text);
+                        }
+                        else {
+                            //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
+                            var text = "<ol>";
+                            for (i = 0; i < res.hits.length; i++) {
+                                text = text + "<li><strong><b> <a href='" + res.hits[i]?.url + "'target=_blank>" + res.hits[i]?.title + "</a></b></strong></li>";
+
+                                text = text + "<a id=\"_abstract" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>ABSTRACT</b></h5> </a>";
+                                text = text + "<div id=\"abstract" + i + "\"  hidden=\"true\"> ";
+                                text = text + "<h5><p align=\"justify\">" + res.hits[i]?.abstract + "</p></h5>";
+                                text = text + "</div>";
+
+                                text = text + "<a id=\"_publication" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>PUBLICATION</b></h5> </a>";
+                                text = text + "<div id=\"publication" + i + "\"  hidden=\"true\"> ";
+                                text = text + "<h5><p align=\"justify\"> Title: " + res.hits[i]?.journal + "</p></h5>";
+                                text = text + "<h5><p align=\"justify\"> Volume: " + res.hits[i]?.volume + "</p></h5>";
+                                text = text + "<h5><p align=\"justify\"> Issue : " + res.hits[i]?.issue + "</p></h5>";
+                                text = text + "<h5><p align=\"justify\"> Pages: " + res.hits[i]?.pages + "</p></h5>";
+                                text = text + "<h5><p align=\"justify\"> Date: " + res.hits[i]?.year + "</p></h5>";
+                                text = text + "</div>";
+
+
+                                text = text + "<a id=\"_authors" + i + "\" href=\"#\"  onclick='show_region(this,i)'> <h5><b>AUTHORS</b></h5> </a>";
+                                text = text + "<div id=\"authors" + i + "\" hidden=\"true\" >";
+                                text = text + "<ul>";
+                                console.log(res.hits[i]?.author)
+                                for (j = 0; j < res.hits[i]?.author.split(';').length; j++) {
+                                    text = text + "<li>" + res.hits[i]?.author.split(";")[j] + "</li>";
+                                }
+                                text = text + "</ul></div><br>";
+
+                                console.log("Article => " + res.hits[i]?.title);
+                            }
+                            text = text + "</ol>";
+                            console.log("text => " + text);
+                            $('#results').html(text);
+                        }
+
+                    }
+                    catch (er) {
+                        console.log("ERROR => " + er);
+                    }
+
+
+                    try {
+                        //AquaDiva publications
+                        res = JSON.parse(resultAD);
+                        if (resultAD.length == 0) {
+                            var text = "<h3> There is no related papers for this dataset </h3> <h4>Please choose another dataset</h4>";
+                            $('#resultsAD').html(text);
+                        }
+                        else {
+                            //var text = "<p><strong>Data Set Id : " + id + "</strong></p><ol>";
+                            var text = "<ol>";
+                            for (i = 0; i < res.hits.length; i++) {
+                                text = text + "<li><strong><b> <a href='" + res.hits[i]?.url + "' target=_blank>" + res.hits[i]?.title + "</a></b></strong></li>";
+
+                                text = text + "<a id=\"_abstractAD" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>ABSTRACT</b></h5> </a>";
+                                text = text + "<div id=\"abstractAD" + i + "\"  hidden=\"true\"> ";
+                                text = text + "<h5><p align=\"justify\">" + res.hits[i]?.abstract + "</p></h5>";
+                                text = text + "</div>";
+
+                                text = text + "<a id=\"_publicationAD" + i + "\" href=\"#\" onclick='show_region(this,i)'> <h5><b>PUBLICATION</b></h5> </a>";
+                                text = text + "<div id=\"publicationAD" + i + "\"  hidden=\"true\"> ";
+                                text = text + "<h5><p align=\"justify\"> Title: " + res.hits[i]?.journal + "</p></h5>";
+                                text = text + "<h5><p align=\"justify\"> Volume: " + res.hits[i]?.volume + "</p></h5>";
+                                text = text + "<h5><p align=\"justify\"> Issue : " + res.hits[i]?.issue + "</p></h5>";
+                                text = text + "<h5><p align=\"justify\"> Pages: " + res.hits[i]?.pages + "</p></h5>";
+                                text = text + "<h5><p align=\"justify\"> Date: " + res.hits[i]?.year + "</p></h5>";
+                                text = text + "</div>";
+
+
+                                text = text + "<a id=\"_authorsAD" + i + "\" href=\"#\"  onclick='show_region(this,i)'> <h5><b>AUTHORS</b></h5> </a>";
+                                text = text + "<div id=\"authorsAD" + i + "\" hidden=\"true\" >";
+                                text = text + "<ul>";
+                                console.log(res.hits[i]?.author)
+                                for (j = 0; j < res.hits[i]?.author.split(';').length; j++) {
+                                    text = text + "<li>" + res.hits[i]?.author.split(";")[j] + "</li>";
+                                }
+                                text = text + "</ul></div><br>";
+
+                                console.log("Article => " + res.hits[i]?.title);
+                            }
+                            text = text + "</ol>";
+                            console.log("text => " + text);
+                            $('#resultsAD').html(text);
+                        }
+                    }
+                    catch (er) {
+                        console.log("ERROR => " + er);
+                    }
+
+                }
+                catch (er) {
+                    console.log("ERROR => " + er);
+                    var text = "<h3> Error </h3> <h4>Please a report the error</h4>";
+                    $('#results').html(text);
+                    $('#resultsAD').html(text);
+                    document.getElementById("spinner_").setAttribute("hidden", true);
+                }
+            },
+            complete: function () {
+                $('#results').show();
+                $('#resultsAD').show();
+                $('#Close_button').prop('disabled', false);
+                document.getElementById("spinner_").setAttribute("hidden", true);
+                $('#button').prop('disabled', true);
+                $('#papers').show();
+            },
+        });
+        return true;
+    }
+
+    function show_region(e, i) {
+        var id = e.getAttribute("id");
+        id = id.substring(1, id.length);
+
+        if (document.getElementById(id).getAttribute("hidden")) {
+            document.getElementById(id).removeAttribute("hidden");
+        } else {
+            document.getElementById(id).setAttribute("hidden", true);
+        }
+    }
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
 
 
 </script>
 
 <style type="text/css">
 
-	#resultGrid .t-grid-content
-	{
-		position:relative;
-		height : auto !important;
-		max-height:450px;
-		/*overflow:auto;*/
-	}
+    #resultGrid .t-grid-content {
+        position: relative;
+        height: auto !important;
+        max-height: 450px;
+        /*overflow:auto;*/
+    }
 
-	
-	#resultGrid .searchResultFunctionDiv
-	{
 
-		text-align:right;
-	}
+    #resultGrid .searchResultFunctionDiv {
+        text-align: right;
+    }
 
+
+    #resultGrid .t-status,
+    #resultGrid .t-status-text {
+    }
+
+    .fa-newspaper {
+        color: green;
+    }
+
+        .fa-newspaper:hover {
+            color: red;
+        }
+</style>
+<!-- CSS for the spinner -->
+<style type="text/css">
+    #spinner_ {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 30em;
+        height: 18em;
+        margin-top: -9em; /*set to a negative number 1/2 of your height*/
+        margin-left: -15em; /*set to a negative number 1/2 of your width*/
+    }
+
+    #loader {
+        bottom: 0;
+        height: 175px;
+        left: 0;
+        margin: auto;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 175px;
+    }
+
+    #loader {
+        bottom: 0;
+        height: 175px;
+        left: 0;
+        margin: auto;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 175px;
+    }
+
+        #loader .dot {
+            bottom: 0;
+            height: 100%;
+            left: 0;
+            margin: auto;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 87.5px;
+        }
+
+            #loader .dot::before {
+                border-radius: 100%;
+                content: "";
+                height: 87.5px;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
+                transform: scale(0);
+                width: 87.5px;
+            }
+
+            #loader .dot:nth-child(7n+1) {
+                transform: rotate(45deg);
+            }
+
+                #loader .dot:nth-child(7n+1)::before {
+                    animation: 0.8s linear 0.1s normal none infinite running load;
+                    background: #00ff80 none repeat scroll 0 0;
+                }
+
+            #loader .dot:nth-child(7n+2) {
+                transform: rotate(90deg);
+            }
+
+                #loader .dot:nth-child(7n+2)::before {
+                    animation: 0.8s linear 0.2s normal none infinite running load;
+                    background: #00ffea none repeat scroll 0 0;
+                }
+
+            #loader .dot:nth-child(7n+3) {
+                transform: rotate(135deg);
+            }
+
+                #loader .dot:nth-child(7n+3)::before {
+                    animation: 0.8s linear 0.3s normal none infinite running load;
+                    background: #00aaff none repeat scroll 0 0;
+                }
+
+            #loader .dot:nth-child(7n+4) {
+                transform: rotate(180deg);
+            }
+
+                #loader .dot:nth-child(7n+4)::before {
+                    animation: 0.8s linear 0.4s normal none infinite running load;
+                    background: #0040ff none repeat scroll 0 0;
+                }
+
+            #loader .dot:nth-child(7n+5) {
+                transform: rotate(225deg);
+            }
+
+                #loader .dot:nth-child(7n+5)::before {
+                    animation: 0.8s linear 0.5s normal none infinite running load;
+                    background: #2a00ff none repeat scroll 0 0;
+                }
+
+            #loader .dot:nth-child(7n+6) {
+                transform: rotate(270deg);
+            }
+
+                #loader .dot:nth-child(7n+6)::before {
+                    animation: 0.8s linear 0.6s normal none infinite running load;
+                    background: #9500ff none repeat scroll 0 0;
+                }
+
+            #loader .dot:nth-child(7n+7) {
+                transform: rotate(315deg);
+            }
+
+                #loader .dot:nth-child(7n+7)::before {
+                    animation: 0.8s linear 0.7s normal none infinite running load;
+                    background: magenta none repeat scroll 0 0;
+                }
+
+            #loader .dot:nth-child(7n+8) {
+                transform: rotate(360deg);
+            }
+
+                #loader .dot:nth-child(7n+8)::before {
+                    animation: 0.8s linear 0.8s normal none infinite running load;
+                    background: #ff0095 none repeat scroll 0 0;
+                }
+
+        #loader .lading {
+            /*background-image: url("../images/loading.gif");*/
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+            bottom: -40px;
+            height: 20px;
+            left: 0;
+            position: absolute;
+            right: 0;
+            width: 180px;
+        }
+
+    @@keyframes load {
+        100% {
+            opacity: 0;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes load {
+        100% {
+            opacity: 0;
+            transform: scale(1);
+        }
+    }
 </style>
