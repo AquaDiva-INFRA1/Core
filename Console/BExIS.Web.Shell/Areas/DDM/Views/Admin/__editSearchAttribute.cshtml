@@ -7,6 +7,7 @@
 @using BExIS.Dlm.Entities.DataStructure;
 @using BExIS.Aam.Entities.Mapping;
 @{
+    bool force_unit_Conversion = bool.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["force_unit_Conversion"].ToString());
 
     string Title = "New Search Attribute";
 
@@ -16,10 +17,10 @@
     }
 
 
-    // enums to list
-    // metadatanodes to list
+        // enums to list
+        // metadatanodes to list
 
-    List<string> SearchComponentBaseType = new List<string>();
+        List<string> SearchComponentBaseType = new List<string>();
     foreach (SearchComponentBaseType ms in Enum.GetValues(typeof(SearchComponentBaseType)))
     {
         SearchComponentBaseType.Add(ms.ToString());
@@ -108,7 +109,7 @@
     <div id="searchAttributeForm" class="bx-content" style="height:410px; overflow:auto">
         @{
             <div>
-                <input type="checkbox" id="checkUnits" name="Check Units" value="true"> Force Conversion Between Units of different variables connected to selected meanings / entites
+                <input type="checkbox" id="checkUnits" name="Check Units" value="@Html.Raw(force_unit_Conversion)"> Force Conversion Between Units of different variables connected to selected meanings / entites
                 <div id="units-error">
                 </div>
             </div>
@@ -616,6 +617,7 @@
 
         var checked = true;
         checkedunits = document.getElementById("checkUnits").checked;
+
         if (checkedunits == true) {
             $.ajax({
                 url: '/DDM/Admin/checkunits',

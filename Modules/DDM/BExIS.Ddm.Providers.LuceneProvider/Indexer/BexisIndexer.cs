@@ -26,6 +26,7 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Web.Configuration;
 using System.Xml;
 using Vaiona.Logging;
 using Vaiona.Persistence.Api;
@@ -41,6 +42,8 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
     /// <remarks></remarks>        
     public class BexisIndexer
     {
+        private static bool force_unit_Conversion = bool.Parse(WebConfigurationManager.AppSettings["force_unit_Conversion"].ToString());
+
         private List<Facet> AllFacets = new List<Facet>();
         private List<Property> AllProperties = new List<Property>();
         private List<Category> AllCategories = new List<Category>();
@@ -507,20 +510,21 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Indexer
                                     DataTable table = dm.GetLatestDatasetVersionTuples(id, 0, 0, true);
                                     var Xmin = table.Compute("min([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
                                     var Xmax = table.Compute("max([" + string.Concat("var", variableObj.Id.ToString()) + "])", string.Empty);
-                                    if (variableObj.Unit.Id != mainUnit.Id)
-                                    {
-                                        string formula = variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id) != null ?
-                                            variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id).Formula :  "";
-                                        try
+                                    if (force_unit_Conversion)
+                                        if (variableObj.Unit.Id != mainUnit.Id)
                                         {
-                                            Xmin = Convert.ToDouble(new DataTable().Compute(Xmin.ToString() + formula, null));
-                                            Xmax = Convert.ToDouble(new DataTable().Compute(Xmax.ToString() + formula, null));
+                                            string formula = variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id) != null ?
+                                                variableObj.Unit.ConversionsIamTheSource.FirstOrDefault(x => x.Target.Id == mainUnit.Id).Formula :  "";
+                                            try
+                                            {
+                                                Xmin = Convert.ToDouble(new DataTable().Compute(Xmin.ToString() + formula, null));
+                                                Xmax = Convert.ToDouble(new DataTable().Compute(Xmax.ToString() + formula, null));
+                                            }
+                                            catch (Exception ec)
+                                            {
+                                                LoggerFactory.GetFileLogger().LogCustom(ec.Message);
+                                            }
                                         }
-                                        catch (Exception ec)
-                                        {
-                                            LoggerFactory.GetFileLogger().LogCustom(ec.Message);
-                                        }
-                                    }
                                     dataset = write_primary_data_facet(facet, Xmin, Xmax, dataset, docId, variableObj.Label);
                                 }
                                 catch (Exception exc)
