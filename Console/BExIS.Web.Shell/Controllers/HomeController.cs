@@ -7,6 +7,9 @@ using BExIS.Utils.Config;
 using BExIS.Web.Shell.Models;
 using System;
 using System.Configuration;
+using System.IO;
+using System.Web;
+using System.Web.Http.Results;
 using System.Web.Mvc;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Data;
@@ -75,6 +78,10 @@ namespace BExIS.Web.Shell.Controllers
             // use defined landing page without login
             else
             {
+                // load langding page from tenants (custom ) if settings 
+                if (string.IsNullOrEmpty(GeneralSettings.LandingPage))
+                    return RedirectToAction("Start");
+
                 landingPage = new Tuple<string, string, string>(
                             GeneralSettings.LandingPage.Split(',')[0].Trim(), //module id
                             GeneralSettings.LandingPage.Split(',')[1].Trim(), //controller
@@ -98,6 +105,24 @@ namespace BExIS.Web.Shell.Controllers
             //return RedirectToAction(landingPage.Item3, landingPage.Item2, new { area = landingPage.Item1 });
         }
 
+        /// <summary>
+        /// use this action to load the landingpage from the tenants folder
+        /// </summary>
+        /// <returns></returns>
+        [DoesNotNeedDataAccess]
+        public ActionResult Start()
+        {
+            return View("Start", null, Session.GetTenant().LandingPageFileNamePath);
+        }
+
+        public ActionResult GetImage(string image)
+        {
+            string path = Path.Combine(Session.GetTenant().PathProvider.GetImagePath(Session.GetTenant().Id, image, "bexis2"));
+            byte[] imageData = System.IO.File.ReadAllBytes(path);
+
+            return File(imageData, MimeMapping.GetMimeMapping(path));
+        }
+
         [DoesNotNeedDataAccess]
         public ActionResult Nopermission()
         {
@@ -119,6 +144,13 @@ namespace BExIS.Web.Shell.Controllers
             {
                 return Json("BEXIS2", JsonRequestBehavior.AllowGet);
             }
+        }
+
+        [JsonNetFilter]
+        [HttpGet]
+        public ActionResult Breadcrumb()
+        {
+            return View("");
         }
 
         [DoesNotNeedDataAccess]

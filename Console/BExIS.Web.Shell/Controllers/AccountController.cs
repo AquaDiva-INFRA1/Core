@@ -21,6 +21,11 @@ using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
 using Vaiona.Web.Mvc.Modularity;
 using Exceptionless;
+using System.Net.Http.Headers;
+using System.Web.Http.Results;
+using BExIS.App.Bootstrap.Helpers;
+using BExIS.Web.Shell.Helpers;
+using BExIS.App.Bootstrap;
 
 namespace BExIS.Web.Shell.Controllers
 {
@@ -228,6 +233,7 @@ namespace BExIS.Web.Shell.Controllers
             return View();
         }
 
+
         //
         // POST: /Account/Login
         [HttpPost]
@@ -267,6 +273,23 @@ namespace BExIS.Web.Shell.Controllers
                     }
                 }
 
+                // set-cookie
+                if (user != null)
+                {
+                    var jwt = JwtHelper.Get(user);
+
+                    // Create a new cookie
+                    HttpCookie cookie = new HttpCookie("jwt", jwt);
+
+                    // Set additional properties if needed
+                    cookie.Expires = DateTime.Now.AddDays(1); // Expires in 1 day
+                    cookie.Domain = Request.Url.Host; // Set the domain
+                    cookie.Path = "/"; // Set the path
+
+                    // Add the cookie to the response
+                    Response.Cookies.Add(cookie);
+                }
+
                 var result =
                     await signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, false);
                 switch (result)
@@ -283,6 +306,9 @@ namespace BExIS.Web.Shell.Controllers
                 }
             }
         }
+
+        
+
 
         //
         // POST: /Account/LogOff
