@@ -182,10 +182,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             List<KeyValuePair<long, string>> tmp = new List<KeyValuePair<long, string>>();
             using (var dataStructureManager = new DataStructureManager())
             {
-                foreach (var structure in dataStructureManager.StructuredDataStructureRepo.Get())
-                {
-                    tmp.Add(new KeyValuePair<long, string>(structure.Id, structure.Name));
-                }
+                tmp = dataStructureManager.GetStructuredDataStructuresAsKVP();
             }
 
             return Json(tmp, JsonRequestBehavior.AllowGet);

@@ -4,6 +4,8 @@
 	import { host, username, password } from '@bexis2/bexis2-core-ui';
 	import { writable } from 'svelte/store';
 	import { getToken } from '$services/BaseCaller';
+	import { createEventDispatcher} from 'svelte'
+
 	// load attributes from div
 	let container;
 	let id:number|undefined = undefined;
@@ -15,6 +17,8 @@
 	$:serverTableConfig;
 
  let t:string = "";
+
+	const dispatch = createEventDispatcher();
 
 	load();
 
@@ -40,13 +44,11 @@
 				console.log(url,t,id, serverTableConfig)
 		}
 
+
+
 </script>
-
-
 <Page>
-
 		{#if serverTableConfig}
 			<Table config={serverTableConfig} />
 		{/if}
-
 </Page>

@@ -729,11 +729,12 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 var dataset  = dm.GetDataset(datasetId);
                 Boolean latest = true;
+                DataTable table = null;
+                DatasetVersion dsv = null;
 
                 if (dataset.Status != DatasetStatus.CheckedOut)
                 {
-                    DataTable table = null;
-                    DatasetVersion dsv = null;
+                    
                     if (dataset.Status == DatasetStatus.CheckedIn) // checi if version is latest
                     {
                         dsv = dm.GetDatasetVersion(versionId);
@@ -751,6 +752,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                         table = dm.GetLatestDatasetVersionTuples(datasetId, filter, orderBy, null, "", command.Page - 1, command.PageSize);
                         ViewData["gridTotal"] = dm.RowCount(datasetId, filter);
+                        model = new GridModel(table);
                     }
                     else
                     {
@@ -767,6 +769,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 {
                     ModelState.AddModelError(String.Empty, "Dataset is just in processing.");
                 }
+
+                model = new GridModel(table);
+                model.Total = Convert.ToInt32(ViewData["gridTotal"]); // (int)Session["gridTotal"];
 
                 return View(model);
             }

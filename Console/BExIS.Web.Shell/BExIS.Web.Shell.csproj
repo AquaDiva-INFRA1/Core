@@ -1629,6 +1629,9 @@
     <Content Include="Views\Header\Content.cshtml" />
     <Content Include="Views\Tokens\Create.cshtml" />
     <Content Include="Views\Tokens\Read.cshtml" />
+    <Content Include="Views\Tokens\GetToken.cshtml" />
+    <Content Include="Views\Home\Start.cshtml" />
+    <Content Include="Themes\Default\Layouts\_SimpleLayout.cshtml" />
     <Content Include="Scripts\leaflet\leaflet-src.esm.js.map" />
     <Content Include="Scripts\leaflet\leaflet-src.js.map" />
     <Content Include="Scripts\leaflet\leaflet.js.map" />
