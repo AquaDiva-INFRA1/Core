@@ -24,7 +24,7 @@ namespace BExIS.Xml.Helpers
         /// <returns></returns>
         public string GetInformation(long datasetid, XmlDocument metadata, NameAttributeValues name)
         {
-            
+
 
             using (var unitOfWork = this.GetUnitOfWork())
             using (DatasetManager dm = new DatasetManager())
@@ -88,7 +88,7 @@ namespace BExIS.Xml.Helpers
         /// <returns></returns>
         public string GetInformationFromVersion(long datasetVersionId, long metadataStructureId, NameAttributeValues name)
         {
-            
+
 
             using (var unitOfWork = this.GetUnitOfWork())
             using (DatasetManager dm = new DatasetManager())
@@ -105,7 +105,7 @@ namespace BExIS.Xml.Helpers
                 XElement temp = XmlUtility.GetXElementByAttribute(nodeNames.nodeRef.ToString(), "name", name.ToString(),
                     xDoc);
 
-                string xpath = temp.Attribute("value").Value.ToString();
+                string xpath = temp?.Attribute("value").Value.ToString();
 
                 return dm.GetMetadataValueFromDatasetVersion(datasetVersionId, xpath);
             }

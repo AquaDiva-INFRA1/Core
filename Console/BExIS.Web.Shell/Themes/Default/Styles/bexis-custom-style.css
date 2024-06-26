@@ -1,60 +1,42 @@
-/*Default Style */
-
 :root {
-    --highlight-color: #ff9700;
+    --highlight-color: #2c4fffa8;
     --bg-color-level-1: #388670;
     --bg-color-level-2: #72b1a0;
-    --bg-color-level-3: #bee1da;
+    --bg-color-level-3: #7bb3ff73;
     --bg-color-level-4: #d2e8e3;
     --bg-color-level-5: #eff7f6;
-    --border-width-field: 2px;
+    --border-width-field: 1px;
     --border-color-field: #000000;
     --button-function: var(--highlight-color);
-    --button-action: #00876F;
+    --button-action: #006287;
     --information-bg-color: black;
     --information-text-color: white;
     --information-link-color: var(--highlight-color);
-    --bg-color-metadata-level-1: #bee1da;
-    --bg-color-metadata-level-3: #CDE7E2;
-    --bg-color-metadata-level-5: #DCEDEA;
+    --bg-color-metadata-level-1: #7bb3ff73;
+    --bg-color-metadata-level-3: #397d99;
+    --bg-color-metadata-level-5: #398f80;
     --bg-color-metadata-level-7: #EBF3F2;
     --bg-color-metadata-level-9: #FAFAFA;
     --bg-bx-active: #45B2A1;
     --bg-bx-hover: #000000;
     --bg-bx-disbaled-hover: #ffffff;
-    --nav-hover: var(--highlight-color);
     --t-grid-a-hover: var(--highlight-color);
     --t-windows-titlebar-color: var(--highlight-color);
     --t-animation-container-hover-selected: var(--highlight-color);
     --bg-color-bx-selected-mousover: var(--highlight-color);
-}
-/*Custom Style Example*/
-/*:root {
-    --bg-color-level-1: #388670;
-    --bg-color-level-2: #72b1a0;
-    --bg-color-level-3: #cde7cf;
-    --bg-color-level-4: #d2e8e3;
-    --bg-color-level-5: #eff7f6;
-    --border-width-field: 1px;
-    --border-color-field: #afb0b1;
-    --button-function: #01939A;
-    --button-action: #01939A;
-    --information-bg-color: #037932;
-    --information-text-color: white;
-    --information-link-color: #00C90D;
-    --information-link-hover-color: #05a8e6;
-    --bg-color-metadata-level-1: #b7d6bd;
-    --bg-color-metadata-level-3: #cde7cf;
-    --bg-color-metadata-level-5: #dcedde;
-    --bg-color-metadata-level-7: #ebf3ee;
-    --bg-color-metadata-level-9: #FAFAFA;
-    --bg-bx-active: #45B2A1;
-    --bg-bx-disbaled-hover: #ffffff;
-    --bg-bx-hover: #037932;
     --nav-hover: var(--highlight-color);
-    --t-grid-a-hover: var(--highlight-color);
-    --t-windows-titlebar-color: var(--highlight-color);
-    --t-animation-container-hover-selected: #01939A;
-    --bg-color-bx-selected-mousover: var(--highlight-color);
+    --nav-text-color: #777;
+    --bs-primary: var(--button-action);
+    --bg-tab: #efefef;
+    /*2.15*/
+    --bexis2-text-color-level-1: #111;
+    --bexis2-text-color-level-2: #333;
+    --bexis2-text-color-level-3: #777;
+    --bexis2-hover: #efefef;
+    --bexis2-border: #eee;
+    --bexis2-bg-color: #fff;
+    --bexis2-gray-1: #f5f5f5;
+    --bexis2-gray-2: #ebebeb;
+    --bexis2-gray-3: #afb0b1;
+    --bexis2-gray-4: #323232;
 }
- */

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BExIS.Utils.NH.Querying
 {
@@ -140,6 +137,7 @@ namespace BExIS.Utils.NH.Querying
             { Operation.LessThanOrEqual,    Tuple.Create("<=", "({0}) <= ('{1}')") },
             { Operation.GreaterThan,        Tuple.Create(">", "({0}) > ('{1}')") },
             { Operation.GreaterThanOrEqual, Tuple.Create(">=", "({0}) >= ('{1}')") },
+            { Operation.NotEquals, Tuple.Create("<>", "{0} <> {1}") }
         };
 
         public static Dictionary<Operation, Tuple<string, string>> TranslationToLINQ = new Dictionary<Operation, Tuple<string, string>>()
@@ -149,6 +147,7 @@ namespace BExIS.Utils.NH.Querying
             { Operation.LessThanOrEqual,    Tuple.Create("<=", "{0} <= {1}") },
             { Operation.GreaterThan,        Tuple.Create(">", "{0} > {1}") },
             { Operation.GreaterThanOrEqual, Tuple.Create(">=", "{0} >= {1}") },
+            { Operation.NotEquals, Tuple.Create("<>", "{0} <> {1}") }
         };
 
         public enum Operation
@@ -158,6 +157,7 @@ namespace BExIS.Utils.NH.Querying
             LessThanOrEqual = GenericOperation.LessThanOrEqual,
             GreaterThan = GenericOperation.GreaterThan,
             GreaterThanOrEqual = GenericOperation.GreaterThanOrEqual,
+            NotEquals = GenericOperation.Not,
         }
     }
 

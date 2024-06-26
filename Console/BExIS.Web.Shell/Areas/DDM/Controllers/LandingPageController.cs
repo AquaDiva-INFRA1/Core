@@ -6,13 +6,13 @@ using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
 using System.Configuration;
 using System.Linq;
-using BExIS.Modules.Rpm.UI.Models;
 using Vaiona.Web.Mvc.Data;
 using BExIS.Aam.Entities.Mapping;
 using BExIS.Aam.Services;
 using System.IO;
 using Vaiona.Utils.Cfg;
 using Newtonsoft.Json.Linq;
+using BExIS.Dlm.Services.DataStructure;
 
 namespace BExIS.Modules.Ddm.UI.Controllers
 {
@@ -21,6 +21,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         static string Conx = ConfigurationManager.ConnectionStrings[1].ConnectionString;
 
         [DoesNotNeedDataAccess]
+        [HttpGet]
         public ActionResult Index()
         {
             String temp_file = Path.Combine(AppConfiguration.GetModuleWorkspacePath("ASM"), "Analytics_temp.txt");
@@ -28,15 +29,13 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             ViewData["datasetCount"] = stats_obj["dataset_count"].ToString();
             ViewData["Datapoints"] = stats_obj["datapoints"].ToString();
 
-            using (Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager())
-            {
-                Int64 count = aam_manager.get_all_dataset_column_annotation().Count;
-
-
-                DataAttributeManagerModel dam = new DataAttributeManagerModel(false);
-
-                ViewData["semantic_Coverage"] = (double)dam.DataAttributeStructs.Count / (double)count;
-            }
+            //using (VariableManager vm = new VariableManager())
+            //using (Aam_Dataset_column_annotationManager aam_manager = new Aam_Dataset_column_annotationManager())
+            //{
+            //    int var_count = vm.VariableInstanceRepo.Get().Count;
+            //    int covered_var = aam_manager.get_all_dataset_column_annotation().Count;
+            //    ViewData["semantic_Coverage"] = (covered_var / var_count * 100).ToString();
+            //}
 
             return View("Index");
 
@@ -44,4 +43,4 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             //return Content(result.ToHtmlString(), "text/html");
         }
     }
-}
+} 

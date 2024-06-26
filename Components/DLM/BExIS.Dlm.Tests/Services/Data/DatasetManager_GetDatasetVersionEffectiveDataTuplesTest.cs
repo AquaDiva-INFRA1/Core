@@ -8,17 +8,13 @@ using BExIS.Dlm.Tests.Helpers;
 using BExIS.Utils.Config;
 using FluentAssertions;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Vaiona.Persistence.Api;
 
 namespace BExIS.Dlm.Tests.Services.Data
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Objekte verwerfen, bevor Bereich verloren geht", Justification = "<Ausstehend>")]
-
     [TestFixture()]
     public class DatasetManager_GetDatasetVersionEffectiveDataTuplesTest
     {
@@ -38,6 +34,7 @@ namespace BExIS.Dlm.Tests.Services.Data
             var dm = new DatasetManager();
             var rsm = new ResearchPlanManager();
             var mdm = new MetadataStructureManager();
+            var etm = new EntityTemplateManager();
             dsHelper = new DatasetHelper();
 
             try
@@ -55,7 +52,10 @@ namespace BExIS.Dlm.Tests.Services.Data
                 var mds = mdm.Repo.Query().First();
                 mds.Should().NotBeNull("Failed to meet a precondition: a metadata strcuture is required.");
 
-                Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds);
+                var et = etm.Repo.Query().First();
+                et.Should().NotBeNull("Failed to meet a precondition: a entity template is required.");
+
+                Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds, et);
                 datasetId = dataset.Id;
 
                 // add datatuples
@@ -68,6 +68,7 @@ namespace BExIS.Dlm.Tests.Services.Data
             }
             finally
             {
+                etm.Dispose();
                 dm.CheckInDataset(datasetId, "for testing  datatuples with versions", username, ViewCreationBehavior.None);
             }
         }
@@ -181,7 +182,7 @@ namespace BExIS.Dlm.Tests.Services.Data
                 using (var uow = this.GetUnitOfWork())
                 {
                     var latestDataTuple = uow.GetReadOnlyRepository<DataTuple>().Get().LastOrDefault();
-                    var firstDataTuple = uow.GetReadOnlyRepository<DataTuple>().Get().Where(dt=>dt.DatasetVersion.Id.Equals(latestDatasetVersionId)).FirstOrDefault();
+                    var firstDataTuple = uow.GetReadOnlyRepository<DataTuple>().Get().Where(dt => dt.DatasetVersion.Id.Equals(latestDatasetVersionId)).FirstOrDefault();
                     if (latestDataTuple != null) latestDataTupleId = latestDataTuple.Id;
                     if (firstDataTuple != null) firstDataTupleId = firstDataTuple.Id;
                 }
@@ -194,12 +195,10 @@ namespace BExIS.Dlm.Tests.Services.Data
                 dataset = dsHelper.UpdateOneTupleForDataset(dataset, (StructuredDataStructure)dataset.DataStructure, latestDataTupleId, 2, datasetManager);
                 datasetManager.CheckInDataset(dataset.Id, "for testing  datatuples with versions", username, ViewCreationBehavior.None);
 
-
                 //Act
                 List<DatasetVersion> datasetversions = datasetManager.GetDatasetVersions(datasetId).OrderBy(d => d.Timestamp).ToList();
                 var resultAll = datasetManager.GetDatasetVersionEffectiveTuples(datasetversions.ElementAt(datasetversions.Count - 2));
-                List<long> comapreIds = resultAll.OrderBy(dt=>dt.OrderNo).Skip(pageNumber * pageSize).Take(pageSize).Select(dt=>dt.Id).ToList();
-
+                List<long> comapreIds = resultAll.OrderBy(dt => dt.OrderNo).Skip(pageNumber * pageSize).Take(pageSize).Select(dt => dt.Id).ToList();
 
                 var result = datasetManager.GetDatasetVersionEffectiveTuples(datasetversions.ElementAt(datasetversions.Count - 2), pageNumber, pageSize); // get datatuples from the one before the latest
                 var resultIds = result.Select(dt => dt.Id).ToList();
@@ -212,8 +211,6 @@ namespace BExIS.Dlm.Tests.Services.Data
                 datasetManager.Dispose();
             }
         }
-
-
 
         //[Test()]
         //public void GetDatasetVersionEffectiveDataTuples_PageOfDataTuplesFromLatestVersion_ReturnListOfAbstractTuplesWithNumberOfPagesize()

@@ -1,0 +1,155 @@
+{
+  "id": "shell",
+  "name": "General",
+  "description": "The default landing page for the search in the form of <moduleId>, <controller>, <action>. The application's home page will redirect here.    The module must be avilable and active, otherwise another redirect happens to the home page, which causes a loop.     The designated action must be set to public in the feature permission mgmt, otherwise the request will be redirected to the login page.     The 'type' attribute must be compatible with the System.TypeCode case-sensitive.",
+  "entries": [
+    {
+      "key": "applicationName",
+      "title": "Application Name",
+      "value": "AppLocal",
+      "type": "String",
+      "description": "The application name is used in several places in the system. e.g. as title in the email"
+    },
+    {
+      "key": "jwt",
+      "title": "JWT",
+      "value": {
+        "validateAudience": false,
+        "validateIssuer": false,
+        "validAudience": "http://localhost:3000",
+        "validIssuer": "https://localhost:7041",
+        "issuerSigningKey": "JWTAuthenticationHIGHsecuredPasswordVVVp1OH7Xzyr",
+        "validateLifetime": false,
+        "validLifetime": 1
+      },
+      "type": "JSON",
+      "description": "The application name is used in several places in the system. e.g. as title in the email"
+    },
+    {
+      "key": "smtp",
+      "title": "SMTP",
+      "value": {
+        "hostName": "smtp.uni-jena.de",
+        "hostPort": 587,
+        "hostAnonymous": false,
+        "hostSecureSocketOptions": 1,
+        "hostCertificateRevocation": false,
+        "accountName": "<account_name>",
+        "accountPassword": "<account_password>",
+        "fromName": "<from_name>",
+        "fromAddress": "<from_address>"
+      },
+      "type": "JSON",
+      "description": "The application name is used in several places in the system. e.g. as title in the email"
+    },
+    {
+      "key": "ldaps",
+      "title": "LDAP Configurations",
+      "value": [
+        {
+          "key": "ldap",
+          "title": "LDAP",
+          "value": {
+            "host": "ldap1.uni-jena.de",
+            "name": "LDAP",
+            "port": 636,
+            "version": 3,
+            "ssl": true,
+            "authType": 1,
+            "scope": 0,
+            "baseDn": "ou=users,dc=uni-jena,dc=de",
+            "identifier": "uid",
+            "enabled": true
+          },
+          "type": "JSON",
+          "description": "ldap configuration"
+        },
+        {
+          "key": "ldap",
+          "title": "LDAP",
+          "value": {
+            "host": "",
+            "name": "",
+            "port": 636,
+            "version": 3,
+            "ssl": true,
+            "authType": 1,
+            "scope": 0,
+            "baseDn": "",
+            "identifier": "",
+            "enabled": false
+          },
+          "type": "JSON",
+          "description": "ldap configuration"
+        }
+      ],
+      "description": "...",
+      "type": "EntryList",
+      "options": []
+    },
+    {
+      "key": "landingPage",
+      "title": "Landing Page",
+      "value": "ddm, publicsearch, index",
+      "type": "String",
+      "description": "user is not logging in -> app goes to e.g. (ddm, publicsearch, index). if no destination is entered, the landingpage.htm is loaded from the tenant/content/landingpage.htm"
+    },
+    {
+      "key": "landingPageForUsers",
+      "title": "Landing Page for Users",
+      "value": "ddm, Home, index",
+      "type": "String",
+      "description": "user logged in, but do not have permission to view the page; shell, home, nopermission is by default; Alternatives must be in a module NOT shell"
+    },
+    {
+      "key": "landingPageForUsersNoPermission",
+      "title": "Landing Page for Users with no Permission",
+      "value": "shell, home, nopermission",
+      "type": "String",
+      "description": "landing page for users , when they logged in successfully"
+    },
+    {
+      "key": "faq",
+      "title": "FAQ",
+      "value": "https://github.com/BEXIS2/Core/wiki/FAQ",
+      "type": "String",
+      "description": "landing page for users , when they logged in successfully"
+    },
+    {
+      "key": "systemEmail",
+      "title": "System E-Mail Address",
+      "value": "david.schoene@uni-jena.de",
+      "type": "String",
+      "description": "All administrative information will be sent to this email."
+    },
+    {
+      "key": "sendExceptions",
+      "title": "Send Exceptions?",
+      "value": true,
+      "type": "Boolean",
+      "description": "If this flag is set to true, all exceptions will be forwarded to SystemEmail."
+    },
+    {
+      "key": "useMultimediaModule",
+      "title": "Use Multimedia Module?",
+      "value": true,
+      "type": "Boolean",
+      "description": "This flag truns on/off the Multimedia Module."
+    },
+    {
+      "key": "usePersonEmailAttributeName",
+      "title": "Use Person E-Mail Attribute Name",
+      "value": false,
+      "type": "Boolean",
+      "description": ""
+    },
+    {
+      "key": "personEmailAttributeName",
+      "title": "Person E-Mail Attribute Name",
+      "value": "Email",
+      "type": "String",
+      "description": "david.schoene@uni-jena.de"
+    }
+
+  ]
+}

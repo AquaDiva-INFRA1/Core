@@ -1,4 +1,4 @@
-﻿using BExIS.Dim.Entities.Publication;
+﻿using BExIS.Dim.Entities.Publications;
 using BExIS.Dim.Services;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Services.Data;
@@ -7,6 +7,7 @@ using BExIS.IO;
 using BExIS.IO.Transform.Output;
 using BExIS.Xml.Helpers;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
@@ -64,15 +65,16 @@ namespace BExIS.Dim.Helpers.Export
             }
         }
 
-        public bool Validate(long datasetVersionId)
+        public bool Validate(long datasetVersionId, out List<string> errors)
         {
-            throw new NotImplementedException();
+            errors = new List<string>();
+            return true; //throw new NotImplementedException();
         }
 
-        public PensoftDataRepoConverter(Repository datarepo)
+        public PensoftDataRepoConverter(Broker broker)
         {
-            _dataRepo = datarepo;
-            _broker = datarepo.Broker;
+            _dataRepo = broker.Repository;
+            _broker = broker;
         }
     }
 }

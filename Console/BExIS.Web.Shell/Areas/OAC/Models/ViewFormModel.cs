@@ -62,7 +62,8 @@ namespace BExIS.Modules.OAC.UI.Models
         public enum DataSource : long
         {
             BioGPS = 1,
-            EBI = 2, NCBI = 3 // the same in our examples
+            EBI = 2, 
+            NCBI = 3 // the same in our examples
         }
     }
 }

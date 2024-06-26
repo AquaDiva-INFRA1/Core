@@ -1,5 +1,6 @@
-﻿using BExIS.Security.Services.Utilities;
-using System.Configuration;
+﻿
+using BExIS.Security.Services.Utilities;
+using BExIS.Utils.Config;
 using Vaiona.Logging;
 
 namespace BExIS.UI.Helpers
@@ -10,12 +11,14 @@ namespace BExIS.UI.Helpers
         {
             try
             {
-
                 var es = new EmailService();
                 var subject = "Error in system";
+
+
+
                 es.Send(subject,
                     result,
-                    ConfigurationManager.AppSettings["SystemEmail"]
+                    GeneralSettings.SystemEmail
                     );
             }
             catch (System.Web.HttpException ehttp)

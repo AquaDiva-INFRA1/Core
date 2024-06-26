@@ -218,7 +218,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
                         string contextualizing_uri = clean_entity_URI_for_insert(excellineJson[7].ToString());
                         string contextualizing_label = clean_entity_URI_for_insert(excellineJson[5].ToString());
 
-                        Variable variable = new Variable();
+                        VariableInstance variable = new VariableInstance();
                         DataStructureManager dataStructureManager = new DataStructureManager();
                         var structureRepo = dataStructureManager.GetUnitOfWork().GetReadOnlyRepository<StructuredDataStructure>();
                         StructuredDataStructure dataStructure = structureRepo.Get(new DatasetManager().GetDataset(Int64.Parse(ds_id[0])).DataStructure.Id);
@@ -227,7 +227,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
                         {
                             foreach (Variable var in dataStructure.Variables)
                             {
-                                if (var.Id == Int64.Parse(var_id)) variable = var;
+                                if (var.Id == Int64.Parse(var_id)) variable = (VariableInstance)var;
                             }
                         }
 

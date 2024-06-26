@@ -6,20 +6,14 @@ using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.MetadataStructure;
 using BExIS.Dlm.Tests.Helpers;
 using BExIS.Utils.Config;
-using BExIS.Utils.Upload;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vaiona.Persistence.Api;
 
 namespace BExIS.Dlm.Tests.Services.Data
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Objekte verwerfen, bevor Bereich verloren geht", Justification = "<Ausstehend>")]
-
     [TestFixture()]
     public class DatasetManager_GetDatasetIdsTests
     {
@@ -37,6 +31,7 @@ namespace BExIS.Dlm.Tests.Services.Data
             var dm = new DatasetManager();
             var rsm = new ResearchPlanManager();
             var mdm = new MetadataStructureManager();
+            var etm = new EntityTemplateManager();
             dsHelper = new DatasetHelper();
 
             dsHelper.PurgeAllDatasets();
@@ -53,17 +48,19 @@ namespace BExIS.Dlm.Tests.Services.Data
             var mds = mdm.Repo.Query().First();
             mds.Should().NotBeNull("Failed to meet a precondition: a metadata strcuture is required.");
 
+            var et = etm.Repo.Query().First();
+            et.Should().NotBeNull("Failed to meet a precondition: a entity template is required.");
+
             // create 10 Datasets
             for (int i = 0; i < 10; i++)
             {
-                Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds);
+                Dataset dataset = dm.CreateEmptyDataset(dataStructure, rp, mds, et);
                 datasetId = dataset.Id;
                 dataset = dsHelper.GenerateTuplesForDataset(dataset, dataStructure, numberOfTuples, "David");
                 dataset.Should().NotBeNull("The dataset tuple generation has failed!");
                 dm.CheckInDataset(dataset.Id, "for testing purposes 2", "David", ViewCreationBehavior.None);
                 dm.SyncView(dataset.Id, ViewCreationBehavior.Create | ViewCreationBehavior.Refresh);
             }
-
         }
 
         [OneTimeTearDown]
@@ -94,7 +91,6 @@ namespace BExIS.Dlm.Tests.Services.Data
                 //Assert
                 Assert.That(checkedInCount, Is.EqualTo(count));
                 Assert.That(checkedInCount, Is.EqualTo(10));
-
             }
             catch (Exception ex)
             {
@@ -105,6 +101,5 @@ namespace BExIS.Dlm.Tests.Services.Data
                 datasetManager.Dispose();
             }
         }
-
     }
 }

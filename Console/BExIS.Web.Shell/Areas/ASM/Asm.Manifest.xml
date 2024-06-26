@@ -25,7 +25,7 @@
 
     <Export tag="internalApi" id="Summary"
             title="Summary" description="Summary" icon=""
-            controller="Summary" action="*"
+            controller="SummaryAnalysis" action="*"
             extends="" />
    
   </Exports>

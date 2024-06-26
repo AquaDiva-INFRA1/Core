@@ -1,4 +1,7 @@
-﻿namespace BExIS.Modules.Ddm.UI.Models
+﻿using BExIS.UI.Hooks;
+using System.Collections.Generic;
+
+namespace BExIS.Modules.Ddm.UI.Models
 {
     public class ShowDataModel
     {
@@ -7,7 +10,7 @@
         public int Version { get; set; }
         public int VersionSelect { get; set; }
         public bool LatestVersion { get; set; }
-        public  long LatestVersionNumber { get; set; }
+        public long LatestVersionNumber { get; set; }
 
         public long MetadataStructureId { get; set; }
         public long DataStructureId { get; set; }
@@ -24,7 +27,11 @@
         public bool RequestExist { get; set; }
         public bool RequestAble { get; set; }
         public bool HasRequestRight { get; set; }
+        public bool HasEditRight { get; set; }
 
         public bool IsPublic { get; set; }
+
+        public List<Hook> Hooks { get; set; }
+
     }
 }

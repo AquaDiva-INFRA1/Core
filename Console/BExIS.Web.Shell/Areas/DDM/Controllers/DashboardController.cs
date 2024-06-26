@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
-using System.Web.Routing;
 using Telerik.Web.Mvc;
 using Vaiona.Persistence.Api;
 using Vaiona.Web.Extensions;
@@ -159,7 +158,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         /// <returns>model</returns>
         public ActionResult _CustomMyDatasetBinding()
         {
-            //DataTable model = new DataTable();
+            DataTable model = new DataTable();
 
             ViewData["PageSize"] = 10;
             ViewData["CurrentPage"] = 1;
@@ -171,83 +170,82 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             #endregion header
 
-            using (DataTable model = CreateDataTable(headerItems))
+            model = CreateDataTable(headerItems);
+
+            DatasetManager datasetManager = new DatasetManager();
+            EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+            UserManager userManager = new UserManager();
+            EntityManager entityManager = new EntityManager();
+
+            try
             {
-                DatasetManager datasetManager = new DatasetManager();
-                EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-                UserManager userManager = new UserManager();
-                EntityManager entityManager = new EntityManager();
+                var entity = entityManager.FindByName("Dataset");
+                var user = userManager.FindByNameAsync(GetUsernameOrDefault()).Result;
 
-                try
+                List<long> gridCommands = datasetManager.GetDatasetLatestIds();
+                gridCommands.Skip(Convert.ToInt16(ViewData["CurrentPage"])).Take(Convert.ToInt16(ViewData["PageSize"]));
+
+                List<DatasetVersion> datasetVersions = datasetManager.GetDatasetLatestVersions(gridCommands, false);
+                foreach (var dsv in datasetVersions)
                 {
-                    var entity = entityManager.FindByName("Dataset");
-                    var user = userManager.FindByNameAsync(GetUsernameOrDefault()).Result;
+                    var datasetId = dsv.Dataset.Id;
 
-                    List<long> gridCommands = datasetManager.GetDatasetLatestIds();
-                    gridCommands.Skip(Convert.ToInt16(ViewData["CurrentPage"])).Take(Convert.ToInt16(ViewData["PageSize"]));
+                    //get permissions
+                    int rights = entityPermissionManager.GetEffectiveRights(user?.Id, entity.Id, datasetId);
 
-                    List<DatasetVersion> datasetVersions = datasetManager.GetDatasetLatestVersions(gridCommands, false);
-                    foreach (var dsv in datasetVersions)
+                    if (rights > 0)
                     {
-                        var datasetId = dsv.Dataset.Id;
+                        DataRow dataRow = model.NewRow();
+                        Object[] rowArray = new Object[8];
+                        string isValid = "no";
 
-                        //get permissions
-                        int rights = entityPermissionManager.GetEffectiveRights(user?.Id, entity.Id, datasetId);
-
-                        if (rights > 0)
+                        if (datasetManager.IsDatasetCheckedIn(datasetId))
                         {
-                            DataRow dataRow = model.NewRow();
-                            Object[] rowArray = new Object[8];
-                            string isValid = "no";
 
-                            if (datasetManager.IsDatasetCheckedIn(datasetId))
+                            string title = dsv.Title;
+                            string description = dsv.Description;
+
+                            if (dsv.StateInfo != null)
                             {
-
-                                string title = dsv.Title;
-                                string description = dsv.Description;
-
-                                if (dsv.StateInfo != null)
-                                {
-                                    isValid = DatasetStateInfo.Valid.ToString().Equals(dsv.StateInfo.State) ? "yes" : "no";
-                                }
-
-                                rowArray[0] = Convert.ToInt64(datasetId);
-                                rowArray[1] = title;
-                                rowArray[2] = description;
-                            }
-                            else
-                            {
-                                rowArray[0] = Convert.ToInt64(datasetId);
-                                rowArray[1] = "";
-                                rowArray[2] = "Dataset is just in processing.";
+                                isValid = DatasetStateInfo.Valid.ToString().Equals(dsv.StateInfo.State) ? "yes" : "no";
                             }
 
-                            rowArray[3] = (rights & (int)RightType.Read) > 0 ? "✔" : "✘";
-                            rowArray[4] = (rights & (int)RightType.Write) > 0 ? "✔" : "✘";
-                            rowArray[5] = (rights & (int)RightType.Delete) > 0 ? "✔" : "✘";
-                            //rowArray[6] = (rights & (int)RightType.Download) > 0 ? "✔" : "✘";
-                            rowArray[6] = (rights & (int)RightType.Grant) > 0 ? "✔" : "✘";
-                            rowArray[7] = isValid;
-
-                            dataRow = model.NewRow();
-                            dataRow.ItemArray = rowArray;
-                            model.Rows.Add(dataRow);
+                            rowArray[0] = Convert.ToInt64(datasetId);
+                            rowArray[1] = title;
+                            rowArray[2] = description;
                         }
-                    }
+                        else
+                        {
+                            rowArray[0] = Convert.ToInt64(datasetId);
+                            rowArray[1] = "";
+                            rowArray[2] = "Dataset is just in processing.";
+                        }
 
-                    return View(new GridModel(model));
+                        rowArray[3] = (rights & (int)RightType.Read) > 0 ? "✔" : "✘";
+                        rowArray[4] = (rights & (int)RightType.Write) > 0 ? "✔" : "✘";
+                        rowArray[5] = (rights & (int)RightType.Delete) > 0 ? "✔" : "✘";
+                        //rowArray[6] = (rights & (int)RightType.Download) > 0 ? "✔" : "✘";
+                        rowArray[6] = (rights & (int)RightType.Grant) > 0 ? "✔" : "✘";
+                        rowArray[7] = isValid;
+
+                        dataRow = model.NewRow();
+                        dataRow.ItemArray = rowArray;
+                        model.Rows.Add(dataRow);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-                finally
-                {
-                    datasetManager.Dispose();
-                    entityPermissionManager.Dispose();
-                    entityManager.Dispose();
-                    userManager.Dispose();
-                }
+
+                return View(new GridModel(model));
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datasetManager.Dispose();
+                entityPermissionManager.Dispose();
+                entityManager.Dispose();
+                userManager.Dispose();
             }
         }
 
@@ -299,15 +297,15 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                         foreach (var partyId in partyIds)
                         {
-                            if(entityPartyIds.Contains(partyId))
+                            if (entityPartyIds.Contains(partyId))
                             {
                                 long datasetId = 0;
                                 var success = long.TryParse(partyManager.Find(partyId).Name, out datasetId);
-                                if(success && !datasetIds.Contains(datasetId))
+                                if (success && !datasetIds.Contains(datasetId))
                                 {
                                     datasetIds.Add(datasetId);
                                 }
-                            } 
+                            }
                         }
                     }
                 }
@@ -326,7 +324,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     string isValid = "no";
 
                     string type = "file";
-                    if (dsv.Dataset.DataStructure.Self is StructuredDataStructure)
+                    if (dsv.Dataset.DataStructure?.Self is StructuredDataStructure)
                     {
                         type = "tabular";
                     }
@@ -356,7 +354,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         rowArray[3] = type;
                     }
 
-                    rowArray[7] = true;
+                    //
+                    rowArray[7] = entityPermissionManager.HasEffectiveRight(HttpContext.User.Identity.Name, typeof(Dataset), dsv.Dataset.Id, RightType.Write); ;
 
                     model.Add(new MyDatasetsModel(
                        (long)rowArray[0],
@@ -390,11 +389,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         public ActionResult ShowMyDatasets_old()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Dashboard", this.Session.GetTenant());
-
-            //DataTable model = new DataTable();
-
-            ViewData["PageSize"] = 10;
-            ViewData["CurrentPage"] = 1;
 
             #region header
 
@@ -471,7 +465,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             #endregion header
 
             using (DataTable model = CreateDataTable(headerItems))
-            {
+            { 
+                ViewData["PageSize"] = 10;
+                ViewData["CurrentPage"] = 1;
+
                 return PartialView("_myDatasetGridView", model);
             }
         }
@@ -487,7 +484,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Dashboard", this.Session.GetTenant());
 
-            //DataTable model = new DataTable();
+            DataTable model = new DataTable();
 
             ViewData["PageSize"] = 10;
             ViewData["CurrentPage"] = 1;
@@ -498,12 +495,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             ViewData["DefaultHeaderList"] = headerItems;
 
-                #endregion header
+            #endregion header
 
-            using (DataTable model = CreateDataTable(headerItems))
-            {
-                return View("_myDatasetGridView", model);
-            }
+            model = CreateDataTable(headerItems);
+
+            return View("_myDatasetGridView", model);
         }
 
         private List<HeaderItem> CreateHeaderItems()

@@ -18,6 +18,7 @@ namespace BExIS.Dlm.Tests.Services.DataStructure
     public class UnitManagerTests
     {
         private TestSetupHelper helper = null;
+
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
@@ -79,8 +80,6 @@ namespace BExIS.Dlm.Tests.Services.DataStructure
             {
                 um.Dispose();
             }
-
         }
     }
-
 }

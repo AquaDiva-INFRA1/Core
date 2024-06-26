@@ -3,28 +3,27 @@ using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Orm.NH.Utils;
 using BExIS.Dlm.Services.Helpers;
+using BExIS.Utils.NH.Querying;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 using System.Xml;
 using Vaiona.Logging;
 using Vaiona.Logging.Aspects;
 using Vaiona.Persistence.Api;
 using MDS = BExIS.Dlm.Entities.MetadataStructure;
-using BExIS.Utils.NH.Querying;
-using System.Text;
-using System.Diagnostics;
 
 namespace System.Data
 {
     public static class DataTableExtensionsForDataset
     {
-        public static void Strip(this DataTable table)
+        public static void Strip(this DataTable table, bool keepId=false)
         {
-            if (table.Columns.Contains("id")) { table.Columns.Remove("id"); }
+            if (table.Columns.Contains("id") && keepId==false) { table.Columns.Remove("id"); }
             if (table.Columns.Contains("orderno")) { table.Columns.Remove("orderno"); }
             if (table.Columns.Contains("timestamp")) { table.Columns.Remove("timestamp"); }
             if (table.Columns.Contains("versionid")) { table.Columns.Remove("versionid"); }
@@ -179,6 +178,17 @@ namespace BExIS.Dlm.Services.Data
             }
         }
 
+        public bool IsDatasetDeleted(Int64 datasetId)
+        {
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                var datasetRepo = uow.GetReadOnlyRepository<Dataset>();
+                return (datasetRepo.Query(p => p.Status == DatasetStatus.Deleted && p.Id == datasetId).Count() == 1);
+            }
+        }
+
+
+
         /// <summary>
         /// Retrieves the dataset object having identifier <paramref name="datasetId"/> from the database.
         /// </summary>
@@ -205,11 +215,12 @@ namespace BExIS.Dlm.Services.Data
         /// <param name="metadataStructure">A valid and persisted metadata structure entity.</param>
         /// <returns>A dataset associated to the <paramref name="dataStructure"/>, <paramref name="researchPlan"/>, and <paramref name="metadataStructure"/> entities.</returns>
         //[MeasurePerformance]
-        public Dataset CreateEmptyDataset(Entities.DataStructure.DataStructure dataStructure, ResearchPlan researchPlan, MDS.MetadataStructure metadataStructure)
+        public Dataset CreateEmptyDataset(Entities.DataStructure.DataStructure dataStructure, ResearchPlan researchPlan, MDS.MetadataStructure metadataStructure, EntityTemplate entityTemplate)
         {
-            Contract.Requires(dataStructure != null && dataStructure.Id >= 0);
+            //Contract.Requires(dataStructure != null && dataStructure.Id >= 0);
             Contract.Requires(researchPlan != null && researchPlan.Id >= 0);
             Contract.Requires(metadataStructure != null && metadataStructure.Id >= 0);
+            //Contract.Requires(entityTemplate != null && entityTemplate.Id >= 0);
 
             Contract.Ensures(Contract.Result<Dataset>() != null && Contract.Result<Dataset>().Id >= 0);
 
@@ -219,18 +230,22 @@ namespace BExIS.Dlm.Services.Data
                 var structureRepo = uow.GetReadOnlyRepository<Entities.DataStructure.DataStructure>();
                 var researchPlanRepo = uow.GetReadOnlyRepository<ResearchPlan>();
                 var metadataStructureRepo = uow.GetReadOnlyRepository<MDS.MetadataStructure>();
+                var entityTemplateRepo = uow.GetReadOnlyRepository<EntityTemplate>();
 
-                dataStructure = structureRepo.Get(dataStructure.Id);
+                if (dataStructure != null) dataStructure = structureRepo.Get(dataStructure.Id);
                 researchPlan = researchPlanRepo.Get(researchPlan.Id);
                 metadataStructure = metadataStructureRepo.Get(metadataStructure.Id);
+                entityTemplate = entityTemplateRepo.Get(entityTemplate.Id);
 
-                Dataset dataset = new Dataset(dataStructure);
+                Dataset dataset = new Dataset(entityTemplate, dataStructure);
 
                 dataset.ResearchPlan = researchPlan;
                 researchPlan.Datasets.Add(dataset);
 
                 dataset.MetadataStructure = metadataStructure;
                 metadataStructure.Datasets.Add(dataset);
+
+                dataset.EntityTemplate = entityTemplate;
 
                 dataset.Status = DatasetStatus.CheckedIn;
                 dataset.CheckOutUser = string.Empty;
@@ -341,10 +356,10 @@ namespace BExIS.Dlm.Services.Data
         /// <param name="comment">A free form text to describe what has changed with this check-in</param>
         /// <param name="username">The username that performs the check-in, which should be the same as the check-out username</param>
         /// <remarks>Does not support simultaneous check-ins</remarks>
-        [MeasurePerformance]
+        //[MeasurePerformance]
         public void CheckInDataset(Int64 datasetId, string comment, string username, ViewCreationBehavior viewCreationBehavior = ViewCreationBehavior.Create | ViewCreationBehavior.Refresh)
         {
-            checkInDataset(datasetId, comment, username, false, viewCreationBehavior);
+            checkInDataset(datasetId, comment, username, false, viewCreationBehavior, "");
         }
 
         /// <summary>
@@ -371,6 +386,7 @@ namespace BExIS.Dlm.Services.Data
         /// <returns>True if the dataset is deleted, False otherwise.</returns>
         public bool DeleteDataset(Int64 datasetId, string username, bool rollbackCheckout)
         {
+            string deleteReason = "Delete"; // @ToDO replace by variable from UI
             Contract.Requires(datasetId >= 0);
 
             using (IUnitOfWork uow = this.GetUnitOfWork())
@@ -409,7 +425,7 @@ namespace BExIS.Dlm.Services.Data
                     //This fetch and insert will be problematic on bigger datasets! try implement the logic without loading the tuples
                     var tupleIds = getWorkingCopyTupleIds(workingCopy);
                     workingCopy = editDatasetVersionBig(workingCopy, null, null, tupleIds, null); // deletes all the tuples from the active list and moves them to the history table
-                    checkInDataset(entity.Id, "Dataset is deleted", username, false, ViewCreationBehavior.Create | ViewCreationBehavior.Refresh);
+                    checkInDataset(entity.Id, "Dataset is deleted", username, false, ViewCreationBehavior.Create | ViewCreationBehavior.Refresh, deleteReason);
 
                     entity = datasetRepo.Get(datasetId); // maybe not needed!
                     entity.Status = DatasetStatus.Deleted;
@@ -428,7 +444,7 @@ namespace BExIS.Dlm.Services.Data
                 {
                     if (entity.Status == DatasetStatus.CheckedOut)
                     {
-                        checkInDataset(entity.Id, "Checked-in after failed delete try!", username, false, ViewCreationBehavior.Create | ViewCreationBehavior.Refresh);
+                        checkInDataset(entity.Id, "Checked-in after failed delete try!", username, false, ViewCreationBehavior.Create | ViewCreationBehavior.Refresh, "");
                     }
                     return false;
                 }
@@ -962,9 +978,9 @@ namespace BExIS.Dlm.Services.Data
             return null;
         }
 
-        public DataTable GetLatestDatasetVersionTuples(long datasetId, FilterExpression filter, OrderByExpression orderBy, ProjectionExpression projection, int pageNumber = 0, int pageSize = 0)
+        public DataTable GetLatestDatasetVersionTuples(long datasetId, FilterExpression filter, OrderByExpression orderBy, ProjectionExpression projection,string searchquery, int pageNumber = 0, int pageSize = 0)
         {
-            return queryMaterializedView(datasetId, filter, orderBy, projection, pageNumber, pageSize);
+            return queryMaterializedView(datasetId, filter, orderBy, projection, searchquery, pageNumber, pageSize);
         }
 
         /// <summary>
@@ -986,7 +1002,7 @@ namespace BExIS.Dlm.Services.Data
         /// </summary>
         /// <param name="datasetVersion">The object representing the data set version requested</param>
         /// <returns>The list of identifiers of the specified version</returns>
-        [MeasurePerformance]
+        //[MeasurePerformance]
         public List<Int64> GetDatasetVersionEffectiveTupleIds(DatasetVersion datasetVersion)
         {
             return getDatasetVersionEffectiveTupleIds(datasetVersion);
@@ -1019,7 +1035,7 @@ namespace BExIS.Dlm.Services.Data
         /// <param name="datasetId">The identifier of the dataset.</param>
         /// <returns>The list of checked-in versions of the dataset requested.</returns>
         /// <remarks>The checked-out version, if exists, is not included in the return list.</remarks>
-        public List<DatasetVersion> GetDatasetVersions(Int64 datasetId)
+        public List<DatasetVersion> GetDatasetVersions(Int64 datasetId, DatasetStatus datasetStatus = DatasetStatus.CheckedIn)
         {
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
@@ -1028,7 +1044,7 @@ namespace BExIS.Dlm.Services.Data
 
                 List<DatasetVersion> dsVersions = datasetVersionRepo.Query(p =>
                 p.Dataset.Id == datasetId
-                && p.Dataset.Status == DatasetStatus.CheckedIn)
+                && p.Dataset.Status == datasetStatus)
                 .OrderByDescending(p => p.Timestamp).ToList();
                 if (dsVersions != null)
                 {
@@ -1098,8 +1114,12 @@ namespace BExIS.Dlm.Services.Data
                 if (dsVersion != null)
                     return (dsVersion);
 
+                DatasetVersion dsv = datasetVersionRepo.Get(versionId);
+                if (dsv == null)
+                    throw new NullReferenceException(string.Format("Dataset version {0} not exist.", versionId));
+
                 // else there is a problem, try to find and report it
-                Dataset dataset = datasetVersionRepo.Get(versionId).Dataset; // it would be nice to not fetch the dataset!
+                Dataset dataset = dsv.Dataset; // it would be nice to not fetch the dataset!
 
                 if (dataset.Status == DatasetStatus.Deleted)
                     throw new Exception(string.Format("Dataset version {0} is not associated with any dataset.", versionId));
@@ -1131,6 +1151,12 @@ namespace BExIS.Dlm.Services.Data
         {
             return getDatasetLatestVersionId(datasetId);
         }
+
+        public Int64 GetDatasetLatestVersionId(Int64 datasetId, DatasetStatus datasetStatus)
+        {
+            return getDatasetLatestVersionId(datasetId, datasetStatus);
+        }
+
 
         /// <summary>
         /// Returns the latest version of the dataset <paramref name="dataset"/> if the dataset is in checked-in state,
@@ -1178,13 +1204,25 @@ namespace BExIS.Dlm.Services.Data
                         );
                     return (q1.ToList());
                 }
-                // also works, but uses the time stamps instead of STATUS info
-                // var qu = (from dsv in DatasetVersionRepo.Get(p => datasetIds.Contains(p.Dataset.Id) && p.Dataset.Status != DatasetStatus.Deleted)
-                //           group dsv by dsv.Dataset.Id into grp
-                //           let maxTimestamp = grp.Max(p => p.Timestamp)
-                //           select grp.Single(p => p.Timestamp >= maxTimestamp));
+            }
+        }
 
-                //return (qu.ToList());
+        /// <summary>
+        /// Returns a list of the deleted latest versions of the provided <paramref name="datasetIds"/> including/ excluding the checked out versions.
+        /// </summary>
+        /// <param name="datasetIds">The list of identifiers of the datasets whose their latest versions is requested</param>
+        /// <returns>The list of the latest versions of the deleted datasets</returns>
+        public List<DatasetVersion> GetDeletedDatasetLatestVersions(List<Int64> datasetIds)
+        {
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                var datasetVersionRepo = uow.GetReadOnlyRepository<DatasetVersion>();
+                var q1 = datasetVersionRepo.Query(p =>
+                        datasetIds.Contains(p.Dataset.Id)
+                        && (p.Dataset.Status == DatasetStatus.Deleted)
+                        && (p.Status == DatasetVersionStatus.CheckedIn)
+                    );
+                return (q1.ToList());
             }
         }
 
@@ -1272,7 +1310,7 @@ namespace BExIS.Dlm.Services.Data
         /// <param name="datasetVersions">List of all dataset versions.</param>
         /// <returns>The list of allowed versions.</returns>
         /// <remarks></remarks>
-        public List<DatasetVersion> GetDatasetVersionsAllowed(Int64 datasetId, bool major = true, bool minor = false, List<DatasetVersion> datasetVersions = null)
+        public List<DatasetVersion> GetDatasetVersionsAllowed(Int64 datasetId, bool major = true, bool minor = false, List<DatasetVersion> datasetVersions = null, DatasetStatus datasetStatus = DatasetStatus.CheckedIn)
         {
             List<DatasetVersion> allowedVersionList = new List<DatasetVersion>();
 
@@ -1280,12 +1318,12 @@ namespace BExIS.Dlm.Services.Data
             if (datasetVersions == null)
             {
                 datasetVersions = new List<DatasetVersion>();
-                datasetVersions = GetDatasetVersions(datasetId);
+                datasetVersions = GetDatasetVersions(datasetId, datasetStatus);
             }
-            
+
             // 1. Select explicit dataset versions with a "public access" flag.This will have the higeth priority
             List<DatasetVersion> versionIdPublicList = datasetVersions.OrderBy(d => d.Timestamp).Where(d => d.PublicAccess).ToList();
-            
+
             // 2. Check for major dataset versions
             List<DatasetVersion> versionIdMajorList = new List<DatasetVersion>();
             if (major)
@@ -1428,14 +1466,14 @@ namespace BExIS.Dlm.Services.Data
             {
                 var datasetVersionRepo = uow.GetReadOnlyRepository<DatasetVersion>();
 
-                    var q1 = datasetVersionRepo.Query(p =>
-                            p.Dataset.Status == datasetStatus && p.Status == versionStatus
-                        )
-                        .Select(p => p.Dataset.Id)
-                        .OrderBy(p => p)
-                        .Distinct();
-                    return (q1.ToList());
-                }
+                var q1 = datasetVersionRepo.Query(p =>
+                        p.Dataset.Status == datasetStatus && p.Status == versionStatus
+                    )
+                    .Select(p => p.Dataset.Id)
+                    .OrderBy(p => p)
+                    .Distinct();
+                return (q1.ToList());
+            }
         }
 
         /// <summary>
@@ -1589,7 +1627,7 @@ namespace BExIS.Dlm.Services.Data
         /// <param name="deletedTuples">The list of existing tuples to be deleted from the working copy.</param>
         /// <param name="unchangedTuples">to be removed</param>
         /// <returns>The working copy having the changes applied on it.</returns>
-        [MeasurePerformance]
+        //[MeasurePerformance]
         public DatasetVersion EditDatasetVersion(DatasetVersion workingCopyDatasetVersion,
             List<DataTuple> createdTuples, ICollection<DataTuple> editedTuples, ICollection<long> deletedTuples, ICollection<DataTuple> unchangedTuples = null
             //,ICollection<ExtendedPropertyValue> extendedPropertyValues, ICollection<ContentDescriptor> contentDescriptors
@@ -1635,12 +1673,12 @@ namespace BExIS.Dlm.Services.Data
         {
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
-   
+
 
                 var datasetVersionRepo = uow.GetReadOnlyRepository<DatasetVersion>();
-                var datasetVersions = datasetVersionRepo.Query().Where(dsv=>dsv.Dataset.Id.Equals(id)).OrderBy(dsv=>dsv.Timestamp);
+                var datasetVersions = datasetVersionRepo.Query().Where(dsv => dsv.Dataset.Id.Equals(id)).OrderBy(dsv => dsv.Timestamp);
 
-                if (datasetVersions.Any() && datasetVersions.Count() >= (versionNr-1))
+                if (datasetVersions.Any() && datasetVersions.Count() >= (versionNr - 1))
                 {
                     return datasetVersions.ToList().ElementAt(versionNr - 1).Id;
                 }
@@ -1823,7 +1861,7 @@ namespace BExIS.Dlm.Services.Data
             }
         }
 
-        private Int64 getDatasetLatestVersionId(Int64 datasetId)
+        private Int64 getDatasetLatestVersionId(Int64 datasetId, DatasetStatus datasetStatus = DatasetStatus.CheckedIn)
         {
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
@@ -1832,7 +1870,7 @@ namespace BExIS.Dlm.Services.Data
 
                 Int64 dsVersionId = datasetVersionRepo.Query(p =>
                     p.Dataset.Id == datasetId
-                    && p.Dataset.Status == DatasetStatus.CheckedIn
+                    && p.Dataset.Status == datasetStatus
                     && p.Status == DatasetVersionStatus.CheckedIn)
                     .Select(p => p.Id).FirstOrDefault();
                 if (dsVersionId > 0)
@@ -2821,7 +2859,7 @@ namespace BExIS.Dlm.Services.Data
         /// <param name="datasetId"></param>
         /// <param name="comment"></param>
         /// <param name="adminMode">if true, the check for current user is bypassed</param>
-        private void checkInDataset(Int64 datasetId, string comment, string username, bool adminMode, ViewCreationBehavior viewCreationBehavior)
+        private void checkInDataset(Int64 datasetId, string comment, string username, bool adminMode, ViewCreationBehavior viewCreationBehavior, string mStateComment = "")
         {
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
@@ -2842,8 +2880,11 @@ namespace BExIS.Dlm.Services.Data
                     dsv.Status = DatasetVersionStatus.CheckedIn;
 
                     ds.Status = DatasetStatus.CheckedIn;
-                    ds.LastCheckIOTimestamp = DateTime.UtcNow;
+                    ds.LastCheckIOTimestamp = DateTime.UtcNow; 
                     ds.CheckOutUser = string.Empty;
+                    if (ds.StateInfo == null)
+                        ds.StateInfo = new Vaiona.Entities.Common.EntityStateInfo();
+                    ds.ModificationInfo.Comment = mStateComment;
                     repo.Put(ds);
                     uow.Commit();
                     // when everything is OK, check if a materialized view is created for the datsets, if yes: refresh it to the lateset changes
@@ -2868,7 +2909,7 @@ namespace BExIS.Dlm.Services.Data
             if (!IsDatasetCheckedIn(datasetId))
                 throw new Exception($"Dataset '{datasetId}' must be in the checked-in status.");
 
-            if (!(dataset.DataStructure.Self is StructuredDataStructure))
+            if (!(dataset.DataStructure != null))
             {
                 if (throwExceptionOnUnstructured)
                     throw new Exception($"Dataset '{datasetId}' is not structured.");
@@ -2934,7 +2975,7 @@ namespace BExIS.Dlm.Services.Data
                     if (sds.Variables != null && sds.Variables.Count() > 0)
                     {
                         columnDefinitionList = (from c in sds.Variables
-                                                select new Tuple<string, string, int, long>(c.Label, c.DataAttribute.DataType.SystemType, c.OrderNo, c.Id))
+                                                select new Tuple<string, string, int, long>(c.Label, c.DataType.SystemType, c.OrderNo, c.Id))
                                                .ToList()
                                                ;
                     }
@@ -3042,10 +3083,10 @@ namespace BExIS.Dlm.Services.Data
             }
         }
 
-        private DataTable queryMaterializedView(long datasetId, FilterExpression filter, OrderByExpression orderBy, ProjectionExpression projection, int pageNumber = 0, int pageSize = 0)
+        private DataTable queryMaterializedView(long datasetId,FilterExpression filter, OrderByExpression orderBy, ProjectionExpression projection,string searchquery,  int pageNumber = 0, int pageSize = 0)
         {
             MaterializedViewHelper mvHelper = new MaterializedViewHelper();
-            return mvHelper.Retrieve(datasetId, filter, orderBy, projection, pageNumber, pageSize);
+            return mvHelper.Retrieve(datasetId, searchquery, filter, orderBy, projection, pageNumber, pageSize);
         }
 
         // in some cases maybe another attribute of the user is used like its ID, email or the IP address

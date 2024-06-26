@@ -8,7 +8,7 @@ namespace BExIS.Security.Services.Utilities
     {
         public static string GetCreateDatasetHeader(long datasetid, string entityname)
         {
-            return $"{entityname} was created (Id: {datasetid})";
+            return $"{entityname}: Created (Id: {datasetid})";
         }
 
         public static string GetCreateDatasetMessage(long datasetid, string title, string userName, string entityname)
@@ -22,14 +22,14 @@ namespace BExIS.Security.Services.Utilities
             return message + ".";
         }
 
-        public static string GetDeleteDatasetHeader(long datasetid)
+        public static string GetDeleteDatasetHeader(long datasetid, string entityname)
         {
-            return $"Dataset was deleted (Id: {datasetid})";
+            return $"{entityname}: Deleted (Id: {datasetid})";
         }
 
-        public static string GetDeleteDatasetMessage(long datasetid, string userName)
+        public static string GetDeleteDatasetMessage(long datasetid, string userName, string entityname)
         {
-            string message = $"Dataset with id <b>({datasetid})</b> was deleted";
+            string message = $"{entityname} with id <b>({datasetid})</b> was deleted";
 
             if (!string.IsNullOrEmpty(userName))
 
@@ -38,14 +38,14 @@ namespace BExIS.Security.Services.Utilities
             return message + ".";
         }
 
-        public static string GetTryToDeleteDatasetHeader(long datasetid)
+        public static string GetTryToDeleteDatasetHeader(long datasetid, string entityname)
         {
-            return $"Someone tried to delete a dataset (Id: {datasetid})";
+            return $"{entityname}: Try to delete (Id: {datasetid})";
         }
 
-        public static string GetTryToDeleteDatasetMessage(long datasetid, string userName)
+        public static string GetTryToDeleteDatasetMessage(long datasetid, string userName, string entityname)
         {
-            string message = $"An unsuccessful attempt was made to delete a Dataset with id <b>({datasetid})</b>";
+            string message = $"An unsuccessful attempt was made to delete a {entityname} with id <b>({datasetid})</b>";
 
             if (!string.IsNullOrEmpty(userName))
 
@@ -54,14 +54,14 @@ namespace BExIS.Security.Services.Utilities
             return message + ".";
         }
 
-        public static string GetPurgeDatasetHeader(long datasetid)
+        public static string GetPurgeDatasetHeader(long datasetid, string entityname)
         {
-            return $"Dataset was purged (Id: {datasetid})";
+            return $"{entityname}: Purged (Id: {datasetid})";
         }
 
-        public static string GetPurgeDatasetMessage(long datasetid, string userName)
+        public static string GetPurgeDatasetMessage(long datasetid, string userName, string entityname)
         {
-            string message = $"Dataset with id <b>({datasetid})</b> was purged";
+            string message = $"{entityname} with id <b>({datasetid})</b> was purged";
 
             if (!string.IsNullOrEmpty(userName))
 
@@ -70,14 +70,14 @@ namespace BExIS.Security.Services.Utilities
             return message + ".";
         }
 
-        public static string GetTryToPurgeDatasetHeader(long datasetid)
+        public static string GetTryToPurgeDatasetHeader(long datasetid, string entityname)
         {
-            return $"Someone tried to purge a dataset (Id: {datasetid})";
+            return $"{entityname}: Try to purge (Id: {datasetid})";
         }
 
-        public static string GetTryToPurgeDatasetMessage(long datasetid, string userName)
+        public static string GetTryToPurgeDatasetMessage(long datasetid, string userName, string entityname)
         {
-            string message = $"An unsuccessful attempt was made to purge a Dataset with id <b>({datasetid})</b>";
+            string message = $"An unsuccessful attempt was made to purge a {entityname} with id <b>({datasetid})</b>";
 
             if (!string.IsNullOrEmpty(userName))
 
@@ -194,7 +194,7 @@ namespace BExIS.Security.Services.Utilities
 
         public static string GetMetadataUpdatHeader(long datasetid, string entityname)
         {
-            return $"{entityname} was updated (Id: {datasetid})";
+            return $"{entityname}: Metadata updated (Id: {datasetid})";
         }
 
         public static string GeFileUpdatHeader(long datasetid)
@@ -205,6 +205,12 @@ namespace BExIS.Security.Services.Utilities
         public static string GetFileUploaddMessage(long userId, string userName, string filename)
         {
             return $"User <b>\"{userName}\"</b>(Id: {userId}) has uploaded a file: <b>{filename}</b>.";
+        }
+
+        public static string GetFilesUploaddMessage(long userId, string userName, string[] filenames)
+        {
+            var fnames = string.Join(",", filenames);
+            return $"User <b>\"{userName}\"</b>(Id: {userId}) has uploaded this files: <b>{ fnames }</b>.";
         }
 
         public static string GetFileDownloadHeader(long datasetid, long version)
@@ -293,6 +299,27 @@ namespace BExIS.Security.Services.Utilities
         public static string GetChangedRoleAppliedMessage(string userName, string newRole, string changeType, string additionalInformation)
         {
             return $"The {newRole} role has been {changeType} your account.<br/><br/>{additionalInformation}";
+        }
+
+
+        public static string GetSetPublicHeader(long datasetid, string entityname)
+        {
+            return $"{entityname}: Set public (Id: {datasetid})";
+        }
+
+        public static string GetSetPublicMessage(string userName, long datasetid, string entityname)
+        {
+            return $"The {entityname} with id {datasetid} was set to public by {userName}.";
+        }
+
+        public static string GetUnsetPublicHeader(long datasetid, string entityname)
+        {
+            return $"{entityname}: Unset public (Id: {datasetid}";
+        }
+
+        public static string GetUnsetPublicMessage(string userName, long datasetid, string entityname)
+        {
+            return $"The {entityname} with id {datasetid} was unset from public by {userName}.";
         }
 
         #region upload api
@@ -401,11 +428,13 @@ namespace BExIS.Security.Services.Utilities
             return $"Data upload started (Id: {datasetid})";
         }
 
-        public static string GetASyncStartUploadMessage(long datasetid, string title, int numberOfRows)
+        public static string GetASyncStartUploadMessage(long datasetid, string title, IEnumerable<string> files)
         {
+            string fNames = string.Join(",", files);
+
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.AppendLine($"Your upload to the dataset <b>\"{title}\"</b> with id <b>(\"{datasetid}\")</b> has started. <br/>");
-            stringBuilder.AppendLine($"<b>\"{numberOfRows}\"</b> lines will be added/edited.");
+            stringBuilder.AppendLine($"<b>\"{fNames}\"</b> will be uploaded.");
 
             return stringBuilder.ToString();
         }

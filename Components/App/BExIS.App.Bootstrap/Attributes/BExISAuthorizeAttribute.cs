@@ -1,8 +1,20 @@
-﻿using BExIS.Security.Services.Authorization;
+﻿using BExIS.App.Bootstrap.Helpers;
+using BExIS.Security.Entities.Subjects;
+using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Subjects;
+using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Net;
+using System.Runtime.Remoting.Contexts;
+using System.Security.Principal;
 using System.Web.Mvc;
 using System.Web.Routing;
+using System.Web.Http.Results;
+using System.Threading.Tasks;
+using BExIS.App.Bootstrap.Extensions;
 
 namespace BExIS.App.Bootstrap.Attributes
 {
@@ -10,72 +22,52 @@ namespace BExIS.App.Bootstrap.Attributes
     {
         public override void OnAuthorization(AuthorizationContext filterContext)
         {
-            var featurePermissionManager = new FeaturePermissionManager();
-            var operationManager = new OperationManager();
-            var userManager = new UserManager();
-
             try
             {
-                //
-                // get values from request
-                var areaName = "Shell";
-                try
+                using (var featurePermissionManager = new FeaturePermissionManager())
+                using (var operationManager = new OperationManager())
+                using (var userManager = new UserManager())
+                using (var identityUserService = new IdentityUserService())
                 {
-                     areaName = filterContext.RouteData.DataTokens["area"].ToString();
-                }
-                catch
-                {
-                    // ignored
-                }
-                var controllerName = filterContext.ActionDescriptor.ControllerDescriptor.ControllerName;
-                var actionName = filterContext.ActionDescriptor.ActionName;
+                    var areaName = filterContext.RouteData.DataTokens.Keys.Contains("area") ? filterContext.RouteData.DataTokens["area"].ToString() : "Shell";
+                    var controllerName = filterContext.ActionDescriptor.ControllerDescriptor.ControllerName;
+                    var actionName = filterContext.ActionDescriptor.ActionName;
+                    var operation = operationManager.Find(areaName, controllerName, "*");
 
-                var userName = string.Empty;
-                if (filterContext.HttpContext.User.Identity.IsAuthenticated)
-                    userName = filterContext.HttpContext.User.Identity.Name;
+                    if (operation == null)
+                    {
+                        filterContext.SetResponse(HttpStatusCode.Forbidden);
+                        //filterContext.Result = new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+                    }
+                    else
+                    {
+                        var feature = operation.Feature;
+                        if (feature == null)
+                        {
+                            return;
+                        }
+                        if (feature != null && !featurePermissionManager.HasAccess(null, feature.Id))
+                        {
+                            User user = BExISAuthorizeHelper.GetUserFromAuthorizationAsync(filterContext.HttpContext).Result;
 
-                //
-                // check request
-
-                var operation = operationManager.Find(areaName, controllerName, "*");
-                if (operation == null)
-                {
-                    filterContext.Result = new RedirectToRouteResult(new
-                    RouteValueDictionary{
-                           { "action", "AccessDenied" },
-                           { "controller", "Error" },
-                           { "Area", string.Empty }
-                       });
-                    return;
-                }
-
-                var feature = operation.Feature;
-
-                if (feature == null) return;
-
-                var result = userManager.FindByNameAsync(userName);
-
-                if (featurePermissionManager.HasAccess(result.Result?.Id, feature.Id)) return;
-
-                if (!filterContext.HttpContext.User.Identity.IsAuthenticated)
-                {
-                    HandleUnauthorizedRequest(filterContext);
-                }
-                else
-                {
-                    filterContext.Result = new RedirectToRouteResult(new
-                        RouteValueDictionary{
-                           { "action", "AccessDenied" },
-                           { "controller", "Error" },
-                           { "Area", string.Empty }
-                       });
+                            if (user == null)
+                            {
+                                filterContext.SetResponse(HttpStatusCode.Unauthorized);
+                            }
+                            else
+                            {
+                                if (!featurePermissionManager.HasAccess(user.Id, feature.Id))
+                                {
+                                    filterContext.SetResponse(HttpStatusCode.Forbidden);
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            finally
+            catch (Exception e)
             {
-                featurePermissionManager.Dispose();
-                operationManager.Dispose();
-                userManager.Dispose();
+                throw;
             }
         }
     }

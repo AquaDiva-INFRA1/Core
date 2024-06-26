@@ -15,7 +15,7 @@ namespace BExIS.Xml.Helpers
 
         public List<EntityStoreItem> GetEntities()
         {
-            return GetEntities(0,0);
+            return GetEntities(0, 0);
         }
 
         public List<EntityStoreItem> GetEntities(int skip, int take)
@@ -60,9 +60,9 @@ namespace BExIS.Xml.Helpers
                         // create tuples based on dataset id list, and get latest version of each dataset
 
                         List<DatasetVersion> datasetVersions = dm.GetDatasetLatestVersions(datasetIds, false);
+
                         foreach (var dsv in datasetVersions)
                         {
-
                             var e = new EntityStoreItem()
                             {
                                 Id = dsv.Dataset.Id,
@@ -71,6 +71,24 @@ namespace BExIS.Xml.Helpers
                             };
 
                             entities.Add(e);
+                        }
+
+                        List<DatasetVersion> deletedDatasetVersions = dm.GetDeletedDatasetLatestVersions(datasetIds);
+                        if (deletedDatasetVersions.Any())
+                        {
+                            foreach (var dsv in deletedDatasetVersions)
+                            {
+                                var e = new EntityStoreItem()
+                                {
+                                    Id = dsv.Dataset.Id,
+                                    Title = dsv.Title + " (deleted)",
+                                    Version = dm.GetDatasetVersionCount(dsv.Dataset.Id)
+                                };
+
+
+                                entities.Add(e);
+                            }
+
 
                         }
                     }
@@ -91,8 +109,8 @@ namespace BExIS.Xml.Helpers
             using (DatasetManager dm = new DatasetManager())
             using (MetadataStructureManager metadataStructureManager = new MetadataStructureManager())
             {
-                
-                
+
+
                 XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
                 var entities = new List<EntityStoreItem>();
                 int count = 0;
@@ -135,6 +153,9 @@ namespace BExIS.Xml.Helpers
 
                 try
                 {
+                    var dataset = dm.GetDataset(id);
+                    if (dataset.Status == DatasetStatus.Deleted) return String.Empty;
+
                     var dsv = dm.GetDatasetLatestVersion(id);
 
                     return dsv.Title;
@@ -219,7 +240,7 @@ namespace BExIS.Xml.Helpers
             try
             {
                 dataset = dm.GetDataset(id);
-                return dataset!=null? true:false;
+                return dataset != null ? true : false;
             }
             catch (Exception ex)
             {

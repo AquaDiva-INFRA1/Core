@@ -1,4 +1,4 @@
-﻿using BExIS.Dim.Entities.Publication;
+﻿using BExIS.Dim.Entities.Publications;
 using BExIS.Dim.Helpers;
 using BExIS.Dim.Helpers.Export;
 using BExIS.Dim.Services;
@@ -14,11 +14,12 @@ using BExIS.IO.Transform.Output;
 using BExIS.Modules.Dim.UI.Models.Export;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Utilities;
+using BExIS.Utils.Config;
 using BExIS.Utils.Extensions;
 using BExIS.Xml.Helpers;
 using Ionic.Zip;
 using System;
-using System.Configuration;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -54,9 +55,9 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
                 Repository dataRepo = new Repository();
                 dataRepo.Name = "generic";
-                dataRepo.Broker = broker;
+                broker.Repository = dataRepo;
 
-                GenericDataRepoConverter dataRepoConverter = new GenericDataRepoConverter(dataRepo);
+                GenericDataRepoConverter dataRepoConverter = new GenericDataRepoConverter(broker);
                 Tuple<string, string> tmp = new Tuple<string, string>(dataRepoConverter.Convert(datasetVersionId), "application/zip");
 
                 return File(tmp.Item1, tmp.Item2, Path.GetFileName(tmp.Item1));
@@ -176,7 +177,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
             }
         }
 
-        public ActionResult GenerateZip(long id,long versionid, string format)
+        public ActionResult GenerateZip(long id, long versionid, string format)
         {
             XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
             DatasetManager dm = new DatasetManager();
@@ -277,10 +278,9 @@ namespace BExIS.Modules.Dim.UI.Controllers
                                 "datastructure", ".txt");
                             string datastructureFilePath = AsciiWriter.CreateFile(dynamicPathOfDS);
 
-                            string json = OutputDataStructureManager.GetVariableListAsJson(dataStructureId);
+                            string json = OutputDataStructureManager.GetDataStructureAsJson(dataStructureId);
 
                             AsciiWriter.AllTextToFile(datastructureFilePath, json);
-
 
                             //generate datastructure as html
                             DatasetVersion ds = uow.GetUnitOfWork().GetReadOnlyRepository<DatasetVersion>().Get(dsvId);
@@ -298,7 +298,6 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
                     using (ZipFile zip = new ZipFile())
                     {
-
                         foreach (ContentDescriptor cd in datasetVersion.ContentDescriptors)
                         {
                             bool addFile = true;
@@ -315,7 +314,8 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
                                 if (FileHelper.FileExist(path))
                                 {
-                                    zip.AddFile(path, "");
+                                    if(!zip.Any(entry => entry.FileName.EndsWith(name)))
+                                        zip.AddFile(path, "");
                                 }
                             }
                         }
@@ -357,7 +357,7 @@ namespace BExIS.Modules.Dim.UI.Controllers
                         var es = new EmailService();
                         es.Send(MessageHelper.GetDownloadDatasetHeader(id, versionNr),
                             MessageHelper.GetDownloadDatasetMessage(id, title, getPartyNameOrDefault(), "zip - " + format, versionNr),
-                            ConfigurationManager.AppSettings["SystemEmail"]
+                            GeneralSettings.SystemEmail
                             );
 
                         return File(zipFilePath, "application/zip", Path.GetFileName(zipFilePath));
@@ -412,12 +412,12 @@ namespace BExIS.Modules.Dim.UI.Controllers
                 //    DatasetVersion = datasetVersion,
                 //};
 
-                if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(name)) > 0)
+                if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(name) && p.MimeType.Equals(mimeType)) > 0)
                 {
                     // remove the one contentdesciptor
                     foreach (ContentDescriptor cd in datasetVersion.ContentDescriptors)
                     {
-                        if (cd.Name == name)
+                        if (cd.Name.Equals(name) && cd.MimeType.Equals(mimeType))
                         {
                             cd.URI = dynamicPath;
                             dm.UpdateContentDescriptor(cd);
@@ -434,7 +434,6 @@ namespace BExIS.Modules.Dim.UI.Controllers
                 //dm.EditDatasetVersion(datasetVersion, null, null, null);
                 return dynamicPath;
             }
-           
         }
 
         private void generateMetadataHtml(DatasetVersion dsv)
@@ -488,7 +487,6 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
         private string getPartyNameOrDefault()
         {
-
             var userName = string.Empty;
             try
             {
@@ -498,11 +496,9 @@ namespace BExIS.Modules.Dim.UI.Controllers
 
             if (userName != null)
             {
-
                 using (var uow = this.GetUnitOfWork())
                 using (var partyManager = new PartyManager())
                 {
-
                     var userRepository = uow.GetReadOnlyRepository<User>();
                     var user = userRepository.Query(s => s.Name.ToUpperInvariant() == userName.ToUpperInvariant()).FirstOrDefault();
 
@@ -514,11 +510,9 @@ namespace BExIS.Modules.Dim.UI.Controllers
                             return party.Name;
                         }
                     }
-
                 }
             }
             return !string.IsNullOrWhiteSpace(userName) ? userName : "DEFAULT";
         }
-
     }
 }

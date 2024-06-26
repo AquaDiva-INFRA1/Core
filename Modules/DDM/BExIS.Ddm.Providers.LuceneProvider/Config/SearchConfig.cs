@@ -8,6 +8,7 @@ using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
@@ -89,7 +90,9 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Config
         /// <seealso cref=""/>        
         private static void Load(string project = null)
         {
-            
+            // check if directory exist
+            string dicPath = Path.GetDirectoryName(FileHelper.ConfigFilePath);
+            if (!Directory.Exists(dicPath)) Directory.CreateDirectory(dicPath); // create if not exist
 
             configXML = new XmlDocument();
 
@@ -174,7 +177,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Config
                         }
                         catch (Exception exc)
                         {
-                            Console.WriteLine(exc.Message);
+
                         }
                     }
 

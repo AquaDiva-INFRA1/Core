@@ -15,7 +15,7 @@
 }
 
 @{
-	int PageSize = 10;
+	int PageSize = int.Parse(System.Web.Configuration.WebConfigurationManager.AppSettings["defautPageSize"]);
 	int CurrentPage = 1;
 	
 	if (ViewData["PageSize"] != null)

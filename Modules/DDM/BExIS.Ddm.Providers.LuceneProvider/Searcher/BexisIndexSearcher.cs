@@ -9,9 +9,17 @@ using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Search.Highlight;
 using Lucene.Net.Store;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.Configuration;
 using System.Xml;
 using HeaderItem = BExIS.Utils.Models.HeaderItem;
 using Row = BExIS.Utils.Models.Row;
@@ -245,7 +253,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
                 {
                     moreThanOneEntityFound = true;
                 }
-                valueLastEntity = ValueList[1].ToString();  
+                valueLastEntity = ValueList[1].ToString();
 
                 foreach (XmlNode ade in headerItemXmlNodeList)
                 {
@@ -269,7 +277,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
                 r.Values = ValueList;
                 RowList.Add(r);
             }
-          
+
             // show column of entities, if there are more than one found
             if (moreThanOneEntityFound == true)
             {
@@ -395,7 +403,7 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
                                 cCount++;
                                 foreach (XmlElement item in configXML.GetElementsByTagName("field"))
                                 {
-                                    if ((!item.Attributes["primitive_type"].InnerText.ToLower().Contains("date")) && (!item.Attributes["primitive_type"].InnerText.ToLower().Contains("string")) && (item.Attributes["display_name"].InnerText.ToLower().Contains(c.Name.ToLower())))
+                                    if ((!item.Attributes["primitive_type"].InnerText.ToLower().Contains("date")) && (!item.Attributes["primitive_type"].InnerText.ToLower().Contains("string")) && (item.Attributes["display_name"].InnerText.ToLower().Contains(c.DisplayName.ToLower())))
                                     {
                                         foreach (var doc in hpg.Documents)
                                         {
@@ -454,6 +462,145 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
 
             }
             return properties;
+        }
+
+        public static SearchResult SemanticSearch(string query, List<XmlNode> headerItemXmlNodeList, string Seamntic_depth, string Error_distance)
+        {
+            int n = 0;
+            DatasetManager dm = null;
+            try
+            {
+                dm = new DatasetManager();
+                n = dm.DatasetRepo.Get().Count;
+
+                if (n == 0) n = 1000;
+            }
+            catch
+            {
+                n = 1000;
+            }
+            finally
+            {
+                dm.Dispose();
+                if (n <= 0)
+                    n = 1000;
+            }
+            SearchResult sro = new SearchResult();
+            sro.PageSize = 10;
+            sro.CurrentPage = 1;
+            sro.NumberOfHits = 100;
+
+            List<HeaderItem> Header = new List<HeaderItem>();
+            List<HeaderItem> DefaultHeader = new List<HeaderItem>();
+
+            // create id
+            HeaderItem id = new HeaderItem();
+            id.DisplayName = "ID";
+            id.Name = "ID";
+            id.DataType = "Integer";
+            sro.Id = id;
+            Header.Add(id);
+            DefaultHeader.Add(id);
+
+            // create entity
+            HeaderItem entity = new HeaderItem();
+            entity.DisplayName = "Type";
+            entity.Name = "entity_name";
+            entity.DataType = "string";
+            Header.Add(entity);
+
+            //DefaultHeader.Add(entity);
+
+            foreach (XmlNode ade in headerItemXmlNodeList)
+            {
+                HeaderItem hi = new HeaderItem();
+                hi = new HeaderItem();
+                hi.Name = ade.Attributes.GetNamedItem("lucene_name").Value;
+                hi.DisplayName = ade.Attributes.GetNamedItem("display_name").Value;
+                Header.Add(hi);
+
+                if (ade.Attributes.GetNamedItem("default_visible_item").Value.ToLower().Equals("yes"))
+                {
+                    DefaultHeader.Add(hi);
+                }
+            }
+
+            List<Row> RowList = new List<Row>();
+
+            foreach (string ds_id in semanticSearchAsync(query, Seamntic_depth, Error_distance).Result)
+            {
+                Row r = new Row();
+                List<object> ValueList = new List<object>();
+                ValueList = new List<object>();
+                ValueList.Add(ds_id);
+                ValueList.Add("Dataset");
+                r.Values = ValueList;
+                RowList.Add(r);
+            }
+            sro.Header = Header;
+            sro.DefaultVisibleHeaderItem = DefaultHeader;
+            sro.Rows = RowList;
+            return sro;
+        }
+
+        public static async Task<List<string>> semanticSearchAsync(string searchTerm, string Seamntic_depth, string Error_distance)
+        {
+            String semanticSearchURL = WebConfigurationManager.AppSettings["semanticSearchURL"];//"http://localhost:2607/bexis-0.1/search/";
+
+            System.Data.DataTable m = new DataTable();
+            List<string> clean_ids = new List<string>();
+
+            using (var client = new HttpClient())
+            {
+                Dictionary<string, string> dict_data = new Dictionary<string, string>();
+                dict_data.Add("key", string.Join(" , ", searchTerm.ToLower()));
+                dict_data.Add("depth", Seamntic_depth);
+                dict_data.Add("errorDistance", Error_distance);
+
+                var json_ = JsonConvert.SerializeObject(dict_data, Newtonsoft.Json.Formatting.Indented);
+                using (var stringContent = new StringContent("[" + json_ + "]", Encoding.UTF8, "application/json"))
+                {
+                    string output = "";
+                    try
+                    {
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        var responseTask = client.PostAsync(semanticSearchURL, stringContent).Result;
+                        output = await responseTask.Content.ReadAsStringAsync();
+                    }
+                    catch (Exception excep)
+                    {
+                        Vaiona.Logging.LoggerFactory.GetFileLogger().LogCustom(excep.Message);
+                        Vaiona.Logging.LoggerFactory.GetFileLogger().LogCustom(excep.InnerException.Message);
+                    }
+
+                    //Parse the search-output
+                    object obj = null;
+                    try
+                    {
+                        obj = JsonConvert.DeserializeObject<object>(output);
+
+                    }
+                    catch (Exception excep)
+                    {
+                        Vaiona.Logging.LoggerFactory.GetFileLogger().LogCustom(excep.Message);
+                        Vaiona.Logging.LoggerFactory.GetFileLogger().LogCustom(excep.InnerException.Message);
+                    }
+
+                    #region find metadata and fill DataTable
+                    if (obj != null)
+                    {
+                        #region cleaning ids of datasets so they can be put in the table as id should be unique
+                        foreach (JObject res in (JArray)obj)
+                        {
+                            if (!clean_ids.Contains(res["dataset_id"].ToString()))
+                                clean_ids.Add(res["dataset_id"].ToString());
+                        }
+                        #endregion
+                    }
+                    #endregion
+                }
+            }
+            return clean_ids;
         }
     }
 }

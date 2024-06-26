@@ -1,0 +1,50 @@
+﻿@model IEnumerable<BExIS.Dlm.Entities.DataStructure.ConversionMethod>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.VersionNo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Description)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Formula)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Source)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Target)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.VersionNo)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Description)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Formula)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Source.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Target.Name)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id = item.Source.Id }) |
+            @Ajax.ActionLink("Delete", "Delete", new { sourceid = item.Source.Id, targetid=item.Target.Id }, new AjaxOptions { HttpMethod = "POST" })
+        </td>
+    </tr>
+}
+
+</table>

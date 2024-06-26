@@ -88,7 +88,7 @@ function sessInterval() {
         //reset server session here
         ResetServerSession();
         clearInterval(actualsess_intervalID);
-        
+
     }
 }
 

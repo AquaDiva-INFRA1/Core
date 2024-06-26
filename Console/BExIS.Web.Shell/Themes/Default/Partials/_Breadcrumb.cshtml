@@ -1,8 +1,80 @@
-﻿<div>
-    <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Private</a></li>
-        <li><a href="#">Pictures</a></li>
-        <li class="active">Vacation</li>
+﻿
+@{
+    string title = ViewBag.Title;
+    if (title != null)
+    {
+        if (title.Contains("-"))
+        {
+            title = title.Split('-').Last();
+        }
+    }
+    else
+    {
+        title = "";
+    }
+
+
+}
+
+<div >
+    <ol class="breadcrumb myBreadCrumb">
+        @{
+            if (title.ToLower().Trim() != "home")
+            {
+                <li><a id="home" class="anchor" href="/"></a></li>
+            }
+
+        }
+
+        <li class="">@title</li>
     </ol>
 </div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $.ajax({
+            url: '/Home/GetApplicationName', // URL of the MVC controller action
+            type: 'GET',  // Specify GET method for retrieving data
+            success: function (response) {
+          
+                const element = document.getElementById('home');
+                if (response === '') {
+                    element.innerText = "Home"
+                }
+                else {
+                    element.innerText = response;
+                }
+            },
+            error: function (error) {
+                // Handle any errors during the request
+                const element = document.getElementById('home');
+                element.innerText = "Home"
+            }
+        });
+    });
+ 
+</script>
+
+
+<style>
+    .myBreadCrumb {
+        background-color: white !important;
+        padding: 5pt;
+        color: #959595;
+    }
+
+    .anchor {
+        --tw-text-opacity: 1;
+        text-decoration-line: underline;
+        color: #959595;
+    }
+
+    .anchor:hover {
+        --tw-text-opacity: 1;
+        color: rgb(52, 134, 121) ;
+        text-decoration-line: underline;
+    }
+
+</style>

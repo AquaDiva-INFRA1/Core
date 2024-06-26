@@ -1,24 +1,12 @@
-﻿using BExIS.Aam.Entities.Mapping;
-using BExIS.Aam.Services;
-using BExIS.Dlm.Entities.Data;
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Dlm.Services.Data;
+﻿using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Modules.Aam.UI.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using Vaiona.Persistence.Api;
-using BExIS.Utils.Models;
-using Vaiona.Web.Mvc.Models;
-using Vaiona.Web.Extensions;
-using System.Web.Routing;
-using Vaiona.Web.Mvc.Modularity;
 using Newtonsoft.Json;
-using System.Text;
+using BExIS.Aam.Services;
+using BExIS.Aam.Entities.Mapping;
 
 namespace BExIS.Modules.Aam.UI.Controllers
 {
@@ -27,7 +15,6 @@ namespace BExIS.Modules.Aam.UI.Controllers
         // GET: Annotation
         public ActionResult Index()
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Annotation List", this.Session.GetTenant());
             AnnotationManager am = new AnnotationManager();
 
             #region Test functions
@@ -149,7 +136,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
             List<AnnotationResult> output = new List<AnnotationResult>();
 
             //First look for full matches
-            List<Annotation> fullMatches = allAnnotations.Where(an => an.Variable.Unit.Id == unitID && an.Variable.DataAttribute.DataType.Id == datatypeID).ToList();
+            List<Annotation> fullMatches = allAnnotations.Where(an => an.Variable.Unit.Id == unitID && an.Variable.DataType.Id == datatypeID).ToList();
 
             if(fullMatches.Count != 0)
             {
@@ -162,7 +149,7 @@ namespace BExIS.Modules.Aam.UI.Controllers
             {
                 //If we didn't find any full matches, look for partial matches
                 List<Annotation> matchingUnit = allAnnotations.Where(an => an.Variable.Unit.Id == unitID).ToList();
-                List<Annotation> matchingDatatype = allAnnotations.Where(an => an.Variable.DataAttribute.DataType.Id == datatypeID).ToList();
+                List<Annotation> matchingDatatype = allAnnotations.Where(an => an.Variable.DataType.Id == datatypeID).ToList();
 
                 foreach(Annotation an in matchingUnit)
                 {
@@ -198,20 +185,20 @@ namespace BExIS.Modules.Aam.UI.Controllers
             }
 
             //Send each of the lists to the SemanticSearchController to find the labels from the ontology
-            if (this.IsAccessible("DDM", "SemanticSearch", "FindOntologyLabels"))
-            {
-                ContentResult entityLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(entityURIs) } });
-                ContentResult charLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(charURIs) } });
-                ContentResult standardLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(standardURIs) } });
-
-                List<String> entityLabels = JsonConvert.DeserializeObject<List<String>>(entityLabelsRes.Content);
-                List<String> charLabels = JsonConvert.DeserializeObject<List<String>>(charLabelsRes.Content);
-                List<String> standardLabels = JsonConvert.DeserializeObject<List<String>>(standardLabelsRes.Content);
-
-                int numberOfModifiedLabels = am.EditLabels(entityURIs.Concat(charURIs).Concat(standardURIs).ToList(), entityLabels.Concat(charLabels).Concat(standardLabels).ToList());
-                
-                //return Content("Number of modified labels: " + numberOfModifiedLabels.ToString()); //For Debugging purposes
-            }
+            //if (this.IsAccessible("DDM", "SemanticSearch", "FindOntologyLabels"))
+            //{
+            //    ContentResult entityLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(entityURIs) } });
+            //    ContentResult charLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(charURIs) } });
+            //    ContentResult standardLabelsRes = (ContentResult) this.Run("DDM", "SemanticSearch", "FindOntologyLabels", new RouteValueDictionary() { { "serializedURIList", JsonConvert.SerializeObject(standardURIs) } });
+            //
+            //    List<String> entityLabels = JsonConvert.DeserializeObject<List<String>>(entityLabelsRes.Content);
+            //    List<String> charLabels = JsonConvert.DeserializeObject<List<String>>(charLabelsRes.Content);
+            //    List<String> standardLabels = JsonConvert.DeserializeObject<List<String>>(standardLabelsRes.Content);
+            //
+            //    int numberOfModifiedLabels = am.EditLabels(entityURIs.Concat(charURIs).Concat(standardURIs).ToList(), entityLabels.Concat(charLabels).Concat(standardLabels).ToList());
+            //    
+            //    //return Content("Number of modified labels: " + numberOfModifiedLabels.ToString()); //For Debugging purposes
+            //}
 
             return RedirectToAction("Index");
         }

@@ -2,9 +2,11 @@
 using BExIS.UI.Helpers;
 using BExIS.Utils.Config;
 using BExIS.Web.Shell.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
-using System.Configuration;
 using System.Web;
+using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -25,6 +27,14 @@ namespace BExIS.Web.Shell
 
         protected void Application_Start()
         {
+            // Json Settings
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
             // Extension of the view search engine by the case that the UI project with view can be found one directory lower.
             // This extension allows to store a complete module with libraries and Ui project in a parent directory.
             var tmp = new CustomViewEngine();
@@ -41,6 +51,8 @@ namespace BExIS.Web.Shell
 
             app = BExIS.App.Bootstrap.Application.GetInstance(RunStage.Production);
             app.Start(WebApiConfig.Register, true);
+
+
 
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
@@ -77,9 +89,9 @@ namespace BExIS.Web.Shell
             Tenant tenant = tenantResolver.Resolve(this.Request);
 
             // if the tenant has no landing page, set the application's default landing page for it.
-            GeneralSettings generalSettings = IoCFactory.Container.Resolve<GeneralSettings>();
-            var landingPage = generalSettings.GetEntryValue("landingPage").ToString();
-            tenant.LandingPage = landingPage; // checks and sets
+
+            //var landingPage = GeneralSettings.LandingPage;
+            //tenant.LandingPage = landingPage; // checks and sets
 
             this.Session.SetTenant(tenant);
         }
@@ -100,8 +112,8 @@ namespace BExIS.Web.Shell
             HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*");
             HttpContext.Current.Response.AddHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
             HttpContext.Current.Response.AddHeader("Access-Control-Allow-Headers", "content-type, append,delete,entries,foreach,get,has,keys,set,values,Authorization");
-            if (
-                   Request.HttpMethod == "OPTIONS")
+
+            if (Request.HttpMethod == "OPTIONS")
             {
                 Response.End();
             }
@@ -128,8 +140,10 @@ namespace BExIS.Web.Shell
 
         protected void Application_Error(object sender, EventArgs e)
         {
-            bool sendExceptions = false;
-            bool.TryParse(ConfigurationManager.AppSettings["SendExceptions"], out sendExceptions);
+
+
+
+            bool sendExceptions = GeneralSettings.SendExceptions;
 
             var error = Server.GetLastError();
             var code = (error is HttpException) ? (error as HttpException).GetHttpCode() : 500;

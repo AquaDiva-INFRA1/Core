@@ -1,5 +1,6 @@
 ﻿using BExIS.Dlm.Entities.Party;
 using BExIS.Dlm.Services.Party;
+using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Objects;
 using System;
 using System.Collections.Generic;
@@ -52,16 +53,16 @@ namespace BExIS.Modules.Bam.UI.Helpers
             using (var featureManager = new FeatureManager())
             {
                 var root = featureManager.FindRoots().FirstOrDefault();
-                if (featureManager.Exists("Business administration module (BAM)", root))
-                    return false;
-                var bamFeature = featureManager.Create("Business administration module (BAM)", "", root);
-                if (featureManager.Exists("Party", bamFeature))
-                    return true;
-                var partyFeature = featureManager.Create("Party", "", bamFeature);
+
+                Feature bamFeature = featureManager.Features.FirstOrDefault(f => f.Name.Equals("Business administration module (BAM)") && (f.Parent.Id == root.Id));
+                if (bamFeature == null) bamFeature = featureManager.Create("Business administration module (BAM)", "", root);
+
+                Feature partyFeature = featureManager.Features.FirstOrDefault(f => f.Name.Equals("Party") && (f.Parent.Id == root.Id));
+                if (partyFeature == null) featureManager.Create("Party", "", bamFeature);
 
                 var partyOperation = operationManager.Create("BAM", "Party", "*", partyFeature);
-                var partyServiceOperation = operationManager.Create("BAM", "PartyService", "*");
-                var partyHelp = operationManager.Create("BAM", "Help", "*");
+                var partyServiceOperation = operationManager.Create("BAM", "PartyService", "*",partyFeature);
+                var partyHelp = operationManager.Create("BAM", "Help", "*", partyFeature);
                 return true;
             }
         }

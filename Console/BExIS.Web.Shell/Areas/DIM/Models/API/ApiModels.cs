@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Linq;
-using System.Web;
-using BExIS.Dlm.Entities.DataStructure;
 
 namespace BExIS.Modules.Dim.UI.Models.Api
 {
     public class ApiSimpleDatasetModel
     {
         public long Id { get; set; }
+        public string Title { get; set; }
         public List<ApiSimpleDatasetVersionModel> Versions { get; set; }
 
         public ApiSimpleDatasetModel()
@@ -24,7 +22,9 @@ namespace BExIS.Modules.Dim.UI.Models.Api
         public long Id { get; set; }
         public long Number { get; set; }
     }
-
+    /// <summary>
+    /// Return model of Dataset API
+    /// </summary>
     public class ApiDatasetModel
     {
         public long Id { get; set; }
@@ -63,13 +63,28 @@ namespace BExIS.Modules.Dim.UI.Models.Api
         }
     }
 
+    public class Citator
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        public Citator()
+        {
+            FirstName = "";
+            LastName = "";
+        }
+
+    }
+
     public class ApiSimpleAttachmentModel
     {
         public long Id { get; set; }
         public string Name { get; set; }
         public string MimeType { get; set; }
     }
-
+    /// <summary>
+    /// Return model of Data Statistic API
+    /// </summary>
     public class ApiDataStatisticModel
     {
         public long VariableId { get; set; }
@@ -89,12 +104,43 @@ namespace BExIS.Modules.Dim.UI.Models.Api
 
     }
 
+    /// <summary>
+    /// Return model of Metadata Statistic API
+    /// </summary>
     public class PostApiMetadataStatisticModel
     {
-        public string xpath { get; set; }
-        public string[] datasetIds { get; set; }
-        public string[] metadatastructureIds { get; set; }
-        public string regex { get; set; }
+        /// <summary>
+        /// Xpath e.g. Metadata/methods/methodsType/measurements/measurementsType/sampleAnalysis/
+        /// </summary>
+        public string Xpath { get; set; }
+        /// <summary>
+        /// List of Dataset version IDs to include instead of dataset id (latests versions)
+        /// </summary>
+        public string[] DatasetVersionIdsInclude { get; set; }
+        /// <summary>
+        /// List of Dataset IDs to include 
+        /// </summary>
+        public string[] DatasetIdsInclude { get; set; }
+        /// <summary>
+        /// List of Dataset IDs to exclude 
+        /// </summary>
+        public string[] DatasetIdsExclude { get; set; }
+        /// <summary>
+        /// List of Metdata structure IDs to include 
+        /// </summary>
+        public string[] MetadatastructureIdsInclude { get; set; }
+        /// <summary>
+        /// List of Metdata structure IDs to exclude
+        /// </summary>
+        public string[] MetadatastructureIdsExclude { get; set; }
+        /// <summary>
+        /// Regex to define text to include
+        /// </summary>
+        public string RegexInclude { get; set; }
+        /// <summary>
+        /// Regex to define text to exclude
+        /// </summary>
+        public string RegexExclude { get; set; }
 
     }
 }

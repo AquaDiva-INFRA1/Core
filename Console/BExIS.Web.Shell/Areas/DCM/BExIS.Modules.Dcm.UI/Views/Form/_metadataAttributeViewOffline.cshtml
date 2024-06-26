@@ -1,0 +1,120 @@
+﻿@model BExIS.Modules.Dcm.UI.Models.Metadata.MetadataAttributeModel
+@using BExIS.Modules.Dcm.UI.Models
+@using BExIS.Utils.WebHelpers
+@using Telerik.Web.Mvc.UI
+@using System.Text.RegularExpressions
+
+@{
+    string id = Model.Id + "_" + Model.Parent.Id + "_" + Model.Number + "_" + Model.ParentModelNumber + "_" + Model.NumberOfSourceInPackage + "_" + Model.ParentStepId;
+    string idInput = id + "_Input";
+    string idAdd = id + "_Add";
+    string idRemove = id + "_Remove";
+    string idUp = id + "_Up";
+    string idDown = id + "_Down";
+
+    bool hasErrors = false;
+    string errorMessage = "";
+    string errorClass = "";
+    string lockedClass = "";
+    bool locked = false;
+    bool showOptional = false;
+
+    string displayName = "";
+
+    string autoCompleteType = "";
+
+    // Add before every uppercase word empty space (e.g. LastNameTEST -> Last Name TEST)
+    displayName = Regex.Replace(Model.DisplayName, "((?<=[a-z])[A-Z])", " $1");
+
+    // split at " "
+    string[] wordList = displayName.Split(new char[0]);
+
+    // lowercase all words, except of uppercase abbreviations (e.g. URL)
+    for (int i = 0; i < wordList.Length; i++)
+    {
+        if (wordList[i].ToUpper() != wordList[i])
+        {
+            wordList[i] = wordList[i].ToLower();
+        }
+    }
+
+    displayName = String.Join(" ", wordList);
+
+    // Make first char uppercase
+    displayName = char.ToUpper(displayName[0]) + displayName.Substring(1);
+
+    if (Model.EntityMappingExist)
+    {
+        autoCompleteType = "Entity";
+    }
+    else if (Model.PartyMappingExist)
+    {
+        autoCompleteType = "PartyCustomType";
+    }
+}
+
+@if (Model.Number > 1)
+{
+    displayName += " " + Model.Number;
+}
+
+@if (ViewData.Keys.Contains("Locked") || Model.Locked)
+{
+    // check global locked
+    if (ViewData.Keys.Contains("Locked")) { locked = (bool)ViewData["Locked"]; }
+    // check attr locked
+    if (!locked && Model.Locked) { locked = Model.Locked; }
+
+    lockedClass = "bx-disabled";
+}
+
+<div id="@id" class="metadataAttributeContent">
+    <table>
+        <tr>
+            <td class="metadataAttributeLabel">
+                @if (Model.MinCardinality > 0)
+                {
+                    <b title="This field is required" style="color:red">*</b>
+                }
+
+                <b title="@Model.Discription">@displayName</b>
+
+            </td>
+            <td class="metadataAttributeInput">
+
+                @if (Model.Value != null)
+                {
+                    @Html.DisplayWithLinksFor(m => m.Value)
+                }
+
+
+            </td>
+            <td class="metadataAttributeOption">
+
+                <table id="attributeOptionTable">
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(Model.Discription))
+                            {
+                                <button type="button" title="@Model.Discription" class="bx-function bx-disabled">?</button>
+                            }
+
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        @foreach (var parameter in Model.Parameters)
+        {
+            <tr>
+                <td>
+                    <!--offset-->
+                </td>
+                <td class="metadataAttributeInput">
+                    @Html.Partial("_metadataParameterViewOffline", parameter)
+                </td>
+                <td></td>
+            </tr>
+        }
+    </table>
+</div>

@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Data;
+﻿using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Dlm.Entities.Data;
-using Vaiona.Utils.Cfg;
-using System.IO;
+using BExIS.Dlm.Services.TypeSystem;
 using BExIS.IO;
 using BExIS.IO.DataType.DisplayPattern;
-using BExIS.Dlm.Services.DataStructure;
-using System.Text;
-using BExIS.Dlm.Services.TypeSystem;
+using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
+using System.IO;
+using System.Text;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.Ddm.UI.Models
 {
@@ -112,7 +109,7 @@ namespace BExIS.Modules.Ddm.UI.Models
         {
             List<string> cv = new List<string>();
 
-                
+
             if (dataStructure != null)
             {
                 foreach (var variable in dataStructure.Variables)
@@ -121,9 +118,9 @@ namespace BExIS.Modules.Ddm.UI.Models
                     foreach (var missingValue in variable.MissingValues)
                     {
 
-                        if (DataTypeUtility.GetTypeCode(variable.DataAttribute.DataType.SystemType) == DataTypeCode.DateTime && DataTypeDisplayPattern.Materialize(variable.DataAttribute.DataType.Extra) != null)
+                        if (DataTypeUtility.GetTypeCode(variable.DataType.SystemType) == DataTypeCode.DateTime && variable.DisplayPatternId>=0)
                         {
-                            DataTypeDisplayPattern ddp = DataTypeDisplayPattern.Materialize(variable.DataAttribute.DataType.Extra);
+                            DataTypeDisplayPattern ddp = DataTypeDisplayPattern.Get(variable.DisplayPatternId);
                             DateTime dateTime;
                             if (DateTime.TryParse(missingValue.Placeholder, new CultureInfo("en-US", false), DateTimeStyles.NoCurrentDateDefault, out dateTime))
                             {
@@ -139,7 +136,7 @@ namespace BExIS.Modules.Ddm.UI.Models
 
                     //add also the case of the optional field
                     //replace the value with EMPTY String
-                    sb.Append(" |" + getMaxvalueOfType(variable.DataAttribute.DataType.SystemType));
+                    sb.Append(" |" + getMaxvalueOfType(variable.DataType.SystemType));
 
                     cv.Add(sb.ToString());
                 }
@@ -176,10 +173,10 @@ namespace BExIS.Modules.Ddm.UI.Models
                 string unit = "";
                 string column = variable.Label;
 
-                DataType dt = variable.DataAttribute.DataType;
+                DataType dt = variable.DataType;
 
                 // add display pattern to DisplayFormatObject;
-                DataTypeDisplayPattern ddp = DataTypeDisplayPattern.Materialize(dt.Extra);
+                DataTypeDisplayPattern ddp = DataTypeDisplayPattern.Get(variable.DisplayPatternId);
                 if (ddp != null)
                 {
                     format = ddp.StringPattern;
@@ -194,11 +191,11 @@ namespace BExIS.Modules.Ddm.UI.Models
                 }
                 else
                 {
-                    if (variable.DataAttribute.Unit != null &&
-                        !string.IsNullOrEmpty(variable.DataAttribute.Unit.Abbreviation) &&
-                        !variable.DataAttribute.Unit.Name.Equals("None"))
+                    if (variable.VariableTemplate.Unit != null &&
+                        !string.IsNullOrEmpty(variable.VariableTemplate.Unit.Abbreviation) &&
+                        !variable.VariableTemplate.Unit.Name.Equals("None"))
                     {
-                        unit = variable.DataAttribute.Unit.Abbreviation;
+                        unit = variable.Unit.Abbreviation;
                     }
                 }
 
@@ -209,7 +206,7 @@ namespace BExIS.Modules.Ddm.UI.Models
             return tmp;
         }
 
-        
+
     }
 
     public enum DataStructureType

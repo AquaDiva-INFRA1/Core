@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BExIS.Modules.Ddm.UI.Models
 {
@@ -20,9 +20,9 @@ namespace BExIS.Modules.Ddm.UI.Models
         [Required(ErrorMessage = "Please select a Metadata link.")]
         public List<string> metadataNames { get; set; }
 
-        [Display(Name = "Variable Node")]
+        [Display(Name = "Entity Node")]
         [Required(ErrorMessage = "Please select a Variable name.")]
-        public List<string> Variables { get; set; }
+        public List<string> Entities { get; set; }
 
         [Display(Name = "Project Node")]
         [Required(ErrorMessage = "Please select a group name.")]
@@ -84,9 +84,10 @@ namespace BExIS.Modules.Ddm.UI.Models
             this.norm = true;
             this.boost = 5;
             this.metadataNames = new List<string>();
-            this.Variables = new List<string>();
+            this.Entities = new List<string>();
             this.Projects = new List<string>();
         }
+
 
         public static SearchAttribute GetSearchAttribute(SearchAttributeViewModel searchAttributeViewModel)
         {
@@ -97,8 +98,9 @@ namespace BExIS.Modules.Ddm.UI.Models
             sa.sourceName = Regex.Replace(searchAttributeViewModel.displayName, "[^0-9a-zA-Z]+", "");
 
             sa.metadataName = string.Join(",", searchAttributeViewModel.metadataNames?.ToArray() ?? new List<string>().ToArray());
-            sa.variables = string.Join(",", searchAttributeViewModel.Variables?.ToArray() ?? new List<string>().ToArray());
+            sa.entities = string.Join(",", searchAttributeViewModel.Entities?.ToArray() ?? new List<string>().ToArray());
             sa.projects = string.Join(",", searchAttributeViewModel.Projects?.ToArray() ?? new List<string>().ToArray());
+
 
             //types
             sa.dataType = SearchAttribute.GetDataType(searchAttributeViewModel.dataType);
@@ -132,7 +134,7 @@ namespace BExIS.Modules.Ddm.UI.Models
             //names
             sa.displayName = searchAttribute.displayName;
             sa.metadataNames.AddRange(searchAttribute.metadataName.Split(','));
-            sa.Variables.AddRange(searchAttribute.variables.Split(','));
+            sa.Entities.AddRange(searchAttribute.entities.Split(','));
             sa.Projects.AddRange(searchAttribute.projects.Split(','));
             //types
             sa.dataType = SearchAttribute.GetDataTypeAsDisplayString(searchAttribute.dataType);

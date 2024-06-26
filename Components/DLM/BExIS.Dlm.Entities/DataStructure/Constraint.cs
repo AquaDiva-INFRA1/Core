@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -26,14 +27,19 @@ namespace BExIS.Dlm.Entities.DataStructure
         public virtual ConstraintProviderSource Provider { get; set; }
 
         /// <summary>
-        /// If the constraint is defined externally, the provider is supposed to have all the information needed to access the external source in order to obtain the required constraint attributes.
+        /// If the constraint is defined internaly/externally, the provider is supposed to have all the information needed to access the external source in order to obtain the required constraint attributes.
         /// </summary>
-        public virtual string ConstraintSelectionPredicate { get; set; } // only for external providers
+        public virtual string ConstraintSelectionPredicate { get; set; }
 
         /// <summary>
         /// the culture the constraint applies to. i.e., a Regex to match a taxon name in German may differ from its equivalent in English, ...
         /// </summary>
         public virtual string CultureId { get; set; }
+
+        /// <summary>
+        /// A free form name of the constraint
+        /// </summary>
+        public virtual string Name { get; set; }
 
         /// <summary>
         /// A free form description of the constraint
@@ -60,6 +66,12 @@ namespace BExIS.Dlm.Entities.DataStructure
         /// </summary>
         public virtual string NegatedMessageTemplate { get; set; }
 
+        public virtual DateTime CreationDate { get; set; }
+
+        public virtual DateTime LastModified { get; set; }
+
+        public virtual long LastModifiedUserRef { get; set; }
+
         #endregion
 
         #region Associations
@@ -69,9 +81,11 @@ namespace BExIS.Dlm.Entities.DataStructure
         /// </summary>
         public virtual DataContainer DataContainer { get; set; }
 
+        public virtual ICollection<Variable> VariableConstraints { get; set; }
+
         #endregion
 
-        #region Mathods
+        #region Methods
         /// <summary>
         /// The method checks whether the input <paramref name="data"/> satisfies the constraint. To be implemented by concrete sub-classes.
         /// </summary>
@@ -172,6 +186,7 @@ namespace BExIS.Dlm.Entities.DataStructure
         {
             defaultMessageTemplate = "Provided value is not a domain item. The value should be one of these items: {0}.";
             defaultNegatedMessageTemplate = "Provided value is a domain item, but the constraint is negated. The value should not be one of these items: {0}.";
+            Items = new List<DomainItem>();
         }
 
         public DomainConstraint(ConstraintProviderSource provider, string constraintSelectionPredicate, string cultureId
@@ -202,7 +217,7 @@ namespace BExIS.Dlm.Entities.DataStructure
         /// <param name="auxiliary"></param>
         public override bool IsSatisfied(object data, object auxiliary = null)
         {
-            if(Items == null || !Items.Any())this.Materialize(); // test it
+            if (Items == null || !Items.Any()) this.Materialize(); // test it
 
             // Domain items are stored as string, so instead of converting them to the containers data type, it is easier and faster to convert the input data to string
             // it computes the XOR between the positive clause of the constraint and the "Negated" Boolean,
@@ -315,10 +330,11 @@ namespace BExIS.Dlm.Entities.DataStructure
         {
             defaultMessageTemplate = "Provided value does not match the pattern. The value should match {0} {1}.";
             defaultNegatedMessageTemplate = "Provided value matches the pattern, but the constraint is negated. The value should not match {0} {1}.";
+            CaseSensitive = true;
         }
 
         public PatternConstraint(ConstraintProviderSource provider, string constraintSelectionPredicate, string cultureId
-            , string description, bool negated, string context, string messageTemplate, string negatedMessageTemplate, string matchingPhrase, bool caseSensitive)
+            , string description, bool negated, string context, string messageTemplate, string negatedMessageTemplate, string matchingPhrase, bool caseSensitive=true)
         {
             Contract.Requires(!string.IsNullOrWhiteSpace(matchingPhrase));
 
@@ -348,6 +364,7 @@ namespace BExIS.Dlm.Entities.DataStructure
             else
                 return (Negated ^ (Regex.IsMatch(data.ToString(), MatchingPhrase)));
         }
+
 
         #endregion
     }
@@ -704,7 +721,7 @@ namespace BExIS.Dlm.Entities.DataStructure
             CultureId = cultureId;
             Description = description;
             Negated = negated;
-            Context = context != null ? context : "Default";
+            Context = context ?? "Default";
             MessageTemplate = messageTemplate;
             NegatedMessageTemplate = negatedMessageTemplate;
             Operator = comparisonOperator;
@@ -835,7 +852,8 @@ namespace BExIS.Dlm.Entities.DataStructure
     /// </summary>
     public enum ConstraintProviderSource
     {
-        Internal, External
+        Internal = 0, 
+        External = 1,
     }
 
     /// <summary>
@@ -861,4 +879,47 @@ namespace BExIS.Dlm.Entities.DataStructure
     {
         Absolute, Ratio,
     }
+
+    public class ConstraintSelectionPredicate
+    {
+        public long DatasetId { get; set; }
+        public long DatasetVersionId { get; set; }
+        public long DatasetVersionNumber { get; set; }
+        public long TagId { get; set; }
+        public long VariableId { get; set; }
+        public string Url { get; set; }
+
+        public ConstraintSelectionPredicate Materialise(string Json)
+        {
+            try
+            {
+                ConstraintSelectionPredicate constraintSelectionPredicate = JsonConvert.DeserializeObject<ConstraintSelectionPredicate>(Json);
+                DatasetId = constraintSelectionPredicate.DatasetId;
+                DatasetVersionId = constraintSelectionPredicate.DatasetVersionId;
+                DatasetVersionNumber = constraintSelectionPredicate.DatasetVersionNumber;
+                TagId = constraintSelectionPredicate.TagId;
+                VariableId = constraintSelectionPredicate.VariableId;
+                Url = constraintSelectionPredicate.Url;
+
+                return this;
+            }
+            catch 
+            { 
+                return null;
+            }
+        }
+
+        public string GetJson()
+        {
+            try
+            {
+                return JsonConvert.SerializeObject(this);
+            }
+            catch 
+            { 
+                return null;
+            }
+        }
+    }
+
 }
