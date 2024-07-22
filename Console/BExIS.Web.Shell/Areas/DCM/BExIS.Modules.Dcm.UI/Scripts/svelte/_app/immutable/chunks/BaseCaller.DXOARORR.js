@@ -1,0 +1,1 @@
+import"./index.KweEQ9zd.js";import{A as r,h as s}from"./eslint4b.es.CUHVcEDL.js";const i=async(o,t=!0)=>{var e,n;t==!0?window!=null&&s!=null&&o!=null&&((e=window.open(s+o,"_self"))==null||e.focus()):(n=window.open(o,"_blank"))==null||n.focus()},l=async()=>{try{return(await r.get("/tokens/get")).data}catch(o){throw console.error(o),o}};export{i as a,l as g};

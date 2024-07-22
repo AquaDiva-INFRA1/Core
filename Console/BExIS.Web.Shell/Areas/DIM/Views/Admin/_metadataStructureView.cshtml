@@ -11,7 +11,6 @@
     string preloader_id = "preloader_" + id;
     string tableId = "table_" + Model.Id.ToString();
 
-
 }
 <div id="@id" class="dim-export-metadata" exportIAvailable="@Model.ExportIsAvailable.ToString()" button="@convert_id">
 
@@ -63,7 +62,6 @@
                     </td>
                 </tr>
             }
-
         </tbody>
     </table>
 </div>
@@ -74,7 +72,7 @@
         display:none;
     }
 
-    #datasetversionsConvertGrid 
+    #datasetversionsConvertGrid
     {
         text-align:left;
     }
@@ -84,10 +82,7 @@
         padding-left:0;
         text-align:center;
     }
-    
-
 </style>
-
 
 <script type="text/javascript">
 
@@ -98,7 +93,6 @@
             document.getElementById("MetadataStructuresDic").style.display = 'none';
         }
     });
-
 
     function setExportBT(e)
     {
@@ -112,11 +106,9 @@
         console.log(exportIsAvailable);
         console.log(bt);
 
-
         if ($("#" + id + " input:checkbox:checked").length > 0 && exportIsAvailable == "True") {
             console.log("some are checked");
 
-            
             $(bt).removeAttr("disabled");
             $(bt).removeClass("bx-disabled");
 
@@ -137,7 +129,6 @@
         setExportBT(e);
     }
 
-
     function dim_OnClickConvert(obj)
     {
         var selectedDatasetIds = "";
@@ -155,8 +146,6 @@
                 $(this).closest("tr").find(".download-button").preloader(12, "Converting dataset " + this.id);
             }
         })
-
-
 
         $.post('@Url.Action("ConvertSelectedDatasetVersion", "Admin", new { area="DIM"})', { Id: id, SelectedDatasetIds: selectedDatasetIds }, function (e) {
 

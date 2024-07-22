@@ -38,7 +38,8 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <Use64BitIISExpress />
+    <Use64BitIISExpress>
+    </Use64BitIISExpress>
     <PostSharpHostConfigurationFile>web.config</PostSharpHostConfigurationFile>
     <TypeScriptEnabled>false</TypeScriptEnabled>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
@@ -70,18 +71,13 @@
     <TypeScriptCompile Remove="*" />
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="ChoETL, Version=1.2.1.64, Culture=neutral, PublicKeyToken=8138733ed69d3172, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ChoETL.1.2.1.64\lib\net45\ChoETL.dll</HintPath>
-    </Reference>
-    <Reference Include="ChoETL.JSON, Version=1.2.1.64, Culture=neutral, PublicKeyToken=f6c38caf4a08e6a4, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\ChoETL.JSON.1.2.1.64\lib\net45\ChoETL.JSON.dll</HintPath>
-    </Reference>
-    <Reference Include="CommonServiceLocator, Version=2.0.6.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CommonServiceLocator.2.0.6\lib\net45\CommonServiceLocator.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="BeginCollectionItem, Version=1.2.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\BeginCollectionItem.1.2.1.0\lib\net35\BeginCollectionItem.dll</HintPath>
+    </Reference>
+    <Reference Include="CommonServiceLocator, Version=2.0.7.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\CommonServiceLocator.2.0.7\lib\net48\CommonServiceLocator.dll</HintPath>
     </Reference>
     <Reference Include="DataAnnotationsExtensions, Version=5.0.1.27, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\DataAnnotationsExtensions.5.0.1.27\lib\NETFramework40\DataAnnotationsExtensions.dll</HintPath>
@@ -109,18 +105,16 @@
     </Reference>
     <Reference Include="Glimpse.Mvc5, Version=1.5.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Glimpse.Mvc5.1.5.3\lib\net45\Glimpse.Mvc5.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.11.43.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\HtmlAgilityPack.1.11.43\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="Iesi.Collections, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Iesi.Collections.4.0.4\lib\net461\Iesi.Collections.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.Identity.Core.2.2.3\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.Identity.Core.2.2.4\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Owin, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.Identity.Owin.2.2.1\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.Identity.Owin.2.2.4\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Extensions.Configuration.Abstractions, Version=7.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
@@ -132,11 +126,11 @@
     <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.IdentityModel.JsonWebTokens.5.3.0\lib\net461\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.IdentityModel.Logging, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.IdentityModel.Logging.5.3.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.IdentityModel.Logging.5.7.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.IdentityModel.Tokens.5.3.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.IdentityModel.Tokens.5.7.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin, Version=4.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Owin.4.2.2\lib\net45\Microsoft.Owin.dll</HintPath>
@@ -168,6 +162,7 @@
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebHelpers.3.2.3\lib\net45\Microsoft.Web.Helpers.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.2.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -178,35 +173,26 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Npgsql, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Npgsql.4.0.0\lib\net451\Npgsql.dll</HintPath>
+    <Reference Include="Npgsql, Version=4.0.16.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Npgsql.4.0.16\lib\net451\Npgsql.dll</HintPath>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="PresentationFramework" />
     <Reference Include="Swashbuckle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cd1bb07a5ac7c7bc, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Swashbuckle.Core.5.6.0\lib\net40\Swashbuckle.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
-    <Reference Include="System.CodeDom, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.CodeDom.4.4.0\lib\net461\System.CodeDom.dll</HintPath>
+    <Reference Include="System.Collections.Immutable, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Collections.Immutable.8.0.0\lib\net462\System.Collections.Immutable.dll</HintPath>
     </Reference>
-    <Reference Include="System.Collections.Immutable, Version=1.2.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Collections.Immutable.1.7.1\lib\net461\System.Collections.Immutable.dll</HintPath>
-    </Reference>
-    <Reference Include="System.ComponentModel.Annotations, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ComponentModel.Annotations.4.4.1\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Configuration.ConfigurationManager, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Configuration.ConfigurationManager.4.4.1\lib\net461\System.Configuration.ConfigurationManager.dll</HintPath>
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ComponentModel.Annotations.5.0.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data.SqlClient, Version=4.2.0.2, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.Data.SqlClient.4.4.3\lib\net461\System.Data.SqlClient.dll</HintPath>
-    </Reference>
     <Reference Include="System.IdentityModel.Tokens.Jwt, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.IdentityModel.Tokens.Jwt.5.3.0\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
@@ -216,9 +202,6 @@
       <HintPath>..\..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http" />
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
@@ -243,13 +226,13 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
@@ -262,27 +245,37 @@
     </Reference>
     <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="System.Web.Routing" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+      <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Telerik.Web.Mvc, Version=2013.2.611.340, Culture=neutral, PublicKeyToken=29ac1a93ec063d92, processorArchitecture=MSIL">
+    <Reference Include="Telerik.Web.Mvc">
       <HintPath>..\..\packages\TelerikMvcExtensions.2013.2.611\lib\net40\Telerik.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
@@ -293,9 +286,11 @@
     </Reference>
     <Reference Include="WebMatrix.Data, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebPages.Data.3.2.3\lib\net45\WebMatrix.Data.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="WebMatrix.WebData, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebPages.WebData.3.2.3\lib\net45\WebMatrix.WebData.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -622,149 +617,6 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\AutoFill\css\autoFill.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Buttons\css\buttons.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\ColReorder\css\colReorder.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedColumns\css\fixedColumns.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\FixedHeader\css\fixedHeader.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\KeyTable\css\keyTable.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Responsive\css\responsive.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\RowReorder\css\rowReorder.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Scroller\css\scroller.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\extensions\Select\css\select.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.bootstrap.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.bootstrap.min.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.bootstrap4.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.bootstrap4.min.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.foundation.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.foundation.min.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.jqueryui.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.jqueryui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.material.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.material.min.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.semanticui.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.semanticui.min.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.uikit.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\dataTables.uikit.min.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\jquery.dataTables.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\jquery.dataTables.min.css" />
-    <Content Include="Content\DataTables-1.10.12\media\css\jquery.dataTables_themeroller.css" />
-    <Content Include="Content\DataTables-1.10.12\media\images\favicon.ico" />
-    <Content Include="Content\DataTables-1.10.12\media\images\sort_asc.png" />
-    <Content Include="Content\DataTables-1.10.12\media\images\sort_asc_disabled.png" />
-    <Content Include="Content\DataTables-1.10.12\media\images\sort_both.png" />
-    <Content Include="Content\DataTables-1.10.12\media\images\sort_desc.png" />
-    <Content Include="Content\DataTables-1.10.12\media\images\sort_desc_disabled.png" />
     <Content Include="Content\DataTables\extensions\AutoFill\css\autoFill.bootstrap.css" />
     <Content Include="Content\DataTables\extensions\AutoFill\css\autoFill.bootstrap.min.css" />
     <Content Include="Content\DataTables\extensions\AutoFill\css\autoFill.bootstrap4.css" />
@@ -959,7 +811,7 @@
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="General.Settings.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="HomePage\Client Scripts\mvcfoolproof.unobtrusive.js" />
     <Content Include="HomePage\Client Scripts\mvcfoolproof.unobtrusive.min.js" />
@@ -1307,7 +1159,6 @@
     <Content Include="Scripts\DataTables-1.10.12\extensions\RowReorder\Readme.md" />
     <Content Include="Scripts\DataTables-1.10.12\extensions\Scroller\Readme.md" />
     <Content Include="Scripts\DataTables-1.10.12\extensions\Select\Readme.md" />
-    <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="App_GlobalResources\UploadLocalization.zh-CN.resx">
       <Generator>GlobalResourceProxyGenerator</Generator>
       <LastGenOutput>UploadLocalization.zh-CN.designer.cs</LastGenOutput>
@@ -1390,10 +1241,7 @@
     <Content Include="Scripts\handsontable\handsontable.min.js" />
     <Content Include="Scripts\isotope.pkgd.min.js" />
     <Content Include="Scripts\jqBootstrapValidation.js" />
-    <Content Include="Scripts\jquery-1.10.2.js" />
-    <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
-    <Content Include="Scripts\jquery-2.1.4.min.map" />
     <None Include="Scripts\jquery-2.2.4.intellisense.js" />
     <None Include="Scripts\jquery-1.4.4-vsdoc.js" />
     <Content Include="Scripts\jquery-1.4.4.js" />
@@ -1401,16 +1249,10 @@
     <Content Include="Scripts\jquery-1.7.1.min.js" />
     <Content Include="Scripts\jquery-2.0.3.js" />
     <Content Include="Scripts\jquery-2.0.3.min.js" />
-    <None Include="Scripts\jquery-2.1.3.intellisense.js" />
-    <None Include="Scripts\jquery-2.1.4.intellisense.js" />
-    <Content Include="Scripts\jquery-2.1.4.js" />
-    <Content Include="Scripts\jquery-2.1.4.min.js" />
     <Content Include="Scripts\jquery-2.2.4.js" />
     <Content Include="Scripts\jquery-2.2.4.min.js" />
     <Content Include="Scripts\jquery-migrate-1.2.1.js" />
     <Content Include="Scripts\jquery-migrate-1.2.1.min.js" />
-    <Content Include="Scripts\jquery-migrate-1.4.1.js" />
-    <Content Include="Scripts\jquery-migrate-1.4.1.min.js" />
     <Content Include="Scripts\jquery-ui-1.7.1.min.js" />
     <Content Include="Scripts\jquery.dataTables.js" />
     <Content Include="Scripts\jquery.dataTables.min.js" />
@@ -1454,6 +1296,33 @@
     <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\session.warning.js" />
+    <Content Include="Scripts\svelte\favicon.png" />
+    <Content Include="Scripts\svelte\index.html" />
+    <Content Include="Scripts\svelte\settings\index.html" />
+    <Content Include="Scripts\svelte\test\index.html" />
+    <Content Include="Scripts\svelte\versions\index.html" />
+    <Content Include="Scripts\svelte\_app\env.js" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\0.hAaJu2YL.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.DMKri8do.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.bRh5xSvE.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.Cirlo5Z8.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.DCYlEL2m.css" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.BBbHeC4Y.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.CFwvHCqb.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.Bbf2B3dJ.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.BdgOChyx.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.DvApBGQX.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.D3weHRKQ.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.C6hznozR.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.BeDNm3mH.js" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.jIA0tWPP.js" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.zsKet6yH.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\0.CBPLc9M2.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.CJAGru2i.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\2.D7KOUdGp.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\3.zPcXZIrH.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\4.BXN2fv8O.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\5.lqvwVADA.js" />
     <Content Include="Scripts\vis\img\network\acceptDeleteIcon.png" />
     <Content Include="Scripts\vis\img\network\addNodeIcon.png" />
     <Content Include="Scripts\vis\img\network\backIcon.png" />
@@ -1638,11 +1507,68 @@
     <Content Include="Scripts\README.md" />
     <Content Include="Scripts\vis\vis.js.map" />
     <Content Include="Scripts\vis\vis.map" />
+    <Content Include="Scripts\svelte\.vite\manifest.json" />
+    <Content Include="Scripts\svelte\.vite\manifest.json.br" />
+    <Content Include="Scripts\svelte\.vite\manifest.json.gz" />
+    <Content Include="Scripts\svelte\index.html.br" />
+    <Content Include="Scripts\svelte\index.html.gz" />
+    <Content Include="Scripts\svelte\settings\index.html.br" />
+    <Content Include="Scripts\svelte\settings\index.html.gz" />
+    <Content Include="Scripts\svelte\test\index.html.br" />
+    <Content Include="Scripts\svelte\test\index.html.gz" />
+    <Content Include="Scripts\svelte\versions\index.html.br" />
+    <Content Include="Scripts\svelte\versions\index.html.gz" />
+    <Content Include="Scripts\svelte\_app\env.js.br" />
+    <Content Include="Scripts\svelte\_app\env.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\0.hAaJu2YL.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\0.hAaJu2YL.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.DMKri8do.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.DMKri8do.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.bRh5xSvE.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.bRh5xSvE.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.Cirlo5Z8.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.Cirlo5Z8.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.DCYlEL2m.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.DCYlEL2m.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.BBbHeC4Y.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.BBbHeC4Y.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.CFwvHCqb.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.CFwvHCqb.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.Bbf2B3dJ.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.Bbf2B3dJ.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.BdgOChyx.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.BdgOChyx.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.DvApBGQX.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.DvApBGQX.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.D3weHRKQ.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.D3weHRKQ.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.C6hznozR.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.C6hznozR.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.BeDNm3mH.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.BeDNm3mH.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.jIA0tWPP.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.jIA0tWPP.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.zsKet6yH.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.zsKet6yH.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\0.CBPLc9M2.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\0.CBPLc9M2.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.CJAGru2i.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.CJAGru2i.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\2.D7KOUdGp.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\2.D7KOUdGp.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\3.zPcXZIrH.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\3.zPcXZIrH.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\4.BXN2fv8O.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\4.BXN2fv8O.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\5.lqvwVADA.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\5.lqvwVADA.js.gz" />
+    <Content Include="Scripts\svelte\_app\version.json" />
+    <Content Include="Scripts\svelte\_app\version.json.br" />
+    <Content Include="Scripts\svelte\_app\version.json.gz" />
     <None Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\" />
-    <Folder Include="Scripts\svelte\" />
     <Folder Include="Views\Help\" />
     <Folder Include="Views\Jwt\" />
   </ItemGroup>
@@ -1818,6 +1744,90 @@
     <Content Include="Views\UiTest\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.zh-CN.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.zh-CN.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.ru-RU.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.ru-RU.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.pt-PT.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.pt-PT.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.pt-BR.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.pt-BR.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.pl-PL.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.pl-PL.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.nl-NL.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.nl-NL.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.fr-FR.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.fr-FR.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\UploadLocalization.en-US.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>UploadLocalization.en-US.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\GridLocalization.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>GridLocalization.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\GridLocalization.en-US.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>GridLocalization.en-US.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\GridLocalization.de-DE.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>GridLocalization.de-DE.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\EditorLocalization.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>EditorLocalization.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\EditorLocalization.en-US.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>EditorLocalization.en-US.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\EditorLocalization.de-DE.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>EditorLocalization.de-DE.designer.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <PropertyGroup>
@@ -1850,7 +1860,7 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>5412</DevelopmentServerPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>https://localhost:44345/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>

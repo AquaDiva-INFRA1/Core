@@ -71,7 +71,6 @@ namespace BExIS.Modules.Dcm.UI.Models
             this.annotation_suggestions = annotation_suggestions;
             this.annotation_suggestion_by_similarity = annotation_suggestion_by_similarity;
         }
-
     }
 
     public class UnitInfo : ICloneable
@@ -113,7 +112,8 @@ namespace BExIS.Modules.Dcm.UI.Models
         public String Description { get; set; }
         public String Name { get; set; }
 
-        public DataTypeInfo() { }
+        public DataTypeInfo()
+        { }
 
         public DataTypeInfo(long UnitId, long DataTypeId, String Description, String Name)
         {
@@ -133,7 +133,8 @@ namespace BExIS.Modules.Dcm.UI.Models
         public String Description { get; set; }
         public String Name { get; set; }
 
-        public DataAttrInfo() { }
+        public DataAttrInfo()
+        { }
 
         public DataAttrInfo(long id, long UnitId, long DataTypeId, String Description, String Name, long dimensionId)
         {
@@ -153,7 +154,8 @@ namespace BExIS.Modules.Dcm.UI.Models
         public int Row { get; set; }
         public string DataType { get; set; }
 
-        public ErrorInfo() { }
+        public ErrorInfo()
+        { }
 
         public ErrorInfo(Error error)
         {

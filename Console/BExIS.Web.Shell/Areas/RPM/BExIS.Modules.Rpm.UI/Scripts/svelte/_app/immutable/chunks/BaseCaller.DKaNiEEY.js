@@ -1,1 +1,0 @@
-import"./index.DWlViqnX.js";import{h as s}from"./eslint4b.es.Bsf3VjZw.js";import"./ProgressBar.svelte_svelte_type_style_lang.5nEx3X7q.js";const i=async o=>{window.open(s+o,"_self").focus()};export{i as g};

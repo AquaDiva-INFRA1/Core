@@ -1,5 +1,4 @@
-﻿
-using BExIS.Security.Entities.Authorization;
+﻿using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
@@ -17,8 +16,8 @@ namespace BExIS.Modules.Ddm.UI.Helpers
             using (OperationManager operationManager = new OperationManager())
             using (var featurePermissionManager = new FeaturePermissionManager())
             {
-
                 #region SECURITY
+
                 //workflows = größere sachen, vielen operation
                 //operations = einzelne actions
 
@@ -48,7 +47,6 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                     f.Parent.Id.Equals(DataDiscovery.Id));
 
                 if (Dashboard == null) Dashboard = featureManager.Create("Dashboard", "Dashboard", DataDiscovery);
-
 
                 Feature RequestsManage = features.FirstOrDefault(f =>
                     f.Name.Equals("Requests Manage") &&
@@ -84,7 +82,7 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 //operationManager.Create("DDM", "Help", "*", null, workflow);
                 operationManager.Create("DDM", "Help", "*", DataDiscovery);
 
-                #endregion
+                #endregion Help Workflow
 
                 #region Search Workflow
 
@@ -103,27 +101,27 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 //if (!featurePermissionManager.Exists(null, SearchFeature.Id, PermissionType.Grant))
                 //    featurePermissionManager.Create(null, SearchFeature.Id, PermissionType.Grant);
 
-                #endregion
+                #endregion Search Workflow
 
                 #region Search Admin Workflow
 
                 operationManager.Create("DDM", "Admin", "*", SearchManagementFeature);
 
-                #endregion
+                #endregion Search Admin Workflow
 
+                #region Dashboard
 
-
-                #region  Dashboard
                 operationManager.Create("DDM", "Dashboard", "*", Dashboard);
 
-                #endregion
+                #endregion Dashboard
 
                 #region Requests
+
                 operationManager.Create("DDM", "RequestsManage", "*", RequestsManage);
                 operationManager.Create("DDM", "RequestsSend", "*", RequestsSend);
 
+                #endregion Requests
 
-                #endregion
                 Feature DataTable = features.FirstOrDefault(f =>
                    f.Name.Equals("Api") &&
                    f.Parent != null &&
@@ -132,16 +130,13 @@ namespace BExIS.Modules.Ddm.UI.Helpers
                 if (RequestsManage == null) RequestsManage = featureManager.Create("Api", "Api", DataDiscovery);
 
                 operationManager.Create("Api", "DataTable", "*", DataTable);
-                #endregion
 
-
+                #endregion SECURITY
             }
-
         }
 
         public void Dispose()
         {
         }
-
     }
 }

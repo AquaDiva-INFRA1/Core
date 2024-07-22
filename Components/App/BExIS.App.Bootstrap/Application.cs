@@ -146,7 +146,6 @@ namespace BExIS.App.Bootstrap
             ModuleManager.StartModules();
 
             // generate settings
-
         }
 
         private void initTenancy()
@@ -281,7 +280,9 @@ namespace BExIS.App.Bootstrap
             filters.Add(new BExISAuthorizeAttribute());
 
             //filters.Add(new Vaiona.Web.Mvc.Filters.AuthorizationDelegationFilter(new Vaiona.Web.Mvc.Filters.IsAuthorizedDelegate(AuthorizationDelegationImplementor.CheckAuthorization)));
-            filters.Add(new HandleErrorAttribute());
+            //filters.Add(new HandleErrorAttribute());
+
+            filters.Add(new CustomExceptionFilter());
         }
 
         private void registerRoutes(RouteCollection routes)

@@ -5,13 +5,13 @@ using System.Xml;
 
 /// <summary>
 ///
-/// </summary>        
+/// </summary>
 namespace BExIS.Dcm.UploadWizard
 {
     /// <summary>
     ///
     /// </summary>
-    /// <remarks></remarks>        
+    /// <remarks></remarks>
     public class EasyUploadTaskManager : AbstractTaskManager
     {
         public static string FILENAME = "FileName";
@@ -20,20 +20,24 @@ namespace BExIS.Dcm.UploadWizard
 
         public static string IS_TEMPLATE = "IsTemplate";
 
-        //Dataset 
+        //Dataset
         public static string DATASET_ID = "DatasetId";
+
         public static string DATASET_TITLE = "DatasetTitle";
 
         // Datastructure
         public static string DATASTRUCTURE_ID = "DataStructureId";
+
         public static string DATASTRUCTURE_TITLE = "DataStructureTitle";
 
         //ResearchPlan
         public static string RESEARCHPLAN_ID = "ResearchPlanId";
+
         public static string RESEARCHPLAN_TITLE = "ResearchPlanTitle";
 
         //Easy Upload Metadata
         public static string TITLE = "Title";
+
         public static string SCHEMA = "Schema";
         public static string DESCRIPTIONTITLE = "DescriptionTitle";
 
@@ -42,6 +46,7 @@ namespace BExIS.Dcm.UploadWizard
 
         //Easy Upload Sheet Area Selection
         public static string SHEET_HEADER_AREA = "SheetHeaderArea";
+
         public static string SHEET_DATA_AREA = "SheetDataArea";
         public static string SHEET_JSON_DATA = "SheetJsonData";
         public static string ACTIVE_WOKSHEET_URI = "ActiveWorksheetUri";
@@ -49,6 +54,7 @@ namespace BExIS.Dcm.UploadWizard
 
         //Easy Upload Data Validation
         public static string VERIFICATION_AVAILABLEUNITS = "VerificationAvailableUnits";
+
         public static string VERIFICATION_HEADERFIELDS = "VerificationHeaderFields";
         public static string VERIFICATION_MAPPEDHEADERUNITS = "VerificationMappedHeaderUnits";
         public static string VERIFICATION_ATTRIBUTESUGGESTIONS = "VerificationAttributeSuggestions";
@@ -68,15 +74,14 @@ namespace BExIS.Dcm.UploadWizard
         public static string NOCONCEPTSFOUND = "NoConceptsFound"; //Structure: List<Tuple<int:headerId, String:Category>>
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
         /// <param name="xmlDocument"></param>
         /// <returns></returns>
-        public static new EasyUploadTaskManager Bind(XmlDocument xmlDocument)
+        public new static EasyUploadTaskManager Bind(XmlDocument xmlDocument)
         {
-
             XmlNodeList xmlStepInfos = xmlDocument.GetElementsByTagName("stepInfo");
 
             EasyUploadTaskManager tm = new EasyUploadTaskManager();
@@ -84,7 +89,6 @@ namespace BExIS.Dcm.UploadWizard
 
             foreach (XmlNode xmlStepInfo in xmlStepInfos)
             {
-
                 StepInfo si = new StepInfo(xmlStepInfo.Attributes.GetNamedItem("title").Value)
                 {
                     GetActionInfo = new ActionInfo
@@ -109,6 +113,5 @@ namespace BExIS.Dcm.UploadWizard
 
             return tm;
         }
-
     }
 }
