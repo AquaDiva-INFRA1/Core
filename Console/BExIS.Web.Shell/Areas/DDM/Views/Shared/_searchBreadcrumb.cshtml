@@ -3,7 +3,7 @@
 
 @model BExIS.Utils.Models.SearchModel
 
-@{ 
+@{
 
     string controller = Session["Controller"].ToString();
     List<string> ops = new List<string>() { "AND","OR" };
@@ -148,7 +148,6 @@
 
     function onSelect2(e) {
 
-
         var selectedItem = e.id
 
         var dw = $("#MoreWindow").data("tWindow");
@@ -189,6 +188,4 @@
 
             });
     }
-
-
 </script>

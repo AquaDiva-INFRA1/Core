@@ -371,7 +371,7 @@
       <SubType>Designer</SubType>
     </Content>
     <None Include="Dcm.Settings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="Dcm.Settings.xml" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -423,10 +423,13 @@
     <None Include="Properties\PublishProfiles\BexisServer_train.pubxml" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
-    <Content Include="Scripts\jquery-2.1.4.min.js" />
+    <None Include="Scripts\jquery-2.2.4.intellisense.js" />
+    <Content Include="Scripts\jquery-2.2.4.js" />
+    <Content Include="Scripts\jquery-2.2.4.min.js" />
     <Content Include="Scripts\jquery-migrate-1.2.1.js" />
-    <Content Include="Scripts\jquery-migrate-1.2.1.min.js" />
+    <Content Include="Scripts\jquery-2.2.4.min.map" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery-migrate-1.2.1.min.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
@@ -447,40 +450,40 @@
     <Content Include="Scripts\svelte\test\index.html" />
     <Content Include="Scripts\svelte\view\index.html" />
     <Content Include="Scripts\svelte\_app\env.js" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\0.C9yfffof.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\4.BJQo6MCZ.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\0.CLCMCLn_.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\4.BCX12tXG.css" />
     <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.DMKri8do.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.bRh5xSvE.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.Dr8i4W5o.css" />
     <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.Cirlo5Z8.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.BCq-Kwda.css" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_page.C5ZGgZNs.css" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.ClKx0L_4.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.Dl2HiqHD.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.DddlA3jT.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CH-8sbRF.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CiHPK1yE.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.DyWTFnni.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.Bkl3-QFW.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.BJ9KW1aQ.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.C_o3LU93.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.DDU2EjEq.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.BSaonwBy.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4f2X8Az.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4wH1ktA.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B7mFRYPc.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Table.B_UXwKgx.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\TextInput.h7YpBags.js" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.BXOqUVYh.js" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\app.qABOw-g5.js" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\start.CGDIx9uR.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\0.DN6Vjid8.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\1.CrOgtUjx.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\2.BQQZoyTc.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\3.C5xq1BKn.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\4.BLb3Oh2Y.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\5.CyGzHVBA.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\6.tb_X8p-6.js" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\7.CxD7-UTw.js" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.BVRrK7m3.css" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_page.BCX12tXG.css" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.DXOARORR.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\ContentContainer.BKGFbrTa.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\each.CfOkuAUV.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.BXKISWBc.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.CUHVcEDL.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.B3w0AL5h.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.KweEQ9zd.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.fzFdbC8L.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.423dBf39.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.CAfox-jx.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.CAAfUJZA.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.BnaZ7UQs.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.6JgGTuOt.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B-L18905.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.BRdHf4bZ.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Table.Cjp2sdtc.js" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.BFcTmUGY.js" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.BUgdzJaV.js" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.K2kxCu6W.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\0.CzNeWHf7.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.-WmKLLgo.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\2.CvmXlLQP.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\3.sgZb29n5.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\4.ew_0dcVN.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\5.Cd458sfl.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\6.BdA9NMvK.js" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\7.oN_68Fg8.js" />
     <Content Include="Views\Help\Informations.xml" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -535,7 +538,6 @@
     <Content Include="Views\View\Index.cshtml" />
     <Content Include="Views\View\_test.cshtml" />
     <Content Include="Views\Messages\Index.cshtml" />
-    <Content Include="Scripts\jquery-2.1.4.min.map" />
     <Content Include="Views\EntityTemplates\Index.cshtml" />
     <Content Include="Views\Create\Index.cshtml" />
     <Content Include="Views\Form\_bool.cshtml" />
@@ -562,74 +564,74 @@
     <Content Include="Scripts\svelte\view\index.html.gz" />
     <Content Include="Scripts\svelte\_app\env.js.br" />
     <Content Include="Scripts\svelte\_app\env.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\0.C9yfffof.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\0.C9yfffof.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\4.BJQo6MCZ.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\4.BJQo6MCZ.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\0.CLCMCLn_.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\0.CLCMCLn_.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\4.BCX12tXG.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\4.BCX12tXG.css.gz" />
     <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.DMKri8do.css.br" />
     <Content Include="Scripts\svelte\_app\immutable\assets\CodeMirror.DMKri8do.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.bRh5xSvE.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.bRh5xSvE.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.Dr8i4W5o.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\eslint4b.Dr8i4W5o.css.gz" />
     <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.Cirlo5Z8.css.br" />
     <Content Include="Scripts\svelte\_app\immutable\assets\ProgressBar.Cirlo5Z8.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.BCq-Kwda.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.BCq-Kwda.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_page.C5ZGgZNs.css.br" />
-    <Content Include="Scripts\svelte\_app\immutable\assets\_page.C5ZGgZNs.css.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.ClKx0L_4.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.ClKx0L_4.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.Dl2HiqHD.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.Dl2HiqHD.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.DddlA3jT.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.DddlA3jT.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CH-8sbRF.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CH-8sbRF.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CiHPK1yE.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\index.CiHPK1yE.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.DyWTFnni.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.DyWTFnni.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.Bkl3-QFW.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.Bkl3-QFW.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.BJ9KW1aQ.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\ProgressBar.svelte_svelte_type_style_lang.BJ9KW1aQ.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.C_o3LU93.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.C_o3LU93.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.DDU2EjEq.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.DDU2EjEq.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.BSaonwBy.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.BSaonwBy.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4f2X8Az.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4f2X8Az.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4wH1ktA.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B4wH1ktA.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B7mFRYPc.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B7mFRYPc.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Table.B_UXwKgx.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\Table.B_UXwKgx.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\TextInput.h7YpBags.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\TextInput.h7YpBags.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.BXOqUVYh.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.BXOqUVYh.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\app.qABOw-g5.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\app.qABOw-g5.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\start.CGDIx9uR.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\entry\start.CGDIx9uR.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\0.DN6Vjid8.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\0.DN6Vjid8.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\1.CrOgtUjx.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\1.CrOgtUjx.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\2.BQQZoyTc.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\2.BQQZoyTc.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\3.C5xq1BKn.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\3.C5xq1BKn.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\4.BLb3Oh2Y.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\4.BLb3Oh2Y.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\5.CyGzHVBA.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\5.CyGzHVBA.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\6.tb_X8p-6.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\6.tb_X8p-6.js.gz" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\7.CxD7-UTw.js.br" />
-    <Content Include="Scripts\svelte\_app\immutable\nodes\7.CxD7-UTw.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.BVRrK7m3.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_layout.BVRrK7m3.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_page.BCX12tXG.css.br" />
+    <Content Include="Scripts\svelte\_app\immutable\assets\_page.BCX12tXG.css.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.DXOARORR.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\BaseCaller.DXOARORR.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\ContentContainer.BKGFbrTa.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\ContentContainer.BKGFbrTa.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\each.CfOkuAUV.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\each.CfOkuAUV.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.BXKISWBc.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\entry.BXKISWBc.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.CUHVcEDL.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\eslint4b.es.CUHVcEDL.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.B3w0AL5h.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.B3w0AL5h.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.KweEQ9zd.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\index.KweEQ9zd.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.fzFdbC8L.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\MultiSelect.fzFdbC8L.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.423dBf39.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Page.423dBf39.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.CAfox-jx.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\scheduler.CAfox-jx.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.CAAfUJZA.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\SlideToggle.CAAfUJZA.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.BnaZ7UQs.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Spinner.BnaZ7UQs.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.6JgGTuOt.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.6JgGTuOt.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B-L18905.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.B-L18905.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.BRdHf4bZ.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\stores.BRdHf4bZ.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Table.Cjp2sdtc.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\Table.Cjp2sdtc.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.BFcTmUGY.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\chunks\vest.production.BFcTmUGY.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.BUgdzJaV.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\app.BUgdzJaV.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.K2kxCu6W.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\entry\start.K2kxCu6W.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\0.CzNeWHf7.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\0.CzNeWHf7.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.-WmKLLgo.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\1.-WmKLLgo.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\2.CvmXlLQP.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\2.CvmXlLQP.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\3.sgZb29n5.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\3.sgZb29n5.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\4.ew_0dcVN.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\4.ew_0dcVN.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\5.Cd458sfl.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\5.Cd458sfl.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\6.BdA9NMvK.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\6.BdA9NMvK.js.gz" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\7.oN_68Fg8.js.br" />
+    <Content Include="Scripts\svelte\_app\immutable\nodes\7.oN_68Fg8.js.gz" />
     <Content Include="Scripts\svelte\_app\version.json" />
     <Content Include="Scripts\svelte\_app\version.json.br" />
     <Content Include="Scripts\svelte\_app\version.json.gz" />
@@ -658,17 +660,17 @@
     <Reference Include="DotNetZip, Version=1.16.0.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\DotNetZip.1.16.0\lib\net40\DotNetZip.dll</HintPath>
     </Reference>
-    <Reference Include="EPPlus, Version=4.1.0.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\packages\EPPlus.4.1.0\lib\net40\EPPlus.dll</HintPath>
+    <Reference Include="EPPlus, Version=5.0.3.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\packages\EPPlus.5.0.3\lib\net45\EPPlus.dll</HintPath>
     </Reference>
     <Reference Include="F23.StringSimilarity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\packages\F23.StringSimilarity.3.0.0\lib\netstandard1.0\F23.StringSimilarity.dll</HintPath>
+      <HintPath>..\..\..\..\..\packages\F23.StringSimilarity.5.0.0\lib\netstandard2.0\F23.StringSimilarity.dll</HintPath>
     </Reference>
     <Reference Include="Iesi.Collections, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\Iesi.Collections.4.0.4\lib\net461\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\packages\Microsoft.AspNet.Identity.Core.2.2.3\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+      <HintPath>..\..\..\..\..\packages\Microsoft.AspNet.Identity.Core.2.2.4\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -683,7 +685,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\..\..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json.Schema, Version=3.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\Newtonsoft.Json.Schema.3.0.14\lib\net45\Newtonsoft.Json.Schema.dll</HintPath>
@@ -691,6 +693,7 @@
     <Reference Include="NHibernate">
       <HintPath>..\..\..\..\..\packages\NHibernate.5.3.10\lib\net461\NHibernate.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="Remotion.Linq, Version=2.2.0.0, Culture=neutral, PublicKeyToken=fee00910d6e5f53b, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\Remotion.Linq.2.2.0\lib\net45\Remotion.Linq.dll</HintPath>
     </Reference>
@@ -721,6 +724,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Globalization.Calendars, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\System.Globalization.Calendars.4.3.0\lib\net46\System.Globalization.Calendars.dll</HintPath>
       <Private>True</Private>
@@ -786,8 +790,8 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Runtime.Extensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\packages\System.Runtime.Extensions.4.3.0\lib\net462\System.Runtime.Extensions.dll</HintPath>
+    <Reference Include="System.Runtime.Extensions, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\packages\System.Runtime.Extensions.4.3.1\lib\net462\System.Runtime.Extensions.dll</HintPath>
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
@@ -801,6 +805,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
       <Private>True</Private>
@@ -827,6 +832,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -1028,10 +1034,6 @@
     <ProjectReference Include="..\..\..\..\..\Modules\DIM\BExIS.Dim.Services\BExIS.Dim.Services.csproj">
       <Project>{cac933a2-6849-4c61-82b4-cbf4052210cc}</Project>
       <Name>BExIS.Dim.Services</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\DIM\BExIS.Modules.Dim.UI.csproj">
-      <Project>{9BFFFD11-03C6-47DF-9CC9-F458A9A49377}</Project>
-      <Name>BExIS.Modules.Dim.UI</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

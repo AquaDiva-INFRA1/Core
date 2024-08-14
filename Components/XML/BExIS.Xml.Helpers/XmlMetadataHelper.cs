@@ -9,7 +9,6 @@ namespace BExIS.Xml.Helpers
 {
     public class XmlMetadataHelper
     {
-
         /// <summary>
         /// Returns a List of SearchMetadataNode
         /// for each Metadata Simple Attribute

@@ -66,9 +66,10 @@ namespace BExIS.Utils.Models
             this.Type = SearchComponentBaseType.General;
             this.IsVisible = false;
         }
-        public string Value { get; set; }
 
+        public string Value { get; set; }
     }
+
     /// <summary>
     ///
     /// </summary>
@@ -124,6 +125,7 @@ namespace BExIS.Utils.Models
         /// <remarks></remarks>
         /// <seealso cref=""/>
         public string Project { get; set; }
+
     }
 
     /// <summary>
@@ -214,6 +216,7 @@ namespace BExIS.Utils.Models
         /// <remarks></remarks>
         /// <seealso cref=""/>
         public IEnumerable<string> Values { get; set; }
+
         public string SelectedValue { get; set; }
     }
 
@@ -227,6 +230,7 @@ namespace BExIS.Utils.Models
         {
             this.IsVisible = true;
         }
+
         /// <summary>
         ///
         /// </summary>
@@ -242,6 +246,7 @@ namespace BExIS.Utils.Models
         public string DisplayName { get; set; }
 
         public bool IsVisible { get; set; }
+
         /// <summary>
         ///
         /// </summary>

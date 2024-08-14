@@ -1,9 +1,8 @@
-﻿@using BExIS.Utils.Models
+﻿﻿@using BExIS.Utils.Models
 @using Telerik.Web.Mvc.UI;
 @using SearchModel = BExIS.Utils.Models.SearchModel
 
-
-@model Tuple<SearchModel, IEnumerable<Facet>>
+@model Tuple<SearchModel,IEnumerable<Facet>>
 
 @{
 
@@ -270,7 +269,6 @@
 
             var detailWindow = $("#MoreWindow").data("tWindow");
 
-
             $.post('@Url.Action("ShowMoreWindow", @controller)',
                 { parent: parent },
                 function(response) {
@@ -280,7 +278,6 @@
                 })
 
         }
-
 
         if (parent == null) {
             if (e.item.hidden) {
@@ -294,8 +291,8 @@
         }
     }
 
-
     function onChecked(e) {
+
         var selectedItem = treeView().getItemText(e.item)
         var selectedItemValue = treeView().getItemValue(e.item)
         var parent = $(e.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
@@ -323,7 +320,6 @@
 
         refreshGrid();
     }
-
 
     function facets_disable() {
         $("#TreeView")
@@ -358,8 +354,6 @@
     function onClose() {
         $('.t-state-selected[title*="more"]').removeClass('t-state-selected');
     }
-
-
 </script>
 <style type="text/css">
 
@@ -424,15 +418,14 @@
         padding-left: 0;
         padding-right: 0;
         color: #black;
-    }
 
-        #TreeView .t-item-child:hover {
-            font-weight: normal;
-            width: 100% !important;
-            padding-left: 0;
-            padding-right: 0;
-            color: black;
-        }
+    }
+    #TreeView .t-item-child:hover {
+        font-weight: normal;
+        width: 100% !important;
+        padding-left: 0;
+        padding-right: 0;
+        color: black;
 
         #TreeView .t-item-child.t-state-selected {
             font-weight: normal;

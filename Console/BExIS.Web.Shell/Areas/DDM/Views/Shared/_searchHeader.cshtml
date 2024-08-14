@@ -31,16 +31,16 @@
     @using (Html.BeginForm(Session["SubmissionAction"].ToString(), @controller))
     {
 
-        <div id="search_Components">
-            <table>
-                <tr>
-                    <td></td>
-                    <td>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        @(Html.Telerik().DropDownList()
+   <div id="search_Components">
+       <table>
+           <tr>
+                <td></td>
+                <td>
+                </td>
+           </tr>
+           <tr>
+                <td>
+                    @(Html.Telerik().DropDownList()
                          .Name("FilterList")
                          .SelectedIndex((int)Session["SelectedIndexFilterAC"])
                          .DropDownHtmlAttributes(new { style = "height: 200px;" })
@@ -124,11 +124,10 @@
 
         <div class="search_Summery">
 
-            @*<b>@Model.ResultComponent.NumberOfHits results for search "" in
-                Category   </b> *@
-
-        </div>
-    }
+        @*<b>@Model.ResultComponent.NumberOfHits results for search "" in
+        Category   </b> *@
+   </div>
+}
 </div>
 
 <script type="text/javascript">
@@ -170,14 +169,12 @@
          }
 
      }
-
-
 </script>
 <style type="text/css">
 
-
-    #search_Components table {
-        width: auto;
+    #search_Components table
+    {
+        width:auto;
     }
 
     /* The switch - the box around the slider */

@@ -10,14 +10,17 @@ namespace BExIS.Ddm.Api
     /// <summary>
     ///
     /// </summary>
-    /// <remarks></remarks>        
+    /// <remarks></remarks>
     public interface ISearchDesigner
     {
         List<SearchAttribute> Get();
+
         void Set(List<SearchAttribute> SearchAttributeList);
+
         void Set(List<SearchAttribute> SearchAttributeList, bool includePrimaryData);
 
         void Reset();
+
         void Reload();
 
         void Dispose();
@@ -29,5 +32,6 @@ namespace BExIS.Ddm.Api
         List<Group> GetProjectsNodes();
     }
 
-    public enum IndexingAction { CREATE, UPDATE, DELETE }
+    public enum IndexingAction
+    { CREATE, UPDATE, DELETE }
 }

@@ -1,9 +1,8 @@
 ﻿using BExIS.App.Bootstrap.Attributes;
 using BExIS.Dcm.CreateDatasetWizard;
-using BExIS.Dcm.UploadWizard;
 using BExIS.Dcm.Wizard;
-using BExIS.Dim.Entities.Mapping;
-using BExIS.Dim.Helpers.Mapping;
+using BExIS.Dim.Entities.Mappings;
+using BExIS.Dim.Helpers.Mappings;
 using BExIS.Dlm.Entities.Common;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.MetadataStructure;
@@ -1419,8 +1418,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     {
                         attrModel.Locked = true;
                     }
-
-                   
                 }
                 else
                 {
@@ -1435,13 +1432,13 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     attrModel.ParentPartyId = 0;
                 }
 
-                 UpdateAttribute(
-                    usage,
-                    number,
-                    metadataAttributeUsage,
-                    Convert.ToInt32(attrModel.Number),
-                    attrModel.Value,
-                    stepModelHelper.XPath);
+                UpdateAttribute(
+                   usage,
+                   number,
+                   metadataAttributeUsage,
+                   Convert.ToInt32(attrModel.Number),
+                   attrModel.Value,
+                   stepModelHelper.XPath);
 
                 AddXmlAttribute(stepModelHelper.XPath, "partyid", partyId.ToString());
             }
@@ -2375,8 +2372,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         private BaseUsage loadUsage(long Id, Type type)
         {
             if (type.Equals(typeof(MetadataAttributeUsage)))
-                return FormHelper.CachedMetadataAttributeUsages().Where(m=>m.Id.Equals(Id)).FirstOrDefault();
-            
+                return FormHelper.CachedMetadataAttributeUsages().Where(m => m.Id.Equals(Id)).FirstOrDefault();
+
             if (type.Equals(typeof(MetadataNestedAttributeUsage)))
                 return FormHelper.CachedMetadataNestedAttributeUsages().Where(m => m.Id.Equals(Id)).FirstOrDefault();
 
@@ -2802,14 +2799,14 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             metadataXml.Save(path);
         }
 
-        private void UpdateParameter(BaseUsage attribute,int attrNumber, object value, string parentXpath, KeyValuePair<string,string> parameter)
+        private void UpdateParameter(BaseUsage attribute, int attrNumber, object value, string parentXpath, KeyValuePair<string, string> parameter)
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
             var metadataXml = getMetadata(TaskManager);
             var xmlMetadataWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add(parameter.Key,parameter.Value);
+            parameters.Add(parameter.Key, parameter.Value);
 
             metadataXml = xmlMetadataWriter.Update(metadataXml, attribute, attrNumber, null, metadataStructureUsageHelper.GetNameOfType(attribute), parentXpath, parameters);
 
@@ -2986,11 +2983,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             model.Number = number;
 
             UpdateAttribute(parentUsage, parentModelNumber, metadataAttributeUsage, number, value, stepModelHelper.XPath);
-            // update model 
+            // update model
 
             ViewData["Xpath"] = stepModelHelper.XPath; // set Xpath for idbyxapth
                                                        // read temp metadata XML
-            
+
             var metadata = getMetadata(TaskManager); // new getMetadata(TaskManager)
 
             if (stepModelHelper.Model.MetadataAttributeModels.Where(a => a.Id.Equals(id) && a.Number.Equals(number)).Count() > 0)
@@ -3057,12 +3054,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             Type type = metadataAttributeUsage == null ? parentUsage.GetType() : metadataAttributeUsage.GetType();
             var destinationUsage = metadataAttributeUsage == null ? parentUsage : metadataAttributeUsage;
 
-            var metadataParameterUsage = metadataStructureUsageHelper.GetParameters(attrUsageId, type).FirstOrDefault(p=>p.Id.Equals(id));
+            var metadataParameterUsage = metadataStructureUsageHelper.GetParameters(attrUsageId, type).FirstOrDefault(p => p.Id.Equals(id));
 
             //UpdateXml
             var metadataStructureId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.METADATASTRUCTURE_ID]);
             var model = FormHelper.CreateMetadataParameterModel(metadataParameterUsage as BaseUsage, destinationUsage, metadataStructureId, parentModelNumber, parentStepId);
- 
 
             //check if datatype is a datetime then check display pattern and manipulate the incoming string
             if (model.SystemType.Equals(typeof(DateTime).Name))
@@ -3115,7 +3111,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         storedParameterModel.Value = model.Value;
                         storedParameterModel.Errors = validateParameter(model);
                     }
-                    
                 }
             }
 
@@ -3158,7 +3153,8 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             // check parameters
             if (aModel.Parameters.Any())
             {
-                foreach (var p in aModel.Parameters) {
+                foreach (var p in aModel.Parameters)
+                {
                     p.Errors = validateParameter(p);
                 }
             }
@@ -3232,7 +3228,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                         foreach (var metadataParameterModel in stepModelHelper.Model.MetadataParameterModels)
                         {
-                            if (metadataParameterModel !=null )
+                            if (metadataParameterModel != null)
                             {
                                 metadataParameterModel.Errors = validateParameter(metadataParameterModel);
 
@@ -3553,7 +3549,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             #endregion entity & Party mapping
 
                             // if at least on item has a value, the parent should be activated
-                           if(!string.IsNullOrEmpty(simpleMetadataAttributeModel.Value.ToString())) setStepModelActive(stepModelHelper);
+                            if (!string.IsNullOrEmpty(simpleMetadataAttributeModel.Value.ToString())) setStepModelActive(stepModelHelper);
                         }
                     }
                     else
@@ -3582,12 +3578,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         if (i == numberOfSMM) newMetadataAttributeModel.last = true;
                         additionalyMetadataAttributeModel.Add(newMetadataAttributeModel);
                     }
-
-
                 }
-
-
-
             }
 
             foreach (var item in additionalyMetadataAttributeModel)
@@ -3601,12 +3592,11 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             // add parameters
             foreach (var item in stepModelHelper.Model.MetadataParameterModels)
             {
-                if (item!=null && complexElement != null && complexElement.HasAttributes)
+                if (item != null && complexElement != null && complexElement.HasAttributes)
                 {
-                    item.Value = complexElement.Attribute(item.DisplayName).Value.ToString();
+                    item.Value = complexElement.Attribute(item.DisplayName) !=null? complexElement.Attribute(item.DisplayName).Value.ToString():"";
                 }
             }
-
 
             return stepModelHelper.Model;
         }
@@ -3818,7 +3808,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         TaskManager.UpdateBus(CreateTaskmanager.METADATA_XML, XmlUtility.ToXDocument(metadata));
                     }
 
-                    return RedirectToAction("ImportMetadata", "Form", new { area = "Dcm", metadataStructureId = metadataStructureid, edit = false, created = false, locked = true });
+                    return RedirectToAction("Show", "Data", new { area = "Ddm", id = datasetid });
                 }
             }
 

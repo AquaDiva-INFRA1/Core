@@ -62,7 +62,7 @@
       <HintPath>..\..\..\..\packages\Lucene.Net.3.0.3\lib\NET40\Lucene.Net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\packages\Microsoft.AspNet.Identity.Core.2.2.3\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+      <HintPath>..\..\..\..\packages\Microsoft.AspNet.Identity.Core.2.2.4\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.Helpers">
@@ -72,7 +72,7 @@
       <HintPath>..\..\..\..\packages\Microsoft.Web.Infrastructure.2.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql">
       <HintPath>..\..\..\..\packages\Npgsql.4.0.0\lib\net451\Npgsql.dll</HintPath>
@@ -89,7 +89,6 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
-    <Reference Include="System.Security" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -134,8 +133,8 @@
     <Reference Include="Telerik.Web.Mvc">
       <HintPath>..\..\..\..\packages\TelerikMvcExtensions.2013.2.611\lib\net40\Telerik.Web.Mvc.dll</HintPath>
     </Reference>
-    <Reference Include="VDS.Common, Version=1.10.0.0, Culture=neutral, PublicKeyToken=ab5f4eb908061bf0, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\packages\VDS.Common.1.10.0\lib\net40-client\VDS.Common.dll</HintPath>
+    <Reference Include="VDS.Common, Version=2.0.0.0, Culture=neutral, PublicKeyToken=ab5f4eb908061bf0, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\VDS.Common.2.0.0\lib\netstandard2.0\VDS.Common.dll</HintPath>
     </Reference>
     <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\WebActivatorEx.2.2.0\lib\net40\WebActivatorEx.dll</HintPath>
@@ -389,22 +388,177 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="HomePage\Client Scripts\mvcfoolproof.unobtrusive.js" />
+    <Content Include="HomePage\Client Scripts\mvcfoolproof.unobtrusive.min.js" />
+    <Content Include="HomePage\Client Scripts\MvcFoolproofJQueryValidation.js" />
+    <Content Include="HomePage\Client Scripts\MvcFoolproofJQueryValidation.min.js" />
+    <Content Include="HomePage\Client Scripts\MvcFoolproofValidation.js" />
+    <Content Include="HomePage\Client Scripts\MvcFoolproofValidation.min.js" />
+    <Content Include="HomePage\Content\bootstrap-grid.css" />
+    <Content Include="HomePage\Content\bootstrap-grid.min.css" />
+    <Content Include="HomePage\Content\bootstrap-reboot.css" />
+    <Content Include="HomePage\Content\bootstrap-reboot.min.css" />
+    <Content Include="HomePage\Content\bootstrap-theme.css" />
+    <Content Include="HomePage\Content\bootstrap-theme.min.css" />
+    <Content Include="HomePage\Content\bootstrap.css" />
+    <Content Include="HomePage\Content\bootstrap.min.css" />
+    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171037.png" />
+    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171336.png" />
+    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171445.png" />
+    <Content Include="HomePage\Content\Images\Annotation 2019-11-06 171548.png" />
+    <Content Include="HomePage\Content\Images\binary-code.png" />
+    <Content Include="HomePage\Content\Images\D01.png" />
+    <Content Include="HomePage\Content\Images\D01_1.png" />
+    <Content Include="HomePage\Content\Images\D01_2.png" />
+    <Content Include="HomePage\Content\Images\dataset.png" />
+    <Content Include="HomePage\Content\Images\graphics.png" />
+    <Content Include="HomePage\Content\Images\Lehmann-Hainich004.jpg" />
+    <Content Include="HomePage\Content\Images\squares.png" />
+    <Content Include="HomePage\Content\Images\water-drop.jpg" />
+    <Content Include="HomePage\Content\Images\water-drop2.jpg" />
+    <Content Include="HomePage\Content\modern-business.css" />
+    <Content Include="HomePage\Scripts\2013.2.611\jquery-1.7.1.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\jquery.validate.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.all.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.autocomplete.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.calendar.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.chart.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.combobox.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.common.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.datepicker.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.datetimepicker.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.draganddrop.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.editor.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.editing.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.filtering.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.grouping.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.reordering.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.grid.resizing.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.imagebrowser.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.list.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.menu.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.panelbar.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.slider.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.splitter.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.tabstrip.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.textbox.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.timepicker.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.treeview.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.upload.min.js" />
+    <Content Include="HomePage\Scripts\2013.2.611\telerik.window.min.js" />
+    <Content Include="HomePage\Scripts\bootstrap.bundle.js" />
+    <Content Include="HomePage\Scripts\bootstrap.bundle.min.js" />
+    <Content Include="HomePage\Scripts\bootstrap.js" />
+    <Content Include="HomePage\Scripts\bootstrap.min.js" />
+    <Content Include="HomePage\Scripts\contact_me.js" />
+    <Content Include="HomePage\Scripts\draggabilly.pkgd.js" />
+    <Content Include="HomePage\Scripts\draggabilly.pkgd.min.js" />
+    <Content Include="HomePage\Scripts\isotope.pkgd.min.js" />
+    <Content Include="HomePage\Scripts\jqBootstrapValidation.js" />
+    <None Include="HomePage\Scripts\jquery-2.1.3.intellisense.js" />
+    <None Include="HomePage\Scripts\jquery-2.1.4.intellisense.js" />
+    <Content Include="HomePage\Scripts\jquery-2.1.4.js" />
+    <Content Include="HomePage\Scripts\jquery-2.1.4.min.js" />
+    <Content Include="HomePage\Scripts\jquery-migrate-1.2.1.js" />
+    <Content Include="HomePage\Scripts\jquery-migrate-1.2.1.min.js" />
+    <Content Include="HomePage\Scripts\jquery.js" />
+    <Content Include="HomePage\Scripts\jquery.min.js" />
+    <Content Include="HomePage\Scripts\jquery.slim.js" />
+    <Content Include="HomePage\Scripts\jquery.slim.min.js" />
+    <None Include="HomePage\Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="HomePage\Scripts\jquery.validate.js" />
+    <Content Include="HomePage\Scripts\jquery.validate.min.js" />
+    <Content Include="HomePage\Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="HomePage\Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="HomePage\Scripts\main.js" />
+    <Content Include="HomePage\Scripts\modernizr-2.8.3.js" />
+    <Content Include="HomePage\Scripts\packery.pkgd.bexis.min.js" />
+    <Content Include="HomePage\Scripts\packery.pkgd.js" />
+    <Content Include="HomePage\Scripts\packery.pkgd.min.js" />
+    <Content Include="HomePage\Scripts\respond.js" />
+    <Content Include="HomePage\Scripts\respond.matchmedia.addListener.js" />
+    <Content Include="HomePage\Scripts\respond.matchmedia.addListener.min.js" />
+    <Content Include="HomePage\Scripts\respond.min.js" />
+    <Content Include="Scripts\2013.2.611\jquery-1.7.1.min.js" />
+    <Content Include="Scripts\2013.2.611\jquery.validate.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.all.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.autocomplete.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.calendar.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.chart.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.combobox.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.common.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.datepicker.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.datetimepicker.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.draganddrop.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.editor.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.editing.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.filtering.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.grouping.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.reordering.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.grid.resizing.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.imagebrowser.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.list.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.menu.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.panelbar.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.slider.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.splitter.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.tabstrip.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.textbox.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.timepicker.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.treeview.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.upload.min.js" />
+    <Content Include="Scripts\2013.2.611\telerik.window.min.js" />
+    <Content Include="Scripts\bootstrap.js" />
+    <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\ddm.js" />
     <Content Include="Ddm.Settings.json" />
+    <Content Include="HomePage\Content\bootstrap-grid.css.map" />
+    <Content Include="HomePage\Content\bootstrap-grid.min.css.map" />
+    <Content Include="HomePage\Content\bootstrap-reboot.css.map" />
+    <Content Include="HomePage\Content\bootstrap-reboot.min.css.map" />
+    <Content Include="HomePage\Content\bootstrap-theme.css.map" />
+    <Content Include="HomePage\Content\bootstrap-theme.min.css.map" />
+    <Content Include="HomePage\Content\bootstrap.css.map" />
+    <Content Include="HomePage\Content\bootstrap.min.css.map" />
+    <Content Include="HomePage\Scripts\bootstrap.bundle.js.map" />
+    <Content Include="HomePage\Scripts\bootstrap.bundle.min.js.map" />
+    <Content Include="HomePage\Scripts\bootstrap.js.map" />
+    <Content Include="HomePage\Scripts\bootstrap.min.js.map" />
+    <Content Include="HomePage\Scripts\jquery-2.1.4.min.map" />
+    <Content Include="HomePage\Scripts\jquery.min.map" />
+    <Content Include="HomePage\Scripts\jquery.slim.min.map" />
     <None Include="Properties\PublishProfiles\BexisServer_dev.pubxml" />
     <None Include="Properties\PublishProfiles\BexisServer_master.pubxml" />
     <None Include="Properties\PublishProfiles\BexisServer_rc.pubxml" />
     <None Include="Properties\PublishProfiles\BexisServer_train.pubxml" />
+    <Content Include="Scripts\jquery-2.1.4.min.map" />
+    <None Include="Scripts\jquery-2.2.4.intellisense.js" />
+    <None Include="Scripts\jquery-2.1.4.intellisense.js" />
+    <Content Include="Scripts\jquery-2.1.4.js" />
+    <Content Include="Scripts\jquery-2.1.4.min.js" />
+    <Content Include="Scripts\jquery-2.2.4.js" />
+    <Content Include="Scripts\jquery-2.2.4.min.js" />
+    <Content Include="Scripts\jquery-2.2.4.min.map" />
     <None Include="Scripts\jquery-3.6.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.6.0.js" />
-    <Content Include="Scripts\jquery-3.6.0.min.js" />
     <Content Include="Scripts\jquery-3.6.0.slim.js" />
-    <Content Include="Scripts\jquery-3.6.0.slim.min.js" />
+    <Content Include="Scripts\jquery-migrate-1.2.1.js" />
+    <Content Include="Scripts\jquery-migrate-1.2.1.min.js" />
     <Content Include="Scripts\jquery-migrate-3.3.0.js" />
-    <Content Include="Scripts\jquery-migrate-3.3.0.min.js" />
+    <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\mdb.min.js" />
+    <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.matchmedia.addListener.js" />
     <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
+    <Content Include="Scripts\respond.min.js" />
     <Content Include="Views\Help\Information.xml" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -461,8 +615,6 @@
     <Content Include="Views\RequestsManage\_Entities.cshtml" />
     <Content Include="Views\RequestsManage\_Requests.cshtml" />
     <Content Include="Views\RequestsManage\_Requests_And_Decisions.cshtml" />
-    <Content Include="Scripts\jquery-3.6.0.slim.min.map" />
-    <Content Include="Scripts\jquery-3.6.0.min.map" />
     <Content Include="Views\interactiveSearch\Index.cshtml" />
     <Content Include="Views\interactiveSearch\index_.cshtml" />
     <Content Include="Views\interactiveSearch\table_result.cshtml" />
@@ -534,7 +686,7 @@
       <Name>BExIS.Utils.Config</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\Utils\BExIS.Utils.NH\BExIS.Utils.NH.csproj">
-      <Project>{0f1ec13e-d685-4f4d-a438-52797b0e53a0}</Project>
+      <Project>{0F1EC13E-D685-4F4D-A438-52797B0E53A0}</Project>
       <Name>BExIS.Utils.NH</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\Utils\BExIS.Utils\BExIS.Utils.csproj">
@@ -582,19 +734,19 @@
       <Name>BExIS.Xml.Helpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Entities\BExIS.Aam.Entities.csproj">
-      <Project>{2B541D06-3259-4AA3-AE6A-452C8F67164D}</Project>
+      <Project>{2b541d06-3259-4aa3-ae6a-452c8f67164d}</Project>
       <Name>BExIS.Aam.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\AAM\BExIS.Aam.Services\BExIS.Aam.Services.csproj">
-      <Project>{898568BE-061E-44D2-A94C-04729F07DDCA}</Project>
+      <Project>{898568be-061e-44d2-a94c-04729f07ddca}</Project>
       <Name>BExIS.Aam.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\DDM\BExIS.Ddm.Api\BExIS.Ddm.Api.csproj">
-      <Project>{8519EAC6-FBF8-48B3-813F-E0B9D3CC4A52}</Project>
+      <Project>{8519eac6-fbf8-48b3-813f-e0b9d3cc4a52}</Project>
       <Name>BExIS.Ddm.Api</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\DDM\BExIS.Ddm.Providers.LuceneProvider\BExIS.Ddm.Providers.LuceneProvider.csproj">
-      <Project>{FBE3101A-791A-4EAB-9B8F-F6E071F8DBDC}</Project>
+      <Project>{fbe3101a-791a-4eab-9b8f-f6e071f8dbdc}</Project>
       <Name>BExIS.Ddm.Providers.LuceneProvider</Name>
     </ProjectReference>
   </ItemGroup>
